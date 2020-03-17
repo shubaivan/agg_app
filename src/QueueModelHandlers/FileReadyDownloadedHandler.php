@@ -1,15 +1,15 @@
 <?php
 
-# project/src/MessageHandler/SleepMessageHandler.php
+# project/src/QueueModelHandlers/FileReadyDownloadedHandler.phpler.php
 
-namespace App\MessageHandler;
+namespace App\QueueModelHandlers;
 
-use App\Message\SleepMessage;
+use App\QueueModel\FileReadyDownloaded;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-class SleepMessageHandler implements MessageHandlerInterface
+class FileReadyDownloadedHandler implements MessageHandlerInterface
 {
-    public function __invoke(SleepMessage $sleepMessage)
+    public function __invoke(FileReadyDownloaded $sleepMessage)
     {
         $seconds = $sleepMessage->getSeconds();
         $output = $sleepMessage->getOutput();

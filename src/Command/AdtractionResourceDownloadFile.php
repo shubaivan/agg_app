@@ -3,25 +3,39 @@
 namespace App\Command;
 
 use App\Kernel;
+use App\QueueModel\FileReadyDownloaded;
 use GuzzleHttp\Client;
-use League\Csv\Reader;
-use League\Csv\Statement;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
-use function League\Csv\delimiter_detect;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\TraceableMessageBus;
 
 class AdtractionResourceDownloadFile extends Command
 {
     protected static $defaultName = 'app:adtraction:download';
 
-//    private $url = 'https://adtraction.com/productfeed.htm?type=feed&format=CSV&encoding=UTF8&epi=0&zip=0&cdelim=tab&tdelim=singlequote&sd=0&sn=0&flat=0&apid=1136856383&asid=1039629367';
-    private $url = 'https://adtraction.com/productfeed.htm?type=feed&format=CSV&encoding=UTF8&epi=0&zip=0&cdelim=comma&tdelim=singlequote&sd=0&sn=0&flat=0&apid=1136856383&asid=1039629367';
-    private $dirForFiles = '/download_files/test/';
+    /**
+     * The logger instance.
+     *
+     * @var LoggerInterface
+     */
+    protected $logger;
 
+    /**
+     * @var string
+     */
+    private $url;
+
+    /**
+     * @var string
+     */
+    private $dirForFiles;
 
     /**
      * @var Kernel
@@ -29,34 +43,90 @@ class AdtractionResourceDownloadFile extends Command
     private $kernel;
 
     /**
-     * AdtractionResource constructor.
+     * @var TraceableMessageBus
      */
-    public function __construct(KernelInterface $kernel)
+    private $bus;
+
+    /**
+     * @var OutputInterface
+     */
+    private $output;
+
+    /**
+     * AdtractionResourceDownloadFile constructor.
+     * @param KernelInterface $kernel
+     * @param MessageBusInterface $bus
+     * @param LoggerInterface $adtractionLogLogger
+     * @param ContainerBagInterface $params
+     */
+    public function __construct(
+        KernelInterface $kernel,
+        MessageBusInterface $bus,
+        LoggerInterface $adtractionLogLogger,
+        ContainerBagInterface $params
+    )
     {
+        $this->url = $params->get('adtraction_download_url');
+        $this->dirForFiles = $params->get('adtraction_download_file_path');
         $this->kernel = $kernel;
+        $this->bus = $bus;
+        $this->logger = $adtractionLogLogger;
+        $this->postConstruct();
         parent::__construct();
     }
 
+    /**
+     * @return void
+     */
+    private function postConstruct()
+    {
+        if (!is_dir($this->getDirForFiles())) {
+            // dir doesn't exist, make it
+            mkdir($this->getDirForFiles());
+        }
+    }
 
     protected function configure()
     {
-        // ...
+        $this
+            ->setDescription('Download file from adtraction resource')
+            ->setHelp('
+                This command download file from adtraction resource and save it in ' . $this->getDirForFiles() . ' with timestamp name
+            ');
     }
 
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
-     * @throws \League\Csv\Exception
+     * @throws \Throwable
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->guzzleWay();
+        $this->setOutput($output);
+        $output->writeln([
+            'Adtraction resource download file',
+            '============',
+            '<fg=green;options=bold,underscore>Start</>',
+        ]);
+
+        try {
+            $this->guzzleStreamWay();
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+            $this->getApplication()->renderThrowable($e, $output);
+        } catch (\Throwable $t) {
+            $this->logger->error($t->getMessage());
+            $this->getApplication()->renderThrowable($t, $output);
+        }
 
         return 0;
     }
 
-    public function guzzleWay()
+    /**
+     * @throws \Throwable
+     */
+    public function guzzleStreamWay()
     {
         $client = new Client();
         $response = $client->request(
@@ -64,23 +134,65 @@ class AdtractionResourceDownloadFile extends Command
             $this->url,
             ['stream' => true]
         );
-// Read bytes off of the stream until the end of the stream is reached
         $body = $response->getBody();
-        $t = '';
-        $date = date('YmdHis');
+        $this->getOutput()->writeln(
+            '<fg=green>' . date('H:i:s') . ' guzzle stream way get body' . '</>'
+        );
+        $fileRelativePath = $this->getDirForFiles() . date('YmdHis') . '.csv';
+        // Read bytes off of the stream until the end of the stream is reached
         while (!$body->eof()) {
-            $t = $body->read(1024);
             file_put_contents(
-                $this->kernel->getProjectDir() . $this->dirForFiles . $date . '.csv',
-                $t,
+                $fileRelativePath,
+                $body->read(1024),
                 FILE_APPEND
             );
-//            $this->parseCSVContent($t);
         }
-        $y = 1;
-
-//        $this->parseCSVContent($t);
+        $this->getOutput()->writeln(
+            '<fg=green>' . date('H:i:s') . ' finish download file: ' . $fileRelativePath . '</>'
+        );
+        $this->getBus()->dispatch(new FileReadyDownloaded(10, $fileRelativePath));
+        $this->getOutput()->writeln(
+            '<bg=yellow;options=bold>' . date('H:i:s') . ' success sent queue' . '</>'
+        );
     }
 
+    /**
+     * @return Kernel
+     */
+    protected function getKernel(): Kernel
+    {
+        return $this->kernel;
+    }
 
+    /**
+     * @return TraceableMessageBus
+     */
+    protected function getBus(): TraceableMessageBus
+    {
+        return $this->bus;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getDirForFiles(): string
+    {
+        return $this->getKernel()->getProjectDir() . $this->dirForFiles;
+    }
+
+    /**
+     * @return OutputInterface
+     */
+    protected function getOutput(): OutputInterface
+    {
+        return $this->output;
+    }
+
+    /**
+     * @param OutputInterface $output
+     */
+    protected function setOutput(OutputInterface $output): void
+    {
+        $this->output = $output;
+    }
 }

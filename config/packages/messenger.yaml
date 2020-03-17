@@ -13,6 +13,6 @@ framework:
 
         routing:
             # Route your messages to the transports
-            # 'App\Message\YourMessage': async
-          'App\Message\SleepMessage': amqp
+          # 'App\QueueModel\YourMessage': async
+          'App\QueueModel\FileReadyDownloaded': amqp
 

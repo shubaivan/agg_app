@@ -1,4 +1,5 @@
 monolog:
+    channels: ['adtraction_log', 'console_command_log']
     handlers:
         main:
             type: fingers_crossed
@@ -13,7 +14,7 @@ monolog:
         console:
             type: console
             process_psr_3_messages: false
-            channels: ["!event", "!doctrine"]
+            channels: ["!event", "!doctrine", "!adtraction_log", "!console_command_log"]
         deprecation:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.deprecations.log"
@@ -22,3 +23,13 @@ monolog:
             handler: deprecation
             max_level: info
             channels: ["php"]
+        console_command_log:
+            type: stream
+            path: '%kernel.logs_dir%/%kernel.environment%_console_command_log.log'
+            level: debug
+            channels: console_command_log
+        adtraction_log:
+            type: stream
+            path: '%kernel.logs_dir%/%kernel.environment%_adtraction_log.log'
+            level: debug
+            channels: adtraction_log

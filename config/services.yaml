@@ -4,6 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    adtraction_download_url: '%env(string:ANDRACTION_DOWNLOAD_URL)%'
+    adtraction_download_file_path: '%env(ANDRACTION_DOWNLOAD_FILE_PATH)%'
 
 services:
     # default configuration for services in *this* file
@@ -25,3 +27,8 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+#    log_console_command_listener.listener:
+#        class: '%event_listener.log_console_command_listener.class%'
+#        arguments:
+#            - '@monolog.logger.console_command_log'

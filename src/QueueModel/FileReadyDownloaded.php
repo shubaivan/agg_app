@@ -1,10 +1,10 @@
 <?php
 
-# project/src/Message/SleepMessage.php
+# project/src/QueueModel/FileReadyDownloaded.phpded.php
 
-namespace App\Message;
+namespace App\QueueModel;
 
-class SleepMessage
+class FileReadyDownloaded
 {
     private $seconds;
     private $output;

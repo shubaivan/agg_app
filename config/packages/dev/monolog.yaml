@@ -1,10 +1,11 @@
 monolog:
+    channels: ['adtraction_log', 'console_command_log']
     handlers:
         main:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
-            channels: ["!event"]
+            channels: ["!event", "!adtraction_log", "!console_command_log"]
         # uncomment to get logging in your browser
         # you may have to allow bigger header sizes in your Web server configuration
         #firephp:
@@ -13,7 +14,17 @@ monolog:
         #chromephp:
         #    type: chromephp
         #    level: info
+        console_command_log:
+            type: stream
+            path: '%kernel.logs_dir%/%kernel.environment%_console_command_log.log'
+            level: debug
+            channels: console_command_log
+        adtraction_log:
+            type: stream
+            path: '%kernel.logs_dir%/%kernel.environment%_adtraction_log.log'
+            level: debug
+            channels: adtraction_log
         console:
             type: console
             process_psr_3_messages: false
-            channels: ["!event", "!doctrine", "!console"]
+            channels: ["!event", "!doctrine", "!console", "!adtraction_log", "!console_command_log"]
