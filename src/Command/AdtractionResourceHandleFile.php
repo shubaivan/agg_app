@@ -16,8 +16,6 @@ class AdtractionResourceHandleFile extends Command
 {
     protected static $defaultName = 'app:adtraction:handle';
 
-    private $file = '/download_files/test/sh.csv';
-
     /**
      * @var Kernel
      */

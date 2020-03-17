@@ -28,17 +28,23 @@ class LogConsoleCommandListener implements EventSubscriberInterface
 
     public function terminate(ConsoleTerminateEvent $event)
     {
-        $this->getLogger()->info($event->getCommand()->getName() . ' terminate');
+        if ($event->getCommand()) {
+            $this->getLogger()->info($event->getCommand()->getName() . ' terminate');
+        }
     }
 
     public function command(ConsoleCommandEvent $event)
     {
-        $this->getLogger()->info($event->getCommand()->getName() . ' should run');
+        if ($event->getCommand()) {
+            $this->getLogger()->info($event->getCommand()->getName() . ' should run');
+        }
     }
 
     public function error(ConsoleErrorEvent $event)
     {
-        $this->getLogger()->error($event->getCommand()->getName() . ': ' . $event->getError()->getMessage());
+        if ($event->getCommand()) {
+            $this->getLogger()->error($event->getCommand()->getName() . ': ' . $event->getError()->getMessage());
+        }
     }
 
     public static function getSubscribedEvents()

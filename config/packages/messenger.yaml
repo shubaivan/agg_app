@@ -15,4 +15,5 @@ framework:
             # Route your messages to the transports
           # 'App\QueueModel\YourMessage': async
           'App\QueueModel\FileReadyDownloaded': amqp
+          'App\QueueModel\AdtractionDataRow': amqp
 
