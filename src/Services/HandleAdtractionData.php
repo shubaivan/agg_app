@@ -6,6 +6,8 @@ use App\Kernel;
 use App\QueueModel\AdtractionDataRow;
 use League\Csv\Reader;
 use League\Csv\Statement;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\TraceableMessageBus;
@@ -14,25 +16,26 @@ use function League\Csv\delimiter_detect;
 class HandleAdtractionData
 {
     /**
-     * @var Kernel
-     */
-    private $kernel;
-
-    /**
      * @var TraceableMessageBus
      */
     private $bus;
 
     /**
+     * @var Logger
+     */
+    private $logger;
+
+    /**
      * HandleAdtractionData constructor.
+     * @param MessageBusInterface $bus
      */
     public function __construct(
-        KernelInterface $kernel,
-        MessageBusInterface $bus
+        MessageBusInterface $bus,
+        LoggerInterface $adtractionFileHandlerLogger
     )
     {
-        $this->kernel = $kernel;
         $this->bus = $bus;
+        $this->logger = $adtractionFileHandlerLogger;
     }
 
     /**
@@ -42,20 +45,22 @@ class HandleAdtractionData
      */
     public function parseCSVContent($filePath)
     {
+        if (!file_exists($filePath)) {
+            $this->getLogger()->error('file ' . $filePath . ' no exist');
+            throw new \Exception('file ' . $filePath . ' no exist');
+        }
         /** @var Reader $csv */
         $csv = Reader::createFromPath($filePath, 'r');
-//        $csv->isActiveStreamFilter(); //return true
-
-//        $csv->setDelimiter(',');
         $csv->setHeaderOffset(0);
-//        $csv->setEscape('\'');
         $csv->setEnclosure('\'');
 
         $result = delimiter_detect($csv, [','], 10);
         $count = $result[','];
+        $this->getLogger()->info(
+            'file ' . $filePath . ' count row ' . $count
+        );
         $offset = 0;
         while ($offset < $count) {
-
             //build a statement
             $stmt = (new Statement())
                 ->offset($offset)
@@ -75,18 +80,18 @@ class HandleAdtractionData
     }
 
     /**
-     * @return Kernel
-     */
-    public function getKernel(): Kernel
-    {
-        return $this->kernel;
-    }
-
-    /**
      * @return TraceableMessageBus
      */
     public function getBus(): TraceableMessageBus
     {
         return $this->bus;
+    }
+
+    /**
+     * @return Logger
+     */
+    public function getLogger(): Logger
+    {
+        return $this->logger;
     }
 }

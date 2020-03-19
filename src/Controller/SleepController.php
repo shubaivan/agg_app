@@ -16,7 +16,7 @@ class SleepController extends AbstractController
      * @Route(name="sleep", path="sleep")
      */
     public function processVideo(MessageBusInterface $bus) {
-        $bus->dispatch(new FileReadyDownloaded(10, 'Hello World'));
+        $bus->dispatch(new FileReadyDownloaded('Hello World'));
         return new Response('<html><body>OK.</body></html>');
     }
 }

@@ -71,8 +71,8 @@ class AdtractionResourceDownloadFile extends Command
         $this->kernel = $kernel;
         $this->bus = $bus;
         $this->logger = $adtractionLogLogger;
-        $this->postConstruct();
         parent::__construct();
+        $this->postConstruct();
     }
 
     /**
@@ -150,7 +150,7 @@ class AdtractionResourceDownloadFile extends Command
         $this->getOutput()->writeln(
             '<fg=green>' . date('H:i:s') . ' finish download file: ' . $fileRelativePath . '</>'
         );
-        $this->getBus()->dispatch(new FileReadyDownloaded(10, $fileRelativePath));
+        $this->getBus()->dispatch(new FileReadyDownloaded($fileRelativePath));
         $this->getOutput()->writeln(
             '<bg=yellow;options=bold>' . date('H:i:s') . ' success sent queue' . '</>'
         );

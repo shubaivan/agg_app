@@ -1,5 +1,5 @@
 monolog:
-    channels: ['adtraction_log', 'console_command_log']
+    channels: ['adtraction_log', 'console_command_log', 'adtraction_file_handler', 'messenger_handler']
     handlers:
         main:
             type: fingers_crossed
@@ -14,7 +14,7 @@ monolog:
         console:
             type: console
             process_psr_3_messages: false
-            channels: ["!event", "!doctrine", "!adtraction_log", "!console_command_log"]
+            channels: ["!event", "!doctrine", "!adtraction_log", "!console_command_log", "!adtraction_file_handler", "!messenger_handler"]
         deprecation:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.deprecations.log"
@@ -33,3 +33,13 @@ monolog:
             path: '%kernel.logs_dir%/%kernel.environment%_adtraction_log.log'
             level: debug
             channels: adtraction_log
+        adtraction_file_handler:
+            type: stream
+            path: '%kernel.logs_dir%/%kernel.environment%_adtraction_file_handler_log.log'
+            level: debug
+            channels: adtraction_file_handler
+        messenger_handler:
+            type: stream
+            path: '%kernel.logs_dir%/%kernel.environment%_messenger_handler_log.log'
+            level: debug
+            channels: messenger_handler

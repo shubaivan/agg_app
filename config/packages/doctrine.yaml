@@ -7,7 +7,7 @@ doctrine:
 #        default_table_options:
 #            charset: utf8mb4
 #            collate: utf8mb4_unicode_ci
-
+        schema_filter: '~^(?!messenger_messages)~'
         driver: 'pdo_pgsql'
         server_version: '9.6'
         charset: utf8

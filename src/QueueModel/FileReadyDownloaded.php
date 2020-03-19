@@ -1,27 +1,25 @@
 <?php
 
-# project/src/QueueModel/FileReadyDownloaded.phpded.php
-
 namespace App\QueueModel;
 
 class FileReadyDownloaded
 {
-    private $seconds;
-    private $output;
+    private $absoluteFilePath;
 
-    public function __construct(int $seconds, string $output)
+    /**
+     * FileReadyDownloaded constructor.
+     * @param $output
+     */
+    public function __construct($output)
     {
-        $this->seconds = $seconds;
-        $this->output = $output;
+        $this->absoluteFilePath = $output;
     }
 
-    public function getSeconds()
+    /**
+     * @return mixed
+     */
+    public function getAbsoluteFilePath()
     {
-        return $this->seconds;
-    }
-
-    public function getOutput()
-    {
-        return $this->output;
+        return $this->absoluteFilePath;
     }
 }

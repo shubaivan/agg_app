@@ -23,18 +23,16 @@ class FileReadyDownloadedHandler implements MessageHandlerInterface
     }
 
     /**
-     * @param FileReadyDownloaded $sleepMessage
+     * @param FileReadyDownloaded $fileReadyDownloaded
      * @throws \League\Csv\Exception
      * @throws \Throwable
      */
-    public function __invoke(FileReadyDownloaded $sleepMessage)
+    public function __invoke(FileReadyDownloaded $fileReadyDownloaded)
     {
-        $seconds = $sleepMessage->getSeconds();
-        $output = $sleepMessage->getOutput();
-        $this->getHandleAdtractionData()->parseCSVContent($output);
-        # Simulate a long running process.
-//        sleep($seconds);
-        echo $output . PHP_EOL;
+        $absoluteFilePath = $fileReadyDownloaded->getAbsoluteFilePath();
+        $this->getHandleAdtractionData()->parseCSVContent($absoluteFilePath);
+
+        echo $absoluteFilePath . PHP_EOL;
     }
 
     /**

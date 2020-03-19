@@ -1,19 +1,26 @@
 framework:
     messenger:
-        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
-        # failure_transport: failed
+      buses:
+        messenger.bus.default:
+          middleware:
+            - reply_middleware
+
+      failure_transport: failed
 
         transports:
-            # https://symfony.com/doc/current/messenger.html#transport-configuration
-            # async: '%env(MESSENGER_TRANSPORT_DSN)%'
-            # failed: 'doctrine://default?queue_name=failed'
-            # sync: 'sync://'
-          amqp: '%env(MESSENGER_TRANSPORT_DSN)%'
-
+          success:
+            dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+            options:
+              exchange:
+                type: direct
+                name: productrow
+                default_publish_routing_key: normal
+              queues:
+                messages_normal:
+                  binding_keys: [normal]
+          failed: 'doctrine://default?queue_name=failed'
 
         routing:
-            # Route your messages to the transports
-          # 'App\QueueModel\YourMessage': async
-          'App\QueueModel\FileReadyDownloaded': amqp
-          'App\QueueModel\AdtractionDataRow': amqp
+          'App\QueueModel\FileReadyDownloaded': success
+          'App\QueueModel\AdtractionDataRow': success
 
