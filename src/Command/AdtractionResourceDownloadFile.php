@@ -5,8 +5,6 @@ namespace App\Command;
 use App\Kernel;
 use App\QueueModel\FileReadyDownloaded;
 use GuzzleHttp\Client;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -103,6 +101,7 @@ class AdtractionResourceDownloadFile extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->logger->info('test');
         $this->setOutput($output);
         $output->writeln([
             'Adtraction resource download file',

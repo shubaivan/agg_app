@@ -3,14 +3,12 @@
 namespace App\Command;
 
 use App\Kernel;
-use League\Csv\Statement;
+use App\Services\HandleAdtractionData;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use League\Csv\Reader;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\KernelInterface;
-use function League\Csv\delimiter_detect;
 
 class AdtractionResourceHandleFile extends Command
 {
@@ -22,18 +20,35 @@ class AdtractionResourceHandleFile extends Command
     private $kernel;
 
     /**
-     * AdtractionResource constructor.
+     * @var HandleAdtractionData
      */
-    public function __construct(KernelInterface $kernel)
+    private $handleAdtractionData;
+
+    /**
+     * AdtractionResourceHandleFile constructor.
+     * @param KernelInterface $kernel
+     * @param HandleAdtractionData $handleAdtractionData
+     * {@inheritDoc}
+     */
+    public function __construct(
+        KernelInterface $kernel,
+        HandleAdtractionData $handleAdtractionData
+    )
     {
+        $this->handleAdtractionData = $handleAdtractionData;
         $this->kernel = $kernel;
         parent::__construct();
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     protected function configure()
     {
-        // ...
+        $this
+            ->setName('app:adtraction:handle')
+            ->setDescription('Handle adtraction resource file by absolute file path on the server')
+            ->addArgument('filePath', InputArgument::REQUIRED, 'Absolute file path on the server');
     }
 
     /**
@@ -41,45 +56,30 @@ class AdtractionResourceHandleFile extends Command
      * @param OutputInterface $output
      * @return int
      * @throws \League\Csv\Exception
+     * @throws \Throwable
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->parseCSVContent();
+        $filePath = $input->getArgument('filePath');
+        $this->parseCSVContent($filePath);
         return 0;
     }
 
     /**
+     * @param $filePath
      * @throws \League\Csv\Exception
+     * @throws \Throwable
      */
-    public function parseCSVContent()
+    public function parseCSVContent($filePath)
     {
-        /** @var Reader $csv */
-        $csv = Reader::createFromPath($this->kernel->getProjectDir() . $this->file, 'r');
-//        $csv->isActiveStreamFilter(); //return true
+        $this->getHandleAdtractionData()->parseCSVContent($filePath);
+    }
 
-//        $csv->setDelimiter(',');
-        $csv->setHeaderOffset(0);
-//        $csv->setEscape('\'');
-        $csv->setEnclosure('\'');
-
-        $result = delimiter_detect($csv, [','], 10);
-        $count = $result[','];
-        $offset = 0;
-        while ($offset < $count) {
-
-            //build a statement
-            $stmt = (new Statement())
-                ->offset($offset)
-                ->limit(2);
-
-            //query your records from the document
-            $records = $stmt->process($csv);
-            $header = $csv->getHeader();
-            foreach ($records as $record) {
-                $t = $record;
-            }
-
-            $offset += 2;
-        }
+    /**
+     * @return HandleAdtractionData
+     */
+    public function getHandleAdtractionData(): HandleAdtractionData
+    {
+        return $this->handleAdtractionData;
     }
 }

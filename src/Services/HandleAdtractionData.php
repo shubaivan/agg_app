@@ -82,7 +82,7 @@ class HandleAdtractionData
     /**
      * @return TraceableMessageBus
      */
-    public function getBus(): TraceableMessageBus
+    protected function getBus(): TraceableMessageBus
     {
         return $this->bus;
     }
@@ -90,7 +90,7 @@ class HandleAdtractionData
     /**
      * @return Logger
      */
-    public function getLogger(): Logger
+    protected function getLogger(): Logger
     {
         return $this->logger;
     }

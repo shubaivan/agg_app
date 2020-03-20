@@ -7,7 +7,7 @@ framework:
 
       failure_transport: failed
 
-        transports:
+      transports:
           success:
             dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
             options:
@@ -18,9 +18,19 @@ framework:
               queues:
                 messages_normal:
                   binding_keys: [normal]
+          andraction_parse_row_success:
+            dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+            options:
+              exchange:
+                type: direct
+                name: andraction_parse_row
+                default_publish_routing_key: parse_row
+              queues:
+                andraction_parse_row:
+                  binding_keys: [parse_row]
           failed: 'doctrine://default?queue_name=failed'
 
-        routing:
+      routing:
           'App\QueueModel\FileReadyDownloaded': success
-          'App\QueueModel\AdtractionDataRow': success
+          'App\QueueModel\AdtractionDataRow': andraction_parse_row_success
 
