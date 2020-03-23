@@ -4,19 +4,22 @@ namespace App\QueueModel;
 
 class FileReadyDownloaded
 {
+    /**
+     * @var string
+     */
     private $absoluteFilePath;
 
     /**
      * FileReadyDownloaded constructor.
-     * @param $output
+     * @param string $absoluteFilePath
      */
-    public function __construct($output)
+    public function __construct(string $absoluteFilePath)
     {
-        $this->absoluteFilePath = $output;
+        $this->absoluteFilePath = $absoluteFilePath;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getAbsoluteFilePath()
     {

@@ -1,34 +1,55 @@
 framework:
     messenger:
+      serializer:
+        default_serializer: messenger.transport.symfony_serializer
+        symfony_serializer:
+          format: json
+          context: { }
       buses:
         messenger.bus.default:
           middleware:
+            # each time a message is handled, the Doctrine connection
+            # is "pinged" and reconnected if it's closed. Useful
+            # if your workers run for a long time and the database
+            # connection is sometimes lost
+            - doctrine_ping_connection
+
+            # After handling, the Doctrine connection is closed,
+            # which can free up database connections in a worker,
+            # instead of keeping them open forever
+            - doctrine_close_connection
+
+            # wraps all handlers in a single Doctrine transaction
+            # handlers do not need to call flush() and an error
+            # in any handler will cause a rollback
+            - doctrine_transaction
             - reply_middleware
 
       failure_transport: failed
 
       transports:
-          success:
-            dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-            options:
-              exchange:
-                type: direct
-                name: productrow
-                default_publish_routing_key: normal
-              queues:
-                messages_normal:
-                  binding_keys: [normal]
-          andraction_parse_row_success:
-            dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-            options:
-              exchange:
-                type: direct
-                name: andraction_parse_row
-                default_publish_routing_key: parse_row
-              queues:
-                andraction_parse_row:
-                  binding_keys: [parse_row]
-          failed: 'doctrine://default?queue_name=failed'
+        success:
+          dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+          options:
+            exchange:
+              type: direct
+              name: productrow
+              default_publish_routing_key: normal
+            queues:
+              messages_normal:
+                binding_keys: [normal]
+        andraction_parse_row_success:
+          dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+          serializer: App\Messenger\ExternalJsonMessageSerializer
+          options:
+            exchange:
+              type: direct
+              name: andraction_parse_row
+              default_publish_routing_key: parse_row
+            queues:
+              andraction_parse_row:
+                binding_keys: [parse_row]
+        failed: 'doctrine://default?queue_name=failed'
 
       routing:
           'App\QueueModel\FileReadyDownloaded': success

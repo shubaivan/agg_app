@@ -6,7 +6,8 @@
 parameters:
     adtraction_download_url: '%env(string:ANDRACTION_DOWNLOAD_URL)%'
     adtraction_download_file_path: '%env(ANDRACTION_DOWNLOAD_FILE_PATH)%'
-
+#    jms_serializer.camel_case_naming_strategy.class: JMS\Serializer\Naming\IdenticalPropertyNamingStrategy
+#    jms_serializer.serialized_name_annotation_strategy.class: JMS\Serializer\Naming\SerializedNameAnnotationStrategy
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -30,3 +31,14 @@ services:
 
     messenger.middleware.reply_middleware:
         class: App\Middleware\ReplyMiddleware
+
+  #    app_serialize.object_constructor:
+  #        class: '%doctrine.object.constructor.class%'
+  #        public: false
+  #        arguments:
+  #            - "@doctrine"
+  #            - "@jms_serializer.unserialize_object_constructor"
+
+    jms_serializer.object_constructor:
+      public: false
+      alias: jms_serializer.doctrine_object_constructor

@@ -70,9 +70,7 @@ class HandleAdtractionData
             $records = $stmt->process($csv);
             $header = $csv->getHeader();
             foreach ($records as $record) {
-                $unserializeRecord = serialize($record);
-                $this->getBus()->dispatch(new AdtractionDataRow($unserializeRecord));
-
+                $this->getBus()->dispatch(new AdtractionDataRow($record));
             }
 
             $offset += 1;
