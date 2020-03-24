@@ -250,6 +250,9 @@
     "symfony/css-selector": {
         "version": "v5.0.5"
     },
+    "symfony/debug": {
+        "version": "v4.4.5"
+    },
     "symfony/debug-bundle": {
         "version": "4.1",
         "recipe": {
@@ -462,6 +465,9 @@
         "version": "v5.0.5"
     },
     "symfony/property-info": {
+        "version": "v5.0.5"
+    },
+    "symfony/proxy-manager-bridge": {
         "version": "v5.0.5"
     },
     "symfony/routing": {

@@ -1,13 +1,10 @@
 <?php
 
-
 namespace App\Messenger;
-
 
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Transport\Serialization\Serializer;
-use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 class ExternalJsonMessageSerializer extends Serializer
 {

@@ -140,9 +140,13 @@ class AdtractionResourceDownloadFile extends Command
         $fileRelativePath = $this->getDirForFiles() . date('YmdHis') . '.csv';
         // Read bytes off of the stream until the end of the stream is reached
         while (!$body->eof()) {
+            $read = $body->read(1024);
+            $read = str_replace('""\'', '\"\"\'', $read);
+            $read = str_replace('"\'', '\"\\\'', $read);
+
             file_put_contents(
                 $fileRelativePath,
-                $body->read(1024),
+                $read,
                 FILE_APPEND
             );
         }

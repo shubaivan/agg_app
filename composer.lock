@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-  "content-hash": "9c0a75e2d9e7320cd5b6246db8ba6ff9",
+  "content-hash": "d235583b2d48b3ee677525e3f4b3a626",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -5881,6 +5881,77 @@
                 "type",
                 "validator"
             ],
+          "time": "2020-01-04T14:08:26+00:00"
+        },
+      {
+        "name": "symfony/proxy-manager-bridge",
+        "version": "v5.0.5",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/symfony/proxy-manager-bridge.git",
+          "reference": "04db5e211ec98c3053b37d5cc393677a619e6002"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/symfony/proxy-manager-bridge/zipball/04db5e211ec98c3053b37d5cc393677a619e6002",
+          "reference": "04db5e211ec98c3053b37d5cc393677a619e6002",
+          "shasum": ""
+        },
+        "require": {
+          "ocramius/proxy-manager": "~2.1",
+          "php": "^7.2.5",
+          "symfony/dependency-injection": "^5.0"
+        },
+        "conflict": {
+          "zendframework/zend-eventmanager": "2.6.0"
+        },
+        "require-dev": {
+          "symfony/config": "^4.4|^5.0"
+        },
+        "type": "symfony-bridge",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "5.0-dev"
+          }
+        },
+        "autoload": {
+          "psr-4": {
+            "Symfony\\Bridge\\ProxyManager\\": ""
+          },
+          "exclude-from-classmap": [
+            "/Tests/"
+          ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+          "MIT"
+        ],
+        "authors": [
+          {
+            "name": "Fabien Potencier",
+            "email": "fabien@symfony.com"
+          },
+          {
+            "name": "Symfony Community",
+            "homepage": "https://symfony.com/contributors"
+          }
+        ],
+        "description": "Symfony ProxyManager Bridge",
+        "homepage": "https://symfony.com",
+        "funding": [
+          {
+            "url": "https://symfony.com/sponsor",
+            "type": "custom"
+          },
+          {
+            "url": "https://github.com/fabpot",
+            "type": "github"
+          },
+          {
+            "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+            "type": "tidelift"
+          }
+        ],
             "time": "2020-01-04T14:08:26+00:00"
         },
         {
@@ -7776,6 +7847,62 @@
             "time": "2020-02-04T09:41:09+00:00"
         },
         {
+          "name": "symfony/debug",
+          "version": "v4.4.5",
+          "source": {
+            "type": "git",
+            "url": "https://github.com/symfony/debug.git",
+            "reference": "a980d87a659648980d89193fd8b7a7ca89d97d21"
+          },
+          "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/symfony/debug/zipball/a980d87a659648980d89193fd8b7a7ca89d97d21",
+            "reference": "a980d87a659648980d89193fd8b7a7ca89d97d21",
+            "shasum": ""
+          },
+          "require": {
+            "php": "^7.1.3",
+            "psr/log": "~1.0"
+          },
+          "conflict": {
+            "symfony/http-kernel": "<3.4"
+          },
+          "require-dev": {
+            "symfony/http-kernel": "^3.4|^4.0|^5.0"
+          },
+          "type": "library",
+          "extra": {
+            "branch-alias": {
+              "dev-master": "4.4-dev"
+            }
+          },
+          "autoload": {
+            "psr-4": {
+              "Symfony\\Component\\Debug\\": ""
+            },
+            "exclude-from-classmap": [
+              "/Tests/"
+            ]
+          },
+          "notification-url": "https://packagist.org/downloads/",
+          "license": [
+            "MIT"
+          ],
+          "authors": [
+            {
+              "name": "Fabien Potencier",
+              "email": "fabien@symfony.com"
+            },
+            {
+              "name": "Symfony Community",
+              "homepage": "https://symfony.com/contributors"
+            }
+          ],
+          "description": "Symfony Debug Component",
+          "homepage": "https://symfony.com",
+          "time": "2020-02-23T14:41:43+00:00"
+        },
+      {
             "name": "symfony/debug-bundle",
             "version": "v5.0.5",
             "source": {

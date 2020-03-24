@@ -27,6 +27,7 @@
         "symfony/notifier": "5.0.*",
         "symfony/orm-pack": "*",
         "symfony/process": "5.0.*",
+      "symfony/proxy-manager-bridge": "5.0.*",
         "symfony/security-bundle": "5.0.*",
         "symfony/serializer-pack": "*",
         "symfony/string": "5.0.*",
@@ -38,6 +39,7 @@
     },
     "require-dev": {
         "symfony/debug-pack": "*",
+      "symfony/debug": "~3.4|~4.0",
         "symfony/maker-bundle": "^1.0",
         "symfony/profiler-pack": "*",
         "symfony/test-pack": "*"

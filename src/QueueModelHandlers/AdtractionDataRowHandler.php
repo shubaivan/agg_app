@@ -34,7 +34,8 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
 
     /**
      * @param AdtractionDataRow $adtractionDataRow
-     * @throws \App\Exception\ValidatorException
+     * @throws ValidatorException
+     * @throws \Exception
      */
     public function __invoke(AdtractionDataRow $adtractionDataRow)
     {
@@ -42,12 +43,14 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
             $product = $this->getProductService()->createProductFromAndractionCsvRow($adtractionDataRow);
             $this->getLogger()->info('sku: ' . $product->getSku());
         } catch (ValidatorException $e) {
-            $this->getLogger()->error($e->getErrorsMessage());
+            $this->getLogger()->error($e->getMessage());
+            throw $e;
         } catch (\Exception $e) {
             $this->getLogger()->error($e->getMessage());
+            throw $e;
         }
 
-        echo $product->getSku() . PHP_EOL;
+        echo $adtractionDataRow->getSku() . PHP_EOL;
     }
 
     /**

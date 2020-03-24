@@ -13,21 +13,31 @@ class ValidatorException extends \Exception
     private $constraintViolatinosList;
 
     /**
+     * @var EntityValidatorException
+     */
+    private $entity;
+
+    /**
      * ValidatorException constructor.
      * @param ConstraintViolationListInterface $constraintViolatinosList
      * @param string $message
      * @param int $code
      * @param \Exception|null $previous
+     * @param EntityValidatorException $entity
      */
     public function __construct(
         ConstraintViolationListInterface $constraintViolatinosList,
+        EntityValidatorException $entity,
         $message = '',
         $code = 400,
         \Exception $previous = null
     )
     {
+        $this->entity = $entity;
         $this->constraintViolatinosList = $constraintViolatinosList;
-
+        if ($message === '') {
+            $message = $this->getErrorsMessage();
+        }
         parent::__construct($message, $code, $previous);
     }
 
@@ -61,13 +71,17 @@ class ValidatorException extends \Exception
     {
         $output = implode(', ', array_map(
             function ($v, $k) {
-                return sprintf("%s='%s'", $k, $v);
+                $reasons = $v;
+                if (is_array($v)) {
+                    $reasons = implode(',\\n', $v);
+                }
+                return sprintf("%s='%s'", $k, $reasons);
             },
             $input,
             array_keys($input)
         ));
 
-        return $output;
+        return 'Identity:' . $this->getEntity()->getIdentity() . ';' . $output;
     }
 
     /**
@@ -81,5 +95,13 @@ class ValidatorException extends \Exception
         }
 
         return '';
+    }
+
+    /**
+     * @return EntityValidatorException
+     */
+    protected function getEntity(): EntityValidatorException
+    {
+        return $this->entity;
     }
 }

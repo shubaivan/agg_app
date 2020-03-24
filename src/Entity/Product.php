@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Exception\EntityValidatorException;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -10,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  * @ORM\Table(name="products",indexes={@ORM\Index(name="sku_idx", columns={"sku"})})
  */
-class Product
+class Product implements EntityValidatorException
 {
     const SERIALIZED_GROUP_CREATE = 'group_create';
 
@@ -23,7 +24,9 @@ class Product
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
      * @Annotation\SerializedName("sKU")
      */
@@ -32,6 +35,11 @@ class Product
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $name;
 
@@ -44,81 +52,137 @@ class Product
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $category;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $price;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $shipping;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $currency;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $instock;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
-     * @Assert\Url()
+     * @Assert\Url(
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $productUrl;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
-     * @Assert\Url()
+     * @Assert\Url(
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $imageUrl;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
-     * @Assert\Url()
+     * @Assert\Url(
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $trackingUrl;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $brand;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $originalPrice;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $ean;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $manufacturerArticleNumber;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 255,
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
      */
     private $extras;
 
@@ -413,5 +477,13 @@ class Product
     {
         $this->extras = $extras;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentity()
+    {
+        return $this->getSku();
     }
 }

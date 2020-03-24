@@ -65,7 +65,7 @@ class ProductService
     private function prepareDataForExistProduct(AdtractionDataRow $adtractionDataRow)
     {
         $product = $this->matchExistProduct($adtractionDataRow->getSku());
-        if ($product->getId()) {
+        if ($product && $product->getId()) {
             $adtractionDataRow->setExistProductId($product->getId());
         }
 

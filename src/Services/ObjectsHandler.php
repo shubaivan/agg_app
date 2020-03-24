@@ -90,7 +90,7 @@ class ObjectsHandler
         $errors = $this->getSymfonyValidator()
             ->validate($entity, null, $validateGroups);
         if (count($errors)) {
-            $validatorException = new ValidatorException($errors);
+            $validatorException = new ValidatorException($errors, $entity);
 
             throw $validatorException;
         }

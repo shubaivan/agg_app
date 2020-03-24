@@ -32,13 +32,24 @@ services:
     messenger.middleware.reply_middleware:
         class: App\Middleware\ReplyMiddleware
 
-  #    app_serialize.object_constructor:
-  #        class: '%doctrine.object.constructor.class%'
-  #        public: false
-  #        arguments:
-  #            - "@doctrine"
-  #            - "@jms_serializer.unserialize_object_constructor"
-
     jms_serializer.object_constructor:
       public: false
       alias: jms_serializer.doctrine_object_constructor
+
+    App\Services\ProductService:
+      lazy: true
+
+    App\Services\HandleAdtractionData:
+      lazy: true
+
+    serializer.normalizer.flatten_exception:
+      class: Symfony\Component\Serializer\Normalizer\FlattenExceptionNormalizer
+      tags:
+        - {name: serializer.normalizer, priority: -915}
+
+
+#        <!-- Normalizer -->
+#        <service id="serializer.normalizer.flatten_exception" class="Symfony\Component\Serializer\Normalizer\FlattenExceptionNormalizer">
+#        <!-- Run before serializer.normalizer.object -->
+#        <tag name="serializer.normalizer" priority="-915" />
+#        </service>

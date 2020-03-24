@@ -28,7 +28,7 @@ class JmsEventSubscriber implements EventSubscriberInterface
         $data = $event->getData();
         array_map(function ($key, $value) use (&$data) {
             unset($data[$key]);
-            $data[lcfirst($key)] = $value;
+            $data[lcfirst($key)] = ($value === '' ? null : $value);
             return [];
         }, array_keys($data), $data);
 
