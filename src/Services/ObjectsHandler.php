@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exception\EntityValidatorException;
 use App\Exception\ValidatorException;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializerInterface;
@@ -76,7 +77,7 @@ class ObjectsHandler
     }
 
     /**
-     * @param object $entity
+     * @param EntityValidatorException $entity
      * @param array $validateGroups
      *
      * @throws ValidatorException
