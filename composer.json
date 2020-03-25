@@ -35,7 +35,8 @@
         "symfony/twig-pack": "*",
         "symfony/validator": "5.0.*",
         "symfony/web-link": "5.0.*",
-        "symfony/yaml": "5.0.*"
+      "symfony/yaml": "5.0.*",
+      "friendsofsymfony/rest-bundle": "master"
     },
     "require-dev": {
         "symfony/debug-pack": "*",
@@ -44,6 +45,8 @@
         "symfony/profiler-pack": "*",
         "symfony/test-pack": "*"
     },
+  "minimum-stability": "dev",
+
     "config": {
         "preferred-install": {
             "*": "dist"
