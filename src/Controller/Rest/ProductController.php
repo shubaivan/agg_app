@@ -41,7 +41,7 @@ class ProductController extends AbstractRestController
      *
      * @View(serializerGroups={Product::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
      *
-     * @SWG\Tag(name="rewards")
+     * @SWG\Tag(name="Products")
      *
      * @SWG\Response(
      *     response=200,
