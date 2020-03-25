@@ -1,5 +1,7 @@
 <?php
 
+use Nelmio\ApiDocBundle\NelmioApiDocBundle;
+
 return [
     Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
     Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
@@ -15,4 +17,5 @@ return [
     JMS\SerializerBundle\JMSSerializerBundle::class => ['all' => true],
     FOS\RestBundle\FOSRestBundle::class => ['all' => true],
     Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle::class => ['all' => true],
+    NelmioApiDocBundle::class => ['all' => true],
 ];

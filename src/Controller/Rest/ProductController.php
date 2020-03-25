@@ -7,6 +7,9 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use App\Entity\Product;
 use FOS\RestBundle\Controller\Annotations\View;
+use Symfony\Component\HttpFoundation\Response;
+use Swagger\Annotations as SWG;
+use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends AbstractRestController
 {
@@ -27,7 +30,7 @@ class ProductController extends AbstractRestController
     /**
      * get Products.
      *
-     * @Rest\Get("/products")
+     * @Rest\Get("/api/products")
      *
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
      * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
@@ -36,7 +39,14 @@ class ProductController extends AbstractRestController
      *
      * @param ParamFetcher $paramFetcher
      *
-     * @View(serializerGroups={Product::SERIALIZED_GROUP_CREATE})
+     * @View(serializerGroups={Product::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="rewards")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json object with all user meta data or a json string with the value of the requested field"
+     * )
      *
      * @return array
      * @throws \Doctrine\ORM\NoResultException
@@ -50,7 +60,6 @@ class ProductController extends AbstractRestController
                 'count' => $this->getProductRepository()->getProductsList($paramFetcher, true)
             ];
     }
-
 
     /**
      * @return ProductRepository

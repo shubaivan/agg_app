@@ -11,17 +11,28 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  * @ORM\Table(name="products",indexes={@ORM\Index(name="sku_idx", columns={"sku"})})
+ * @Annotation\AccessorOrder("custom",
+ *      custom = {
+ *     "id", "sku", "name",
+ *     "description", "category", "price",
+ *     "shipping", "currency", "instock", "productUrl", "imageUrl",
+ *     "trackingUrl", "brand", "originalPrice", "ean", "manufacturerArticleNumber",
+ *     "extras", "createdAt"
+ *      }
+ * )
  */
 class Product implements EntityValidatorException
 {
     use TimestampableEntity;
 
     const SERIALIZED_GROUP_CREATE = 'group_create';
+    const SERIALIZED_GROUP_LIST = 'group_list';
 
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $id;
 
@@ -30,14 +41,14 @@ class Product implements EntityValidatorException
      * @Assert\NotBlank(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Annotation\SerializedName("sKU")
      */
     private $sku;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -48,13 +59,13 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      */
     private $description;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -65,7 +76,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -76,7 +87,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -87,7 +98,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -98,7 +109,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -109,7 +120,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Url(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
@@ -118,7 +129,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Url(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
@@ -127,7 +138,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Url(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
@@ -136,7 +147,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -147,7 +158,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -158,7 +169,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -169,7 +180,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -180,7 +191,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -189,6 +200,21 @@ class Product implements EntityValidatorException
      */
     private $extras;
 
+    /**
+     * @return \DateTime
+     * @Annotation\VirtualProperty()
+     * @Annotation\SerializedName("createdAt")
+     * @Annotation\Type("DateTime<'Y:m:d H:i:s'>")
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
+     */
+    public function getCreatedAtValue()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
