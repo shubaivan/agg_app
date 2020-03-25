@@ -6,6 +6,7 @@ use App\Exception\EntityValidatorException;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation;
 use Symfony\Component\Validator\Constraints as Assert;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
@@ -13,6 +14,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Product implements EntityValidatorException
 {
+    use TimestampableEntity;
+
     const SERIALIZED_GROUP_CREATE = 'group_create';
 
     /**

@@ -1,7 +1,33 @@
 fos_rest:
-  view:
-    view_response_listener:  true
-  format_listener:
-    rules:
-      - { path: ^/api, prefer_extension: true, fallback_format: json, priorities: [ json ] }
-      - { path: ^/, priorities: [ json, xml, html ], fallback_format: ~, prefer_extension: true }
+    body_listener:
+        service: my_body_listener
+    unauthorized_challenge: "Basic realm=\"Restricted Area\""
+    access_denied_listener:
+        # all requests using the 'json' format will return a 403 on an access denied violation
+        json: true
+    param_fetcher_listener: force
+    format_listener:
+        rules:
+            - { path: ^/api, prefer_extension: true, fallback_format: json, priorities: [ json ] }
+            - { path: ^/, priorities: [ json, xml, html ], fallback_format: ~, prefer_extension: true }
+    view:
+        view_response_listener: 'force'
+        formats:
+            json: true
+            jsonp: false
+            xml: false
+            rss: false
+        mime_types:
+            json: ['application/json', 'application/x-json']
+    routing_loader:
+        default_format:  json
+    exception:
+        enabled: true
+        codes:
+            'Symfony\Component\Routing\Exception\ResourceNotFoundException': 404
+            'Doctrine\ORM\OptimisticLockException': HTTP_CONFLICT
+            'Symfony\Component\HttpKernel\Exception\BadRequestHttpException': 400
+        messages:
+            Symfony\Component\HttpKernel\Exception\BadRequestHttpException: true
+            Symfony\Component\HttpKernel\Exception\HttpException: true
+

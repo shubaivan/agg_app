@@ -9,11 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Component\Serializer\Normalizer;
+namespace App\Symfony\Component\Serializer\Normalizer;
 
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
+use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
  * Normalizes FlattenException instances.
@@ -22,7 +25,8 @@ use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
  *
  * @experimental
  */
-class FlattenExceptionNormalizer implements NormalizerInterface, DenormalizerInterface, CacheableSupportsMethodInterface
+class FlattenExceptionNormalizer implements
+    NormalizerInterface, DenormalizerInterface, CacheableSupportsMethodInterface
 {
     /**
      * {@inheritdoc}

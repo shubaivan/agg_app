@@ -3,13 +3,12 @@
 namespace App\Controller\Rest;
 
 use App\Repository\ProductRepository;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\View\View;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use FOS\RestBundle\Request\ParamFetcher;
+use App\Entity\Product;
+use FOS\RestBundle\Controller\Annotations\View;
 
-class ProductController extends AbstractFOSRestController
+class ProductController extends AbstractRestController
 {
     /**
      * @var ProductRepository
@@ -26,17 +25,32 @@ class ProductController extends AbstractFOSRestController
     }
 
     /**
-     * Creates an Article resource
+     * get Products.
+     *
      * @Rest\Get("/products")
-     * @param Request $request
-     * @return View
+     *
+     * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
+     * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
+     * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
+     * @Rest\QueryParam(name="sort_order", strict=true, requirements="^[a-zA-Z]+", default="DESC", description="Sort order", nullable=true)
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @View(serializerGroups={Product::SERIALIZED_GROUP_CREATE})
+     *
+     * @return array
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getProducts(Request $request): View
+    public function getProductsAction(ParamFetcher $paramFetcher)
     {
-        $products = $this->getProductRepository()->findAll();
-        // In case our GET was a success we need to return a 200 HTTP OK response with the request object
-        return View::create($products, Response::HTTP_OK);
+        return
+            [
+                'collection' => $this->getProductRepository()->getProductsList($paramFetcher),
+                'count' => $this->getProductRepository()->getProductsList($paramFetcher, true)
+            ];
     }
+
 
     /**
      * @return ProductRepository
