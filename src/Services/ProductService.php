@@ -33,7 +33,11 @@ class ProductService
      * @param ObjectsHandler $objectHandler
      * @param EntityManagerInterface $em
      */
-    public function __construct(LoggerInterface $logger, ObjectsHandler $objectHandler, EntityManagerInterface $em)
+    public function __construct(
+        LoggerInterface $logger,
+        ObjectsHandler $objectHandler,
+        EntityManagerInterface $em
+    )
     {
         $this->logger = $logger;
         $this->objectHandler = $objectHandler;

@@ -4,6 +4,7 @@ namespace App\QueueModelHandlers;
 
 use App\Exception\ValidatorException;
 use App\QueueModel\AdtractionDataRow;
+use App\Services\BrandService;
 use App\Services\ProductService;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -22,14 +23,25 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     private $productService;
 
     /**
-     * AdtractionDataRowHandler constructor.
-     * @param LoggerInterface $adtractionCsvRowHandlerLogger
-     * @param ProductService $productService
+     * @var BrandService
      */
-    public function __construct(LoggerInterface $adtractionCsvRowHandlerLogger, ProductService $productService)
+    private $brandService;
+
+    /**
+     * AdtractionDataRowHandler constructor.
+     * @param Logger $adtractionCsvRowHandlerLogger
+     * @param ProductService $productService
+     * @param BrandService $brandService
+     */
+    public function __construct(
+        LoggerInterface $adtractionCsvRowHandlerLogger,
+        ProductService $productService,
+        BrandService $brandService
+    )
     {
         $this->logger = $adtractionCsvRowHandlerLogger;
         $this->productService = $productService;
+        $this->brandService = $brandService;
     }
 
     /**
@@ -41,6 +53,7 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     {
         try {
             $product = $this->getProductService()->createProductFromAndractionCsvRow($adtractionDataRow);
+            $this->getBrandService()->createBrandFromProduct($product);
             $this->getLogger()->info('sku: ' . $product->getSku());
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
@@ -67,5 +80,13 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     protected function getLogger(): Logger
     {
         return $this->logger;
+    }
+
+    /**
+     * @return BrandService
+     */
+    protected function getBrandService(): BrandService
+    {
+        return $this->brandService;
     }
 }

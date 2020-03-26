@@ -42,7 +42,6 @@ class Product implements EntityValidatorException
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Annotation\SerializedName("sKU")
      */
     private $sku;
 
@@ -155,6 +154,13 @@ class Product implements EntityValidatorException
      * )
      */
     private $brand;
+
+    /**
+     * @var Brand
+     *
+     * @ORM\ManyToOne(targetEntity="Brand", inversedBy="products")
+     */
+    private $brandRelation;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -514,5 +520,17 @@ class Product implements EntityValidatorException
     public function getIdentity()
     {
         return $this->getSku();
+    }
+
+    public function getBrandRelation(): ?Brand
+    {
+        return $this->brandRelation;
+    }
+
+    public function setBrandRelation(?Brand $brandRelation): self
+    {
+        $this->brandRelation = $brandRelation;
+
+        return $this;
     }
 }
