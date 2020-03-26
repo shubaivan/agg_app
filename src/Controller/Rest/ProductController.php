@@ -5,11 +5,9 @@ namespace App\Controller\Rest;
 use App\Repository\ProductRepository;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
-use App\Entity\Product;
 use FOS\RestBundle\Controller\Annotations\View;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
-use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends AbstractRestController
 {
