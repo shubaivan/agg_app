@@ -32,6 +32,12 @@ class ProductController extends AbstractRestController
      *
      * @Rest\Get("/api/products")
      *
+     * @Rest\QueryParam(
+     *     name="search",
+     *     strict=true,
+     *     requirements="^[A-Za-z0-9 ]*$",
+     *     nullable=true,
+     *     description="Search by each world with `or` condition by sku, name, description, category, brand and price fields")
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
      * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
      * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
@@ -39,7 +45,7 @@ class ProductController extends AbstractRestController
      *
      * @param ParamFetcher $paramFetcher
      *
-     * @View(serializerGroups={Product::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
+     * @View(statusCode=Response::HTTP_OK)
      *
      * @SWG\Tag(name="Products")
      *
@@ -51,14 +57,16 @@ class ProductController extends AbstractRestController
      * @return array
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function getProductsAction(ParamFetcher $paramFetcher)
     {
-        return
-            [
-                'collection' => $this->getProductRepository()->getProductsList($paramFetcher),
-                'count' => $this->getProductRepository()->getProductsList($paramFetcher, true)
-            ];
+        $collection = $this->getProductRepository()->fullTextSearch($paramFetcher);
+        $count = $this->getProductRepository()->fullTextSearch($paramFetcher, true);
+        return [
+            'collection' => $collection,
+            'count' => $count
+        ];
     }
 
     /**

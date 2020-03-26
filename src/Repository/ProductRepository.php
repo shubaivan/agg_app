@@ -50,4 +50,72 @@ class ProductRepository extends ServiceEntityRepository
 
         return $result;
     }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param bool $count
+     * @return false|int|mixed|mixed[]
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function fullTextSearch(ParamFetcher $paramFetcher, $count = false)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $limit = $paramFetcher->get('count');
+        $offset = $limit * ($paramFetcher->get('page') - 1);
+
+        $search = str_replace(' ', '|', $paramFetcher->get('search'));
+        if ($count) {
+            $query = '
+            SELECT 
+                COUNT(*)
+            FROM products, to_tsquery(:search) query
+            WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,\'\')||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')) @@ query;
+        ';
+
+            $statement = $connection->prepare($query);
+            $statement->bindValue(':search', $search, \PDO::PARAM_STR);
+
+            $execute = $statement->execute();
+            $products = $statement->fetchColumn();
+            $products = (int)$products;
+        } else {
+            $query = '
+            SELECT 
+                id AS id,
+                sku As sku,
+                name AS "name",
+                description AS description,
+                category AS category,
+                price AS price,
+                shipping AS shipping,
+                currency AS currency,
+                instock AS instock,
+                product_url AS "productUrl",
+                image_url AS "imageUrl",
+                tracking_url AS "trackingUrl",
+                brand AS brand,
+                original_price AS "originalPrice",
+                ean AS ean,
+                manufacturer_article_number AS "manufacturerArticleNumber",
+                extras AS extras,
+                created_at AS "createdAt",
+                ts_rank_cd(to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,\'\')||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')), query) AS rank
+            FROM products, to_tsquery(:search) query
+            WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,\'\')||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')) @@ query
+            ORDER BY rank DESC
+            LIMIT :limit
+            OFFSET :offset;
+        ';
+
+            $statement = $connection->prepare($query);
+            $statement->bindValue(':search', $search, \PDO::PARAM_STR);
+            $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $statement->bindValue(':limit', $limit, \PDO::PARAM_INT);
+
+            $execute = $statement->execute();
+            $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        }
+
+        return $products;
+    }
 }
