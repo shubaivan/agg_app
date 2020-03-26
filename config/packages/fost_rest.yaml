@@ -11,7 +11,14 @@ fos_rest:
             - { path: ^/api, prefer_extension: true, fallback_format: json, priorities: [ json ] }
             - { path: ^/, priorities: [ json, xml, html ], fallback_format: ~, prefer_extension: true }
     view:
-        view_response_listener: true
+      view_response_listener: 'force'
+      formats:
+        json: true
+        jsonp: false
+        xml: false
+        rss: false
+      mime_types:
+        json: ['application/json', 'application/x-json']
     routing_loader:
         default_format:  json
     exception:
