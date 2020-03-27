@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use JMS\Serializer\Annotation;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\BrandRepository")
@@ -21,17 +22,21 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class Brand
 {
+    const SERIALIZED_GROUP_LIST = 'brand_group_list';
+
     use TimestampableEntity;
 
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
      */
     private $name;
 

@@ -49,7 +49,7 @@ class ProductController extends AbstractRestController
      *
      * @SWG\Response(
      *     response=200,
-     *     description="Json object with all user meta data or a json string with the value of the requested field"
+     *     description="Json collection objects Products"
      * )
      *
      * @return array

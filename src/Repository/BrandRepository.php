@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Brand;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use FOS\RestBundle\Request\ParamFetcher;
 
 /**
  * @method Brand|null find($id, $lockMode = null, $lockVersion = null)
@@ -19,32 +20,31 @@ class BrandRepository extends ServiceEntityRepository
         parent::__construct($registry, Brand::class);
     }
 
-    // /**
-    //  * @return Brand[] Returns an array of Brand objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param bool $count
+     * @return Brand[]|int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getBrandList(ParamFetcher $paramFetcher, $count = false)
     {
-        return $this->createQueryBuilder('b')
-            ->andWhere('b.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('b.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $qb = $this->createQueryBuilder('s');
 
-    /*
-    public function findOneBySomeField($value): ?Brand
-    {
-        return $this->createQueryBuilder('b')
-            ->andWhere('b.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        if ($count) {
+            $qb
+                ->select('COUNT(s.id)');
+            $query = $qb->getQuery();
+            $result = $query->getSingleScalarResult();
+        } else {
+            $qb
+                ->orderBy('s.' . $paramFetcher->get('sort_by'), $paramFetcher->get('sort_order'))
+                ->setFirstResult($paramFetcher->get('count') * ($paramFetcher->get('page') - 1))
+                ->setMaxResults($paramFetcher->get('count'));
+            $query = $qb->getQuery();
+            $result = $query->getResult();
+        }
+
+        return $result;
     }
-    */
 }
