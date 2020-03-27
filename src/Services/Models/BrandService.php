@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Models;
 
 use App\Entity\Brand;
 use App\Entity\Product;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class BrandService
 {
@@ -30,6 +31,9 @@ class BrandService
      */
     public function createBrandFromProduct(Product $product)
     {
+        if (strlen($product->getBrand()) < 1) {
+            throw new BadRequestHttpException('product id:' . $product->getId() . ' brand is empty');
+        }
         $brand = $this->matchExistBrand($product->getBrand());
         if (!($brand instanceof Brand)) {
             $brand = new Brand();

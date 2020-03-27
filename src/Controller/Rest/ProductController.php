@@ -33,7 +33,7 @@ class ProductController extends AbstractRestController
      * @Rest\QueryParam(
      *     name="search",
      *     strict=true,
-     *     requirements="^[A-Za-z0-9 éäöåÄÖÅ]*$",
+     *     requirements="^[A-Za-z0-9 éäöåÉÄÖÅ]*$",
      *     nullable=true,
      *     description="Search by each world with `or` condition by sku, name, description, category, brand and price fields")
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")

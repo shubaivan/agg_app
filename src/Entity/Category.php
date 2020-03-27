@@ -9,16 +9,16 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\BrandRepository")
- * @ORM\Table(name="brand",
+ * @ORM\Entity(repositoryClass="App\Repository\CategoryRepository")
+ * @ORM\Table(name="category",
  *    uniqueConstraints={
- *        @UniqueConstraint(name="brand_name_idx",
+ *        @UniqueConstraint(name="category_name_idx",
  *            columns={"name"})
  *    }
  * )
  * @UniqueEntity(fields={"name"})
  */
-class Brand
+class Category
 {
     /**
      * @ORM\Id()
@@ -33,8 +33,8 @@ class Brand
     private $name;
 
     /**
-     * @var Product[]|Collection
-     * @ORM\OneToMany(targetEntity="Product", mappedBy="brandRelation", cascade={"persist"})
+     * @var Collection|Product[]
+     * @ORM\ManyToMany(targetEntity="Product", inversedBy="categoryRelation", cascade={"persist"})
      */
     private $products;
 
@@ -65,14 +65,17 @@ class Brand
      */
     public function getProducts(): Collection
     {
+        if (!$this->products) {
+            $this->products = new ArrayCollection();
+        }
+
         return $this->products;
     }
 
     public function addProduct(Product $product): self
     {
-        if (!$this->products->contains($product)) {
+        if (!$this->getProducts()->contains($product)) {
             $this->products[] = $product;
-            $product->setBrandRelation($this);
         }
 
         return $this;
@@ -80,12 +83,8 @@ class Brand
 
     public function removeProduct(Product $product): self
     {
-        if ($this->products->contains($product)) {
+        if ($this->getProducts()->contains($product)) {
             $this->products->removeElement($product);
-            // set the owning side to null (unless already changed)
-            if ($product->getBrandRelation() === $this) {
-                $product->setBrandRelation(null);
-            }
         }
 
         return $this;

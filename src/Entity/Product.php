@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Exception\EntityValidatorException;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -72,6 +74,12 @@ class Product implements EntityValidatorException
      * )
      */
     private $category;
+
+    /**
+     * @var Collection|Category[]
+     * @ORM\ManyToMany(targetEntity="Category", mappedBy="products")
+     */
+    private $categoryRelation;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -205,6 +213,11 @@ class Product implements EntityValidatorException
      * )
      */
     private $extras;
+
+    public function __construct()
+    {
+        $this->categoryRelation = new ArrayCollection();
+    }
 
     /**
      * @return \DateTime
@@ -530,6 +543,38 @@ class Product implements EntityValidatorException
     public function setBrandRelation(?Brand $brandRelation): self
     {
         $this->brandRelation = $brandRelation;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Category[]
+     */
+    public function getCategoryRelation(): Collection
+    {
+        if (!$this->categoryRelation) {
+            $this->categoryRelation = new ArrayCollection();
+        }
+
+        return $this->categoryRelation;
+    }
+
+    public function addCategoryRelation(Category $categoryRelation): self
+    {
+        if (!$this->getCategoryRelation()->contains($categoryRelation)) {
+            $this->categoryRelation[] = $categoryRelation;
+            $categoryRelation->addProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCategoryRelation(Category $categoryRelation): self
+    {
+        if ($this->getCategoryRelation()->contains($categoryRelation)) {
+            $this->categoryRelation->removeElement($categoryRelation);
+            $categoryRelation->removeProduct($this);
+        }
 
         return $this;
     }

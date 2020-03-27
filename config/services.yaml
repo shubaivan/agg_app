@@ -39,10 +39,13 @@ services:
       public: false
       alias: jms_serializer.doctrine_object_constructor
 
-    App\Services\ProductService:
+    App\Services\Models\ProductService:
       lazy: true
 
-    App\Services\BrandService:
+    App\Services\Models\BrandService:
+      lazy: true
+
+    App\Services\Models\CategoryService:
       lazy: true
 
     App\Services\HandleAdtractionData:
@@ -54,7 +57,7 @@ services:
         - {name: serializer.normalizer, priority: -915}
 
     my_body_listener:
-      class: App\Services\BodyListener
+      class: App\EventListener\BodyListener
       tags:
         - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 10 }
       arguments: ['@fos_rest.decoder_provider', '%fos_rest.throw_exception_on_unsupported_content_type%']

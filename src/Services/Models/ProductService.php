@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Models;
 
 use App\Entity\Product;
 use App\Exception\ValidatorException;
 use App\QueueModel\AdtractionDataRow;
+use App\Services\ObjectsHandler;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;

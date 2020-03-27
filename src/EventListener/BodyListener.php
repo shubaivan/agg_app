@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Services;
+namespace App\EventListener;
 
 
 use FOS\RestBundle\Decoder\ContainerDecoderProvider;

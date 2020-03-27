@@ -2,13 +2,11 @@
 
 namespace App\Services;
 
-use App\Kernel;
 use App\QueueModel\AdtractionDataRow;
 use League\Csv\Reader;
 use League\Csv\Statement;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\TraceableMessageBus;
 use function League\Csv\delimiter_detect;
