@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-  "content-hash": "f328e002170ccacb60c3f2b4d5459b6f",
+  "content-hash": "830f99179acdbcb2b5e1dfc1de00546f",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -2826,6 +2826,63 @@
           ],
           "time": "2020-03-14T10:41:27+00:00"
         },
+      {
+        "name": "nelmio/cors-bundle",
+        "version": "dev-master",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/nelmio/NelmioCorsBundle.git",
+          "reference": "c8cedded10e52971165e52120c1f05c29f89eabc"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/nelmio/NelmioCorsBundle/zipball/c8cedded10e52971165e52120c1f05c29f89eabc",
+          "reference": "c8cedded10e52971165e52120c1f05c29f89eabc",
+          "shasum": ""
+        },
+        "require": {
+          "symfony/framework-bundle": "^4.3 || ^5.0"
+        },
+        "require-dev": {
+          "mockery/mockery": "^1.2",
+          "symfony/phpunit-bridge": "^4.3 || ^5.0"
+        },
+        "type": "symfony-bundle",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "2.0.x-dev"
+          }
+        },
+        "autoload": {
+          "psr-4": {
+            "Nelmio\\CorsBundle\\": ""
+          },
+          "exclude-from-classmap": [
+            "/Tests/"
+          ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+          "MIT"
+        ],
+        "authors": [
+          {
+            "name": "Nelmio",
+            "homepage": "http://nelm.io"
+          },
+          {
+            "name": "Symfony Community",
+            "homepage": "https://github.com/nelmio/NelmioCorsBundle/contributors"
+          }
+        ],
+        "description": "Adds CORS (Cross-Origin Resource Sharing) headers support in your Symfony application",
+        "keywords": [
+          "api",
+          "cors",
+          "crossdomain"
+        ],
+        "time": "2020-02-07T21:18:12+00:00"
+      },
       {
             "name": "ocramius/package-versions",
             "version": "1.4.2",
@@ -8904,7 +8961,8 @@
     "aliases": [],
   "minimum-stability": "dev",
   "stability-flags": {
-    "nelmio/api-doc-bundle": 20
+    "nelmio/api-doc-bundle": 20,
+    "nelmio/cors-bundle": 20
   },
     "prefer-stable": false,
     "prefer-lowest": false,
@@ -8912,7 +8970,8 @@
         "php": "^7.2.5",
       "ext-amqp": "*",
       "ext-ctype": "*",
-        "ext-iconv": "*"
+      "ext-iconv": "*",
+      "ext-pdo": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "1.1.0"
