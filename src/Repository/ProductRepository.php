@@ -3,9 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Product;
-use App\Entity\Serial;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use FOS\RestBundle\Request\ParamFetcher;
 
@@ -25,35 +23,6 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
-     * @return Product[]|int
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    public function getProductsList(ParamFetcher $paramFetcher, $count = false)
-    {
-        $qb = $this->createQueryBuilder('s');
-
-        if ($count) {
-            $qb
-                ->select('COUNT(s.id)');
-            $query = $qb->getQuery();
-            $result = $query->getSingleScalarResult();
-        } else {
-            $qb
-                ->orderBy('s.' . $paramFetcher->get('sort_by'), $paramFetcher->get('sort_order'))
-                ->setFirstResult($paramFetcher->get('count') * ($paramFetcher->get('page') - 1))
-                ->setMaxResults($paramFetcher->get('count'))
-                ->orderBy('s.createdAt', Criteria::DESC);
-            $query = $qb->getQuery();
-            $result = $query->getResult();
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param ParamFetcher $paramFetcher
-     * @param bool $count
      * @return false|int|mixed|mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
@@ -62,7 +31,8 @@ class ProductRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
         $limit = $paramFetcher->get('count');
         $offset = $limit * ($paramFetcher->get('page') - 1);
-
+        $sortBy = $paramFetcher->get('sort_by');
+        $sortOrder = $paramFetcher->get('sort_order');
         $searchField = $paramFetcher->get('search');
         if ($searchField) {
             if (preg_match_all('/[ ]/', $searchField, $matches) > 0) {
@@ -149,14 +119,17 @@ class ProductRepository extends ServiceEntityRepository
                         extras AS extras,
                         created_at AS "createdAt"
                     FROM products
+                    ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '
                     LIMIT :limit
                     OFFSET :offset;
                 ';
 
                 $statement = $connection->prepare($query);
 
-                $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
+//                $statement->bindValue(':sortBy', $sortBy, \PDO::PARAM_STR);
                 $statement->bindValue(':limit', $limit, \PDO::PARAM_INT);
+                $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
+//                $statement->bindValue(':sortOrder', $sortOrder, \PDO::PARAM_STR);
             }
 
             $execute = $statement->execute();

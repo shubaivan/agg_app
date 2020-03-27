@@ -27,8 +27,8 @@ class Product implements EntityValidatorException
 {
     use TimestampableEntity;
 
-    const SERIALIZED_GROUP_CREATE = 'group_create';
-    const SERIALIZED_GROUP_LIST = 'group_list';
+    const SERIALIZED_GROUP_CREATE = 'product_group_create';
+    const SERIALIZED_GROUP_LIST = 'product_group_list';
 
     /**
      * @ORM\Id()
@@ -82,13 +82,10 @@ class Product implements EntityValidatorException
     private $categoryRelation;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @var float
+     *
+     * @ORM\Column(type="decimal", precision=10, scale=2, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Length(
-     *      min = 1,
-     *      max = 255,
-     *     groups={Product::SERIALIZED_GROUP_CREATE}
-     * )
      */
     private $price;
 
@@ -171,13 +168,10 @@ class Product implements EntityValidatorException
     private $brandRelation;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @var float
+     *
+     * @ORM\Column(type="decimal", precision=10, scale=2, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Length(
-     *      min = 1,
-     *      max = 255,
-     *     groups={Product::SERIALIZED_GROUP_CREATE}
-     * )
      */
     private $originalPrice;
 
@@ -308,24 +302,6 @@ class Product implements EntityValidatorException
     public function setCategory($category)
     {
         $this->category = $category;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPrice()
-    {
-        return $this->price;
-    }
-
-    /**
-     * @param mixed $price
-     * @return Product
-     */
-    public function setPrice($price)
-    {
-        $this->price = $price;
         return $this;
     }
 
@@ -575,6 +551,18 @@ class Product implements EntityValidatorException
             $this->categoryRelation->removeElement($categoryRelation);
             $categoryRelation->removeProduct($this);
         }
+
+        return $this;
+    }
+
+    public function getPrice(): ?string
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?string $price): self
+    {
+        $this->price = $price;
 
         return $this;
     }
