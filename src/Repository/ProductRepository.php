@@ -49,7 +49,7 @@ class ProductRepository extends ServiceEntityRepository
                     SELECT 
                         COUNT(*)
                     FROM products, to_tsquery(:search) query
-                    WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,\'\')||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')) @@ query;
+                    WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')) @@ query;
                 ';
                 $statement = $connection->prepare($query);
                 $statement->bindValue(':search', $search, \PDO::PARAM_STR);
@@ -85,9 +85,9 @@ class ProductRepository extends ServiceEntityRepository
                         manufacturer_article_number AS "manufacturerArticleNumber",
                         extras AS extras,
                         created_at AS "createdAt",
-                        ts_rank_cd(to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,\'\')||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')), query) AS rank
+                        ts_rank_cd(to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')), query) AS rank
                     FROM products, to_tsquery(:search) query
-                    WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,\'\')||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')) @@ query
+                    WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')) @@ query
                     ORDER BY rank DESC
                     LIMIT :limit
                     OFFSET :offset;
