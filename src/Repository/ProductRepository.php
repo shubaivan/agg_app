@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Product;
+use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use FOS\RestBundle\Request\ParamFetcher;
@@ -15,8 +16,14 @@ use FOS\RestBundle\Request\ParamFetcher;
  */
 class ProductRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    /**
+     * @var Helpers
+     */
+    private $helpers;
+
+    public function __construct(ManagerRegistry $registry, Helpers $helpers)
     {
+        $this->helpers = $helpers;
         parent::__construct($registry, Product::class);
     }
 
@@ -25,6 +32,7 @@ class ProductRepository extends ServiceEntityRepository
      * @param bool $count
      * @return false|int|mixed|mixed[]
      * @throws \Doctrine\DBAL\DBALException
+     * @throws \InvalidArgumentException
      */
     public function fullTextSearch(ParamFetcher $paramFetcher, $count = false)
     {
@@ -33,6 +41,15 @@ class ProductRepository extends ServiceEntityRepository
         $offset = $limit * ($paramFetcher->get('page') - 1);
         $sortBy = $paramFetcher->get('sort_by');
         $sortOrder = $paramFetcher->get('sort_order');
+
+        $sortBy = $this->getHelpers()->white_list($sortBy,
+            ["id", "sku", "name",
+                "description", "category", "price",
+                "shipping", "currency", "instock", "productUrl", "imageUrl",
+                "trackingUrl", "brand", "originalPrice", "ean", "manufacturerArticleNumber",
+                "extras", "createdAt"], "Invalid field name " . $sortBy);
+        $sortOrder = $this->getHelpers()->white_list($sortOrder, ["ASC", "DESC"], "Invalid ORDER BY direction " . $sortOrder);
+
         $searchField = $paramFetcher->get('search');
         if ($searchField) {
             if (preg_match_all('/[ ]/', $searchField, $matches) > 0) {
@@ -135,6 +152,12 @@ class ProductRepository extends ServiceEntityRepository
                 array_values($categoryIds)
             );
             $bindKeysCategory = implode(',', array_keys($preparedInValuesCategory));
+            if ($search) {
+                $query .= '
+                    LEFT JOIN category_product cp on cp.product_id = products_alias.id
+                ';
+
+            }
             $query .= "
                             WHERE cp.category_id IN ($bindKeysCategory)
                         ";
@@ -197,5 +220,13 @@ class ProductRepository extends ServiceEntityRepository
 
 
         return $products;
+    }
+
+    /**
+     * @return Helpers
+     */
+    public function getHelpers(): Helpers
+    {
+        return $this->helpers;
     }
 }
