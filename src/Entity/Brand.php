@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use JMS\Serializer\Annotation;
+use App\Entity\Product;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\BrandRepository")
@@ -30,7 +31,7 @@ class Brand
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST, Product::SERIALIZED_GROUP_LIST})
      */
     private $id;
 

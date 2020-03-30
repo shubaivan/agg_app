@@ -31,12 +31,6 @@ class CategoryController extends AbstractRestController
      *
      * @Rest\Get("/api/categories")
      *
-     * @Rest\QueryParam(
-     *     name="search",
-     *     strict=true,
-     *     requirements="^[A-Za-z0-9 éäöåÉÄÖÅ]*$",
-     *     nullable=true,
-     *     description="Search by each world with `or` condition by name fields")
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
      * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
      * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
@@ -60,8 +54,8 @@ class CategoryController extends AbstractRestController
      */
     public function getCategoriesAction(ParamFetcher $paramFetcher)
     {
-        $collection = $this->getCategoryRepository()->getCategoryList($paramFetcher);
-        $count = $this->getCategoryRepository()->getCategoryList($paramFetcher, true);
+        $collection = $this->getCategoryRepository()->getEntityList($paramFetcher);
+        $count = $this->getCategoryRepository()->getEntityList($paramFetcher, true);
         return [
             'collection' => $collection,
             'count' => $count

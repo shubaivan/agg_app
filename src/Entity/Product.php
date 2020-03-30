@@ -78,6 +78,7 @@ class Product implements EntityValidatorException
     /**
      * @var Collection|Category[]
      * @ORM\ManyToMany(targetEntity="Category", mappedBy="products")
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $categoryRelation;
 
@@ -164,6 +165,7 @@ class Product implements EntityValidatorException
      * @var Brand
      *
      * @ORM\ManyToOne(targetEntity="Brand", inversedBy="products")
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $brandRelation;
 

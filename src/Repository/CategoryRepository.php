@@ -13,9 +13,12 @@ use FOS\RestBundle\Request\ParamFetcher;
  * @method Category|null findOneBy(array $criteria, array $orderBy = null)
  * @method Category[]    findAll()
  * @method Category[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Category[] getList($qb, $paramFetcher, $count)
  */
 class CategoryRepository extends ServiceEntityRepository
 {
+    use PaginationRepository;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Category::class);
@@ -24,28 +27,14 @@ class CategoryRepository extends ServiceEntityRepository
     /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
-     * @return Category[]|int
+     * @return Category[]
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getCategoryList(ParamFetcher $paramFetcher, $count = false)
+    public function getEntityList(
+        ParamFetcher $paramFetcher,
+        $count = false)
     {
-        $qb = $this->createQueryBuilder('s');
-
-        if ($count) {
-            $qb
-                ->select('COUNT(s.id)');
-            $query = $qb->getQuery();
-            $result = $query->getSingleScalarResult();
-        } else {
-            $qb
-                ->orderBy('s.' . $paramFetcher->get('sort_by'), $paramFetcher->get('sort_order'))
-                ->setFirstResult($paramFetcher->get('count') * ($paramFetcher->get('page') - 1))
-                ->setMaxResults($paramFetcher->get('count'));
-            $query = $qb->getQuery();
-            $result = $query->getResult();
-        }
-
-        return $result;
+        return $this->getList($this->createQueryBuilder('s'), $paramFetcher, $count);
     }
 }

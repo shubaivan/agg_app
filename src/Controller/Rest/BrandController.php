@@ -32,12 +32,6 @@ class BrandController extends AbstractRestController
      *
      * @Rest\Get("/api/brands")
      *
-     * @Rest\QueryParam(
-     *     name="search",
-     *     strict=true,
-     *     requirements="^[A-Za-z0-9 éäöåÉÄÖÅ]*$",
-     *     nullable=true,
-     *     description="Search by each world with `or` condition by name fields")
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
      * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
      * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
@@ -61,8 +55,8 @@ class BrandController extends AbstractRestController
      */
     public function getBrandsAction(ParamFetcher $paramFetcher)
     {
-        $collection = $this->getBrandRepository()->getBrandList($paramFetcher);
-        $count = $this->getBrandRepository()->getBrandList($paramFetcher, true);
+        $collection = $this->getBrandRepository()->getEntityList($paramFetcher);
+        $count = $this->getBrandRepository()->getEntityList($paramFetcher, true);
         return [
             'collection' => $collection,
             'count' => $count

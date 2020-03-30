@@ -30,7 +30,9 @@ class ProductController extends AbstractRestController
      *
      * @Rest\Get("/api/products")
      *
-     * @Rest\QueryParam(
+     * @Rest\QueryParam(map=true, name="category_ids", nullable=true, strict=true, requirements="\d+", default="0", description="List of category ids")
+     * @Rest\QueryParam(map=true, name="brand_ids", nullable=true, strict=true, requirements="\d+", default="0", description="List of brand ids")
+ * @Rest\QueryParam(
      *     name="search",
      *     strict=true,
      *     requirements="^[A-Za-z0-9 éäöåÉÄÖÅ]*$",
