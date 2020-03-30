@@ -3,8 +3,6 @@
 
 namespace App\Repository;
 
-use App\Entity\Brand;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
 

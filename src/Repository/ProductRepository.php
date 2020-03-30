@@ -7,15 +7,19 @@ use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use FOS\RestBundle\Request\ParamFetcher;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @method Product|null find($id, $lockMode = null, $lockVersion = null)
  * @method Product|null findOneBy(array $criteria, array $orderBy = null)
  * @method Product[]    findAll()
  * @method Product[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Product[] getList($qb, $paramFetcher, $count)
  */
 class ProductRepository extends ServiceEntityRepository
 {
+    use PaginationRepository;
+
     /**
      * @var Helpers
      */
@@ -25,6 +29,27 @@ class ProductRepository extends ServiceEntityRepository
     {
         $this->helpers = $helpers;
         parent::__construct($registry, Product::class);
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param bool $count
+     * @return []|int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
+    public function getProductByIds(ParamFetcher $paramFetcher, $count = false)
+    {
+        if (is_array($paramFetcher->get('ids'))
+            && array_search('0', $paramFetcher->get('ids'), true) === false) {
+            $qb = $this->createQueryBuilder('s');
+            $qb
+                ->where($qb->expr()->in('s.id', $paramFetcher->get('ids')));
+
+            return $this->getList($qb, $paramFetcher, $count);
+        } else {
+            throw new BadRequestHttpException($paramFetcher->get('ids') . ' not valid');
+        }
     }
 
     /**
