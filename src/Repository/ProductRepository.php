@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * @method Product|null findOneBy(array $criteria, array $orderBy = null)
  * @method Product[]    findAll()
  * @method Product[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- * @method Product[] getList($qb, $paramFetcher, $count)
+ * @method Product[]|int getList($qb, $paramFetcher, $count)
  */
 class ProductRepository extends ServiceEntityRepository
 {
@@ -34,9 +34,9 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
-     * @return []|int
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Product[]|int
      * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getProductByIds(ParamFetcher $paramFetcher, $count = false)
     {
@@ -160,6 +160,9 @@ class ProductRepository extends ServiceEntityRepository
                         FROM products , to_tsquery(:search) query
                         WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')) @@ query
                         ORDER BY rank DESC) as products_alias';
+            $query .= '
+                LEFT JOIN category_product cp on cp.product_id = products_alias.id
+            ';
         } else {
             $query .= '
                         FROM products AS products_alias
