@@ -6,6 +6,7 @@
 parameters:
     adtraction_download_url: '%env(string:ANDRACTION_DOWNLOAD_URL)%'
     adtraction_download_file_path: '%env(ANDRACTION_DOWNLOAD_FILE_PATH)%'
+    support_email: '%env(SUPPORT_EMAIL)%'
     fos_rest.throw_exception_on_unsupported_content_type: true
     fos_rest.body_default_format: 'json'
     locale: 'en'
@@ -55,6 +56,11 @@ services:
       class: App\Symfony\Component\Serializer\Normalizer\FlattenExceptionNormalizer
       tags:
         - {name: serializer.normalizer, priority: -915}
+
+    App\Serializer\ConstraintViolationListHandler:
+      public: false
+      tags:
+        - {name: jms_serializer.subscribing_handler, priority: 100}
 
     my_body_listener:
       class: App\EventListener\BodyListener

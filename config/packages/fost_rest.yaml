@@ -1,6 +1,10 @@
 fos_rest:
     body_listener:
         service: my_body_listener
+    body_converter:
+      enabled: true
+      validate: true
+      validation_errors_argument: validationErrors
     unauthorized_challenge: "Basic realm=\"Restricted Area\""
     access_denied_listener:
         # all requests using the 'json' format will return a 403 on an access denied violation

@@ -40,15 +40,19 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function getProductByIds(ParamFetcher $paramFetcher, $count = false)
     {
-        if (is_array($paramFetcher->get('ids'))
-            && array_search('0', $paramFetcher->get('ids'), true) === false) {
+        $ids = $paramFetcher->get('ids');
+        if (is_array($ids)
+            && array_search('0', $ids, true) === false) {
+            $ids = array_filter($ids, function ($value, $key) {
+                return boolval($value);
+            }, ARRAY_FILTER_USE_BOTH);
             $qb = $this->createQueryBuilder('s');
             $qb
-                ->where($qb->expr()->in('s.id', $paramFetcher->get('ids')));
+                ->where($qb->expr()->in('s.id', $ids));
 
             return $this->getList($qb, $paramFetcher, $count);
         } else {
-            throw new BadRequestHttpException($paramFetcher->get('ids') . ' not valid');
+            throw new BadRequestHttpException($ids . ' not valid');
         }
     }
 
