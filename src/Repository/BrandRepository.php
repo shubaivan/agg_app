@@ -13,7 +13,7 @@ use FOS\RestBundle\Request\ParamFetcher;
  * @method Brand|null findOneBy(array $criteria, array $orderBy = null)
  * @method Brand[]    findAll()
  * @method Brand[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- * @method Brand[] getList($qb, $paramFetcher, $count)
+ * @method Brand[]|int getList($qb, $paramFetcher, $count)
  */
 class BrandRepository extends ServiceEntityRepository
 {
@@ -27,7 +27,7 @@ class BrandRepository extends ServiceEntityRepository
     /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
-     * @return Brand[]
+     * @return Brand[]|int
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */

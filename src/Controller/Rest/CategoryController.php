@@ -2,11 +2,13 @@
 
 namespace App\Controller\Rest;
 
+use App\Entity\Collection\CategoriesCollection;
 use App\Repository\CategoryRepository;
 use App\Entity\Category;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 
@@ -44,10 +46,11 @@ class CategoryController extends AbstractRestController
      *
      * @SWG\Response(
      *     response=200,
-     *     description="Json collection objects Category"
+     *     description="Json collection object Categories",
+     *     @SWG\Schema(ref=@Model(type=CategoriesCollection::class, groups={Category::SERIALIZED_GROUP_LIST}))
      * )
      *
-     * @return array
+     * @return CategoriesCollection
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\DBAL\DBALException
@@ -56,10 +59,7 @@ class CategoryController extends AbstractRestController
     {
         $collection = $this->getCategoryRepository()->getEntityList($paramFetcher);
         $count = $this->getCategoryRepository()->getEntityList($paramFetcher, true);
-        return [
-            'collection' => $collection,
-            'count' => $count
-        ];
+        return (new CategoriesCollection($collection, $count));
     }
 
     /**

@@ -2,12 +2,14 @@
 
 namespace App\Controller\Rest;
 
+use App\Entity\Collection\BrandsCollection;
 use App\Repository\BrandRepository;
 use App\Repository\CategoryRepository;
 use App\Entity\Brand;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 
@@ -45,10 +47,11 @@ class BrandController extends AbstractRestController
      *
      * @SWG\Response(
      *     response=200,
-     *     description="Json collection objects Brand"
+     *     description="Json collection object Brands",
+     *     @SWG\Schema(ref=@Model(type=BrandsCollection::class, groups={Brand::SERIALIZED_GROUP_LIST}))
      * )
      *
-     * @return array
+     * @return BrandsCollection
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\DBAL\DBALException
@@ -57,10 +60,8 @@ class BrandController extends AbstractRestController
     {
         $collection = $this->getBrandRepository()->getEntityList($paramFetcher);
         $count = $this->getBrandRepository()->getEntityList($paramFetcher, true);
-        return [
-            'collection' => $collection,
-            'count' => $count
-        ];
+
+        return (new BrandsCollection($collection, $count));
     }
 
     /**

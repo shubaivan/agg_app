@@ -2,13 +2,16 @@
 
 namespace App\Controller\Rest;
 
+use App\Entity\Collection\ProductsCollection;
 use App\Repository\ProductRepository;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 use App\Entity\Product;
+use App\Entity\Collection\SearchProductCollection;
 
 class ProductController extends AbstractRestController
 {
@@ -52,10 +55,44 @@ class ProductController extends AbstractRestController
      *
      * @SWG\Response(
      *     response=200,
-     *     description="Json collection objects Products"
+     *     description="Json collection object Products",
+     *     @SWG\Schema(
+     *         type="object",
+     *         properties={
+     *             @SWG\Property(
+     *                  property="collection",
+     *                  type="array",
+     *                  @SWG\Items(
+     *                        type="object",
+     *                      @SWG\Property(property="id", type="integer"),
+     *                      @SWG\Property(property="sku", type="string"),
+     *                      @SWG\Property(property="name", type="string"),
+     *                      @SWG\Property(property="description", type="string"),
+     *                      @SWG\Property(property="category", type="string"),
+     *                      @SWG\Property(property="price", type="string"),
+     *                      @SWG\Property(property="shipping", type="string"),
+     *                      @SWG\Property(property="currency", type="string"),
+     *                      @SWG\Property(property="instock", type="string"),
+     *                      @SWG\Property(property="productUrl", type="string"),
+     *                      @SWG\Property(property="imageUrl", type="string"),
+     *                      @SWG\Property(property="trackingUrl", type="string"),
+     *                      @SWG\Property(property="brand", type="string"),
+     *                      @SWG\Property(property="originalPrice", type="string"),
+     *                      @SWG\Property(property="ean", type="string"),
+     *                      @SWG\Property(property="manufacturerArticleNumber", type="string"),
+     *                      @SWG\Property(property="extras", type="string"),
+     *                      @SWG\Property(property="createdAt", type="string"),
+     *                      @SWG\Property(property="rank", type="string"),
+     *                      @SWG\Property(property="brandRelationId", type="integer"),
+     *                      @SWG\Property(property="category_ids", type="string")
+     *                  )
+     *             ),
+     *             @SWG\Property(property="count", type="integer")
+     *         }
+     *     )
      * )
      *
-     * @return array
+     * @return SearchProductCollection
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\DBAL\DBALException
@@ -64,10 +101,8 @@ class ProductController extends AbstractRestController
     {
         $collection = $this->getProductRepository()->fullTextSearch($paramFetcher);
         $count = $this->getProductRepository()->fullTextSearch($paramFetcher, true);
-        return [
-            'collection' => $collection,
-            'count' => $count
-        ];
+
+        return (new SearchProductCollection($collection, $count));
     }
 
     /**
@@ -81,7 +116,8 @@ class ProductController extends AbstractRestController
      *
      * @SWG\Response(
      *     response=200,
-     *     description="Json collection objects Products"
+     *     description="Json object Products",
+     *     @Model(type=Product::class, groups={Product::SERIALIZED_GROUP_LIST})
      * )
      *
      * @return Product
@@ -95,7 +131,7 @@ class ProductController extends AbstractRestController
     }
 
     /**
-     * get Product.
+     * get Products by ids.
      *
      * @Rest\Get("/api/products/by/ids")
      *
@@ -114,10 +150,11 @@ class ProductController extends AbstractRestController
      *
      * @SWG\Response(
      *     response=200,
-     *     description="Json collection objects Products"
+     *     description="Json collection object Products",
+     *     @SWG\Schema(ref=@Model(type=ProductsCollection::class, groups={Product::SERIALIZED_GROUP_LIST}))
      * )
      *
-     * @return Product[]|[]
+     * @return ProductsCollection
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\DBAL\DBALException
@@ -126,10 +163,8 @@ class ProductController extends AbstractRestController
     {
         $collection = $this->getProductRepository()->getProductByIds($paramFetcher);
         $count = $this->getProductRepository()->getProductByIds($paramFetcher, true);
-        return [
-            'collection' => $collection,
-            'count' => $count
-        ];
+
+        return (new ProductsCollection($collection, $count));
     }
 
 

@@ -13,7 +13,7 @@ use FOS\RestBundle\Request\ParamFetcher;
  * @method Category|null findOneBy(array $criteria, array $orderBy = null)
  * @method Category[]    findAll()
  * @method Category[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- * @method Category[] getList($qb, $paramFetcher, $count)
+ * @method Category[]|int getList($qb, $paramFetcher, $count)
  */
 class CategoryRepository extends ServiceEntityRepository
 {
@@ -27,7 +27,7 @@ class CategoryRepository extends ServiceEntityRepository
     /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
-     * @return Category[]
+     * @return Category[]|int
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
