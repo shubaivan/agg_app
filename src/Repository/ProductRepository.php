@@ -113,7 +113,7 @@ class ProductRepository extends ServiceEntityRepository
                         products_alias."createdAt" AS "createdAt",
                         products_alias.rank AS rank,
                         products_alias."brandRelationId" AS "brandRelationId",
-                        array_agg(DISTINCT category_id) AS category_ids
+                        array_agg(DISTINCT cpt.category_id) AS category_ids
                         ';
             }
 
@@ -163,6 +163,9 @@ class ProductRepository extends ServiceEntityRepository
             $query .= '
                 LEFT JOIN category_product cp on cp.product_id = products_alias.id
             ';
+            $query .= '
+                    LEFT JOIN category_product cpt on cpt.product_id = products_alias.id
+                ';
         } else {
             $query .= '
                         FROM products AS products_alias
@@ -180,12 +183,7 @@ class ProductRepository extends ServiceEntityRepository
                 array_values($categoryIds)
             );
             $bindKeysCategory = implode(',', array_keys($preparedInValuesCategory));
-            if ($search) {
-                $query .= '
-                    LEFT JOIN category_product cp on cp.product_id = products_alias.id
-                ';
 
-            }
             $query .= "
                             WHERE cp.category_id IN ($bindKeysCategory)
                         ";
