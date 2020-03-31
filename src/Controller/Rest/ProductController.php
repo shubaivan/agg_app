@@ -84,7 +84,7 @@ class ProductController extends AbstractRestController
      *                      @SWG\Property(property="createdAt", type="string"),
      *                      @SWG\Property(property="rank", type="string"),
      *                      @SWG\Property(property="brandRelationId", type="integer"),
-     *                      @SWG\Property(property="category_ids", type="string")
+     *                      @SWG\Property(property="categoryIds", type="string")
      *                  )
      *             ),
      *             @SWG\Property(property="count", type="integer")

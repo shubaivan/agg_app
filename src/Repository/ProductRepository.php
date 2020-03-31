@@ -113,7 +113,7 @@ class ProductRepository extends ServiceEntityRepository
                         products_alias."createdAt" AS "createdAt",
                         products_alias.rank AS rank,
                         products_alias."brandRelationId" AS "brandRelationId",
-                        array_agg(DISTINCT cpt.category_id) AS category_ids
+                        array_agg(DISTINCT cpt.category_id) AS categoryIds
                         ';
             }
 
@@ -151,7 +151,7 @@ class ProductRepository extends ServiceEntityRepository
                         ';
             if (!$search) {
                 $query .= '
-                ,array_agg(DISTINCT category_id) AS category_ids';
+                ,array_agg(DISTINCT category_id) AS categoryIds';
             }
         }
 
