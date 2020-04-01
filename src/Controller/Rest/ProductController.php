@@ -122,7 +122,7 @@ class ProductController extends AbstractRestController
      *
      * @SWG\Response(
      *     response=200,
-     *     description="Json collection object Products",
+     *     description="Json object Product with relation items",
      *     @SWG\Schema(
      *         type="object",
      *         properties={
@@ -131,6 +131,7 @@ class ProductController extends AbstractRestController
      *             @SWG\Property(
      *                  property="relatedItems",
      *                  type="array",
+     *                  description="related products by price, band name and categories names",
      *                  @SWG\Items(
      *                        type="object",
      *                      @SWG\Property(property="id", type="integer"),
