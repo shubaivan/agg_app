@@ -60,7 +60,7 @@ services:
     App\Serializer\ConstraintViolationListHandler:
       public: false
       tags:
-        - {name: jms_serializer.subscribing_handler, priority: 1000}
+        - {name: jms_serializer.subscribing_handler}
 
     my_body_listener:
       class: App\EventListener\BodyListener

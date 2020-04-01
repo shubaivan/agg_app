@@ -7,8 +7,10 @@ namespace App\Serializer;
 use JMS\Serializer\GraphNavigatorInterface;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\JsonSerializationVisitor;
+use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 use JMS\Serializer\Context;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 class ConstraintViolationListHandler implements SubscribingHandlerInterface
 {
@@ -22,27 +24,51 @@ class ConstraintViolationListHandler implements SubscribingHandlerInterface
                 'direction' => GraphNavigatorInterface::DIRECTION_SERIALIZATION,
                 'format' => 'json',
                 'type' => ConstraintViolationList::class,
-                'method' => 'serializeListToJson',
+                'method' => 'serializeCustomListToJson',
+                'priority' => -915
             ]
         ];
     }
 
     /**
      * @param JsonSerializationVisitor $visitor
-     * @param ConstraintViolationList $constraintViolationList
+     * @param ConstraintViolationListInterface $object
      * @param array $type
      * @param Context|null $context
-     * @return int
+     * @return array
      */
-    public function serializeListToJson(
+    public function serializeCustomListToJson(
         JsonSerializationVisitor $visitor,
-        ConstraintViolationList $constraintViolationList,
+        ConstraintViolationListInterface $object,
         array $type,
         Context $context = null
     )
     {
-        $t = 1;
+        [$messages, $violations] = $this->getMessagesAndViolations($object);
+        return [
+            'title' => 'An error occurred',
+            'detail' => $messages ? implode("\n", $messages) : '',
+            'violations' => $violations,
+        ];
+    }
 
-        return 1;
+    /**
+     * @param ConstraintViolationListInterface $constraintViolationList
+     * @return array
+     */
+    private function getMessagesAndViolations(ConstraintViolationListInterface $constraintViolationList): array
+    {
+        $violations = $messages = [];
+        /** @var ConstraintViolation $violation */
+        foreach ($constraintViolationList as $violation) {
+            $violations[] = [
+                'propertyPath' => $violation->getPropertyPath(),
+                'message' => $violation->getMessage(),
+                'code' => $violation->getCode(),
+            ];
+            $propertyPath = $violation->getPropertyPath();
+            $messages[] = ($propertyPath ? $propertyPath . ': ' : '') . $violation->getMessage();
+        }
+        return [$messages, $violations];
     }
 }
