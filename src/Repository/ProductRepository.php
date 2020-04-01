@@ -5,8 +5,10 @@ namespace App\Repository;
 use App\Entity\Product;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use FOS\RestBundle\Request\ParamFetcher;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -61,15 +63,28 @@ class ProductRepository extends ServiceEntityRepository
      * @param bool $count
      * @return false|int|mixed|mixed[]
      * @throws \Doctrine\DBAL\DBALException
+     */
+    public function fullTextSearchByParameterFetcher(ParamFetcher $paramFetcher, $count = false)
+    {
+        $parameterBag = new ParameterBag($paramFetcher->all());
+
+        return $this->fullTextSearchByParameterBag($parameterBag, $count);
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param bool $count
+     * @return false|int|mixed|mixed[]
+     * @throws \Doctrine\DBAL\DBALException
      * @throws \InvalidArgumentException
      */
-    public function fullTextSearch(ParamFetcher $paramFetcher, $count = false)
+    public function fullTextSearchByParameterBag(ParameterBag $parameterBag, $count = false)
     {
         $connection = $this->getEntityManager()->getConnection();
-        $limit = $paramFetcher->get('count');
-        $offset = $limit * ($paramFetcher->get('page') - 1);
-        $sortBy = $paramFetcher->get('sort_by');
-        $sortOrder = $paramFetcher->get('sort_order');
+        $limit = $parameterBag->get('count');
+        $offset = $limit * ($parameterBag->get('page') - 1);
+        $sortBy = $parameterBag->get('sort_by');
+        $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
             ["id", "sku", "name",
@@ -77,9 +92,9 @@ class ProductRepository extends ServiceEntityRepository
                 "shipping", "currency", "instock", "productUrl", "imageUrl",
                 "trackingUrl", "brand", "originalPrice", "ean", "manufacturerArticleNumber",
                 "extras", "createdAt"], "Invalid field name " . $sortBy);
-        $sortOrder = $this->getHelpers()->white_list($sortOrder, ["ASC", "DESC"], "Invalid ORDER BY direction " . $sortOrder);
+        $sortOrder = $this->getHelpers()->white_list($sortOrder, [Criteria::ASC, Criteria::DESC], "Invalid ORDER BY direction " . $sortOrder);
 
-        $searchField = $paramFetcher->get('search');
+        $searchField = $parameterBag->get('search');
         if ($searchField) {
             if (preg_match_all('/[ ]/', $searchField, $matches) > 0) {
                 $search = str_replace(' ', ':*|', $searchField) . ':*';
@@ -177,9 +192,24 @@ class ProductRepository extends ServiceEntityRepository
                     ';
         }
 
-        if (is_array($paramFetcher->get('category_ids'))
-            && array_search('0', $paramFetcher->get('category_ids'), true) === false) {
-            $categoryIds = $paramFetcher->get('category_ids');
+        if (is_array($parameterBag->get('exclude_ids'))
+            && array_search('0', $parameterBag->get('exclude_ids'), true) === false
+        ) {
+            $excludeIds = $parameterBag->get('exclude_ids');
+            $preparedInValuesIds = array_combine(
+                array_map(function ($key) {
+                    return ':var_' . $key;
+                }, array_keys($excludeIds)),
+                array_values($excludeIds)
+            );
+            $bindKeysIds = implode(',', array_keys($preparedInValuesIds));
+            $query .= "                           
+                            WHERE products_alias.id NOT IN ($bindKeysIds)
+                        ";
+        }
+        if (is_array($parameterBag->get('category_ids'))
+            && array_search('0', $parameterBag->get('category_ids'), true) === false) {
+            $categoryIds = $parameterBag->get('category_ids');
             $preparedInValuesCategory = array_combine(
                 array_map(function ($key) {
                     return ':var_' . $key;
@@ -193,10 +223,10 @@ class ProductRepository extends ServiceEntityRepository
                         ";
         }
 
-        if (is_array($paramFetcher->get('brand_ids'))
-            && array_search('0', $paramFetcher->get('brand_ids'), true) === false
+        if (is_array($parameterBag->get('brand_ids'))
+            && array_search('0', $parameterBag->get('brand_ids'), true) === false
         ) {
-            $brandIds = $paramFetcher->get('brand_ids');
+            $brandIds = $parameterBag->get('brand_ids');
             $preparedInValuesBrand = array_combine(
                 array_map(function ($key) {
                     return ':var_' . $key;
@@ -219,6 +249,12 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         $statement = $connection->prepare($query);
+        if (isset($preparedInValuesIds)) {
+            foreach ($preparedInValuesIds as $key => $val) {
+                $statement->bindValue($key, $val);
+            }
+        }
+
         if (isset($preparedInValuesCategory)) {
             foreach ($preparedInValuesCategory as $key => $val) {
                 $statement->bindValue($key, $val);

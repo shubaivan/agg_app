@@ -57,10 +57,10 @@ services:
       tags:
         - {name: serializer.normalizer, priority: -915}
 
-#    App\Serializer\ConstraintViolationListHandler:
-#      public: false
-#      tags:
-#        - {name: jms_serializer.subscribing_handler, priority: 100}
+    App\Serializer\ConstraintViolationListHandler:
+      public: false
+      tags:
+        - {name: jms_serializer.subscribing_handler, priority: 1000}
 
     my_body_listener:
       class: App\EventListener\BodyListener

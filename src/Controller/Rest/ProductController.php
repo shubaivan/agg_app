@@ -2,12 +2,16 @@
 
 namespace App\Controller\Rest;
 
+use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
 use App\Repository\ProductRepository;
+use App\Services\Helpers;
+use Doctrine\Common\Collections\Criteria;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 use App\Entity\Product;
@@ -23,9 +27,11 @@ class ProductController extends AbstractRestController
     /**
      * ProductController constructor.
      * @param ProductRepository $productRepository
+     * @param Helpers $helpers
      */
-    public function __construct(ProductRepository $productRepository)
+    public function __construct(ProductRepository $productRepository, Helpers $helpers)
     {
+        parent::__construct($helpers);
         $this->productRepository = $productRepository;
     }
 
@@ -99,8 +105,8 @@ class ProductController extends AbstractRestController
      */
     public function getProductsAction(ParamFetcher $paramFetcher)
     {
-        $collection = $this->getProductRepository()->fullTextSearch($paramFetcher);
-        $count = $this->getProductRepository()->fullTextSearch($paramFetcher, true);
+        $collection = $this->getProductRepository()->fullTextSearchByParameterFetcher($paramFetcher);
+        $count = $this->getProductRepository()->fullTextSearchByParameterFetcher($paramFetcher, true);
 
         return (new SearchProductCollection($collection, $count));
     }
@@ -116,18 +122,61 @@ class ProductController extends AbstractRestController
      *
      * @SWG\Response(
      *     response=200,
-     *     description="Json object Products",
-     *     @Model(type=Product::class, groups={Product::SERIALIZED_GROUP_LIST})
+     *     description="Json collection object Products",
+     *     @SWG\Schema(
+     *         type="object",
+     *         properties={
+     *             @SWG\Property(property="product",
+     *                  @Model(type=Product::class, groups={Product::SERIALIZED_GROUP_LIST})),
+     *             @SWG\Property(
+     *                  property="relatedItems",
+     *                  type="array",
+     *                  @SWG\Items(
+     *                        type="object",
+     *                      @SWG\Property(property="id", type="integer"),
+     *                      @SWG\Property(property="sku", type="string"),
+     *                      @SWG\Property(property="name", type="string"),
+     *                      @SWG\Property(property="description", type="string"),
+     *                      @SWG\Property(property="category", type="string"),
+     *                      @SWG\Property(property="price", type="string"),
+     *                      @SWG\Property(property="shipping", type="string"),
+     *                      @SWG\Property(property="currency", type="string"),
+     *                      @SWG\Property(property="instock", type="string"),
+     *                      @SWG\Property(property="productUrl", type="string"),
+     *                      @SWG\Property(property="imageUrl", type="string"),
+     *                      @SWG\Property(property="trackingUrl", type="string"),
+     *                      @SWG\Property(property="brand", type="string"),
+     *                      @SWG\Property(property="originalPrice", type="string"),
+     *                      @SWG\Property(property="ean", type="string"),
+     *                      @SWG\Property(property="manufacturerArticleNumber", type="string"),
+     *                      @SWG\Property(property="extras", type="string"),
+     *                      @SWG\Property(property="createdAt", type="string"),
+     *                      @SWG\Property(property="rank", type="string"),
+     *                      @SWG\Property(property="brandRelationId", type="integer"),
+     *                      @SWG\Property(property="categoryIds", type="string")
+     *                  )
+     *             )
+     *         }
+     *     )
      * )
      *
-     * @return Product
+     * @return ProductCollection
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function getProductByIdAction(Product $product)
+    public function getProductByIdAction(Product $product, ParamFetcher $paramFetcher)
     {
-        return $product;
+        $this->setParamFetcherData($paramFetcher, 'page', 1);
+        $this->setParamFetcherData($paramFetcher, 'count', 4);
+        $this->setParamFetcherData($paramFetcher, 'exclude_ids', [$product->getId()]);
+        $this->setParamFetcherData($paramFetcher, 'search',
+            $product->getSearchDataForRelatedProductItems());
+
+        return (new ProductCollection(
+            $this->getProductRepository()->fullTextSearchByParameterFetcher($paramFetcher),
+            $product
+        ));
     }
 
     /**

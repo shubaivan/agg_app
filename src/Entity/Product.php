@@ -568,4 +568,28 @@ class Product implements EntityValidatorException
 
         return $this;
     }
+
+    /**
+     * @return array
+     */
+    public function getCategoriesNameArray()
+    {
+        $collection = $this->getCategoryRelation()->map(function (Category $category) {
+            return $category->getName();
+        });
+
+        return $collection->count() ? $collection->toArray() : [];
+    }
+
+    /**
+     * @return string
+     */
+    public function getSearchDataForRelatedProductItems()
+    {
+        $search = implode(' ', [$this->getPrice(), $this->getBrandRelation()->getName(), implode(' ', $this->getCategoriesNameArray())]);
+        $replace = preg_replace('/[^a-zA-Z0-9 ,.éäöåÉÄÖÅ]/', "", $search);
+        $result = preg_replace('!\s+!', ' ', $replace);
+
+        return $result;
+    }
 }

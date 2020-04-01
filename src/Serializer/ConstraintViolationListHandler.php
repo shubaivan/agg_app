@@ -22,14 +22,21 @@ class ConstraintViolationListHandler implements SubscribingHandlerInterface
                 'direction' => GraphNavigatorInterface::DIRECTION_SERIALIZATION,
                 'format' => 'json',
                 'type' => ConstraintViolationList::class,
-                'method' => 'serializeListTojson',
+                'method' => 'serializeListToJson',
             ]
         ];
     }
 
-    public function serializeListTojson(
+    /**
+     * @param JsonSerializationVisitor $visitor
+     * @param ConstraintViolationList $constraintViolationList
+     * @param array $type
+     * @param Context|null $context
+     * @return int
+     */
+    public function serializeListToJson(
         JsonSerializationVisitor $visitor,
-        $constraintViolationList,
+        ConstraintViolationList $constraintViolationList,
         array $type,
         Context $context = null
     )

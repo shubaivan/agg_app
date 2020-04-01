@@ -6,6 +6,7 @@ use App\Entity\Collection\BrandsCollection;
 use App\Repository\BrandRepository;
 use App\Repository\CategoryRepository;
 use App\Entity\Brand;
+use App\Services\Helpers;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
@@ -23,9 +24,11 @@ class BrandController extends AbstractRestController
     /**
      * BrandController constructor.
      * @param BrandRepository $brandRepository
+     * @param Helpers $helpers
      */
-    public function __construct(BrandRepository $brandRepository)
+    public function __construct(BrandRepository $brandRepository, Helpers $helpers)
     {
+        parent::__construct($helpers);
         $this->brandRepository = $brandRepository;
     }
 

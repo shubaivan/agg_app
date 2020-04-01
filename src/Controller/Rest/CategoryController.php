@@ -5,6 +5,7 @@ namespace App\Controller\Rest;
 use App\Entity\Collection\CategoriesCollection;
 use App\Repository\CategoryRepository;
 use App\Entity\Category;
+use App\Services\Helpers;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
@@ -22,9 +23,11 @@ class CategoryController extends AbstractRestController
     /**
      * CategoryController constructor.
      * @param CategoryRepository $categoryRepository
+     * @param Helpers $helpers
      */
-    public function __construct(CategoryRepository $categoryRepository)
+    public function __construct(CategoryRepository $categoryRepository, Helpers $helpers)
     {
+        parent::__construct($helpers);
         $this->categoryRepository = $categoryRepository;
     }
 
