@@ -198,7 +198,7 @@ class ProductRepository extends ServiceEntityRepository
             $excludeIds = $parameterBag->get('exclude_ids');
             $preparedInValuesIds = array_combine(
                 array_map(function ($key) {
-                    return ':var_' . $key;
+                    return ':var_exclude_id' . $key;
                 }, array_keys($excludeIds)),
                 array_values($excludeIds)
             );
@@ -213,7 +213,7 @@ class ProductRepository extends ServiceEntityRepository
             $categoryIds = $parameterBag->get('category_ids');
             $preparedInValuesCategory = array_combine(
                 array_map(function ($key) {
-                    return ':var_' . $key;
+                    return ':var_category_id' . $key;
                 }, array_keys($categoryIds)),
                 array_values($categoryIds)
             );
@@ -230,7 +230,7 @@ class ProductRepository extends ServiceEntityRepository
             $brandIds = $parameterBag->get('brand_ids');
             $preparedInValuesBrand = array_combine(
                 array_map(function ($key) {
-                    return ':var_' . $key;
+                    return ':var_brand_id' . $key;
                 }, array_keys($brandIds)),
                 array_values($brandIds)
             );
