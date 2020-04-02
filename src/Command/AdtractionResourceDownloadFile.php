@@ -26,7 +26,7 @@ class AdtractionResourceDownloadFile extends Command
     protected $logger;
 
     /**
-     * @var string
+     * @var array
      */
     private $url;
 
@@ -64,7 +64,7 @@ class AdtractionResourceDownloadFile extends Command
         ContainerBagInterface $params
     )
     {
-        $this->url = $params->get('adtraction_download_url');
+        $this->url = $params->get('adtraction_download_urls');
         $this->dirForFiles = $params->get('adtraction_download_file_path');
         $this->kernel = $kernel;
         $this->bus = $bus;
@@ -81,6 +81,13 @@ class AdtractionResourceDownloadFile extends Command
         if (!is_dir($this->getDirForFiles())) {
             // dir doesn't exist, make it
             mkdir($this->getDirForFiles());
+        }
+
+        foreach ($this->getUrl() as $key => $value) {
+            if (!is_dir($this->getDirForFiles($key))) {
+                // dir doesn't exist, make it
+                mkdir($this->getDirForFiles($key));
+            }
         }
     }
 
@@ -110,7 +117,7 @@ class AdtractionResourceDownloadFile extends Command
         ]);
 
         try {
-            $this->guzzleStreamWay();
+            $this->createGuzzleStreamWayForEachUrl();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             $this->getApplication()->renderThrowable($e, $output);
@@ -125,22 +132,42 @@ class AdtractionResourceDownloadFile extends Command
     /**
      * @throws \Throwable
      */
-    public function guzzleStreamWay()
+    private function createGuzzleStreamWayForEachUrl()
+    {
+        foreach ($this->getUrl() as $key => $url) {
+            $this->guzzleStreamWay($key, $url);
+        }
+    }
+
+    /**
+     * @param string $key
+     * @param string $url
+     * @throws \Throwable
+     */
+    private function guzzleStreamWay(string $key, string $url)
     {
         $client = new Client();
         $response = $client->request(
             'GET',
-            $this->url,
-            ['stream' => true]
-        );
-        $body = $response->getBody();
+            $url,
+            [
+                'stream' => true,
+                'version' => '1.0'
+            ]
+        )->getBody();
+
+        $phpStream = $response->detach();
+        unset($client);
+        unset($response);
+
         $this->getOutput()->writeln(
             '<fg=green>' . date('H:i:s') . ' guzzle stream way get body' . '</>'
         );
-        $fileRelativePath = $this->getDirForFiles() . date('YmdHis') . '.csv';
+        $fileRelativePath = $this->getDirForFiles($key) . '/' . date('YmdHis') . '.csv';
         // Read bytes off of the stream until the end of the stream is reached
-        while (!$body->eof()) {
-            $read = $body->read(1024);
+        while (!feof($phpStream)) {
+            $read = fread($phpStream, 1024);
+
             $read = str_replace('""\'', '\"\"\'', $read);
             $read = str_replace('"\'', '\"\\\'', $read);
 
@@ -153,7 +180,7 @@ class AdtractionResourceDownloadFile extends Command
         $this->getOutput()->writeln(
             '<fg=green>' . date('H:i:s') . ' finish download file: ' . $fileRelativePath . '</>'
         );
-        $this->getBus()->dispatch(new FileReadyDownloaded($fileRelativePath));
+        $this->getBus()->dispatch(new FileReadyDownloaded($key, $fileRelativePath));
         $this->getOutput()->writeln(
             '<bg=yellow;options=bold>' . date('H:i:s') . ' success sent queue' . '</>'
         );
@@ -176,11 +203,12 @@ class AdtractionResourceDownloadFile extends Command
     }
 
     /**
+     * @param null $key
      * @return string
      */
-    protected function getDirForFiles(): string
+    protected function getDirForFiles($key = null): string
     {
-        return $this->getKernel()->getProjectDir() . $this->dirForFiles;
+        return $this->getKernel()->getProjectDir() . $this->dirForFiles . ($key ?? '');
     }
 
     /**
@@ -197,5 +225,13 @@ class AdtractionResourceDownloadFile extends Command
     protected function setOutput(OutputInterface $output): void
     {
         $this->output = $output;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUrl(): array
+    {
+        return $this->url;
     }
 }

@@ -48,7 +48,8 @@ class AdtractionResourceHandleFile extends Command
         $this
             ->setName('app:adtraction:handle')
             ->setDescription('Handle adtraction resource file by absolute file path on the server')
-            ->addArgument('filePath', InputArgument::REQUIRED, 'Absolute file path on the server');
+            ->addArgument('filePath', InputArgument::REQUIRED, 'Absolute file path on the server')
+            ->addArgument('shop', InputArgument::REQUIRED, 'Identity shop for file');
     }
 
     /**
@@ -61,18 +62,20 @@ class AdtractionResourceHandleFile extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $filePath = $input->getArgument('filePath');
-        $this->parseCSVContent($filePath);
+        $shop = $input->getArgument('shop');
+        $this->parseCSVContent($filePath, $shop);
         return 0;
     }
 
     /**
-     * @param $filePath
+     * @param string $filePath
+     * @param string $shop
      * @throws \League\Csv\Exception
      * @throws \Throwable
      */
-    public function parseCSVContent($filePath)
+    public function parseCSVContent(string $filePath, string $shop)
     {
-        $this->getHandleAdtractionData()->parseCSVContent($filePath);
+        $this->getHandleAdtractionData()->parseCSVContent($filePath, $shop);
     }
 
     /**

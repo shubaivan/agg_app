@@ -29,10 +29,12 @@ class FileReadyDownloadedHandler implements MessageHandlerInterface
      */
     public function __invoke(FileReadyDownloaded $fileReadyDownloaded)
     {
-        $absoluteFilePath = $fileReadyDownloaded->getAbsoluteFilePath();
-        $this->getHandleAdtractionData()->parseCSVContent($absoluteFilePath);
+        $this->getHandleAdtractionData()->parseCSVContent(
+            $fileReadyDownloaded->getAbsoluteFilePath(),
+            $fileReadyDownloaded->getShop()
+        );
 
-        echo $absoluteFilePath . PHP_EOL;
+        echo $fileReadyDownloaded->getAbsoluteFilePath() . PHP_EOL;
     }
 
     /**

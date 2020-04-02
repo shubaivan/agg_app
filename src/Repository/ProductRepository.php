@@ -132,7 +132,8 @@ class ProductRepository extends ServiceEntityRepository
                         products_alias."createdAt" AS "createdAt",
                         products_alias.rank AS rank,
                         products_alias."brandRelationId" AS "brandRelationId",
-                        array_agg(DISTINCT cpt.category_id) AS categoryIds
+                        array_agg(DISTINCT cpt.category_id) AS categoryIds,
+                        array_agg(DISTINCT spt.shop_id) AS shopIds
                         ';
             }
 
@@ -169,25 +170,29 @@ class ProductRepository extends ServiceEntityRepository
                         ';
             if (!$search) {
                 $query .= '
-                ,array_agg(DISTINCT category_id) AS categoryIds';
+                ,array_agg(DISTINCT shop_id) AS shopIds,
+                array_agg(DISTINCT category_id) AS categoryIds';
             }
         }
 
         if ($search) {
-            $query .= ',ts_rank_cd(to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')), query) AS rank
+            $query .= ',ts_rank_cd(to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')), query) AS rank
                         FROM products , to_tsquery(:search) query
-                        WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')) @@ query
+                        WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')) @@ query
                         ORDER BY rank DESC) as products_alias';
             $query .= '
                 LEFT JOIN category_product cp on cp.product_id = products_alias.id
+                LEFT JOIN shop_product sp on sp.product_id = products_alias.id
             ';
             $query .= '
                     LEFT JOIN category_product cpt on cpt.product_id = products_alias.id
+                    LEFT JOIN shop_product spt on spt.product_id = products_alias.id
                 ';
         } else {
             $query .= '
                         FROM products AS products_alias
                         LEFT JOIN category_product cp on cp.product_id = products_alias.id
+                        LEFT JOIN shop_product sp on sp.product_id = products_alias.id
                     ';
         }
 
@@ -208,6 +213,23 @@ class ProductRepository extends ServiceEntityRepository
                         ";
             array_push($conditions, $conditionIds);
         }
+
+        if (is_array($parameterBag->get('shop_ids'))
+            && array_search('0', $parameterBag->get('shop_ids'), true) === false) {
+            $shopIds = $parameterBag->get('shop_ids');
+            $preparedInValuesShop = array_combine(
+                array_map(function ($key) {
+                    return ':var_shop_id' . $key;
+                }, array_keys($shopIds)),
+                array_values($shopIds)
+            );
+            $bindKeysShop = implode(',', array_keys($preparedInValuesShop));
+            $conditionShop = "
+                            sp.shop_id IN ($bindKeysShop)
+                        ";
+            array_push($conditions, $conditionShop);
+        }
+
         if (is_array($parameterBag->get('category_ids'))
             && array_search('0', $parameterBag->get('category_ids'), true) === false) {
             $categoryIds = $parameterBag->get('category_ids');
@@ -261,6 +283,12 @@ class ProductRepository extends ServiceEntityRepository
 
         if (isset($preparedInValuesCategory)) {
             foreach ($preparedInValuesCategory as $key => $val) {
+                $statement->bindValue($key, $val);
+            }
+        }
+
+        if (isset($preparedInValuesShop)) {
+            foreach ($preparedInValuesShop as $key => $val) {
                 $statement->bindValue($key, $val);
             }
         }

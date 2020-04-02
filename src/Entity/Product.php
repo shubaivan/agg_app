@@ -210,9 +210,30 @@ class Product implements EntityValidatorException
      */
     private $extras;
 
+    /**
+     * @var Collection|UserIp[]
+     * @ORM\ManyToMany(targetEntity="UserIp", mappedBy="products")
+     */
+    private $userIps;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $shop;
+
+    /**
+     * @var Collection|Shop[]
+     * @ORM\ManyToMany(targetEntity="Shop", mappedBy="products")
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
+     */
+    private $shopRelation;
+
     public function __construct()
     {
         $this->categoryRelation = new ArrayCollection();
+        $this->userIps = new ArrayCollection();
+        $this->shopRelation = new ArrayCollection();
     }
 
     /**
@@ -586,10 +607,89 @@ class Product implements EntityValidatorException
      */
     public function getSearchDataForRelatedProductItems()
     {
-        $search = implode(' ', [$this->getPrice(), $this->getBrandRelation()->getName(), implode(' ', $this->getCategoriesNameArray())]);
+        $search = implode(' ', [
+            $this->getPrice(),
+            $this->getBrandRelation()->getName(),
+            implode(' ', $this->getCategoriesNameArray())
+        ]);
         $replace = preg_replace('/[^a-zA-Z0-9 ,.éäöåÉÄÖÅ]/', "", $search);
         $result = preg_replace('!\s+!', ' ', $replace);
 
         return $result;
+    }
+
+    /**
+     * @return Collection|UserIp[]
+     */
+    public function getUserIps(): Collection
+    {
+        if (!$this->userIps) {
+            $this->userIps = new ArrayCollection();
+        }
+
+        return $this->userIps;
+    }
+
+    public function addUserIp(UserIp $userIp): self
+    {
+        if (!$this->getUserIps()->contains($userIp)) {
+            $this->userIps[] = $userIp;
+            $userIp->addProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserIp(UserIp $userIp): self
+    {
+        if ($this->getUserIps()->contains($userIp)) {
+            $this->userIps->removeElement($userIp);
+            $userIp->removeProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function getShop(): ?string
+    {
+        return $this->shop;
+    }
+
+    public function setShop(?string $shop): self
+    {
+        $this->shop = $shop;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Shop[]
+     */
+    public function getShopRelation(): Collection
+    {
+        if (!$this->shopRelation) {
+            $this->shopRelation = new ArrayCollection();
+        }
+        return $this->shopRelation;
+    }
+
+    public function addShopRelation(Shop $shopRelation): self
+    {
+        if (!$this->getShopRelation()->contains($shopRelation)) {
+            $this->shopRelation[] = $shopRelation;
+            $shopRelation->addProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeShopRelation(Shop $shopRelation): self
+    {
+        if ($this->getShopRelation()->contains($shopRelation)) {
+            $this->shopRelation->removeElement($shopRelation);
+            $shopRelation->removeProduct($this);
+        }
+
+        return $this;
     }
 }

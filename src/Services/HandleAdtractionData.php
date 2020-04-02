@@ -37,11 +37,12 @@ class HandleAdtractionData
     }
 
     /**
-     * @param $filePath
+     * @param string $filePath
+     * @param string|null $shop
      * @throws \League\Csv\Exception
      * @throws \Throwable
      */
-    public function parseCSVContent($filePath)
+    public function parseCSVContent(string $filePath, ?string $shop)
     {
         if (!file_exists($filePath)) {
             $this->getLogger()->error('file ' . $filePath . ' no exist');
@@ -68,6 +69,9 @@ class HandleAdtractionData
             $records = $stmt->process($csv);
             $header = $csv->getHeader();
             foreach ($records as $record) {
+                if ($shop) {
+                    $record['shop'] = $shop;
+                }
                 $this->getBus()->dispatch(new AdtractionDataRow($record));
             }
 

@@ -7,6 +7,7 @@ use App\QueueModel\AdtractionDataRow;
 use App\Services\Models\BrandService;
 use App\Services\Models\CategoryService;
 use App\Services\Models\ProductService;
+use App\Services\Models\ShopService;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -35,23 +36,31 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     private $categoryService;
 
     /**
+     * @var ShopService
+     */
+    private $shopService;
+
+    /**
      * AdtractionDataRowHandler constructor.
      * @param Logger $adtractionCsvRowHandlerLogger
      * @param ProductService $productService
      * @param BrandService $brandService
      * @param CategoryService $categoryService
+     * @param ShopService $shopService
      */
     public function __construct(
         LoggerInterface $adtractionCsvRowHandlerLogger,
         ProductService $productService,
         BrandService $brandService,
-        CategoryService $categoryService
+        CategoryService $categoryService,
+        ShopService $shopService
     )
     {
         $this->logger = $adtractionCsvRowHandlerLogger;
         $this->productService = $productService;
         $this->brandService = $brandService;
         $this->categoryService = $categoryService;
+        $this->shopService = $shopService;
     }
 
     /**
@@ -65,6 +74,7 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
             $product = $this->getProductService()->createProductFromAndractionCsvRow($adtractionDataRow);
             $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);
+            $this->getShopService()->createShopFromProduct($product);
             $this->getLogger()->info('sku: ' . $product->getSku());
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
@@ -109,5 +119,13 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     public function getCategoryService(): CategoryService
     {
         return $this->categoryService;
+    }
+
+    /**
+     * @return ShopService
+     */
+    public function getShopService(): ShopService
+    {
+        return $this->shopService;
     }
 }
