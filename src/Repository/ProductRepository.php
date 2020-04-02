@@ -160,7 +160,6 @@ class ProductRepository extends ServiceEntityRepository
                             image_url AS "imageUrl",
                             tracking_url AS "trackingUrl",
                             brand,
-                            brand_relation_id,
                             original_price AS "originalPrice",
                             ean,
                             manufacturer_article_number AS "manufacturerArticleNumber",
