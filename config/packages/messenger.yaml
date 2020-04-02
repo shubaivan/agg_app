@@ -23,7 +23,6 @@ framework:
             # handlers do not need to call flush() and an error
             # in any handler will cause a rollback
             - doctrine_transaction
-            - reply_middleware
 
       failure_transport: failed
 

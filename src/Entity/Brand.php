@@ -43,7 +43,7 @@ class Brand
 
     /**
      * @var Product[]|Collection
-     * @ORM\OneToMany(targetEntity="Product", mappedBy="brandRelation", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="Product", mappedBy="brandRelation")
      */
     private $products;
 

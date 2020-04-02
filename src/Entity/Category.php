@@ -43,7 +43,7 @@ class Category
 
     /**
      * @var Collection|Product[]
-     * @ORM\ManyToMany(targetEntity="Product", inversedBy="categoryRelation", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="Product", inversedBy="categoryRelation")
      */
     private $products;
 

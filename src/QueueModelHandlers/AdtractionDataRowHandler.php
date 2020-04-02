@@ -8,6 +8,8 @@ use App\Services\Models\BrandService;
 use App\Services\Models\CategoryService;
 use App\Services\Models\ProductService;
 use App\Services\Models\ShopService;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -41,19 +43,26 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     private $shopService;
 
     /**
+     * @var EntityManager
+     */
+    private $em;
+
+    /**
      * AdtractionDataRowHandler constructor.
      * @param Logger $adtractionCsvRowHandlerLogger
      * @param ProductService $productService
      * @param BrandService $brandService
      * @param CategoryService $categoryService
      * @param ShopService $shopService
+     * @param EntityManagerInterface $em
      */
     public function __construct(
         LoggerInterface $adtractionCsvRowHandlerLogger,
         ProductService $productService,
         BrandService $brandService,
         CategoryService $categoryService,
-        ShopService $shopService
+        ShopService $shopService,
+        EntityManagerInterface $em
     )
     {
         $this->logger = $adtractionCsvRowHandlerLogger;
@@ -61,6 +70,7 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
         $this->brandService = $brandService;
         $this->categoryService = $categoryService;
         $this->shopService = $shopService;
+        $this->em = $em;
     }
 
     /**
@@ -75,6 +85,9 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
             $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);
             $this->getShopService()->createShopFromProduct($product);
+
+            $this->getEm()->persist($product);
+
             $this->getLogger()->info('sku: ' . $product->getSku());
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
@@ -127,5 +140,13 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     public function getShopService(): ShopService
     {
         return $this->shopService;
+    }
+
+    /**
+     * @return EntityManager
+     */
+    public function getEm(): EntityManager
+    {
+        return $this->em;
     }
 }

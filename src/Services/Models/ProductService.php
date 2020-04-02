@@ -58,7 +58,6 @@ class ProductService
         /** @var Product $handleObject */
         $handleObject = $this->getObjectHandler()
             ->handleObject($row, Product::class, [Product::SERIALIZED_GROUP_CREATE]);
-        $this->getEm()->persist($handleObject);
 
         return $handleObject;
     }

@@ -62,9 +62,7 @@ class CategoryService
                 $categoryModel
                     ->setName($category);
             }
-
-            $product->addCategoryRelation($categoryModel);
-            $this->getEm()->persist($categoryModel);
+            $categoryModel->addProduct($product);
             array_push($arrayModelsCategory, $categoryModel);
         }
 

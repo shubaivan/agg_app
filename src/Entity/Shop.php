@@ -43,7 +43,7 @@ class Shop
 
     /**
      * @var Collection|Product[]
-     * @ORM\ManyToMany(targetEntity="Product", inversedBy="shopRelation", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="Product", inversedBy="shopRelation")
      */
     private $products;
 

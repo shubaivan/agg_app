@@ -40,8 +40,7 @@ class BrandService
             $brand
                 ->setName($product->getBrand());
         }
-        $brand->addProduct($product);
-        $this->getEm()->persist($brand);
+        $product->setBrandRelation($brand);
 
         return $brand;
     }

@@ -77,7 +77,7 @@ class Product implements EntityValidatorException
 
     /**
      * @var Collection|Category[]
-     * @ORM\ManyToMany(targetEntity="Category", mappedBy="products")
+     * @ORM\ManyToMany(targetEntity="Category", mappedBy="products", cascade={"persist"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $categoryRelation;
@@ -164,7 +164,7 @@ class Product implements EntityValidatorException
     /**
      * @var Brand
      *
-     * @ORM\ManyToOne(targetEntity="Brand", inversedBy="products")
+     * @ORM\ManyToOne(targetEntity="Brand", inversedBy="products", cascade={"persist"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $brandRelation;
@@ -224,7 +224,7 @@ class Product implements EntityValidatorException
 
     /**
      * @var Collection|Shop[]
-     * @ORM\ManyToMany(targetEntity="Shop", mappedBy="products")
+     * @ORM\ManyToMany(targetEntity="Shop", mappedBy="products", cascade={"persist"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $shopRelation;
@@ -562,7 +562,6 @@ class Product implements EntityValidatorException
     {
         if (!$this->getCategoryRelation()->contains($categoryRelation)) {
             $this->categoryRelation[] = $categoryRelation;
-            $categoryRelation->addProduct($this);
         }
 
         return $this;
@@ -677,7 +676,6 @@ class Product implements EntityValidatorException
     {
         if (!$this->getShopRelation()->contains($shopRelation)) {
             $this->shopRelation[] = $shopRelation;
-            $shopRelation->addProduct($this);
         }
 
         return $this;
