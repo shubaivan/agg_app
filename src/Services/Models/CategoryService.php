@@ -62,7 +62,7 @@ class CategoryService
                 $categoryModel
                     ->setName($category);
             }
-            $categoryModel->addProduct($product);
+            $product->addCategoryRelation($categoryModel);
             array_push($arrayModelsCategory, $categoryModel);
         }
 

@@ -83,6 +83,7 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
         try {
             $product = $this->getProductService()->createProductFromAndractionCsvRow($adtractionDataRow);
             $this->getBrandService()->createBrandFromProduct($product);
+
             $this->getCategoryService()->createCategoriesFromProduct($product);
             $this->getShopService()->createShopFromProduct($product);
 

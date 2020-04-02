@@ -43,7 +43,7 @@ class Shop
 
     /**
      * @var Collection|Product[]
-     * @ORM\ManyToMany(targetEntity="Product", inversedBy="shopRelation")
+     * @ORM\ManyToMany(targetEntity="Product", mappedBy="shopRelation")
      */
     private $products;
 
@@ -84,6 +84,7 @@ class Shop
     {
         if (!$this->getProducts()->contains($product)) {
             $this->products[] = $product;
+            $product->addShopRelation($this);
         }
 
         return $this;
@@ -93,6 +94,7 @@ class Shop
     {
         if ($this->getProducts()->contains($product)) {
             $this->products->removeElement($product);
+            $product->removeShopRelation($this);
         }
 
         return $this;

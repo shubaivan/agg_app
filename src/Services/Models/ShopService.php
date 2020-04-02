@@ -40,7 +40,7 @@ class ShopService
             $shop
                 ->setName($product->getShop());
         }
-        $shop->addProduct($product);
+        $product->addShopRelation($shop);
 
         return $shop;
     }

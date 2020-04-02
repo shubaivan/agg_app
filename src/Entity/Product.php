@@ -77,7 +77,7 @@ class Product implements EntityValidatorException
 
     /**
      * @var Collection|Category[]
-     * @ORM\ManyToMany(targetEntity="Category", mappedBy="products", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="Category", inversedBy="products", cascade={"persist"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $categoryRelation;
@@ -224,15 +224,15 @@ class Product implements EntityValidatorException
 
     /**
      * @var Collection|Shop[]
-     * @ORM\ManyToMany(targetEntity="Shop", mappedBy="products", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="Shop", inversedBy="products", cascade={"persist"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $shopRelation;
 
     public function __construct()
     {
-        $this->categoryRelation = new ArrayCollection();
         $this->userIps = new ArrayCollection();
+        $this->categoryRelation = new ArrayCollection();
         $this->shopRelation = new ArrayCollection();
     }
 
@@ -546,37 +546,6 @@ class Product implements EntityValidatorException
         return $this;
     }
 
-    /**
-     * @return Collection|Category[]
-     */
-    public function getCategoryRelation(): Collection
-    {
-        if (!$this->categoryRelation) {
-            $this->categoryRelation = new ArrayCollection();
-        }
-
-        return $this->categoryRelation;
-    }
-
-    public function addCategoryRelation(Category $categoryRelation): self
-    {
-        if (!$this->getCategoryRelation()->contains($categoryRelation)) {
-            $this->categoryRelation[] = $categoryRelation;
-        }
-
-        return $this;
-    }
-
-    public function removeCategoryRelation(Category $categoryRelation): self
-    {
-        if ($this->getCategoryRelation()->contains($categoryRelation)) {
-            $this->categoryRelation->removeElement($categoryRelation);
-            $categoryRelation->removeProduct($this);
-        }
-
-        return $this;
-    }
-
     public function getPrice(): ?string
     {
         return $this->price;
@@ -662,6 +631,36 @@ class Product implements EntityValidatorException
     }
 
     /**
+     * @return Collection|Category[]
+     */
+    public function getCategoryRelation(): Collection
+    {
+        if (!$this->categoryRelation) {
+            $this->categoryRelation = new ArrayCollection();
+        }
+
+        return $this->categoryRelation;
+    }
+
+    public function addCategoryRelation(Category $categoryRelation): self
+    {
+        if (!$this->getCategoryRelation()->contains($categoryRelation)) {
+            $this->categoryRelation[] = $categoryRelation;
+        }
+
+        return $this;
+    }
+
+    public function removeCategoryRelation(Category $categoryRelation): self
+    {
+        if ($this->getCategoryRelation()->contains($categoryRelation)) {
+            $this->categoryRelation->removeElement($categoryRelation);
+        }
+
+        return $this;
+    }
+
+    /**
      * @return Collection|Shop[]
      */
     public function getShopRelation(): Collection
@@ -669,6 +668,7 @@ class Product implements EntityValidatorException
         if (!$this->shopRelation) {
             $this->shopRelation = new ArrayCollection();
         }
+
         return $this->shopRelation;
     }
 
@@ -685,7 +685,6 @@ class Product implements EntityValidatorException
     {
         if ($this->getShopRelation()->contains($shopRelation)) {
             $this->shopRelation->removeElement($shopRelation);
-            $shopRelation->removeProduct($this);
         }
 
         return $this;

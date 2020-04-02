@@ -43,7 +43,7 @@ class Category
 
     /**
      * @var Collection|Product[]
-     * @ORM\ManyToMany(targetEntity="Product", inversedBy="categoryRelation")
+     * @ORM\ManyToMany(targetEntity="Product", mappedBy="categoryRelation")
      */
     private $products;
 
@@ -77,7 +77,6 @@ class Category
         if (!$this->products) {
             $this->products = new ArrayCollection();
         }
-
         return $this->products;
     }
 
@@ -85,6 +84,7 @@ class Category
     {
         if (!$this->getProducts()->contains($product)) {
             $this->products[] = $product;
+            $product->addCategoryRelation($this);
         }
 
         return $this;
@@ -94,6 +94,7 @@ class Category
     {
         if ($this->getProducts()->contains($product)) {
             $this->products->removeElement($product);
+            $product->removeCategoryRelation($this);
         }
 
         return $this;
