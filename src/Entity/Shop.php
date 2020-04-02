@@ -43,7 +43,7 @@ class Shop
 
     /**
      * @var Collection|Product[]
-     * @ORM\OneToMany(targetEntity="Product", mappedBy="shopRelation")
+     * @ORM\OneToMany(targetEntity="Product", mappedBy="shopRelation", fetch="LAZY")
      */
     private $products;
 

@@ -43,7 +43,7 @@ class Brand
 
     /**
      * @var Product[]|Collection
-     * @ORM\OneToMany(targetEntity="Product", mappedBy="brandRelation")
+     * @ORM\OneToMany(targetEntity="Product", mappedBy="brandRelation",fetch="LAZY")
      */
     private $products;
 

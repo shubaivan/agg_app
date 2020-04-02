@@ -77,7 +77,7 @@ class Product implements EntityValidatorException
 
     /**
      * @var Collection|Category[]
-     * @ORM\ManyToMany(targetEntity="Category", inversedBy="products", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="Category", inversedBy="products", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $categoryRelation;

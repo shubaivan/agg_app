@@ -43,7 +43,7 @@ class Category
 
     /**
      * @var Collection|Product[]
-     * @ORM\ManyToMany(targetEntity="Product", mappedBy="categoryRelation")
+     * @ORM\ManyToMany(targetEntity="Product", mappedBy="categoryRelation", fetch="EXTRA_LAZY")
      */
     private $products;
 
