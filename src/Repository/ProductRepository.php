@@ -181,18 +181,18 @@ class ProductRepository extends ServiceEntityRepository
                         WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')) @@ query
                         ORDER BY rank DESC) as products_alias';
             $query .= '
-                LEFT JOIN category_product cp on cp.product_id = products_alias.id
-                LEFT JOIN shop_product sp on sp.product_id = products_alias.id
+                LEFT JOIN product_category cp on cp.product_id = products_alias.id
+                LEFT JOIN product_shop sp on sp.product_id = products_alias.id
             ';
             $query .= '
-                    LEFT JOIN category_product cpt on cpt.product_id = products_alias.id
-                    LEFT JOIN shop_product spt on spt.product_id = products_alias.id
+                    LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
+                    LEFT JOIN product_shop spt on spt.product_id = products_alias.id
                 ';
         } else {
             $query .= '
                         FROM products AS products_alias
-                        LEFT JOIN category_product cp on cp.product_id = products_alias.id
-                        LEFT JOIN shop_product sp on sp.product_id = products_alias.id
+                        LEFT JOIN product_category cp on cp.product_id = products_alias.id
+                        LEFT JOIN product_shop sp on sp.product_id = products_alias.id
                     ';
         }
 
