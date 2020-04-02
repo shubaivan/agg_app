@@ -31,7 +31,9 @@ fos_rest:
             'Symfony\Component\Routing\Exception\ResourceNotFoundException': 404
             'Doctrine\ORM\OptimisticLockException': HTTP_CONFLICT
             'Symfony\Component\HttpKernel\Exception\BadRequestHttpException': 400
+            'Doctrine\DBAL\Exception\SyntaxErrorException': 400
         messages:
             Symfony\Component\HttpKernel\Exception\BadRequestHttpException: true
             Symfony\Component\HttpKernel\Exception\HttpException: true
+            'Doctrine\DBAL\Exception\SyntaxErrorException': true
 

@@ -7,11 +7,14 @@ use App\Entity\Collection\ProductsCollection;
 use App\Repository\ProductRepository;
 use App\Services\Helpers;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\DBAL\DBALException;
+use Doctrine\ORM\NonUniqueResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 use App\Entity\Product;
@@ -161,13 +164,20 @@ class ProductController extends AbstractRestController
      *     )
      * )
      *
+     * @param Product $product
+     * @param ParamFetcher $paramFetcher
+     * @param Request $request
+     *
      * @return ProductCollection
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
-    public function getProductByIdAction(Product $product, ParamFetcher $paramFetcher)
+    public function getProductByIdAction(
+        Product $product,
+        ParamFetcher $paramFetcher,
+        Request $request
+    )
     {
+        $clientIp = $request->getClientIp();
         $this->setParamFetcherData($paramFetcher, 'page', 1);
         $this->setParamFetcherData($paramFetcher, 'count', 4);
         $this->setParamFetcherData($paramFetcher, 'exclude_ids', [$product->getId()]);

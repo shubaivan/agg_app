@@ -192,6 +192,7 @@ class ProductRepository extends ServiceEntityRepository
                     ';
         }
 
+        $conditions = [];
         if (is_array($parameterBag->get('exclude_ids'))
             && array_search('0', $parameterBag->get('exclude_ids'), true) === false
         ) {
@@ -203,9 +204,10 @@ class ProductRepository extends ServiceEntityRepository
                 array_values($excludeIds)
             );
             $bindKeysIds = implode(',', array_keys($preparedInValuesIds));
-            $query .= "                           
-                            WHERE products_alias.id NOT IN ($bindKeysIds)
+            $conditionIds = "                           
+                            products_alias.id NOT IN ($bindKeysIds)
                         ";
+            array_push($conditions, $conditionIds);
         }
         if (is_array($parameterBag->get('category_ids'))
             && array_search('0', $parameterBag->get('category_ids'), true) === false) {
@@ -217,10 +219,10 @@ class ProductRepository extends ServiceEntityRepository
                 array_values($categoryIds)
             );
             $bindKeysCategory = implode(',', array_keys($preparedInValuesCategory));
-
-            $query .= "
-                            WHERE cp.category_id IN ($bindKeysCategory)
+            $conditionCategory = "
+                            cp.category_id IN ($bindKeysCategory)
                         ";
+            array_push($conditions, $conditionCategory);
         }
 
         if (is_array($parameterBag->get('brand_ids'))
@@ -234,11 +236,14 @@ class ProductRepository extends ServiceEntityRepository
                 array_values($brandIds)
             );
             $bindKeysBrand = implode(',', array_keys($preparedInValuesBrand));
-            $query .= "                           
-                            WHERE products_alias.brand_relation_id IN ($bindKeysBrand)
+            $conditionBrand = "                           
+                            products_alias.brand_relation_id IN ($bindKeysBrand)
                         ";
+            array_push($conditions, $conditionBrand);
         }
-
+        if (count($conditions)) {
+            $query .= 'WHERE ' . implode(' AND ', $conditions);
+        }
         if (!$count) {
             $query .= '
                         GROUP BY id, sku, name, description, category, price, shipping, currency, instock, "productUrl", "imageUrl", "trackingUrl", brand, "originalPrice", ean, "manufacturerArticleNumber", extras, "createdAt", "brandRelationId"'
