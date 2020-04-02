@@ -90,7 +90,7 @@ class ProductRepository extends ServiceEntityRepository
             ["id", "sku", "name",
                 "description", "category", "price",
                 "shipping", "currency", "instock", "productUrl", "imageUrl",
-                "trackingUrl", "brand", "originalPrice", "ean", "manufacturerArticleNumber",
+                "trackingUrl", "brand", "shop", "originalPrice", "ean", "manufacturerArticleNumber",
                 "extras", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()->white_list($sortOrder, [Criteria::ASC, Criteria::DESC], "Invalid ORDER BY direction " . $sortOrder);
 
@@ -124,7 +124,8 @@ class ProductRepository extends ServiceEntityRepository
                         products_alias."productUrl" AS "productUrl",
                         products_alias."imageUrl" AS "imageUrl",
                         products_alias."trackingUrl" AS "trackingUrl",
-                        products_alias.brand AS brand,                    
+                        products_alias.brand AS brand,
+                        products_alias.shop AS shop,                    
                         products_alias."originalPrice" AS "originalPrice",
                         products_alias.ean AS ean,
                         products_alias."manufacturerArticleNumber" AS "manufacturerArticleNumber",
@@ -132,8 +133,8 @@ class ProductRepository extends ServiceEntityRepository
                         products_alias."createdAt" AS "createdAt",
                         products_alias.rank AS rank,
                         products_alias."brandRelationId" AS "brandRelationId",
-                        array_agg(DISTINCT cpt.category_id) AS categoryIds,
-                        array_agg(DISTINCT spt.shop_id) AS shopIds
+                        products_alias."shopRelationId" AS "shopRelationId",
+                        array_agg(DISTINCT cpt.category_id) AS categoryIds
                         ';
             }
 
@@ -161,17 +162,18 @@ class ProductRepository extends ServiceEntityRepository
                             image_url AS "imageUrl",
                             tracking_url AS "trackingUrl",
                             brand,
+                            shop,
                             original_price AS "originalPrice",
                             ean,
                             manufacturer_article_number AS "manufacturerArticleNumber",
                             extras,
                             created_at AS "createdAt",
-                            brand_relation_id AS "brandRelationId"
+                            brand_relation_id AS "brandRelationId",
+                            shop_relation_id AS "shopRelationId"
                         ';
             if (!$search) {
-                $query .= '
-                ,array_agg(DISTINCT shop_id) AS shopIds,
-                array_agg(DISTINCT category_id) AS categoryIds';
+                $query .= '               
+                ,array_agg(DISTINCT category_id) AS categoryIds';
             }
         }
 
@@ -181,19 +183,13 @@ class ProductRepository extends ServiceEntityRepository
                         WHERE to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')) @@ query
                         ORDER BY rank DESC) as products_alias';
             $query .= '
-                LEFT JOIN product_category cp on cp.product_id = products_alias.id
-                LEFT JOIN product_shop sp on sp.product_id = products_alias.id
-            ';
+                LEFT JOIN product_category cp on cp.product_id = products_alias.id            ';
             $query .= '
-                    LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
-                    LEFT JOIN product_shop spt on spt.product_id = products_alias.id
-                ';
+                    LEFT JOIN product_category cpt on cpt.product_id = products_alias.id                ';
         } else {
             $query .= '
                         FROM products AS products_alias
-                        LEFT JOIN product_category cp on cp.product_id = products_alias.id
-                        LEFT JOIN product_shop sp on sp.product_id = products_alias.id
-                    ';
+                        LEFT JOIN product_category cp on cp.product_id = products_alias.id                    ';
         }
 
         $conditions = [];
@@ -225,7 +221,8 @@ class ProductRepository extends ServiceEntityRepository
             );
             $bindKeysShop = implode(',', array_keys($preparedInValuesShop));
             $conditionShop = "
-                            sp.shop_id IN ($bindKeysShop)
+                            products_alias.shop_relation_id IN ($bindKeysShop)
+
                         ";
             array_push($conditions, $conditionShop);
         }
@@ -267,7 +264,7 @@ class ProductRepository extends ServiceEntityRepository
         }
         if (!$count) {
             $query .= '
-                        GROUP BY id, sku, name, description, category, price, shipping, currency, instock, "productUrl", "imageUrl", "trackingUrl", brand, "originalPrice", ean, "manufacturerArticleNumber", extras, "createdAt", "brandRelationId"'
+                        GROUP BY id, sku, name, description, category, price, shipping, currency, instock, "productUrl", "imageUrl", "trackingUrl", brand, shop, "originalPrice", ean, "manufacturerArticleNumber", extras, "createdAt", "brandRelationId", "shopRelationId"'
                 . ($search ? ', rank ORDER BY rank DESC' : 'ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '') . '
                         LIMIT :limit
                         OFFSET :offset;

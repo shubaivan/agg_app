@@ -223,8 +223,8 @@ class Product implements EntityValidatorException
     private $shop;
 
     /**
-     * @var Collection|Shop[]
-     * @ORM\ManyToMany(targetEntity="Shop", inversedBy="products", cascade={"persist"})
+     * @var Shop
+     * @ORM\ManyToOne(targetEntity="Shop", inversedBy="products", cascade={"persist"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $shopRelation;
@@ -660,32 +660,14 @@ class Product implements EntityValidatorException
         return $this;
     }
 
-    /**
-     * @return Collection|Shop[]
-     */
-    public function getShopRelation(): Collection
+    public function getShopRelation(): ?Shop
     {
-        if (!$this->shopRelation) {
-            $this->shopRelation = new ArrayCollection();
-        }
-
         return $this->shopRelation;
     }
 
-    public function addShopRelation(Shop $shopRelation): self
+    public function setShopRelation(?Shop $shopRelation): self
     {
-        if (!$this->getShopRelation()->contains($shopRelation)) {
-            $this->shopRelation[] = $shopRelation;
-        }
-
-        return $this;
-    }
-
-    public function removeShopRelation(Shop $shopRelation): self
-    {
-        if ($this->getShopRelation()->contains($shopRelation)) {
-            $this->shopRelation->removeElement($shopRelation);
-        }
+        $this->shopRelation = $shopRelation;
 
         return $this;
     }

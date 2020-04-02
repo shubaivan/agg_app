@@ -43,7 +43,7 @@ class Shop
 
     /**
      * @var Collection|Product[]
-     * @ORM\ManyToMany(targetEntity="Product", mappedBy="shopRelation")
+     * @ORM\OneToMany(targetEntity="Product", mappedBy="shopRelation")
      */
     private $products;
 
@@ -77,6 +77,7 @@ class Shop
         if (!$this->products) {
             $this->products = new ArrayCollection();
         }
+
         return $this->products;
     }
 
@@ -84,7 +85,7 @@ class Shop
     {
         if (!$this->getProducts()->contains($product)) {
             $this->products[] = $product;
-            $product->addShopRelation($this);
+            $product->setShopRelation($this);
         }
 
         return $this;
@@ -94,9 +95,14 @@ class Shop
     {
         if ($this->getProducts()->contains($product)) {
             $this->products->removeElement($product);
-            $product->removeShopRelation($this);
+            // set the owning side to null (unless already changed)
+            if ($product->getShopRelation() === $this) {
+                $product->setShopRelation(null);
+            }
         }
 
         return $this;
     }
+
+
 }
