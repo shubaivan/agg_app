@@ -18,11 +18,6 @@ parameters:
     'Litenlekermer': '%env(ANDRACTION_DOWNLOAD_URL_Litenlekermer)%'
     'Cykloteket': '%env(ANDRACTION_DOWNLOAD_URL_Cykloteket)%'
     'Ahlens': '%env(ANDRACTION_DOWNLOAD_URL_Ahlens)%'
-
-  messenger:
-    middleware:
-      reply_middleware: 'ddd'
-
   adtraction_download_file_path: '%env(ANDRACTION_DOWNLOAD_FILE_PATH)%'
     support_email: '%env(SUPPORT_EMAIL)%'
     fos_rest.throw_exception_on_unsupported_content_type: true
