@@ -10,6 +10,8 @@ fos_rest:
         # all requests using the 'json' format will return a 403 on an access denied violation
         json: true
     param_fetcher_listener: true
+    serializer:
+      serialize_null: true
     format_listener:
         rules:
             - { path: ^/api, prefer_extension: true, fallback_format: json, priorities: [ json ] }
