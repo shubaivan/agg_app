@@ -654,8 +654,14 @@ class Product implements EntityValidatorException
         return $this;
     }
 
-    public function setExtrasAccessor(string $extras)
+    /**
+     * @param string|null $extras
+     */
+    public function setExtrasAccessor(?string $extras)
     {
+        if (is_null($extras)) {
+            return;
+        }
         $result = [];
         $preg_match_all = preg_match_all('~{([^{}]*)}~', $extras, $matches);
         if ($preg_match_all > 0) {
