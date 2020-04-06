@@ -221,7 +221,7 @@ class ProductRepository extends ServiceEntityRepository
             );
             $bindKeysShop = implode(',', array_keys($preparedInValuesShop));
             $conditionShop = "
-                            products_alias.shop_relation_id IN ($bindKeysShop)
+                            products_alias.\"shopRelationId\" IN ($bindKeysShop)
 
                         ";
             array_push($conditions, $conditionShop);
@@ -255,7 +255,7 @@ class ProductRepository extends ServiceEntityRepository
             );
             $bindKeysBrand = implode(',', array_keys($preparedInValuesBrand));
             $conditionBrand = "                           
-                            products_alias.brand_relation_id IN ($bindKeysBrand)
+                            products_alias.\"brandRelationId\" IN ($bindKeysBrand)
                         ";
             array_push($conditions, $conditionBrand);
         }
