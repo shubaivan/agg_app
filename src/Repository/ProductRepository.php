@@ -80,6 +80,7 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function fullTextSearchByParameterBag(ParameterBag $parameterBag, $count = false)
     {
+        $sort_by = isset($_REQUEST['sort_by']);
         $connection = $this->getEntityManager()->getConnection();
         $limit = $parameterBag->get('count');
         $offset = $limit * ($parameterBag->get('page') - 1);
@@ -220,10 +221,16 @@ class ProductRepository extends ServiceEntityRepository
                 array_values($shopIds)
             );
             $bindKeysShop = implode(',', array_keys($preparedInValuesShop));
-            $conditionShop = "
+            if ($search) {
+                $conditionShop = "
                             products_alias.\"shopRelationId\" IN ($bindKeysShop)
-
                         ";
+            } else {
+                $conditionShop = "
+                            products_alias.shop_relation_id IN ($bindKeysShop)
+                        ";
+            }
+
             array_push($conditions, $conditionShop);
         }
 
@@ -254,9 +261,16 @@ class ProductRepository extends ServiceEntityRepository
                 array_values($brandIds)
             );
             $bindKeysBrand = implode(',', array_keys($preparedInValuesBrand));
-            $conditionBrand = "                           
+            if ($search) {
+                $conditionBrand = "                           
                             products_alias.\"brandRelationId\" IN ($bindKeysBrand)
                         ";
+            } else {
+                $conditionBrand = "                           
+                            products_alias.brand_relation_id IN ($bindKeysBrand)
+                        ";
+            }
+
             array_push($conditions, $conditionBrand);
         }
         if (count($conditions)) {
@@ -265,7 +279,7 @@ class ProductRepository extends ServiceEntityRepository
         if (!$count) {
             $query .= '
                         GROUP BY id, sku, name, description, category, price, shipping, currency, instock, "productUrl", "imageUrl", "trackingUrl", brand, shop, "originalPrice", ean, "manufacturerArticleNumber", extras, "createdAt", "brandRelationId", "shopRelationId"'
-                . ($search ? ', rank ORDER BY rank DESC' : 'ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '') . '
+                . ($search ? ($sort_by ? ', rank ORDER BY rank DESC, ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' : ', rank ORDER BY rank DESC') : 'ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '') . '
                         LIMIT :limit
                         OFFSET :offset;
                     ';

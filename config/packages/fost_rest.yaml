@@ -34,8 +34,10 @@ fos_rest:
             'Doctrine\ORM\OptimisticLockException': HTTP_CONFLICT
             'Symfony\Component\HttpKernel\Exception\BadRequestHttpException': 400
             'Doctrine\DBAL\Exception\SyntaxErrorException': 400
+            'Doctrine\DBAL\Exception\InvalidFieldNameException': 400
         messages:
             Symfony\Component\HttpKernel\Exception\BadRequestHttpException: true
             Symfony\Component\HttpKernel\Exception\HttpException: true
             'Doctrine\DBAL\Exception\SyntaxErrorException': true
+            'Doctrine\DBAL\Exception\InvalidFieldNameException': true
 
