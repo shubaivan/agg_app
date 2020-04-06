@@ -11,6 +11,9 @@
     "behat/transliterator": {
         "version": "v1.3.0"
     },
+    "boldtrn/jsonb-bundle": {
+        "version": "v1.2.0"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -185,6 +188,9 @@
     },
     "league/csv": {
         "version": "8.2.3"
+    },
+    "martin-georgiev/postgresql-for-doctrine": {
+        "version": "dev-master"
     },
     "monolog/monolog": {
         "version": "2.0.2"

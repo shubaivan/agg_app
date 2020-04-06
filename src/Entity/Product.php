@@ -200,13 +200,10 @@ class Product implements EntityValidatorException
     private $manufacturerArticleNumber;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="jsonb", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Length(
-     *      min = 1,
-     *      max = 255,
-     *     groups={Product::SERIALIZED_GROUP_CREATE}
-     * )
+     * @Annotation\Accessor(setter="setExtrasAccessor")
+     * @Annotation\Type("string")
      */
     private $extras;
 
@@ -509,24 +506,6 @@ class Product implements EntityValidatorException
     }
 
     /**
-     * @return mixed
-     */
-    public function getExtras()
-    {
-        return $this->extras;
-    }
-
-    /**
-     * @param mixed $extras
-     * @return Product
-     */
-    public function setExtras($extras)
-    {
-        $this->extras = $extras;
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getIdentity()
@@ -671,6 +650,39 @@ class Product implements EntityValidatorException
     public function setShopRelation(?Shop $shopRelation): self
     {
         $this->shopRelation = $shopRelation;
+
+        return $this;
+    }
+
+    public function setExtrasAccessor(string $extras)
+    {
+        $result = [];
+        $preg_match_all = preg_match_all('~{([^{}]*)}~', $extras, $matches);
+        if ($preg_match_all > 0) {
+            if (isset($matches[1]) && is_array($matches[1])) {
+                $extraFields = $matches[1];
+                foreach ($extraFields as $field) {
+                    if (preg_match_all('/[#]/', $field, $matches) > 0) {
+                        $explode = explode('#', $field);
+                        if (isset($explode[0]) && isset($explode[1])) {
+                            $result[$explode[0]] = $explode[1];
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->setExtras($result);
+    }
+
+    public function getExtras()
+    {
+        return $this->extras;
+    }
+
+    public function setExtras($extras): self
+    {
+        $this->extras = $extras;
 
         return $this;
     }

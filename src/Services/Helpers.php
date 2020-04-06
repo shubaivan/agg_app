@@ -3,10 +3,35 @@
 
 namespace App\Services;
 
+use JMS\Serializer\Serializer;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Helpers
 {
+    /**
+     * @var Serializer
+     */
+    private $serilizer;
+
+    /**
+     * Helpers constructor.
+     * @param Serializer $serilizer
+     */
+    public function __construct(SerializerInterface $serilizer)
+    {
+        $this->serilizer = $serilizer;
+    }
+
+    /**
+     * @param array $array
+     * @return string
+     */
+    public function executeSerializerArray(array $array)
+    {
+        return $this->serilizer->serialize($array, 'json');
+    }
+
     /**
      * @param $value
      * @param $allowed

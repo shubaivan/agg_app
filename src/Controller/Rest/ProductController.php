@@ -39,10 +39,34 @@ class ProductController extends AbstractRestController
     }
 
     /**
+     * get Products extra keys.
+     *
+     * @Rest\Get("/api/products/extra_keys")
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Products")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object Products",
+     * )
+     *
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function fetchProductExtraKeyAction()
+    {
+        $allExtrasKey = $this->getProductRepository()->fetchAllExtrasKey();
+        return $allExtrasKey;
+    }
+
+    /**
      * get Products.
      *
      * @Rest\Get("/api/products")
      *
+     * @Rest\QueryParam(map=true, name="extra_array", nullable=true, strict=true, requirements="^[A-Za-z0-9 éäöåÉÄÖÅ]*$", default="0", description="array of extra key and value")
      * @Rest\QueryParam(map=true, name="shop_ids", nullable=true, strict=true, requirements="\d+", default="0", description="array of shop ids")
      * @Rest\QueryParam(map=true, name="category_ids", nullable=true, strict=true, requirements="\d+", default="0", description="array of category ids")
      * @Rest\QueryParam(map=true, name="brand_ids", nullable=true, strict=true, requirements="\d+", default="0", description="array of brand ids")

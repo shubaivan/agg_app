@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Product;
 use App\QueueModel\FileReadyDownloaded;
 use App\Services\ObjectsHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -35,7 +36,19 @@ class FileDownloadController extends AbstractController
             $fileReadyDownloaded = new FileReadyDownloaded($path);
             $bus->dispatch($fileReadyDownloaded);
         }
+        /** @var \Doctrine\Bundle\DoctrineBundle\Registry $obj */
+        $obj = $this->get('doctrine');
+        $objectManager = $obj->getManager();
 
+        $product = $objectManager->getRepository(Product::class)
+            ->fff();
+
+        /** @var Product $product */
+        $product = $objectManager->getRepository(Product::class)
+            ->findOneBy(['id' => 14661]);
+        $product
+            ->setExtras(['test' => 'result', 'hello' => 'world']);
+        $objectManager->flush();
         return new Response('<html><body>' . ($path ?? 'OK') . '</body></html>');
     }
 }

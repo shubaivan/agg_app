@@ -34,6 +34,21 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function fetchAllExtrasKey()
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $query = 'select DISTINCT e.key from products AS p join jsonb_each_text(p.extras) e on true';
+        $statement = $connection->prepare($query);
+        $execute = $statement->execute();
+
+        $products = $statement->fetchAll(\PDO::FETCH_COLUMN);
+        return $products;
+    }
+
+    /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
      * @return Product[]|int
@@ -194,6 +209,16 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         $conditions = [];
+        if (is_array($parameterBag->get('extra_array'))
+            && array_search('0', $parameterBag->get('extra_array'), true) === false
+        ) {
+            $extraArray = $parameterBag->get('extra_array');
+            $preparedExtraArray = $this->getHelpers()->executeSerializerArray($extraArray);
+            $query .= '
+                 WHERE products_alias.extras @> :var_extra_arrays
+            ';
+        }
+        
         if (is_array($parameterBag->get('exclude_ids'))
             && array_search('0', $parameterBag->get('exclude_ids'), true) === false
         ) {
@@ -286,6 +311,11 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         $statement = $connection->prepare($query);
+
+        if (isset($preparedExtraArray)) {
+            $statement->bindValue(':var_extra_arrays', $preparedExtraArray);
+        }
+
         if (isset($preparedInValuesIds)) {
             foreach ($preparedInValuesIds as $key => $val) {
                 $statement->bindValue($key, $val);
