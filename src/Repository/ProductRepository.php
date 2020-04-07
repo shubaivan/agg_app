@@ -40,11 +40,16 @@ class ProductRepository extends ServiceEntityRepository
     public function fetchAllExtrasKey()
     {
         $connection = $this->getEntityManager()->getConnection();
-        $query = 'select DISTINCT e.key from products AS p join jsonb_each_text(p.extras) e on true';
+        $query = '
+            select DISTINCT e.key, array_agg(DISTINCT e.value) 
+            from products AS p 
+            join jsonb_each_text(p.extras) e on true        
+            GROUP BY e.key
+        ';
         $statement = $connection->prepare($query);
         $execute = $statement->execute();
 
-        $products = $statement->fetchAll(\PDO::FETCH_COLUMN);
+        $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
         return $products;
     }
 
