@@ -201,7 +201,7 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="jsonb", nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
      * @Annotation\Accessor(setter="setExtrasAccessor")
      * @Annotation\Type("string")
      */
@@ -243,6 +243,18 @@ class Product implements EntityValidatorException
     public function getCreatedAtValue()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * @return array
+     * @Annotation\VirtualProperty()
+     * @Annotation\SerializedName("extraFields")
+     * @Annotation\Type("array")
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
+     */
+    public function getExtraFields()
+    {
+        return $this->getExtras();
     }
 
     /**
