@@ -39,9 +39,9 @@ class ProductController extends AbstractRestController
     }
 
     /**
-     * get Products extra keys.
+     * get Products extra fields.
      *
-     * @Rest\Get("/api/products/extra_keys")
+     * @Rest\Get("/api/products/extra_fields")
      *
      * @View(statusCode=Response::HTTP_OK)
      *
@@ -55,9 +55,9 @@ class ProductController extends AbstractRestController
      * @return array
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function fetchProductExtraKeyAction()
+    public function fetchProductExtraFieldsAction()
     {
-        $allExtrasKey = $this->getProductRepository()->fetchAllExtrasKey();
+        $allExtrasKey = $this->getProductRepository()->fetchAllExtrasFields();
         return $allExtrasKey;
     }
 

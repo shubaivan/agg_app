@@ -37,11 +37,11 @@ class ProductRepository extends ServiceEntityRepository
      * @return mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function fetchAllExtrasKey()
+    public function fetchAllExtrasFields()
     {
         $connection = $this->getEntityManager()->getConnection();
         $query = '
-            select DISTINCT e.key, array_agg(DISTINCT e.value) 
+            select DISTINCT e.key, array_agg(DISTINCT e.value) as fields 
             from products AS p 
             join jsonb_each_text(p.extras) e on true        
             GROUP BY e.key
@@ -391,7 +391,7 @@ class ProductRepository extends ServiceEntityRepository
                 "shipping", "currency", "instock", "productUrl", "imageUrl",
                 "trackingUrl", "brand", "shop", "originalPrice", "ean", "manufacturerArticleNumber",
                 "extras", "createdAt"], "Invalid field name " . $sortBy);
-        $sortOrder = $this->getHelpers()->white_list($sortOrder, [Criteria::ASC, Criteria::DESC], "Invalid ORDER BY direction " . $sortOrder);
+        $sortOrder = $this->getHelpers()->white_list($sortOrder, [Criteria::DESC, Criteria::ASC], "Invalid ORDER BY direction " . $sortOrder);
 
         $searchField = $parameterBag->get('search');
         if ($searchField) {
