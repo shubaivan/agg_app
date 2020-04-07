@@ -395,8 +395,11 @@ class ProductRepository extends ServiceEntityRepository
 
         $searchField = $parameterBag->get('search');
         if ($searchField) {
-            if (preg_match_all('/[ ]/', $searchField, $matches) > 0) {
-                $search = str_replace(' ', ':*|', $searchField) . ':*';
+            if (preg_match_all('/[,]/', $searchField, $matches) > 0) {
+                $result = preg_replace('!\s+!', ' ', $searchField);
+                $result = preg_replace('/\s*,\s*/', ',', $result);
+                $result = preg_replace('!\s!', '&', $result);
+                $search = str_replace(',', ':*|', $result) . ':*';
             } else {
                 $search = $searchField . ':*';
             }
