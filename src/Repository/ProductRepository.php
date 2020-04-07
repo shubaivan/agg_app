@@ -214,9 +214,10 @@ class ProductRepository extends ServiceEntityRepository
         ) {
             $extraArray = $parameterBag->get('extra_array');
             $preparedExtraArray = $this->getHelpers()->executeSerializerArray($extraArray);
-            $query .= '
-                 WHERE products_alias.extras @> :var_extra_arrays
+            $conditionExtraFields = '
+                 products_alias.extras @> :var_extra_arrays
             ';
+            array_push($conditions, $conditionExtraFields);
         }
         
         if (is_array($parameterBag->get('exclude_ids'))
