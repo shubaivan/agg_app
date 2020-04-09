@@ -6,20 +6,17 @@ use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
 use App\Repository\ProductRepository;
 use App\Services\Helpers;
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\DBALException;
-use Doctrine\ORM\NonUniqueResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 use App\Entity\Product;
 use App\Entity\Collection\SearchProductCollection;
-use App\Validator\Constraints\ExtraFields;
+use App\Validation\Constraints\ExtraFields;
 
 class ProductController extends AbstractRestController
 {
@@ -37,6 +34,30 @@ class ProductController extends AbstractRestController
     {
         parent::__construct($helpers);
         $this->productRepository = $productRepository;
+    }
+
+    /**
+     * get User Ip.
+     *
+     * @Rest\Get("/api/user/ip")
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="User")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object Products",
+     * )
+     *
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function getUserIpAction(Request $request)
+    {
+        return [
+            'ip' => $request->getClientIp()
+        ];
     }
 
     /**
@@ -134,7 +155,7 @@ class ProductController extends AbstractRestController
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function getProductsAction(ParamFetcher $paramFetcher)
+    public function getProductsAction(ParamFetcher $paramFetcher, Request $request)
     {
         $collection = $this->getProductRepository()->fullTextSearchByParameterFetcher($paramFetcher);
         $count = $this->getProductRepository()->fullTextSearchByParameterFetcher($paramFetcher, true);
