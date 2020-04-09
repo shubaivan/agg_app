@@ -389,7 +389,8 @@ class ProductRepository extends ServiceEntityRepository
             ["id", "sku", "name",
                 "description", "category", "price",
                 "shipping", "currency", "instock", "productUrl", "imageUrl",
-                "trackingUrl", "brand", "shop", "originalPrice", "ean", "manufacturerArticleNumber",
+                "trackingUrl", "brand", "shop", "originalPrice", "ean",
+                "manufacturerArticleNumber", "shopRelationId", "brandRelationId",
                 "extras", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()->white_list($sortOrder, [Criteria::DESC, Criteria::ASC], "Invalid ORDER BY direction " . $sortOrder);
 
@@ -465,11 +466,23 @@ class ProductRepository extends ServiceEntityRepository
             && array_search('0', $parameterBag->get('extra_array'), true) === false
         ) {
             $extraArray = $parameterBag->get('extra_array');
-            $preparedExtraArray = $this->getHelpers()->executeSerializerArray($extraArray);
-            $conditionExtraFields = '
-                 products_alias.extras @> :var_extra_arrays
-            ';
-            array_push($conditions, $conditionExtraFields);
+            $commonExtraConditionsArray = [];
+            $preparedExtraArray = [];
+            foreach ($extraArray as $key => $extraFieldData) {
+                $commonExtraConditionArray = [];
+                foreach ($extraFieldData as $childKey => $extraData) {
+                    $preparedExtraArrayString = $this->getHelpers()
+                        ->executeSerializerArray([$key => $extraData]);
+                    $conditionExtraFields = 'products_alias.extras @> :var_extra_arrays_' . $key . '_' . $childKey;
+                    $preparedExtraArray[':var_extra_arrays_' . $key . '_' . $childKey] = $preparedExtraArrayString;
+                    array_push($commonExtraConditionArray, $conditionExtraFields);
+                }
+                $commonExtraConditionString = '(' . implode(' OR ', $commonExtraConditionArray) . ')';
+                array_push($commonExtraConditionsArray, $commonExtraConditionString);
+            }
+            $commonExtraConditionsString = '(' . implode(' AND ', $commonExtraConditionsArray) . ')';
+
+            array_push($conditions, $commonExtraConditionsString);
         }
 
         if (is_array($parameterBag->get('exclude_ids'))
@@ -564,7 +577,9 @@ class ProductRepository extends ServiceEntityRepository
         $statement = $connection->prepare($query);
 
         if (isset($preparedExtraArray)) {
-            $statement->bindValue(':var_extra_arrays', $preparedExtraArray);
+            foreach ($preparedExtraArray as $key => $val) {
+                $statement->bindValue($key, $val);
+            }
         }
 
         if (isset($preparedInValuesIds)) {

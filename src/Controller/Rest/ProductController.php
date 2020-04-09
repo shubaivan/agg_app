@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 use App\Entity\Product;
 use App\Entity\Collection\SearchProductCollection;
+use App\Validator\Constraints\ExtraFields;
 
 class ProductController extends AbstractRestController
 {
@@ -66,14 +67,14 @@ class ProductController extends AbstractRestController
      *
      * @Rest\Get("/api/products")
      *
-     * @Rest\QueryParam(map=true, name="extra_array", nullable=true, strict=true, requirements="^[A-Za-z0-9 -éäöåÉÄÖÅ]*$", default="0", description="array of extra key and value")
+     * @Rest\QueryParam(map=true, name="extra_array", requirements=@ExtraFields, nullable=true, strict=true, default="0", description="array of extra keys and values")
      * @Rest\QueryParam(map=true, name="shop_ids", nullable=true, strict=true, requirements="\d+", default="0", description="array of shop ids")
      * @Rest\QueryParam(map=true, name="category_ids", nullable=true, strict=true, requirements="\d+", default="0", description="array of category ids")
      * @Rest\QueryParam(map=true, name="brand_ids", nullable=true, strict=true, requirements="\d+", default="0", description="array of brand ids")
      * @Rest\QueryParam(
      *     name="search",
      *     strict=true,
-     *     requirements="^[A-Za-z0-9 ,éäöåÉÄÖÅ]*$",
+     *     requirements="^[A-Za-z0-9 ,-éäöåÉÄÖÅ]*$",
      *     nullable=true,
      *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by sku, name, description, category, brand, shop and price fields")
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
