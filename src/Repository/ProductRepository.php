@@ -43,7 +43,7 @@ class ProductRepository extends ServiceEntityRepository
         $query = '
             select 
             DISTINCT e.key, 
-            jsonb_agg(DISTINCT jsonb_build_array(e.value)) as fields 
+            jsonb_agg(DISTINCT e.value) as fields 
             from products AS p 
             join jsonb_each_text(p.extras) e on true
             WHERE e.key != :exclude_key       
