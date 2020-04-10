@@ -576,10 +576,8 @@ class Product implements EntityValidatorException
         }
         $search = implode(',', $pieces);
         $replace = preg_replace('/[^a-zA-Z0-9 ,.éäöåÉÄÖÅ]/', "", $search);
-        $result = preg_replace('!\s+!', ' ', $replace);
-        $result = preg_replace('!\s!', '&', $replace);
 
-        return $result;
+        return $replace;
     }
 
     /**
