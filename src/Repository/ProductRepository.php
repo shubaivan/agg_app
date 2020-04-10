@@ -43,7 +43,7 @@ class ProductRepository extends ServiceEntityRepository
         $query = '
             select 
             DISTINCT e.key, 
-            array_agg(DISTINCT e.value) as fields 
+            jsonb_agg(DISTINCT e.value) as fields 
             from products AS p 
             join jsonb_each_text(p.extras) e on true
             WHERE e.key != :exclude_key       
@@ -56,8 +56,10 @@ class ProductRepository extends ServiceEntityRepository
 
         $result = [];
         foreach ($keyPairs as $key => $value) {
-            preg_match_all('/{([^_]+)}/', $value, $matches);
-            $value = explode(',', $matches[1][0]);
+            preg_match_all('/\["([^_]+)"\]/', $value, $matches);
+            if (isset($matches[1][0])) {
+                $value = explode('", "', $matches[1][0]);
+            }
             $result[$key] = $value;
         }
 
