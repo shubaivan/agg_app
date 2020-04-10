@@ -19,7 +19,7 @@ class ExtraFieldsValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, ExtraFields::class);
         }
 
-        if (null === $value || '' === $value) {
+        if (null === $value || '' === $value || 0 == $value) {
             return;
         }
 
