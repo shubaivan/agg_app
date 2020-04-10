@@ -43,7 +43,7 @@ class ProductRepository extends ServiceEntityRepository
         $query = '
             select 
             DISTINCT e.key, 
-            jsonb_agg(DISTINCT e.value) as fields 
+            array_agg(DISTINCT e.value) as fields 
             from products AS p 
             join jsonb_each_text(p.extras) e on true
             WHERE e.key != :exclude_key       
@@ -52,8 +52,16 @@ class ProductRepository extends ServiceEntityRepository
         $statement = $connection->prepare($query);
         $statement->bindValue(':exclude_key', 'ALTERNATIVE_IMAGE');
         $execute = $statement->execute();
+        $keyPairs = $statement->fetchAll(\PDO::FETCH_KEY_PAIR);
 
-        return $statement->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $result = [];
+        foreach ($keyPairs as $key => $value) {
+            preg_match_all('/{([^_]+)}/', $value, $matches);
+            $value = explode(',', $matches[1][0]);
+            $result[$key] = $value;
+        }
+
+        return $result;
     }
 
     /**
