@@ -137,7 +137,9 @@ class ProductRepository extends ServiceEntityRepository
                 $result = preg_replace('!\s!', '&', $result);
                 $search = str_replace(',', ':*|', $result) . ':*';
             } else {
-                $search = $searchField . ':*';
+                $result = preg_replace('!\s+!', ' ', $searchField);
+                $result = preg_replace('!\s!', '&', $result);
+                $search = $result . ':*';
             }
         } else {
             $search = $searchField;
