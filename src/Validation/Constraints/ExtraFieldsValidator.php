@@ -9,6 +9,8 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 class ExtraFieldsValidator extends ConstraintValidator
 {
+    const pattern = '^[A-Za-z0-9 ,-éäöåÉÄÖÅ]*$';
+
     /**
      * @param mixed $value
      * @param Constraint $constraint
@@ -28,11 +30,12 @@ class ExtraFieldsValidator extends ConstraintValidator
         }
 
         foreach ($value as $item) {
-            if (!preg_match('/^[A-Za-z0-9 ,-éäöåÉÄÖÅ]*$/', $item, $matches)
+            if (!preg_match('/' . self::pattern . '/', $item, $matches)
                 || null === $item || '' === $item
             ) {
                 $this->context
-                    ->buildViolation('key ' . $this->context->getPropertyPath() . ' with value "' . $item . '" not valid')
+                    ->buildViolation('key ' . $this->context->getPropertyPath()
+                        . ' with value "' . $item . '" not valid. Pattern:' . self::pattern)
                     ->addViolation();
             }
         }

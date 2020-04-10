@@ -17,6 +17,7 @@ use Swagger\Annotations as SWG;
 use App\Entity\Product;
 use App\Entity\Collection\SearchProductCollection;
 use App\Validation\Constraints\ExtraFields;
+use App\Validation\Constraints\SearchQueryParam;
 
 class ProductController extends AbstractRestController
 {
@@ -95,7 +96,7 @@ class ProductController extends AbstractRestController
      * @Rest\QueryParam(
      *     name="search",
      *     strict=true,
-     *     requirements="^[A-Za-z0-9 ,-éäöåÉÄÖÅ]*$",
+     *     requirements=@SearchQueryParam,
      *     nullable=true,
      *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by sku, name, description, category, brand, shop and price fields")
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
