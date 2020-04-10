@@ -53,7 +53,7 @@ class ProductRepository extends ServiceEntityRepository
         $statement->bindValue(':exclude_key', 'ALTERNATIVE_IMAGE');
         $execute = $statement->execute();
 
-        return $statement->fetchAll(\PDO::FETCH_ASSOC);
+        return $statement->fetchAll(\PDO::FETCH_KEY_PAIR);
     }
 
     /**
