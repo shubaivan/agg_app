@@ -208,10 +208,10 @@ class Product implements EntityValidatorException
     private $extras;
 
     /**
-     * @var Collection|UserIp[]
-     * @ORM\ManyToMany(targetEntity="UserIp", mappedBy="products")
+     * @var Collection|UserIpProduct[]
+     * @ORM\OneToMany(targetEntity="UserIpProduct", mappedBy="products")
      */
-    private $userIps;
+    private $userIpProducts;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -231,6 +231,7 @@ class Product implements EntityValidatorException
         $this->userIps = new ArrayCollection();
         $this->categoryRelation = new ArrayCollection();
         $this->shopRelation = new ArrayCollection();
+        $this->userIpProducts = new ArrayCollection();
     }
 
     /**
@@ -580,38 +581,6 @@ class Product implements EntityValidatorException
         return $replace;
     }
 
-    /**
-     * @return Collection|UserIp[]
-     */
-    public function getUserIps(): Collection
-    {
-        if (!$this->userIps) {
-            $this->userIps = new ArrayCollection();
-        }
-
-        return $this->userIps;
-    }
-
-    public function addUserIp(UserIp $userIp): self
-    {
-        if (!$this->getUserIps()->contains($userIp)) {
-            $this->userIps[] = $userIp;
-            $userIp->addProduct($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserIp(UserIp $userIp): self
-    {
-        if ($this->getUserIps()->contains($userIp)) {
-            $this->userIps->removeElement($userIp);
-            $userIp->removeProduct($this);
-        }
-
-        return $this;
-    }
-
     public function getShop(): ?string
     {
         return $this->shop;
@@ -709,6 +678,40 @@ class Product implements EntityValidatorException
     public function setExtras($extras): self
     {
         $this->extras = $extras;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|UserIpProduct[]
+     */
+    public function getUserIpProducts(): Collection
+    {
+        if (!$this->userIpProducts) {
+            $this->userIpProducts = new ArrayCollection();
+        }
+        return $this->userIpProducts;
+    }
+
+    public function addUserIpProduct(UserIpProduct $userIpProduct): self
+    {
+        if (!$this->getUserIpProducts()->contains($userIpProduct)) {
+            $this->userIpProducts[] = $userIpProduct;
+            $userIpProduct->setProducts($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserIpProduct(UserIpProduct $userIpProduct): self
+    {
+        if ($this->getUserIpProducts()->contains($userIpProduct)) {
+            $this->userIpProducts->removeElement($userIpProduct);
+            // set the owning side to null (unless already changed)
+            if ($userIpProduct->getProducts() === $this) {
+                $userIpProduct->setProducts(null);
+            }
+        }
 
         return $this;
     }

@@ -24,14 +24,14 @@ class UserIp
     private $ip;
 
     /**
-     * @var Collection|Product[]
-     * @ORM\ManyToMany(targetEntity="Product", inversedBy="userIps", cascade={"persist"})
+     * @var Collection|UserIpProduct[]
+     * @ORM\OneToMany(targetEntity="UserIpProduct", mappedBy="ips")
      */
-    private $products;
+    private $userIpProducts;
 
     public function __construct()
     {
-        $this->products = new ArrayCollection();
+        $this->userIpProducts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -52,29 +52,34 @@ class UserIp
     }
 
     /**
-     * @return Collection|Product[]
+     * @return Collection|UserIpProduct[]
      */
-    public function getProducts(): Collection
+    public function getUserIpProducts(): Collection
     {
-        if (!$this->products) {
-            $this->products = new ArrayCollection();
+        if (!$this->userIpProducts) {
+            $this->userIpProducts = new ArrayCollection();
         }
-        return $this->products;
+        return $this->userIpProducts;
     }
 
-    public function addProduct(Product $product): self
+    public function addUserIpProduct(UserIpProduct $userIpProduct): self
     {
-        if (!$this->getProducts()->contains($product)) {
-            $this->products[] = $product;
+        if (!$this->getUserIpProducts()->contains($userIpProduct)) {
+            $this->userIpProducts[] = $userIpProduct;
+            $userIpProduct->setIps($this);
         }
 
         return $this;
     }
 
-    public function removeProduct(Product $product): self
+    public function removeUserIpProduct(UserIpProduct $userIpProduct): self
     {
-        if ($this->getProducts()->contains($product)) {
-            $this->products->removeElement($product);
+        if ($this->getUserIpProducts()->contains($userIpProduct)) {
+            $this->userIpProducts->removeElement($userIpProduct);
+            // set the owning side to null (unless already changed)
+            if ($userIpProduct->getIps() === $this) {
+                $userIpProduct->setIps(null);
+            }
         }
 
         return $this;

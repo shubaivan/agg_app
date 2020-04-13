@@ -225,6 +225,9 @@
     "ocramius/proxy-manager": {
         "version": "2.2.3"
     },
+    "oro/doctrine-extensions": {
+        "version": "dev-master"
+    },
     "php": {
         "version": "7.3"
     },
