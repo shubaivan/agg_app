@@ -308,6 +308,8 @@ class ProductController extends AbstractRestController
      *                  type="array",
      *                  @SWG\Items(
      *                        type="object",
+     *                      @SWG\Property(property="product_id", type="integer"),
+     *                      @SWG\Property(property="number_of_entries", type="integer"),
      *                      @SWG\Property(property="id", type="integer"),
      *                      @SWG\Property(property="sku", type="string"),
      *                      @SWG\Property(property="name", type="string"),
