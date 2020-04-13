@@ -17,6 +17,10 @@ use App\Services\ObjectsHandler;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
 use FOS\RestBundle\Request\ParamFetcher;
 use Monolog\Logger;
@@ -109,25 +113,38 @@ class ProductService
     /**
      * @param ParamFetcher $paramFetcher
      * @return SearchProductCollection
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function getProductByIp(ParamFetcher $paramFetcher)
     {
-        $collection = $this->getUserIpProductRepository()->getTopProductByIp($this->getUserIp(), $paramFetcher);
-        $count = $this->getUserIpProductRepository()->getCountTopProductByIp($this->getUserIp());
+        $collection = $this->getUserIpProductRepository()
+            ->getTopProductByIp($this->getUserIp(), $paramFetcher);
+        $count = $this->getUserIpProductRepository()
+            ->getCountTopProductByIp($this->getUserIp());
 
         return (new SearchProductCollection($collection, $count));
     }
 
     /**
      * @return UserIp|object|null
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function getUserIp()
     {
         $clientIp = $this->getClientIp();
-        return $this->getEm()->getRepository(UserIp::class)
+        $userIp = $this->getEm()->getRepository(UserIp::class)
             ->findOneBy(['ip' => $clientIp]);
+        if (!$userIp) {
+            $userIp = (new UserIp())->setIp($clientIp);
+            $this->getEm()->persist($userIp);
+            $this->getEm()->flush();
+        }
+
+        return $userIp;
     }
 
     /**
@@ -139,11 +156,7 @@ class ProductService
     private function recordIpToProduct(Product $product)
     {
         $userIp = $this->getUserIp();
-        if (!$userIp) {
-            $clientIp = $this->getClientIp();
-            $userIp = (new UserIp())->setIp($clientIp);
-            $this->getEm()->persist($userIp);
-        }
+
         $userIpProduct = new UserIpProduct();
         $userIpProduct
             ->setProducts($product)

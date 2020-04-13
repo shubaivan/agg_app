@@ -343,6 +343,8 @@ class ProductController extends AbstractRestController
      * @return SearchProductCollection
      * @throws NoResultException
      * @throws NonUniqueResultException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function getProductByIpAction(ParamFetcher $paramFetcher)
     {
