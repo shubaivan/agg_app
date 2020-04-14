@@ -43,7 +43,7 @@ class SearchProductCollection
     public function getCollection(): array
     {
         $array_map = array_map(function ($key) {
-            if (isset($key['extras'])) {
+            if (isset($key['extras']) && !is_array($key['extras'])) {
                 $val = json_decode($key['extras'], true);
 
                 if (json_last_error() !== JSON_ERROR_NONE) {
