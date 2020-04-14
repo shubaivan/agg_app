@@ -3,6 +3,7 @@
 namespace App\Entity\Collection;
 
 use App\Entity\Product;
+use Doctrine\DBAL\Types\ConversionException;
 use JMS\Serializer\Annotation;
 
 class ProductCollection
@@ -18,6 +19,7 @@ class ProductCollection
      * @var array
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      * @Annotation\Type("array")
+     * @Annotation\Accessor(getter="getAccessorRelatedItems")
      */
     private $relatedItems;
 
@@ -32,12 +34,30 @@ class ProductCollection
         $this->product = $product;
     }
 
+    public function getAccessorRelatedItems()
+    {
+        return $this->getRelatedItems();
+    }
+
     /**
      * @return array
      */
     public function getRelatedItems(): array
     {
-        return $this->relatedItems;
+        $array_map = array_map(function ($key) {
+            if (isset($key['extras'])) {
+                $val = json_decode($key['extras'], true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw ConversionException::conversionFailed($key['extras'], $key['sku']);
+                }
+                $key['extras'] = $val;
+            }
+
+            return $key;
+        }, $this->relatedItems);
+
+        return $array_map;
     }
 
     /**
