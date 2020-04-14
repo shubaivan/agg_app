@@ -14,6 +14,26 @@ doctrine:
 
         url: '%env(resolve:DATABASE_URL)%'
     orm:
+        second_level_cache:
+            region_cache_driver:
+                type: service
+                id: doctrine.orm.default_result_cache
+            enabled: true
+            regions:
+                entity_that_rarely_changes:
+                    lifetime: 86400 # 1 day
+                    cache_driver:
+                        type: service
+                        id: doctrine.orm.default_result_cache
+        metadata_cache_driver:
+            type: pool
+            pool: doctrine.system_cache_pool
+        query_cache_driver:
+            type: pool
+            pool: doctrine.system_cache_pool
+        result_cache_driver:
+            type: pool
+            pool: doctrine.result_cache_pool
         dql:
             string_functions:
                 JSONB_AG:   Boldtrn\JsonbBundle\Query\JsonbAtGreater

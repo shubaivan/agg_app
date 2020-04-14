@@ -7,6 +7,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserIpProductRepository")
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class UserIpProduct
 {
@@ -21,12 +22,14 @@ class UserIpProduct
 
     /**
      * @var Product
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="userIpProducts", cascade={"persist"})
      */
     private $products;
 
     /**
      * @var UserIp
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToOne(targetEntity="UserIp", inversedBy="userIpProducts", cascade={"persist"})
      */
     private $ips;

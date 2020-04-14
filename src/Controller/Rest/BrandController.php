@@ -7,10 +7,16 @@ use App\Repository\BrandRepository;
 use App\Repository\CategoryRepository;
 use App\Entity\Brand;
 use App\Services\Helpers;
+use Doctrine\DBAL\DBALException;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 
@@ -55,16 +61,20 @@ class BrandController extends AbstractRestController
      * )
      *
      * @return BrandsCollection
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws DBALException
+     * @throws InvalidArgumentException
      */
-    public function getBrandsAction(ParamFetcher $paramFetcher)
+    public function getBrandsAction(
+        ParamFetcher $paramFetcher
+    )
     {
         $collection = $this->getBrandRepository()->getEntityList($paramFetcher);
         $count = $this->getBrandRepository()->getEntityList($paramFetcher, true);
+        $brandsCollection = new BrandsCollection($collection, $count);
 
-        return (new BrandsCollection($collection, $count));
+        return $brandsCollection;
     }
 
     /**

@@ -96,7 +96,7 @@ class ProductController extends AbstractRestController
      */
     public function fetchProductExtraFieldsAction()
     {
-        $allExtrasKey = $this->getProductRepository()->fetchAllExtrasFields();
+        $allExtrasKey = $this->getProductRepository()->fetchAllExtrasFieldsWithCache();
         return $allExtrasKey;
     }
 

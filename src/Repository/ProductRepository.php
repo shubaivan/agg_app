@@ -2,12 +2,20 @@
 
 namespace App\Repository;
 
+use App\Entity\Brand;
 use App\Entity\Product;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Cache\Cache as ResultCacheDriver;
+use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\DBAL\Cache\QueryCacheProfile;
+use Doctrine\DBAL\Cache\ResultCacheStatement;
+use Doctrine\DBAL\ParameterType;
+use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -16,7 +24,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * @method Product|null findOneBy(array $criteria, array $orderBy = null)
  * @method Product[]    findAll()
  * @method Product[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- * @method Product[]|int getList($qb, $paramFetcher, $count)
+ * @method Product[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false)
  */
 class ProductRepository extends ServiceEntityRepository
 {
@@ -37,30 +45,40 @@ class ProductRepository extends ServiceEntityRepository
      * @return mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function fetchAllExtrasFields()
+    public function fetchAllExtrasFieldsWithCache()
     {
         $connection = $this->getEntityManager()->getConnection();
+
+        $cache = $this->getEntityManager()->getConfiguration()->getResultCacheImpl();
+
         $query = '
             select 
-            DISTINCT e.key, 
+            DISTINCT e.key,  
             jsonb_agg(DISTINCT e.value) as fields 
             from products AS p 
             join jsonb_each_text(p.extras) e on true
             WHERE e.key != :exclude_key       
             GROUP BY e.key
         ';
-        $statement = $connection->prepare($query);
-        $statement->bindValue(':exclude_key', 'ALTERNATIVE_IMAGE');
-        $execute = $statement->execute();
-        $keyPairs = $statement->fetchAll(\PDO::FETCH_KEY_PAIR);
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            [':exclude_key' => 'ALTERNATIVE_IMAGE'],
+            [':exclude_key' => ParameterType::STRING],
+            new QueryCacheProfile(0, "extras_fields", $cache)
+        );
+        $keyPairs = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $statement->closeCursor();
 
         $result = [];
         foreach ($keyPairs as $key => $value) {
-            preg_match_all('/\["([^_]+)"\]/', $value, $matches);
-            if (isset($matches[1][0])) {
-                $value = explode('", "', $matches[1][0]);
+            if (isset($value['fields']) && isset($value['key'])) {
+                preg_match_all('/\["([^_]+)"\]/', $value['fields'], $matches);
+                if (isset($matches[1][0])) {
+                    $value['fields'] = explode('", "', $matches[1][0]);
+                }
+                $result[$value['key']] = $value['fields'];
             }
-            $result[$key] = $value;
         }
 
         return $result;
@@ -85,7 +103,12 @@ class ProductRepository extends ServiceEntityRepository
             $qb
                 ->where($qb->expr()->in('s.id', $ids));
 
-            return $this->getList($qb, $paramFetcher, $count);
+            return $this->getList(
+                $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
+                $qb,
+                $paramFetcher,
+                $count
+            );
         } else {
             throw new BadRequestHttpException($ids . ' not valid');
         }
@@ -113,6 +136,8 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function fullTextSearchByParameterBagOptimization(ParameterBag $parameterBag, $count = false)
     {
+        $cache = $this->getEntityManager()->getConfiguration()->getResultCacheImpl();
+
         $sort_by = isset($_REQUEST['sort_by']);
         $connection = $this->getEntityManager()->getConnection();
         $limit = $parameterBag->get('count');
@@ -199,6 +224,7 @@ class ProductRepository extends ServiceEntityRepository
         ';
 
         $conditions = [];
+        $variables = [];
         if (is_array($parameterBag->get('extra_array'))
             && array_search('0', $parameterBag->get('extra_array'), true) === false
         ) {
@@ -220,6 +246,7 @@ class ProductRepository extends ServiceEntityRepository
             $commonExtraConditionsString = '(' . implode(' AND ', $commonExtraConditionsArray) . ')';
 
             array_push($conditions, $commonExtraConditionsString);
+            $variables = array_merge($variables, $preparedExtraArray);
         }
 
         if (is_array($parameterBag->get('exclude_ids'))
@@ -237,6 +264,7 @@ class ProductRepository extends ServiceEntityRepository
                             products_alias.id NOT IN ($bindKeysIds)
                         ";
             array_push($conditions, $conditionIds);
+            $variables = array_merge($variables, $preparedInValuesIds);
         }
 
         if (is_array($parameterBag->get('shop_ids'))
@@ -254,6 +282,7 @@ class ProductRepository extends ServiceEntityRepository
                         ";
 
             array_push($conditions, $conditionShop);
+            $variables = array_merge($variables, $preparedInValuesShop);
         }
 
         if (is_array($parameterBag->get('category_ids'))
@@ -270,6 +299,7 @@ class ProductRepository extends ServiceEntityRepository
                             cp.category_id IN ($bindKeysCategory)
                         ";
             array_push($conditions, $conditionCategory);
+            $variables = array_merge($variables, $preparedInValuesCategory);
         }
 
         if (is_array($parameterBag->get('brand_ids'))
@@ -288,6 +318,7 @@ class ProductRepository extends ServiceEntityRepository
                         ";
 
             array_push($conditions, $conditionBrand);
+            $variables = array_merge($variables, $preparedInValuesBrand);
         }
         if (count($conditions)) {
             $query .= 'WHERE ' . implode(' AND ', $conditions);
@@ -311,55 +342,42 @@ class ProductRepository extends ServiceEntityRepository
             ';
         }
 
-        $statement = $connection->prepare($query);
-
-        if (isset($preparedExtraArray)) {
-            foreach ($preparedExtraArray as $key => $val) {
-                $statement->bindValue($key, $val);
-            }
+        $params = [];
+        $types = [];
+        foreach ($variables as $key => $val) {
+            $params[$key] = $val;
         }
 
-        if (isset($preparedInValuesIds)) {
-            foreach ($preparedInValuesIds as $key => $val) {
-                $statement->bindValue($key, $val);
-            }
-        }
-
-        if (isset($preparedInValuesCategory)) {
-            foreach ($preparedInValuesCategory as $key => $val) {
-                $statement->bindValue($key, $val);
-            }
-        }
-
-        if (isset($preparedInValuesShop)) {
-            foreach ($preparedInValuesShop as $key => $val) {
-                $statement->bindValue($key, $val);
-            }
-        }
-
-        if (isset($preparedInValuesBrand)) {
-            foreach ($preparedInValuesBrand as $key => $val) {
-                $statement->bindValue($key, $val);
-            }
-        }
         if ($search) {
-            $statement->bindValue(':search', $search, \PDO::PARAM_STR);
+            $params[':search'] = $search;
+            $types[':search'] = \PDO::PARAM_STR;
         }
 
         if (!$count) {
-            $statement->bindValue(':offset', $offset, \PDO::PARAM_INT);
-            $statement->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $params[':offset'] = $offset;
+            $params[':limit'] = $limit;
+            $types[':offset'] = \PDO::PARAM_INT;
+            $types[':limit'] = \PDO::PARAM_INT;
         }
 
-        $execute = $statement->execute();
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            new QueryCacheProfile(
+                0,
+                $count ? "product_search_cont" : "product_search_collection",
+                $cache)
+        );
 
         if ($count) {
-            $products = $statement->fetchColumn();
-            $products = (int)$products;
+            $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $products = isset($products[0]['count']) ? (int)$products[0]['count'] : 0;
         } else {
             $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
         }
-
+        $statement->closeCursor();
 
         return $products;
     }

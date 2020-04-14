@@ -20,6 +20,7 @@ use App\Entity\Product;
  *    }
  * )
  * @UniqueEntity(fields={"name"})
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
  */
 class Category
 {
@@ -43,6 +44,7 @@ class Category
 
     /**
      * @var Collection|Product[]
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToMany(targetEntity="Product", mappedBy="categoryRelation", fetch="EXTRA_LAZY")
      */
     private $products;

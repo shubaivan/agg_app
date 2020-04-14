@@ -46,8 +46,12 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    messenger.middleware.reply_middleware:
-        class: App\Middleware\ReplyMiddleware
+    app.my_custom_redis_provider:
+      class: \Redis
+      factory: ['Symfony\Component\Cache\Adapter\RedisAdapter', 'createConnection']
+      arguments:
+        - 'redis://redis:6379'
+        - { retry_interval: 2, timeout: 10 }
 
     jms_serializer.object_constructor:
       public: false

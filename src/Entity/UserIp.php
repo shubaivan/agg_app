@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserIpRepository")
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class UserIp
 {
@@ -25,6 +26,7 @@ class UserIp
 
     /**
      * @var Collection|UserIpProduct[]
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\OneToMany(targetEntity="UserIpProduct", mappedBy="ips")
      */
     private $userIpProducts;

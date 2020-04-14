@@ -3,6 +3,8 @@
     "license": "proprietary",
     "require": {
         "php": "^7.2.5",
+      "ext-redis": "*",
+      "ext-json": "*",
         "ext-amqp": "*",
         "ext-ctype": "*",
         "ext-iconv": "*",

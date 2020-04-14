@@ -2,10 +2,11 @@
 
 namespace App\Repository;
 
-use App\Entity\Brand;
 use App\Entity\Shop;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Cache\Cache as ResultCacheDriver;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
 
 /**
@@ -13,7 +14,7 @@ use FOS\RestBundle\Request\ParamFetcher;
  * @method Shop|null findOneBy(array $criteria, array $orderBy = null)
  * @method Shop[]    findAll()
  * @method Shop[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- * @method Shop[]|int getList($qb, $paramFetcher, $count)
+ * @method Shop[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false)
  */
 class ShopRepository extends ServiceEntityRepository
 {
@@ -28,13 +29,16 @@ class ShopRepository extends ServiceEntityRepository
      * @param ParamFetcher $paramFetcher
      * @param bool $count
      * @return Shop[]|int
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getEntityList(
         ParamFetcher $paramFetcher,
         $count = false)
     {
-        return $this->getList($this->createQueryBuilder('s'), $paramFetcher, $count);
+        return $this->getList(
+            $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
+            $this->createQueryBuilder('s'),
+            $paramFetcher,
+            $count
+        );
     }
 }

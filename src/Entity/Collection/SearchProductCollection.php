@@ -3,6 +3,7 @@
 namespace App\Entity\Collection;
 
 use App\Entity\Product;
+use Doctrine\DBAL\Types\ConversionException;
 use JMS\Serializer\Annotation;
 
 class SearchProductCollection
@@ -10,6 +11,7 @@ class SearchProductCollection
     /**
      * @var array
      * @Annotation\Type("array")
+     * @Annotation\Accessor(getter="getAccessorCollection")
      */
     private $collection;
 
@@ -30,12 +32,30 @@ class SearchProductCollection
         $this->count = $count;
     }
 
+    public function getAccessorCollection()
+    {
+        return $this->getCollection();
+    }
+
     /**
      * @return array
      */
     public function getCollection(): array
     {
-        return $this->collection;
+        $array_map = array_map(function ($key) {
+            if (isset($key['extras'])) {
+                $val = json_decode($key['extras'], true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw ConversionException::conversionFailed($key['extras'], $key['sku']);
+                }
+                $key['extras'] = $val;
+            }
+
+            return $key;
+        }, $this->collection);
+
+        return $array_map;
     }
 
     /**

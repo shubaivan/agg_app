@@ -4,8 +4,9 @@ namespace App\Repository;
 
 use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Cache\Cache as ResultCacheDriver;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
 
 /**
@@ -13,7 +14,7 @@ use FOS\RestBundle\Request\ParamFetcher;
  * @method Category|null findOneBy(array $criteria, array $orderBy = null)
  * @method Category[]    findAll()
  * @method Category[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- * @method Category[]|int getList($qb, $paramFetcher, $count)
+ * @method Category[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false)
  */
 class CategoryRepository extends ServiceEntityRepository
 {
@@ -28,13 +29,16 @@ class CategoryRepository extends ServiceEntityRepository
      * @param ParamFetcher $paramFetcher
      * @param bool $count
      * @return Category[]|int
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getEntityList(
         ParamFetcher $paramFetcher,
         $count = false)
     {
-        return $this->getList($this->createQueryBuilder('s'), $paramFetcher, $count);
+        return $this->getList(
+            $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
+            $this->createQueryBuilder('s'),
+            $paramFetcher,
+            $count
+        );
     }
 }

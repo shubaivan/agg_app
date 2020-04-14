@@ -22,6 +22,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
  *     "extras", "createdAt"
  *      }
  * )
+ * @ORM\Cache("NONSTRICT_READ_WRITE")
  */
 class Product implements EntityValidatorException
 {
@@ -77,6 +78,7 @@ class Product implements EntityValidatorException
 
     /**
      * @var Collection|Category[]
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToMany(targetEntity="Category", inversedBy="products", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
@@ -163,7 +165,7 @@ class Product implements EntityValidatorException
 
     /**
      * @var Brand
-     *
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToOne(targetEntity="Brand", inversedBy="products", cascade={"persist"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
@@ -221,6 +223,7 @@ class Product implements EntityValidatorException
 
     /**
      * @var Shop
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToOne(targetEntity="Shop", inversedBy="products", cascade={"persist"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
