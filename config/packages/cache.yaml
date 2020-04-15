@@ -20,6 +20,9 @@ framework:
                 adapter: cache.adapter.redis
             doctrine.system_cache_pool:
                 adapter: cache.adapter.redis
-            my_cache_pool:
+            pdo_common_cache_pool:
+              adapter: cache.adapter.redis
+              tags: true
+            pdo_product_cache_pool:
                 adapter: cache.adapter.redis
                 tags: true

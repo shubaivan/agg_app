@@ -2,9 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\Product;
+use App\Cache\CacheManager;
 use App\QueueModel\FileReadyDownloaded;
 use App\Services\ObjectsHandler;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -18,37 +19,54 @@ class FileDownloadController extends AbstractController
     private $handler;
 
     /**
-     * SleepController constructor.
-     * @param ObjectsHandler $handler
+     * @var CacheManager
      */
-    public function __construct(ObjectsHandler $handler)
+    private $cacheManager;
+
+    /**
+     * FileDownloadController constructor.
+     * @param ObjectsHandler $handler
+     * @param CacheManager $cacheManager
+     */
+    public function __construct(ObjectsHandler $handler, CacheManager $cacheManager)
     {
         $this->handler = $handler;
+        $this->cacheManager = $cacheManager;
     }
-
 
     /**
      * @Route(name="sleep/{path}", path="sleep")
      */
-    public function processVideo(MessageBusInterface $bus, ?string $path)
+    public function processVideo(
+        MessageBusInterface $bus,
+        ?string $path,
+        EntityManagerInterface $em
+    )
     {
+        $this->getCacheManager()->clearAllPoolsCache();
+        $articleContent = <<<EOF
+**successful** all keay was removed.
+EOF;
         if ($path) {
-            $fileReadyDownloaded = new FileReadyDownloaded($path);
+            $fileReadyDownloaded = new FileReadyDownloaded($path, 'test');
             $bus->dispatch($fileReadyDownloaded);
         }
-        /** @var \Doctrine\Bundle\DoctrineBundle\Registry $obj */
-        $obj = $this->get('doctrine');
-        $objectManager = $obj->getManager();
+        return new Response('<html><body>' . $articleContent . '</body></html>');
+    }
 
-        $product = $objectManager->getRepository(Product::class)
-            ->fff();
+    /**
+     * @return ObjectsHandler
+     */
+    public function getHandler(): ObjectsHandler
+    {
+        return $this->handler;
+    }
 
-        /** @var Product $product */
-        $product = $objectManager->getRepository(Product::class)
-            ->findOneBy(['id' => 14661]);
-        $product
-            ->setExtras(['test' => 'result', 'hello' => 'world']);
-        $objectManager->flush();
-        return new Response('<html><body>' . ($path ?? 'OK') . '</body></html>');
+    /**
+     * @return CacheManager
+     */
+    public function getCacheManager(): CacheManager
+    {
+        return $this->cacheManager;
     }
 }

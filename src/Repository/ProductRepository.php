@@ -2,6 +2,9 @@
 
 namespace App\Repository;
 
+use App\Cache\TagAwareQueryResultCacheCommon;
+use App\Cache\TagAwareQueryResultCacheFactory;
+use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
 use App\Entity\Product;
 use App\Services\Helpers;
@@ -16,6 +19,7 @@ use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
+use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -35,11 +39,35 @@ class ProductRepository extends ServiceEntityRepository
      */
     private $helpers;
 
-    public function __construct(ManagerRegistry $registry, Helpers $helpers)
+    /**
+     * @var TagAwareQueryResultCacheCommon
+     */
+    private $tagAwareQueryResultCacheCommon;
+
+    /**
+     * @var TagAwareQueryResultCacheProduct
+     */
+    private $tagAwareQueryResultCacheProduct;
+
+    /**
+     * ProductRepository constructor.
+     * @param Helpers $helpers
+     * @param TagAwareQueryResultCacheCommon $tagAwareQueryResultCacheCommon
+     */
+    public function __construct(
+        ManagerRegistry $registry,
+        Helpers $helpers,
+        TagAwareQueryResultCacheCommon $tagAwareQueryResultCacheCommon,
+        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
+    )
     {
-        $this->helpers = $helpers;
         parent::__construct($registry, Product::class);
+
+        $this->helpers = $helpers;
+        $this->tagAwareQueryResultCacheCommon = $tagAwareQueryResultCacheCommon;
+        $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
     }
+
 
     /**
      * @return mixed[]
@@ -47,9 +75,9 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function fetchAllExtrasFieldsWithCache()
     {
+        $this->getTagAwareQueryResultCacheCommon()
+            ->getTagAwareAdapter()->invalidateTags(['fetchAllExtrasFieldsWithCache']);
         $connection = $this->getEntityManager()->getConnection();
-
-        $cache = $this->getEntityManager()->getConfiguration()->getResultCacheImpl();
 
         $query = '
             select 
@@ -60,12 +88,19 @@ class ProductRepository extends ServiceEntityRepository
             WHERE e.key != :exclude_key       
             GROUP BY e.key
         ';
-        /** @var ResultCacheStatement $statement */
-        $statement = $connection->executeCacheQuery(
+
+        $this->getTagAwareQueryResultCacheCommon()->setQueryCacheTags(
             $query,
             [':exclude_key' => 'ALTERNATIVE_IMAGE'],
             [':exclude_key' => ParameterType::STRING],
-            new QueryCacheProfile(0, "extras_fields", $cache)
+            ['fetchAllExtrasFieldsWithCache'],
+            0, "extras_fields"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCommon()
+            ->prepareParamsForExecuteCacheQuery();
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query, $params, $types, $queryCacheProfile
         );
         $keyPairs = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $statement->closeCursor();
@@ -136,8 +171,6 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function fullTextSearchByParameterBagOptimization(ParameterBag $parameterBag, $count = false)
     {
-        $cache = $this->getEntityManager()->getConfiguration()->getResultCacheImpl();
-
         $sort_by = isset($_REQUEST['sort_by']);
         $connection = $this->getEntityManager()->getConnection();
         $limit = $parameterBag->get('count');
@@ -360,15 +393,22 @@ class ProductRepository extends ServiceEntityRepository
             $types[':limit'] = \PDO::PARAM_INT;
         }
 
+        $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
+            $query,
+            $params,
+            $types,
+            ['fullTextSearchByParameterBagOptimization'],
+            0, $count ? "product_search_cont" : "product_search_collection"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
+            ->prepareParamsForExecuteCacheQuery();
+
         /** @var ResultCacheStatement $statement */
         $statement = $connection->executeCacheQuery(
             $query,
             $params,
             $types,
-            new QueryCacheProfile(
-                0,
-                $count ? "product_search_cont" : "product_search_collection",
-                $cache)
+            $queryCacheProfile
         );
 
         if ($count) {
@@ -388,5 +428,21 @@ class ProductRepository extends ServiceEntityRepository
     public function getHelpers(): Helpers
     {
         return $this->helpers;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheCommon
+     */
+    public function getTagAwareQueryResultCacheCommon(): TagAwareQueryResultCacheCommon
+    {
+        return $this->tagAwareQueryResultCacheCommon;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheProduct
+     */
+    public function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
+    {
+        return $this->tagAwareQueryResultCacheProduct;
     }
 }

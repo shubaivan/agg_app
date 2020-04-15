@@ -16,6 +16,8 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Symfony\Component\Cache\Adapter\TagAwareAdapter;
+use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
@@ -45,8 +47,7 @@ class ProductController extends AbstractRestController
     public function __construct(
         ProductRepository $productRepository,
         Helpers $helpers,
-        ProductService $productService
-    )
+        ProductService $productService)
     {
         parent::__construct($helpers);
         $this->productRepository = $productRepository;
@@ -96,7 +97,8 @@ class ProductController extends AbstractRestController
      */
     public function fetchProductExtraFieldsAction()
     {
-        $allExtrasKey = $this->getProductRepository()->fetchAllExtrasFieldsWithCache();
+        $allExtrasKey = $this->getProductRepository()
+            ->fetchAllExtrasFieldsWithCache();
         return $allExtrasKey;
     }
 
@@ -366,5 +368,13 @@ class ProductController extends AbstractRestController
     protected function getProductService(): ProductService
     {
         return $this->productService;
+    }
+
+    /**
+     * @return TagAwareAdapter
+     */
+    private function getPdoCachePool(): TagAwareAdapter
+    {
+        return $this->pdoCachePool;
     }
 }

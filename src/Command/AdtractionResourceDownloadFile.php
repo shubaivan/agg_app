@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Cache\CacheManager;
 use App\Kernel;
 use App\QueueModel\FileReadyDownloaded;
 use GuzzleHttp\Client;
@@ -51,19 +52,27 @@ class AdtractionResourceDownloadFile extends Command
     private $output;
 
     /**
+     * @var CacheManager
+     */
+    private $cacheManager;
+
+    /**
      * AdtractionResourceDownloadFile constructor.
      * @param KernelInterface $kernel
      * @param MessageBusInterface $bus
      * @param LoggerInterface $adtractionLogLogger
      * @param ContainerBagInterface $params
+     * @param CacheManager $cacheManager
      */
     public function __construct(
         KernelInterface $kernel,
         MessageBusInterface $bus,
         LoggerInterface $adtractionLogLogger,
-        ContainerBagInterface $params
+        ContainerBagInterface $params,
+        CacheManager $cacheManager
     )
     {
+        $this->cacheManager = $cacheManager;
         $this->url = $params->get('adtraction_download_urls');
         $this->dirForFiles = $params->get('adtraction_download_file_path');
         $this->kernel = $kernel;
@@ -124,6 +133,8 @@ class AdtractionResourceDownloadFile extends Command
         } catch (\Throwable $t) {
             $this->logger->error($t->getMessage());
             $this->getApplication()->renderThrowable($t, $output);
+        } finally {
+            $this->getCacheManager()->clearAllPoolsCache();
         }
 
         return 0;
@@ -230,8 +241,16 @@ class AdtractionResourceDownloadFile extends Command
     /**
      * @return array
      */
-    public function getUrl(): array
+    protected function getUrl(): array
     {
         return $this->url;
+    }
+
+    /**
+     * @return CacheManager
+     */
+    protected function getCacheManager(): CacheManager
+    {
+        return $this->cacheManager;
     }
 }
