@@ -126,6 +126,7 @@ class AdtractionResourceDownloadFile extends Command
         ]);
 
         try {
+            $this->getCacheManager()->clearAllPoolsCache();
             $this->createGuzzleStreamWayForEachUrl();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
@@ -133,8 +134,6 @@ class AdtractionResourceDownloadFile extends Command
         } catch (\Throwable $t) {
             $this->logger->error($t->getMessage());
             $this->getApplication()->renderThrowable($t, $output);
-        } finally {
-            $this->getCacheManager()->clearAllPoolsCache();
         }
 
         return 0;
