@@ -36,9 +36,9 @@ parameters:
 services:
     # default configuration for services in *this* file
     _defaults:
-      bind:
-        # optionally you can define both the name and type of the argument to match
-        array $config: '%app.cache.handlers.config%'
+        bind:
+            # optionally you can define both the name and type of the argument to match
+            array $config: '%app.cache.handlers.config%'
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
