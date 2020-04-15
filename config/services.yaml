@@ -72,13 +72,6 @@ services:
         $doctrine_result_cache_pool: '@doctrine.result_cache_pool'
         $doctrine_system_cache_pool: '@doctrine.system_cache_pool'
 
-    app.my_custom_redis_provider:
-      class: \Redis
-      factory: ['Symfony\Component\Cache\Adapter\RedisAdapter', 'createConnection']
-      arguments:
-        - 'redis://redis:6379'
-        - { retry_interval: 2, timeout: 10 }
-
     jms_serializer.object_constructor:
       public: false
       alias: jms_serializer.doctrine_object_constructor
