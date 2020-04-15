@@ -65,11 +65,6 @@ services:
       arguments: ['@pdo_common_cache_pool']
       public: true
 
-    tag_query_result_cache_pdo_product_cache_pool:
-      class:   App\Cache\TagAwareQueryResultCacheFactory
-      arguments: ['@pdo_product_cache_pool']
-      public: true
-
     App\Cache\CacheManager:
       arguments:
         $pdo_common_cache_pool: '@pdo_common_cache_pool'
