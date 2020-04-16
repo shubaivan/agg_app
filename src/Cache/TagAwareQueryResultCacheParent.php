@@ -9,7 +9,7 @@ use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\Cache\DoctrineProvider;
 
-class TagAwareQueryResultCacheFactory extends DoctrineProvider
+class TagAwareQueryResultCacheParent extends DoctrineProvider
 {
     /**
      * @var TagAwareAdapterInterface
@@ -159,10 +159,5 @@ class TagAwareQueryResultCacheFactory extends DoctrineProvider
     public function getTagAwareAdapter()
     {
         return $this->tagAwareAdapter;
-    }
-
-    public function __invoke($t)
-    {
-        $this->tagAwareAdapter = $t;
     }
 }

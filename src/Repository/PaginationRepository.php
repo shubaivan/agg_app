@@ -28,7 +28,6 @@ trait PaginationRepository
             $query = $qb
                 ->select('COUNT(s.id) as count')
                 ->getQuery()
-                ->setResultCacheProfile(new QueryCacheProfile())
                 ->setHydrationCacheProfile(new QueryCacheProfile(0, null, $cache))
                 ->useQueryCache(true);
 
@@ -39,11 +38,12 @@ trait PaginationRepository
             $qb
                 ->orderBy('s.' . $paramFetcher->get('sort_by'), $paramFetcher->get('sort_order'))
                 ->setFirstResult($paramFetcher->get('count') * ($paramFetcher->get('page') - 1))
-                ->setMaxResults($paramFetcher->get('count'))
-                ->setCacheMode(Cache::MODE_NORMAL)
-                ->setCacheable(true);
+                ->setMaxResults($paramFetcher->get('count'));
+
             $query =
-                $qb->getQuery()->useQueryCache(true);
+                $qb->getQuery()
+                    ->enableResultCache()
+                    ->useQueryCache(true);
             $result = $query->getResult();
         }
 

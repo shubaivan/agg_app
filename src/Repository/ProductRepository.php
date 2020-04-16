@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Cache\TagAwareQueryResultCacheCommon;
-use App\Cache\TagAwareQueryResultCacheFactory;
+use App\Cache\TagAwareQueryResultCacheParent;
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
 use App\Entity\Product;
@@ -75,8 +75,8 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function fetchAllExtrasFieldsWithCache()
     {
-        $this->getTagAwareQueryResultCacheCommon()
-            ->getTagAwareAdapter()->invalidateTags(['fetchAllExtrasFieldsWithCache']);
+//        $this->getTagAwareQueryResultCacheCommon()
+//            ->getTagAwareAdapter()->invalidateTags(['fetchAllExtrasFieldsWithCache']);
         $connection = $this->getEntityManager()->getConnection();
 
         $query = '
@@ -102,11 +102,11 @@ class ProductRepository extends ServiceEntityRepository
         $statement = $connection->executeCacheQuery(
             $query, $params, $types, $queryCacheProfile
         );
-        $keyPairs = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $fetchAll = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $statement->closeCursor();
 
         $result = [];
-        foreach ($keyPairs as $key => $value) {
+        foreach ($fetchAll as $key => $value) {
             if (isset($value['fields']) && isset($value['key'])) {
                 preg_match_all('/\["([^_]+)"\]/', $value['fields'], $matches);
                 if (isset($matches[1][0])) {
