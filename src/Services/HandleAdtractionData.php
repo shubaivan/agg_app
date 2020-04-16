@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Entity\Shop;
 use App\QueueModel\AdtractionDataRow;
+use App\Util\RedisHelper;
 use League\Csv\Reader;
 use League\Csv\Statement;
 use Monolog\Logger;
@@ -24,17 +26,27 @@ class HandleAdtractionData
     private $logger;
 
     /**
+     * @var RedisHelper
+     */
+    private $redisHelper;
+
+    /**
      * HandleAdtractionData constructor.
      * @param MessageBusInterface $bus
+     * @param LoggerInterface $adtractionFileHandlerLogger
+     * @param RedisHelper $redisHelper
      */
     public function __construct(
         MessageBusInterface $bus,
-        LoggerInterface $adtractionFileHandlerLogger
+        LoggerInterface $adtractionFileHandlerLogger,
+        RedisHelper $redisHelper
     )
     {
         $this->bus = $bus;
         $this->logger = $adtractionFileHandlerLogger;
+        $this->redisHelper = $redisHelper;
     }
+
 
     /**
      * @param string $filePath
@@ -46,6 +58,8 @@ class HandleAdtractionData
     {
         if (!file_exists($filePath)) {
             $this->getLogger()->error('file ' . $filePath . ' no exist');
+            $this->getRedisHelper()
+                ->incr(Shop::PREFIX_HANDLE_DATA_SHOP_FAILED.$shop);
             throw new \Exception('file ' . $filePath . ' no exist');
         }
         /** @var Reader $csv */
@@ -71,6 +85,8 @@ class HandleAdtractionData
             foreach ($records as $record) {
                 if ($shop) {
                     $record['shop'] = $shop;
+                    $this->getRedisHelper()
+                        ->incr(Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL.$shop);
                 }
                 $this->getBus()->dispatch(new AdtractionDataRow($record));
             }
@@ -93,5 +109,13 @@ class HandleAdtractionData
     protected function getLogger(): Logger
     {
         return $this->logger;
+    }
+
+    /**
+     * @return RedisHelper
+     */
+    protected function getRedisHelper(): RedisHelper
+    {
+        return $this->redisHelper;
     }
 }

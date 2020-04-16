@@ -23,7 +23,9 @@ parameters:
     fos_rest.throw_exception_on_unsupported_content_type: true
     fos_rest.body_default_format: 'json'
     locale: 'en'
-
+    redis_host: '%env(REDIS_HOST)%'
+    redis_port: '%env(REDIS_PORT)%'
+    redis_access: '%redis_host%:%redis_port%'
     app.cache.handlers.config:
       products:
         - 'pdo_product_cache_pool'
@@ -56,6 +58,10 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Util\RedisHelper:
+      arguments:
+        - '%redis_host%'
+        - '%redis_port%'
 
     App\Cache\TagAwareQueryResultCacheProduct:
       arguments: ['@pdo_product_cache_pool']

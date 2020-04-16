@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Statistics</h1>
+    <ul>
+        {% for blockName, typeEvent in data  %}
+            {% if typeEvent is iterable %}
+                <h2>{{blockName}}</h2>
+                <li>
+                    {% for eventName, events in typeEvent  %}
+                        {% if events is iterable %}
+                            <h3>{{eventName}}</h3>
+                            <ul>
+                                {% for shopName, counter in events %}
+                                    <li>{{ shopName }} - {{ counter }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {% endfor %}
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    {% block page_contents %}{% endblock %}
+{% endblock %}

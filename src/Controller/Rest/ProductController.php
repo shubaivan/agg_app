@@ -183,9 +183,9 @@ class ProductController extends AbstractRestController
     }
 
     /**
-     * get Product.
+     * get Product data by id.
      *
-     * @Rest\Get("/api/product/{id}")
+     * @Rest\Get("/api/product/{id}", requirements={"id"="\d+"})
      *
      * @View(serializerGroups={Product::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
      *

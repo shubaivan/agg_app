@@ -11,10 +11,12 @@ class RedisHelper
 
     /** @var Redis $redis */
     private $redis;
+    /** @var string  */
     private $host;
+    /** @var string  */
     private $port;
 
-    public function __construct($host, $port)
+    public function __construct(string $host, string $port)
     {
         $this->host = $host;
         $this->port = $port;
@@ -43,6 +45,8 @@ class RedisHelper
         } else {
             $this->redis->setex($key, $this->normaliseTtl($ttl), $value);
         }
+
+        return $this;
     }
 
     /**
@@ -87,6 +91,26 @@ class RedisHelper
         $this->connect();
 
         return $this->redis->persist($key);
+    }
+
+    /**
+     * @param string|null $patern
+     * @return array
+     */
+    public function keys(?string $patern = '*')
+    {
+        $this->connect();
+        return $this->redis->keys($patern);
+    }
+
+    /**
+     * @param string $key
+     * @return int
+     */
+    public function incr(string $key)
+    {
+        $this->connect();
+        return $this->redis->incr($key);
     }
 
     /**

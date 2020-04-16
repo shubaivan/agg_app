@@ -24,7 +24,26 @@ use App\Entity\Product;
  */
 class Shop
 {
+    const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL = 'shop:processing:successful:';
+    const PREFIX_PROCESSING_DATA_SHOP_FAILED = 'shop:processing:failed:';
+
+    const PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL = 'shop:handle:successful:';
+    const PREFIX_HANDLE_DATA_SHOP_FAILED = 'shop:handle:failed:';
+
     const SERIALIZED_GROUP_LIST = 'shop_group_list';
+
+    public static function getPrefixes() {
+        return [
+            'handle' => [
+                'FAILED' => self::PREFIX_HANDLE_DATA_SHOP_FAILED,
+                'SUCCESSFUL' => self::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL,
+            ],
+            'processing' => [
+                'FAILED' => self::PREFIX_PROCESSING_DATA_SHOP_FAILED,
+                'SUCCESSFUL' => self::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL,
+            ]
+        ];
+    }
 
     use TimestampableEntity;
 
