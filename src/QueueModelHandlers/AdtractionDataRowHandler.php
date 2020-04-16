@@ -105,16 +105,16 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->incr(Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED.$product->getShop());
+                ->incr(Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
             throw $e;
         } catch (BadRequestHttpException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->incr(Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED.$product->getShop());
+                ->incr(Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
         } catch (\Exception $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->incr(Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED.$product->getShop());
+                ->incr(Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
             throw $e;
         }
 

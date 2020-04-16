@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Exception\EntityValidatorException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -9,7 +10,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use JMS\Serializer\Annotation;
-use App\Entity\Product;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CategoryRepository")
@@ -19,12 +20,18 @@ use App\Entity\Product;
  *            columns={"name"})
  *    }
  * )
- * @UniqueEntity(fields={"name"})
+ * @UniqueEntity(fields={"name"}, groups={Category::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
  */
-class Category
+class Category implements EntityValidatorException
 {
     const SERIALIZED_GROUP_LIST = 'category_group_list';
+    const SERIALIZED_GROUP_CREATE = 'category_group_crete';
+
+    public function getIdentity()
+    {
+        return $this->getId();
+    }
 
     use TimestampableEntity;
 
@@ -39,6 +46,7 @@ class Category
     /**
      * @ORM\Column(type="string", length=255)
      * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST})
+     * @Assert\NotBlank(groups={Category::SERIALIZED_GROUP_CREATE})
      */
     private $name;
 

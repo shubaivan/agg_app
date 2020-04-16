@@ -25,7 +25,10 @@ class ObjectsHandler
      * @param SerializerInterface $jmsSerializer
      * @param ValidatorInterface $symfonyValidator
      */
-    public function __construct(SerializerInterface $jmsSerializer, ValidatorInterface $symfonyValidator)
+    public function __construct(
+        SerializerInterface $jmsSerializer,
+        ValidatorInterface $symfonyValidator
+    )
     {
         $this->jmsSerializer = $jmsSerializer;
         $this->symfonyValidator = $symfonyValidator;
@@ -82,7 +85,7 @@ class ObjectsHandler
      *
      * @throws ValidatorException
      */
-    private function validateEntity(
+    public function validateEntity(
         $entity,
         array $validateGroups = []
     )

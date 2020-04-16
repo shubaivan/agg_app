@@ -31,6 +31,14 @@ class AdtractionDataRow
     /**
      * @return string|null
      */
+    public function getShop()
+    {
+        return $this->row['shop'] ?? null;
+    }
+
+    /**
+     * @return string|null
+     */
     public function getSku()
     {
         return $this->row['SKU'] ?? null;

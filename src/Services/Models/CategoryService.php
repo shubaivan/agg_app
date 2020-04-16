@@ -4,30 +4,40 @@ namespace App\Services\Models;
 
 use App\Entity\Category;
 use App\Entity\Product;
+use App\Repository\CategoryRepository;
+use App\Services\ObjectsHandler;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CategoryService
 {
     /**
-     * @var EntityManager
+     * @var CategoryRepository
      */
-    private $em;
+    private $categoryRepository;
+
+    /**
+     * @var ObjectsHandler
+     */
+    private $objecHandler;
 
     /**
      * CategoryService constructor.
-     * @param EntityManager $em
+     * @param CategoryRepository $categoryRepository
+     * @param ObjectsHandler $objecHandler
      */
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(CategoryRepository $categoryRepository, ObjectsHandler $objecHandler)
     {
-        $this->em = $em;
+        $this->categoryRepository = $categoryRepository;
+        $this->objecHandler = $objecHandler;
     }
 
     /**
      * @param Product $product
-     * @return Category[]
-     * @throws \Doctrine\ORM\ORMException
+     * @return array
+     * @throws \App\Exception\ValidatorException
      */
     public function createCategoriesFromProduct(Product $product)
     {
@@ -38,7 +48,7 @@ class CategoryService
         $matchAll = preg_match_all('/[-]/', $stringCategories, $matches);
         $arrayCategories = [];
         if ($matchAll > 0) {
-            $arrayCategories = explode(' - ', $stringCategories);
+            $arrayCategories = array_unique(explode(' - ', $stringCategories));
         } else {
             array_push($arrayCategories, $stringCategories);
         }
@@ -50,7 +60,7 @@ class CategoryService
      * @param array $arrayCategories
      * @param Product $product
      * @return array
-     * @throws \Doctrine\ORM\ORMException
+     * @throws \App\Exception\ValidatorException
      */
     private function createArrayModelCategory(array $arrayCategories, Product $product)
     {
@@ -61,6 +71,9 @@ class CategoryService
                 $categoryModel = new Category();
                 $categoryModel
                     ->setName($category);
+
+                $this->getObjecHandler()
+                    ->validateEntity($categoryModel, [Category::SERIALIZED_GROUP_CREATE]);
             }
             $product->addCategoryRelation($categoryModel);
             array_push($arrayModelsCategory, $categoryModel);
@@ -75,15 +88,23 @@ class CategoryService
      */
     private function matchExistCategory(string $name)
     {
-        return $this->getEm()->getRepository(Category::class)
+        return $this->getCategoryRepository()
             ->findOneBy(['name' => $name]);
     }
 
     /**
-     * @return EntityManager
+     * @return ObjectsHandler
      */
-    private function getEm(): EntityManager
+    private function getObjecHandler(): ObjectsHandler
     {
-        return $this->em;
+        return $this->objecHandler;
+    }
+
+    /**
+     * @return CategoryRepository
+     */
+    private function getCategoryRepository(): CategoryRepository
+    {
+        return $this->categoryRepository;
     }
 }
