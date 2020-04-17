@@ -69,6 +69,33 @@ class ShopController extends AbstractRestController
     }
 
     /**
+     * get Shop by id.
+     *
+     * @Rest\Get("/api/shop/{id}", requirements={"id"="\d+"})
+     *
+     * @View(serializerGroups={Shop::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Shop")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json object with relation items",
+     *     @Model(type=Shop::class, groups={Shop::SERIALIZED_GROUP_LIST}))
+     *     )
+     * )
+     *
+     * @param Shop $shop
+     *
+     * @return Shop
+     */
+    public function getCategoryByIdAction(
+        Shop $shop
+    )
+    {
+        return $shop;
+    }
+
+    /**
      * @return ShopRepository
      */
     public function getShopRepository(): ShopRepository

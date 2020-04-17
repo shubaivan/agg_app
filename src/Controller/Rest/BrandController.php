@@ -3,6 +3,8 @@
 namespace App\Controller\Rest;
 
 use App\Entity\Collection\BrandsCollection;
+use App\Entity\Collection\ProductCollection;
+use App\Entity\Product;
 use App\Repository\BrandRepository;
 use App\Repository\CategoryRepository;
 use App\Entity\Brand;
@@ -11,12 +13,15 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 
@@ -75,6 +80,33 @@ class BrandController extends AbstractRestController
         $brandsCollection = new BrandsCollection($collection, $count);
 
         return $brandsCollection;
+    }
+
+    /**
+     * get Brand by id.
+     *
+     * @Rest\Get("/api/brand/{id}", requirements={"id"="\d+"})
+     *
+     * @View(serializerGroups={Brand::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Brand")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json object with relation items",
+     *     @Model(type=Brand::class, groups={Brand::SERIALIZED_GROUP_LIST}))
+     *     )
+     * )
+     *
+     * @param Brand $brand
+     *
+     * @return Brand
+     */
+    public function getBrandByIdAction(
+        Brand $brand
+    )
+    {
+        return $brand;
     }
 
     /**

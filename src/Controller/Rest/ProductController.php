@@ -369,12 +369,4 @@ class ProductController extends AbstractRestController
     {
         return $this->productService;
     }
-
-    /**
-     * @return TagAwareAdapter
-     */
-    private function getPdoCachePool(): TagAwareAdapter
-    {
-        return $this->pdoCachePool;
-    }
 }

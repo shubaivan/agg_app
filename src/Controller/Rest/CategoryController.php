@@ -2,6 +2,7 @@
 
 namespace App\Controller\Rest;
 
+use App\Entity\Brand;
 use App\Entity\Collection\CategoriesCollection;
 use App\Repository\CategoryRepository;
 use App\Entity\Category;
@@ -63,6 +64,33 @@ class CategoryController extends AbstractRestController
         $collection = $this->getCategoryRepository()->getEntityList($paramFetcher);
         $count = $this->getCategoryRepository()->getEntityList($paramFetcher, true);
         return (new CategoriesCollection($collection, $count));
+    }
+
+    /**
+     * get Category by id.
+     *
+     * @Rest\Get("/api/category/{id}", requirements={"id"="\d+"})
+     *
+     * @View(serializerGroups={Category::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Category")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json object with relation items",
+     *     @Model(type=Category::class, groups={Category::SERIALIZED_GROUP_LIST}))
+     *     )
+     * )
+     *
+     * @param Category $category
+     *
+     * @return Category
+     */
+    public function getCategoryByIdAction(
+        Category $category
+    )
+    {
+        return $category;
     }
 
     /**
