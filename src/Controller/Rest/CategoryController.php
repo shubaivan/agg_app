@@ -2,17 +2,18 @@
 
 namespace App\Controller\Rest;
 
-use App\Entity\Brand;
 use App\Entity\Collection\CategoriesCollection;
 use App\Repository\CategoryRepository;
 use App\Entity\Category;
 use App\Services\Helpers;
+use Doctrine\DBAL\DBALException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
+use App\Validation\Constraints\SearchQueryParam;
 
 class CategoryController extends AbstractRestController
 {
@@ -37,6 +38,12 @@ class CategoryController extends AbstractRestController
      *
      * @Rest\Get("/api/categories")
      *
+     * @Rest\QueryParam(
+     *     name="search",
+     *     strict=true,
+     *     requirements=@SearchQueryParam,
+     *     nullable=true,
+     *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by sku, name, description, category, brand, shop and price fields")
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
      * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
      * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
@@ -44,25 +51,38 @@ class CategoryController extends AbstractRestController
      *
      * @param ParamFetcher $paramFetcher
      *
-     * @View(serializerGroups={Category::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
+     * @View(statusCode=Response::HTTP_OK)
      *
      * @SWG\Tag(name="Category")
      *
      * @SWG\Response(
      *     response=200,
-     *     description="Json collection object Categories",
-     *     @SWG\Schema(ref=@Model(type=CategoriesCollection::class, groups={Category::SERIALIZED_GROUP_LIST}))
+     *     description="Json collection objects",
+     *     @SWG\Schema(
+     *         type="object",
+     *         properties={
+     *             @SWG\Property(
+     *                  property="collection",
+     *                  type="array",
+     *                  @SWG\Items(
+     *                        type="object",
+     *                      @SWG\Property(property="id", type="integer"),
+     *                      @SWG\Property(property="name", type="string"),
+     *                      @SWG\Property(property="createdAt", type="string")
+     *                  )
+     *             ),
+     *             @SWG\Property(property="count", type="integer")
+     *         }
+     *     )
      * )
      *
      * @return CategoriesCollection
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function getCategoriesAction(ParamFetcher $paramFetcher)
     {
-        $collection = $this->getCategoryRepository()->getEntityList($paramFetcher);
-        $count = $this->getCategoryRepository()->getEntityList($paramFetcher, true);
+        $collection = $this->getCategoryRepository()->fullTextSearchByParameterFetcher($paramFetcher);
+        $count = $this->getCategoryRepository()->fullTextSearchByParameterFetcher($paramFetcher, true);
         return (new CategoriesCollection($collection, $count));
     }
 
