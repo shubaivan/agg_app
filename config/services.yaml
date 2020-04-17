@@ -62,14 +62,22 @@ services:
       arguments:
         - '%redis_host%'
         - '%redis_port%'
+      lazy: true
+
+    App\Cache\TagAwareQueryResultCacheShop:
+      arguments: ['@pdo_shop_cache_pool']
+      public: true
+      lazy: true
 
     App\Cache\TagAwareQueryResultCacheProduct:
       arguments: ['@pdo_product_cache_pool']
       public: true
+      lazy: true
 
     App\Cache\TagAwareQueryResultCacheCommon:
       arguments: ['@pdo_common_cache_pool']
       public: true
+      lazy: true
 
     App\Cache\CacheManager:
       arguments:
@@ -77,6 +85,7 @@ services:
         $pdo_product_cache_pool: '@pdo_product_cache_pool'
         $doctrine_result_cache_pool: '@doctrine.result_cache_pool'
         $doctrine_system_cache_pool: '@doctrine.system_cache_pool'
+      lazy: true
 
     jms_serializer.object_constructor:
       public: false

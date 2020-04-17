@@ -105,7 +105,7 @@ class ProductService
         $this->recordIpToProduct($product);
         return (new ProductCollection(
             $this->getProductRepository()
-                ->fullTextSearchByParameterBagOptimization($parameterBag),
+                ->fullTextSearchByParameterBag($parameterBag),
             $product
         ));
     }

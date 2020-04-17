@@ -3,23 +3,17 @@
 namespace App\Repository;
 
 use App\Cache\TagAwareQueryResultCacheCommon;
-use App\Cache\TagAwareQueryResultCacheParent;
 use App\Cache\TagAwareQueryResultCacheProduct;
-use App\Entity\Brand;
 use App\Entity\Product;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Cache\Cache as ResultCacheDriver;
-use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ManagerRegistry;
-use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Cache\ResultCacheStatement;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
-use Symfony\Component\Cache\Adapter\RedisAdapter;
-use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -76,7 +70,7 @@ class ProductRepository extends ServiceEntityRepository
     public function fetchAllExtrasFieldsWithCache()
     {
 //        $this->getTagAwareQueryResultCacheCommon()
-//            ->getTagAwareAdapter()->invalidateTags(['fetchAllExtrasFieldsWithCache']);
+//            ->getTagAwareAdapter()->invalidateTags(['fetch_all_extras_fields']);
         $connection = $this->getEntityManager()->getConnection();
 
         $query = '
@@ -93,7 +87,7 @@ class ProductRepository extends ServiceEntityRepository
             $query,
             [':exclude_key' => 'ALTERNATIVE_IMAGE'],
             [':exclude_key' => ParameterType::STRING],
-            ['fetchAllExtrasFieldsWithCache'],
+            ['fetch_all_extras_fields'],
             0, "extras_fields"
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCommon()
@@ -159,7 +153,7 @@ class ProductRepository extends ServiceEntityRepository
     {
         $parameterBag = new ParameterBag($paramFetcher->all());
 
-        return $this->fullTextSearchByParameterBagOptimization($parameterBag, $count);
+        return $this->fullTextSearchByParameterBag($parameterBag, $count);
     }
 
     /**
@@ -169,7 +163,7 @@ class ProductRepository extends ServiceEntityRepository
      * @throws \Doctrine\DBAL\DBALException
      * @throws \InvalidArgumentException
      */
-    public function fullTextSearchByParameterBagOptimization(ParameterBag $parameterBag, $count = false)
+    public function fullTextSearchByParameterBag(ParameterBag $parameterBag, $count = false)
     {
         $sort_by = isset($_REQUEST['sort_by']);
         $connection = $this->getEntityManager()->getConnection();
@@ -397,7 +391,7 @@ class ProductRepository extends ServiceEntityRepository
             $query,
             $params,
             $types,
-            ['fullTextSearchByParameterBagOptimization'],
+            ['product_full_text_search'],
             0, $count ? "product_search_cont" : "product_search_collection"
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()

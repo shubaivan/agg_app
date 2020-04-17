@@ -1,9 +1,24 @@
 doctrine:
     dbal:
         types:
-            jsonb: Boldtrn\JsonbBundle\Types\JsonbArrayType
+            jsonb: MartinGeorgiev\Doctrine\DBAL\Types\Jsonb
+            jsonb[]: MartinGeorgiev\Doctrine\DBAL\Types\JsonbArray
+            smallint[]: MartinGeorgiev\Doctrine\DBAL\Types\SmallIntArray
+            integer[]: MartinGeorgiev\Doctrine\DBAL\Types\IntegerArray
+            bigint[]: MartinGeorgiev\Doctrine\DBAL\Types\BigIntArray
+            text[]: MartinGeorgiev\Doctrine\DBAL\Types\TextArray
         mapping_types:
             jsonb: jsonb
+            jsonb[]: jsonb[]
+            _jsonb: jsonb[]
+            smallint[]: smallint[]
+            _int2: smallint[]
+            integer[]: integer[]
+            _int4: integer[]
+            bigint[]: bigint[]
+            _int8: bigint[]
+            text[]: text[]
+            _text: text[]
         schema_filter: '~^(?!messenger_messages)~'
         driver: 'pdo_pgsql'
         server_version: '9.6'
@@ -36,10 +51,6 @@ doctrine:
             pool: doctrine.result_cache_pool
         dql:
             string_functions:
-                JSONB_AG:   Boldtrn\JsonbBundle\Query\JsonbAtGreater
-                JSONB_HGG:  Boldtrn\JsonbBundle\Query\JsonbHashGreaterGreater
-                JSONB_EX:   Boldtrn\JsonbBundle\Query\JsonbExistence
-
                 # alternative implementation of ALL() and ANY() where subquery is not required, useful for arrays
                 ALL_OF: MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\All
                 ANY_OF: MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\Any
@@ -111,27 +122,27 @@ doctrine:
                 date_format:    Oro\ORM\Query\AST\Functions\String\DateFormat
 
             datetime_functions:
-              date:           Oro\ORM\Query\AST\Functions\SimpleFunction
-              time:           Oro\ORM\Query\AST\Functions\SimpleFunction
-              timestamp:      Oro\ORM\Query\AST\Functions\SimpleFunction
-              convert_tz:     Oro\ORM\Query\AST\Functions\DateTime\ConvertTz
+                date:           Oro\ORM\Query\AST\Functions\SimpleFunction
+                time:           Oro\ORM\Query\AST\Functions\SimpleFunction
+                timestamp:      Oro\ORM\Query\AST\Functions\SimpleFunction
+                convert_tz:     Oro\ORM\Query\AST\Functions\DateTime\ConvertTz
             numeric_functions:
-              timestampdiff:  Oro\ORM\Query\AST\Functions\Numeric\TimestampDiff
-              dayofyear:      Oro\ORM\Query\AST\Functions\SimpleFunction
-              dayofmonth:     Oro\ORM\Query\AST\Functions\SimpleFunction
-              dayofweek:      Oro\ORM\Query\AST\Functions\SimpleFunction
-              week:           Oro\ORM\Query\AST\Functions\SimpleFunction
-              day:            Oro\ORM\Query\AST\Functions\SimpleFunction
-              hour:           Oro\ORM\Query\AST\Functions\SimpleFunction
-              minute:         Oro\ORM\Query\AST\Functions\SimpleFunction
-              month:          Oro\ORM\Query\AST\Functions\SimpleFunction
-              quarter:        Oro\ORM\Query\AST\Functions\SimpleFunction
-              second:         Oro\ORM\Query\AST\Functions\SimpleFunction
-              year:           Oro\ORM\Query\AST\Functions\SimpleFunction
-              sign:           Oro\ORM\Query\AST\Functions\Numeric\Sign
-              pow:            Oro\ORM\Query\AST\Functions\Numeric\Pow
-              round:          Oro\ORM\Query\AST\Functions\Numeric\Round
-              ceil:           Oro\ORM\Query\AST\Functions\SimpleFunction
+                timestampdiff:  Oro\ORM\Query\AST\Functions\Numeric\TimestampDiff
+                dayofyear:      Oro\ORM\Query\AST\Functions\SimpleFunction
+                dayofmonth:     Oro\ORM\Query\AST\Functions\SimpleFunction
+                dayofweek:      Oro\ORM\Query\AST\Functions\SimpleFunction
+                week:           Oro\ORM\Query\AST\Functions\SimpleFunction
+                day:            Oro\ORM\Query\AST\Functions\SimpleFunction
+                hour:           Oro\ORM\Query\AST\Functions\SimpleFunction
+                minute:         Oro\ORM\Query\AST\Functions\SimpleFunction
+                month:          Oro\ORM\Query\AST\Functions\SimpleFunction
+                quarter:        Oro\ORM\Query\AST\Functions\SimpleFunction
+                second:         Oro\ORM\Query\AST\Functions\SimpleFunction
+                year:           Oro\ORM\Query\AST\Functions\SimpleFunction
+                sign:           Oro\ORM\Query\AST\Functions\Numeric\Sign
+                pow:            Oro\ORM\Query\AST\Functions\Numeric\Pow
+                round:          Oro\ORM\Query\AST\Functions\Numeric\Round
+                ceil:           Oro\ORM\Query\AST\Functions\SimpleFunction
 
         auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware

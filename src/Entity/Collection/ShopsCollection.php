@@ -9,14 +9,12 @@ class ShopsCollection
 {
     /**
      * @var array
-     * @Annotation\Groups({Shop::SERIALIZED_GROUP_LIST})
-     * @Annotation\Type("array<App\Entity\Shop>")
+     * @Annotation\Type("array")
      */
     private $collection;
 
     /**
      * @var int
-     * @Annotation\Groups({Shop::SERIALIZED_GROUP_LIST})
      * @Annotation\Type("int")
      */
     private $count;

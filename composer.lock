@@ -4,60 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-  "content-hash": "66bf7edd85fdd274743e7eb24e6901ef",
+  "content-hash": "28e61d9e76f2922fd7269b18abbcd173",
     "packages": [
-        {
-            "name": "boldtrn/jsonb-bundle",
-            "version": "v1.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/boldtrn/JsonbBundle.git",
-                "reference": "bef906f150d3b6a3439c727eabc0fc10a01b33b2"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/boldtrn/JsonbBundle/zipball/bef906f150d3b6a3439c727eabc0fc10a01b33b2",
-                "reference": "bef906f150d3b6a3439c727eabc0fc10a01b33b2",
-                "shasum": ""
-            },
-            "require": {
-                "doctrine/dbal": "~2.4",
-                "php": ">=5.3.3"
-            },
-            "require-dev": {
-                "doctrine/orm": ">2.4,<2.6",
-                "phpunit/phpunit": "~4.2"
-            },
-            "suggest": {
-                "doctrine/orm": "To use DQL functions"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Boldtrn\\JsonbBundle\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Robin Boldt",
-                    "email": "boldtrn@gmail.com"
-                }
-            ],
-            "description": "A library adding the support for JSONB columns of PostgreSQL to Doctrine.",
-            "homepage": "https://github.com/boldtrn/JsonbBundle",
-            "keywords": [
-                "bundle",
-                "doctrine",
-                "jsonb",
-                "postgresql",
-                "symfony"
-            ],
-            "time": "2019-10-09T07:05:14+00:00"
-        },
         {
             "name": "doctrine/annotations",
             "version": "v1.8.0",
@@ -2723,16 +2671,16 @@
         },
         {
             "name": "martin-georgiev/postgresql-for-doctrine",
-            "version": "dev-master",
+          "version": "v1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/martin-georgiev/postgresql-for-doctrine.git",
-                "reference": "ec04e152a70f00718b0cd8c811d612450bbbb076"
+              "reference": "840a55f9eb7ad95152d86b362f6f002e67087d91"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/martin-georgiev/postgresql-for-doctrine/zipball/ec04e152a70f00718b0cd8c811d612450bbbb076",
-                "reference": "ec04e152a70f00718b0cd8c811d612450bbbb076",
+              "url": "https://api.github.com/repos/martin-georgiev/postgresql-for-doctrine/zipball/840a55f9eb7ad95152d86b362f6f002e67087d91",
+              "reference": "840a55f9eb7ad95152d86b362f6f002e67087d91",
                 "shasum": ""
             },
             "require": {
@@ -2740,7 +2688,7 @@
                 "ext-ctype": "*",
                 "ext-json": "*",
                 "ext-mbstring": "*",
-                "php": "^7.1"
+              "php": "^7.2"
             },
             "require-dev": {
                 "doctrine/orm": "~2.5",
@@ -2749,7 +2697,7 @@
                 "php-coveralls/php-coveralls": "^2.1",
                 "phpstan/phpstan": "^0.11",
                 "phpstan/phpstan-phpunit": "^0.11",
-                "phpunit/phpunit": "^7.5 || ^8.0",
+              "phpunit/phpunit": "^8.5",
                 "sensiolabs/security-checker": "^6.0"
             },
             "suggest": {
@@ -2785,7 +2733,7 @@
                 "text search",
                 "tsvector"
             ],
-            "time": "2020-03-09T17:13:06+00:00"
+          "time": "2020-04-13T21:39:57+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -8644,6 +8592,7 @@
                 "monolog",
                 "productivity"
             ],
+          "abandoned": true,
             "time": "2019-10-24T07:13:31+00:00"
         },
         {
@@ -9309,11 +9258,10 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "jms/serializer-bundle": 20,
-        "martin-georgiev/postgresql-for-doctrine": 20,
         "nelmio/api-doc-bundle": 20,
         "nelmio/cors-bundle": 20,
-      "symfony/swiftmailer-bundle": 20,
-      "oro/doctrine-extensions": 20
+      "oro/doctrine-extensions": 20,
+      "symfony/swiftmailer-bundle": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
@@ -9322,7 +9270,9 @@
         "ext-amqp": "*",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "ext-pdo": "*"
+      "ext-json": "*",
+      "ext-pdo": "*",
+      "ext-redis": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "1.1.0"

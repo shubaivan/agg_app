@@ -2,12 +2,17 @@
 
 namespace App\Repository;
 
+use App\Cache\TagAwareQueryResultCacheShop;
 use App\Entity\Shop;
+use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Cache\Cache as ResultCacheDriver;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\DBAL\Cache\ResultCacheStatement;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * @method Shop|null find($id, $lockMode = null, $lockVersion = null)
@@ -20,9 +25,32 @@ class ShopRepository extends ServiceEntityRepository
 {
     use PaginationRepository;
 
-    public function __construct(ManagerRegistry $registry)
+    /**
+     * @var Helpers
+     */
+    private $helpers;
+
+    /**
+     * @var TagAwareQueryResultCacheShop
+     */
+    private $tagAwareQueryResultCacheShop;
+
+    /**
+     * ShopRepository constructor.
+     * @param ManagerRegistry $registry
+     * @param Helpers $helpers
+     * @param TagAwareQueryResultCacheShop $tagAwareQueryResultCacheShop
+     */
+    public function __construct(
+        ManagerRegistry $registry,
+        Helpers $helpers,
+        TagAwareQueryResultCacheShop $tagAwareQueryResultCacheShop
+    )
     {
         parent::__construct($registry, Shop::class);
+
+        $this->helpers = $helpers;
+        $this->tagAwareQueryResultCacheShop = $tagAwareQueryResultCacheShop;
     }
 
     /**
@@ -34,11 +62,174 @@ class ShopRepository extends ServiceEntityRepository
         ParamFetcher $paramFetcher,
         $count = false)
     {
+        $qb = $this->createQueryBuilder('s');
         return $this->getList(
             $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
-            $this->createQueryBuilder('s'),
+            $qb,
             $paramFetcher,
             $count
         );
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param bool $count
+     * @return int|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function fullTextSearchByParameterFetcher(ParamFetcher $paramFetcher, $count = false)
+    {
+        $parameterBag = new ParameterBag($paramFetcher->all());
+
+        return $this->fullTextSearchByParameterBag($parameterBag, $count);
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param bool $count
+     * @return int|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function fullTextSearchByParameterBag(ParameterBag $parameterBag, $count = false)
+    {
+        $sort_by = isset($_REQUEST['sort_by']);
+        $connection = $this->getEntityManager()->getConnection();
+        $limit = $parameterBag->get('count');
+        $offset = $limit * ($parameterBag->get('page') - 1);
+        $sortBy = $parameterBag->get('sort_by');
+        $sortOrder = $parameterBag->get('sort_order');
+
+        $sortBy = $this->getHelpers()->white_list($sortBy,
+            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+        $sortOrder = $this->getHelpers()
+            ->white_list(
+                $sortOrder,
+                [Criteria::DESC, Criteria::ASC],
+                "Invalid ORDER BY direction " . $sortOrder
+            );
+
+        $searchField = $parameterBag->get('search');
+        if ($searchField) {
+            if (preg_match_all('/[,]/', $searchField, $matches) > 0) {
+                $result = preg_replace('!\s+!', ' ', $searchField);
+                $result = preg_replace('/\s*,\s*/', ',', $result);
+                $result = preg_replace('!\s!', '&', $result);
+                $search = str_replace(',', ':*|', $result) . ':*';
+            } else {
+                $result = preg_replace('!\s+!', ' ', $searchField);
+                $result = preg_replace('!\s!', '&', $result);
+                $search = $result . ':*';
+            }
+        } else {
+            $search = $searchField;
+        }
+        $query = '';
+
+        if ($count) {
+            $query .= '
+                        SELECT COUNT(DISTINCT shop_alias.id)
+                    ';
+        } else {
+            $query .= '
+                    SELECT                         
+                            shop_alias.id,
+                            shop_alias.name AS "name",
+                            shop_alias.created_at AS "createdAt"
+            ';
+
+            if ($search) {
+                $query .= '
+                    ,ts_rank_cd(to_tsvector(\'english\',coalesce(name,\'\')||\' \'), query_search) AS rank
+            ';
+            }
+        }
+
+        $query .= '
+                FROM shop shop_alias 
+        ';
+        if ($search) {
+            $query .= '
+                JOIN to_tsquery(:search) query_search
+                ON to_tsvector(\'english\',coalesce(name,\'\')||\' \') @@ query_search
+            ';
+        }
+
+        if (!$count) {
+            $query .= '
+                    GROUP BY id';
+            if ($search) {
+                $query .= ', query_search.query_search';
+            }
+
+            $query .=
+                ($search ?
+                    ($sort_by
+                        ? ' ORDER BY rank DESC, ' . '"' . $sortBy . '"' . ' ' . $sortOrder . ''
+                        : ' ORDER BY rank DESC')
+                    : ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '') . '
+                                          
+                    LIMIT :limit
+                    OFFSET :offset;
+            ';
+        }
+
+        $params = [];
+        $types = [];
+
+        if ($search) {
+            $params[':search'] = $search;
+            $types[':search'] = \PDO::PARAM_STR;
+        }
+
+        if (!$count) {
+            $params[':offset'] = $offset;
+            $params[':limit'] = $limit;
+            $types[':offset'] = \PDO::PARAM_INT;
+            $types[':limit'] = \PDO::PARAM_INT;
+        }
+
+        $this->getTagAwareQueryResultCacheShop()->setQueryCacheTags(
+            $query,
+            $params,
+            $types,
+            ['shop_full_text_search'],
+            0, $count ? "shop_search_cont" : "shop_search_collection"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheShop()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+
+        if ($count) {
+            $shops = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $shops = isset($shops[0]['count']) ? (int)$shops[0]['count'] : 0;
+        } else {
+            $shops = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        $statement->closeCursor();
+
+        return $shops;
+    }
+
+    /**
+     * @return Helpers
+     */
+    private function getHelpers(): Helpers
+    {
+        return $this->helpers;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheShop
+     */
+    private function getTagAwareQueryResultCacheShop(): TagAwareQueryResultCacheShop
+    {
+        return $this->tagAwareQueryResultCacheShop;
     }
 }
