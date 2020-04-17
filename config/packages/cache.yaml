@@ -29,3 +29,6 @@ framework:
             pdo_shop_cache_pool:
                 adapter: cache.adapter.redis
                 tags: true
+            pdo_brand_cache_pool:
+                adapter: cache.adapter.redis
+                tags: true

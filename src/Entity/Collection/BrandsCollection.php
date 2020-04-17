@@ -9,14 +9,12 @@ class BrandsCollection
 {
     /**
      * @var array
-     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
-     * @Annotation\Type("array<App\Entity\Brand>")
+     * @Annotation\Type("array")
      */
     private $collection;
 
     /**
      * @var int
-     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
      * @Annotation\Type("int")
      */
     private $count;

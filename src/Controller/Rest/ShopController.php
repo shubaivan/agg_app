@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 use App\Validation\Constraints\SearchQueryParam;
 
-
 class ShopController extends AbstractRestController
 {
     /**

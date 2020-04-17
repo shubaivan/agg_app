@@ -64,6 +64,11 @@ services:
         - '%redis_port%'
       lazy: true
 
+    App\Cache\TagAwareQueryResultCacheBrand:
+      arguments: ['@pdo_brand_cache_pool']
+      public: true
+      lazy: true
+
     App\Cache\TagAwareQueryResultCacheShop:
       arguments: ['@pdo_shop_cache_pool']
       public: true

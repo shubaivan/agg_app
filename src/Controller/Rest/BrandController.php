@@ -3,27 +3,17 @@
 namespace App\Controller\Rest;
 
 use App\Entity\Collection\BrandsCollection;
-use App\Entity\Collection\ProductCollection;
-use App\Entity\Product;
 use App\Repository\BrandRepository;
-use App\Repository\CategoryRepository;
 use App\Entity\Brand;
 use App\Services\Helpers;
 use Doctrine\DBAL\DBALException;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Psr\Cache\InvalidArgumentException;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
+use App\Validation\Constraints\SearchQueryParam;
 
 class BrandController extends AbstractRestController
 {
@@ -48,6 +38,12 @@ class BrandController extends AbstractRestController
      *
      * @Rest\Get("/api/brands")
      *
+     * @Rest\QueryParam(
+     *     name="search",
+     *     strict=true,
+     *     requirements=@SearchQueryParam,
+     *     nullable=true,
+     *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by sku, name, description, category, brand, shop and price fields")
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
      * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
      * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
@@ -55,28 +51,40 @@ class BrandController extends AbstractRestController
      *
      * @param ParamFetcher $paramFetcher
      *
-     * @View(serializerGroups={Brand::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
+     * @View(statusCode=Response::HTTP_OK)
      *
      * @SWG\Tag(name="Brand")
      *
      * @SWG\Response(
      *     response=200,
-     *     description="Json collection object Brands",
-     *     @SWG\Schema(ref=@Model(type=BrandsCollection::class, groups={Brand::SERIALIZED_GROUP_LIST}))
+     *     description="Json collection objects",
+     *     @SWG\Schema(
+     *         type="object",
+     *         properties={
+     *             @SWG\Property(
+     *                  property="collection",
+     *                  type="array",
+     *                  @SWG\Items(
+     *                        type="object",
+     *                      @SWG\Property(property="id", type="integer"),
+     *                      @SWG\Property(property="name", type="string"),
+     *                      @SWG\Property(property="createdAt", type="string")
+     *                  )
+     *             ),
+     *             @SWG\Property(property="count", type="integer")
+     *         }
+     *     )
      * )
      *
      * @return BrandsCollection
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws DBALException
-     * @throws InvalidArgumentException
      */
     public function getBrandsAction(
         ParamFetcher $paramFetcher
     )
     {
-        $collection = $this->getBrandRepository()->getEntityList($paramFetcher);
-        $count = $this->getBrandRepository()->getEntityList($paramFetcher, true);
+        $collection = $this->getBrandRepository()->fullTextSearchByParameterFetcher($paramFetcher);
+        $count = $this->getBrandRepository()->fullTextSearchByParameterFetcher($paramFetcher, true);
         $brandsCollection = new BrandsCollection($collection, $count);
 
         return $brandsCollection;
