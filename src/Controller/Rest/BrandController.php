@@ -6,6 +6,7 @@ use App\Entity\Collection\BrandsCollection;
 use App\Repository\BrandRepository;
 use App\Entity\Brand;
 use App\Services\Helpers;
+use App\Services\Models\BrandService;
 use Doctrine\DBAL\DBALException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
@@ -18,19 +19,19 @@ use App\Validation\Constraints\SearchQueryParam;
 class BrandController extends AbstractRestController
 {
     /**
-     * @var BrandRepository
+     * @var BrandService
      */
-    private $brandRepository;
+    private $brandService;
 
     /**
      * BrandController constructor.
-     * @param BrandRepository $brandRepository
+     * @param BrandService $brandService
      * @param Helpers $helpers
      */
-    public function __construct(BrandRepository $brandRepository, Helpers $helpers)
+    public function __construct(BrandService $brandService, Helpers $helpers)
     {
         parent::__construct($helpers);
-        $this->brandRepository = $brandRepository;
+        $this->brandService = $brandService;
     }
 
     /**
@@ -83,11 +84,7 @@ class BrandController extends AbstractRestController
         ParamFetcher $paramFetcher
     )
     {
-        $collection = $this->getBrandRepository()->fullTextSearchByParameterFetcher($paramFetcher);
-        $count = $this->getBrandRepository()->fullTextSearchByParameterFetcher($paramFetcher, true);
-        $brandsCollection = new BrandsCollection($collection, $count);
-
-        return $brandsCollection;
+        return $this->getBrandService()->getBrandsByFilter($paramFetcher);
     }
 
     /**
@@ -118,10 +115,10 @@ class BrandController extends AbstractRestController
     }
 
     /**
-     * @return BrandRepository
+     * @return BrandService
      */
-    public function getBrandRepository(): BrandRepository
+    private function getBrandService(): BrandService
     {
-        return $this->brandRepository;
+        return $this->brandService;
     }
 }

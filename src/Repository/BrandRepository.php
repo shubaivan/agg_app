@@ -109,16 +109,8 @@ class BrandRepository extends ServiceEntityRepository
 
         $searchField = $parameterBag->get('search');
         if ($searchField) {
-            if (preg_match_all('/[,]/', $searchField, $matches) > 0) {
-                $result = preg_replace('!\s+!', ' ', $searchField);
-                $result = preg_replace('/\s*,\s*/', ',', $result);
-                $result = preg_replace('!\s!', '&', $result);
-                $search = str_replace(',', ':*|', $result) . ':*';
-            } else {
-                $result = preg_replace('!\s+!', ' ', $searchField);
-                $result = preg_replace('!\s!', '&', $result);
-                $search = $result . ':*';
-            }
+            $search = $this->getHelpers()
+                ->handleSearchValue($searchField, $parameterBag->get('strict') !== true);
         } else {
             $search = $searchField;
         }
@@ -216,10 +208,31 @@ class BrandRepository extends ServiceEntityRepository
         return $shops;
     }
 
+    public function getAvailableBrandByProductSearchQuery()
+    {
+//        SELECT
+//        brand_alias.id,
+//        brand_alias.name
+//
+//        FROM brand brand_alias
+//        INNER JOIN products products_alias ON products_alias.brand_relation_id = brand_alias.id
+//
+//        JOIN to_tsquery('ball:*') query_search
+//        ON to_tsvector('english',products_alias.name||' '||coalesce(description,'')||' '||coalesce(sku,'')||' '||coalesce(price,0)||' '||coalesce(category,'')||' '||coalesce(brand,'')||' '||coalesce(shop,'')) @@ query_search
+//
+//        LEFT JOIN product_category cp on cp.product_id = products_alias.id
+//        LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
+//
+//        GROUP BY brand_alias.id, brand_alias.name
+//
+//        LIMIT 3
+//        OFFSET 0;
+    }
+
     /**
      * @return Helpers
      */
-    public function getHelpers(): Helpers
+    private function getHelpers(): Helpers
     {
         return $this->helpers;
     }
@@ -227,7 +240,7 @@ class BrandRepository extends ServiceEntityRepository
     /**
      * @return TagAwareQueryResultCacheBrand
      */
-    public function getTagAwareQueryResultCacheBrand(): TagAwareQueryResultCacheBrand
+    private function getTagAwareQueryResultCacheBrand(): TagAwareQueryResultCacheBrand
     {
         return $this->tagAwareQueryResultCacheBrand;
     }

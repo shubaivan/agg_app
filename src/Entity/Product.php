@@ -560,7 +560,7 @@ class Product implements EntityValidatorException
     public function getCategoriesNameArray()
     {
         $collection = $this->getCategoryRelation()->map(function (Category $category) {
-            return $category->getName();
+            return $category->getCategoryName();
         });
 
         return $collection->count() ? $collection->toArray() : [];
@@ -613,7 +613,7 @@ class Product implements EntityValidatorException
         if (!$this->getCategoryRelation()->contains($categoryRelation)) {
             $this->categoryRelation[] = $categoryRelation;
             $categoryNames = $this->getCategoryRelation()->map(function (Category $category) {
-                return $category->getName();
+                return $category->getCategoryName();
             });
             if ($categoryNames->count()) {
                 $implode = implode(' - ', $categoryNames->toArray());

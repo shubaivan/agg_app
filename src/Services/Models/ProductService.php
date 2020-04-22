@@ -2,6 +2,8 @@
 
 namespace App\Services\Models;
 
+use App\Entity\Brand;
+use App\Entity\Category;
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
 use App\Entity\Collection\SearchProductCollection;
@@ -10,10 +12,13 @@ use App\Entity\UserIp;
 use App\Entity\UserIpProduct;
 use App\Exception\ValidatorException;
 use App\QueueModel\AdtractionDataRow;
+use App\Repository\BrandRepository;
+use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserIpProductRepository;
 use App\Repository\UserIpRepository;
 use App\Services\ObjectsHandler;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -87,14 +92,25 @@ class ProductService
         return $handleObject;
     }
 
+//    public function getProductsByFilter(ParamFetcher $paramFetcher, $count = false)
+//    {
+//        $parameterBag = new ParameterBag($paramFetcher->all());
+//        if ($paramFetcher->get('category_word')) {
+//
+//            $this->getCategoryRepository()
+//                ->fullTextSearchByParameterBag()
+//        }
+//        return $this->fullTextSearchByParameterBag($parameterBag, $count);
+//    }
+
     /**
      * @param Product $product
      * @return ProductCollection
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws DBALException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
-    public function getProductCollection(Product $product)
+    public function getProductById(Product $product)
     {
         $parameterBag = new ParameterBag([
             'page' => 1,
@@ -103,6 +119,18 @@ class ProductService
             'search' => $product->getSearchDataForRelatedProductItems()
         ]);
         $this->recordIpToProduct($product);
+
+        return $this->getProductCollection($product, $parameterBag);
+    }
+
+    /**
+     * @param Product $product
+     * @param ParameterBag $parameterBag
+     * @return ProductCollection
+     * @throws DBALException
+     */
+    private function getProductCollection(Product $product, ParameterBag $parameterBag)
+    {
         return (new ProductCollection(
             $this->getProductRepository()
                 ->fullTextSearchByParameterBag($parameterBag),
@@ -221,6 +249,14 @@ class ProductService
     private function getProductRepository()
     {
         return $this->getEm()->getRepository(Product::class);
+    }
+
+    /**
+     * @return CategoryRepository|EntityRepository
+     */
+    private function getCategoryRepository()
+    {
+        return $this->getEm()->getRepository(Category::class);
     }
 
     /**

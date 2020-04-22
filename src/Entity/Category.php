@@ -17,10 +17,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name="category",
  *    uniqueConstraints={
  *        @UniqueConstraint(name="category_name_idx",
- *            columns={"name"})
+ *            columns={"category_name"})
  *    }
  * )
- * @UniqueEntity(fields={"name"}, groups={Category::SERIALIZED_GROUP_CREATE})
+ * @UniqueEntity(fields={"categoryName"}, groups={Category::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
  */
 class Category implements EntityValidatorException
@@ -48,7 +48,7 @@ class Category implements EntityValidatorException
      * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST})
      * @Assert\NotBlank(groups={Category::SERIALIZED_GROUP_CREATE})
      */
-    private $name;
+    private $categoryName;
 
     /**
      * @var Collection|Product[]
@@ -67,14 +67,14 @@ class Category implements EntityValidatorException
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getCategoryName(): ?string
     {
-        return $this->name;
+        return $this->categoryName;
     }
 
-    public function setName(string $name): self
+    public function setCategoryName(string $categoryName): self
     {
-        $this->name = $name;
+        $this->categoryName = $categoryName;
 
         return $this;
     }

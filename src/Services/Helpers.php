@@ -51,4 +51,24 @@ class Helpers
             return $value;
         }
     }
+
+    /**
+     * @param $searchField
+     * @param bool $strict
+     * @return string
+     */
+    public function handleSearchValue($searchField, bool $strict): string
+    {
+        if (preg_match_all('/[,]/', $searchField, $matches) > 0) {
+            $result = preg_replace('!\s+!', ' ', $searchField);
+            $result = preg_replace('/\s*,\s*/', ',', $result);
+            $result = preg_replace('!\s!', '&', $result);
+            $search = str_replace(',', ':*|', $result) . ':*';
+        } else {
+            $result = preg_replace('!\s+!', ' ', $searchField);
+            $result = preg_replace('!\s!', '&', $result);
+            $search = $result . ($strict !== true ? ':*' : '');
+        }
+        return $search;
+    }
 }

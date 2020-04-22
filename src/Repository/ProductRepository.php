@@ -183,16 +183,7 @@ class ProductRepository extends ServiceEntityRepository
 
         $searchField = $parameterBag->get('search');
         if ($searchField) {
-            if (preg_match_all('/[,]/', $searchField, $matches) > 0) {
-                $result = preg_replace('!\s+!', ' ', $searchField);
-                $result = preg_replace('/\s*,\s*/', ',', $result);
-                $result = preg_replace('!\s!', '&', $result);
-                $search = str_replace(',', ':*|', $result) . ':*';
-            } else {
-                $result = preg_replace('!\s+!', ' ', $searchField);
-                $result = preg_replace('!\s!', '&', $result);
-                $search = $result . ':*';
-            }
+            $search = $this->getHelpers()->handleSearchValue($searchField, false);
         } else {
             $search = $searchField;
         }
@@ -249,6 +240,20 @@ class ProductRepository extends ServiceEntityRepository
                 LEFT JOIN product_category cp on cp.product_id = products_alias.id
                 LEFT JOIN product_category cpt on cpt.product_id = products_alias.id               
         ';
+
+        $categoryWord = $parameterBag->get('category_word');
+        if ($categoryWord) {
+            $categoryWord = $this->getHelpers()->handleSearchValue($categoryWord, false);
+            $query .= '
+                INNER JOIN product_category cps on cps.product_id = products_alias.id                                   
+                INNER JOIN category cat on cps.category_id = cat.id         
+            ';
+
+            $query .= '
+                JOIN to_tsquery(:category_word) cps_query_search
+                ON to_tsvector(\'english\',coalesce(category_name,\'\')||\' \') @@ cps_query_search
+            ';
+        }
 
         $conditions = [];
         $variables = [];
@@ -352,7 +357,7 @@ class ProductRepository extends ServiceEntityRepository
         }
         if (!$count) {
             $query .= '
-                    GROUP BY id';
+                    GROUP BY products_alias.id';
             if ($search) {
                 $query .= ', query_search.query_search';
             }
@@ -378,6 +383,11 @@ class ProductRepository extends ServiceEntityRepository
         if ($search) {
             $params[':search'] = $search;
             $types[':search'] = \PDO::PARAM_STR;
+        }
+
+        if ($categoryWord) {
+            $params[':category_word'] = $categoryWord;
+            $types[':category_word'] = \PDO::PARAM_STR;
         }
 
         if (!$count) {

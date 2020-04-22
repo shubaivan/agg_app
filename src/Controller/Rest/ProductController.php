@@ -112,6 +112,12 @@ class ProductController extends AbstractRestController
      * @Rest\QueryParam(map=true, name="category_ids", nullable=true, strict=true, requirements="\d+", default="0", description="array of category ids")
      * @Rest\QueryParam(map=true, name="brand_ids", nullable=true, strict=true, requirements="\d+", default="0", description="array of brand ids")
      * @Rest\QueryParam(
+     *     name="category_word",
+     *     strict=true,
+     *     requirements=@SearchQueryParam,
+     *     nullable=true,
+     *     description="Search Categories by name like paetial of word and then search product by categories")
+     * @Rest\QueryParam(
      *     name="search",
      *     strict=true,
      *     requirements=@SearchQueryParam,
@@ -245,7 +251,8 @@ class ProductController extends AbstractRestController
         Product $product
     )
     {
-        return $this->getProductService()->getProductCollection($product);
+        return $this->getProductService()
+            ->getProductById($product);
     }
 
     /**

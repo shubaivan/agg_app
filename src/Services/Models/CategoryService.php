@@ -3,11 +3,15 @@
 namespace App\Services\Models;
 
 use App\Entity\Category;
+use App\Entity\Collection\CategoriesCollection;
 use App\Entity\Product;
 use App\Repository\CategoryRepository;
 use App\Services\ObjectsHandler;
+use Doctrine\DBAL\Cache\CacheException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use FOS\RestBundle\Request\ParamFetcher;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -32,6 +36,33 @@ class CategoryService
     {
         $this->categoryRepository = $categoryRepository;
         $this->objecHandler = $objecHandler;
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param bool $count
+     * @return CategoriesCollection
+     * @throws CacheException
+     */
+    public function getCategoriesByFilter(ParamFetcher $paramFetcher, $count = false)
+    {
+        $parameterBag = new ParameterBag($paramFetcher->all());
+        $parameterBag->set('strict', true);
+        $countStrict = $this->getCategoryRepository()
+            ->fullTextSearchByParameterBag($parameterBag, true);
+        if ($countStrict > 0) {
+            $strictCategoriesCollection = $this->getCategoryRepository()
+                ->fullTextSearchByParameterBag($parameterBag);
+
+            return (new CategoriesCollection($strictCategoriesCollection, $countStrict));
+        }
+        $parameterBag->remove('strict');
+        $count = $this->getCategoryRepository()
+            ->fullTextSearchByParameterBag($parameterBag, true);
+        $categoriesCollection = $this->getCategoryRepository()
+            ->fullTextSearchByParameterBag($parameterBag);
+
+        return (new CategoriesCollection($categoriesCollection, $count));
     }
 
     /**
@@ -70,7 +101,7 @@ class CategoryService
             if (!($categoryModel instanceof Category)) {
                 $categoryModel = new Category();
                 $categoryModel
-                    ->setName($category);
+                    ->setCategoryName($category);
 
                 $this->getObjecHandler()
                     ->validateEntity($categoryModel, [Category::SERIALIZED_GROUP_CREATE]);

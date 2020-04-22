@@ -6,6 +6,7 @@ use App\Entity\Collection\CategoriesCollection;
 use App\Repository\CategoryRepository;
 use App\Entity\Category;
 use App\Services\Helpers;
+use App\Services\Models\CategoryService;
 use Doctrine\DBAL\DBALException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
@@ -18,19 +19,19 @@ use App\Validation\Constraints\SearchQueryParam;
 class CategoryController extends AbstractRestController
 {
     /**
-     * @var CategoryRepository
+     * @var CategoryService
      */
-    private $categoryRepository;
+    private $categoryService;
 
     /**
      * CategoryController constructor.
-     * @param CategoryRepository $categoryRepository
+     * @param CategoryService $categoryService
      * @param Helpers $helpers
      */
-    public function __construct(CategoryRepository $categoryRepository, Helpers $helpers)
+    public function __construct(CategoryService $categoryService, Helpers $helpers)
     {
         parent::__construct($helpers);
-        $this->categoryRepository = $categoryRepository;
+        $this->categoryService = $categoryService;
     }
 
     /**
@@ -81,9 +82,7 @@ class CategoryController extends AbstractRestController
      */
     public function getCategoriesAction(ParamFetcher $paramFetcher)
     {
-        $collection = $this->getCategoryRepository()->fullTextSearchByParameterFetcher($paramFetcher);
-        $count = $this->getCategoryRepository()->fullTextSearchByParameterFetcher($paramFetcher, true);
-        return (new CategoriesCollection($collection, $count));
+        return $this->getCategoryService()->getCategoriesByFilter($paramFetcher);
     }
 
     /**
@@ -114,10 +113,10 @@ class CategoryController extends AbstractRestController
     }
 
     /**
-     * @return CategoryRepository
+     * @return CategoryService
      */
-    public function getCategoryRepository(): CategoryRepository
+    private function getCategoryService(): CategoryService
     {
-        return $this->categoryRepository;
+        return $this->categoryService;
     }
 }
