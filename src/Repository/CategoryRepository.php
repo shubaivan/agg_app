@@ -98,7 +98,7 @@ class CategoryRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "category_name", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()
             ->white_list(
                 $sortOrder,
@@ -123,7 +123,7 @@ class CategoryRepository extends ServiceEntityRepository
             $query .= '
                     SELECT                         
                             category_alias.id,
-                            category_alias.name AS "name",
+                            category_alias.category_name AS "category_name",
                             category_alias.created_at AS "createdAt"
             ';
 
