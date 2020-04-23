@@ -36,7 +36,7 @@ doctrine:
             enabled: true
             regions:
                 entity_that_rarely_changes:
-                    lifetime: 86400 # 1 day
+                    lifetime: 31536000 # One year
                     cache_driver:
                         type: service
                         id: doctrine.orm.default_result_cache
