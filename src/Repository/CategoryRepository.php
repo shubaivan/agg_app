@@ -122,7 +122,7 @@ class CategoryRepository extends ServiceEntityRepository
         } else {
             $query .= '
                     SELECT                         
-                            category_alias.id,
+                            DISTINCT category_alias.id,
                             category_alias.category_name AS "category_name",
                             category_alias.created_at AS "createdAt"
             ';
@@ -146,7 +146,7 @@ class CategoryRepository extends ServiceEntityRepository
 
         if (!$count) {
             $query .= '
-                    GROUP BY id';
+                    GROUP BY category_alias.id';
             if ($search) {
                 $query .= ', query_search.query_search';
             }

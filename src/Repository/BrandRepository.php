@@ -123,7 +123,7 @@ class BrandRepository extends ServiceEntityRepository
         } else {
             $query .= '
                     SELECT                         
-                            brand_alias.id,
+                            DISTINCT brand_alias.id,
                             brand_alias.name AS "name",
                             brand_alias.created_at AS "createdAt"
             ';
@@ -147,7 +147,7 @@ class BrandRepository extends ServiceEntityRepository
 
         if (!$count) {
             $query .= '
-                    GROUP BY id';
+                    GROUP BY brand_alias.id';
             if ($search) {
                 $query .= ', query_search.query_search';
             }

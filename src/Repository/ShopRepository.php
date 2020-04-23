@@ -132,7 +132,7 @@ class ShopRepository extends ServiceEntityRepository
         } else {
             $query .= '
                     SELECT                         
-                            shop_alias.id,
+                            DISTINCT shop_alias.id,
                             shop_alias.name AS "name",
                             shop_alias.created_at AS "createdAt"
             ';
@@ -156,7 +156,7 @@ class ShopRepository extends ServiceEntityRepository
 
         if (!$count) {
             $query .= '
-                    GROUP BY id';
+                    GROUP BY shop_alias.id';
             if ($search) {
                 $query .= ', query_search.query_search';
             }
