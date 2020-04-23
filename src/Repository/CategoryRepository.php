@@ -92,8 +92,8 @@ class CategoryRepository extends ServiceEntityRepository
     {
         $sort_by = isset($_REQUEST['sort_by']);
         $connection = $this->getEntityManager()->getConnection();
-        $limit = $parameterBag->get('count');
-        $offset = $limit * ($parameterBag->get('page') - 1);
+        $limit = (int)$parameterBag->get('count');
+        $offset = $limit * ((int)$parameterBag->get('page') - 1);
         $sortBy = $parameterBag->get('sort_by');
         $sortOrder = $parameterBag->get('sort_order');
 
@@ -182,8 +182,8 @@ class CategoryRepository extends ServiceEntityRepository
             $query,
             $params,
             $types,
-            ['brand_full_text_search'],
-            0, $count ? "brand_search_cont" : "brand_search_collection"
+            ['category_full_text_search'],
+            0, $count ? "category_search_cont" : "category_search_collection"
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
             ->prepareParamsForExecuteCacheQuery();
