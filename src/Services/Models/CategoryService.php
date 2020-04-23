@@ -120,7 +120,7 @@ class CategoryService
     private function matchExistCategory(string $name)
     {
         return $this->getCategoryRepository()
-            ->findOneBy(['name' => $name]);
+            ->findOneBy(['categoryName' => $name]);
     }
 
     /**
