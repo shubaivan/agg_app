@@ -109,7 +109,7 @@ class CategoryRepository extends ServiceEntityRepository
         $searchField = $parameterBag->get('search');
         if ($searchField) {
             $search = $this->getHelpers()
-                ->handleSearchValue($searchField, $parameterBag->get('strict') !== true);
+                ->handleSearchValue($searchField, $parameterBag->get('strict') === true);
         } else {
             $search = $searchField;
         }
@@ -139,7 +139,7 @@ class CategoryRepository extends ServiceEntityRepository
         ';
         if ($search) {
             $query .= '
-                JOIN to_tsquery(:search) query_search
+                JOIN to_tsquery(\'simple\', :search) query_search
                 ON to_tsvector(\'english\',coalesce(category_name,\'\')||\' \') @@ query_search
             ';
         }

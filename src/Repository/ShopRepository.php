@@ -110,16 +110,8 @@ class ShopRepository extends ServiceEntityRepository
 
         $searchField = $parameterBag->get('search');
         if ($searchField) {
-            if (preg_match_all('/[,]/', $searchField, $matches) > 0) {
-                $result = preg_replace('!\s+!', ' ', $searchField);
-                $result = preg_replace('/\s*,\s*/', ',', $result);
-                $result = preg_replace('!\s!', '&', $result);
-                $search = str_replace(',', ':*|', $result) . ':*';
-            } else {
-                $result = preg_replace('!\s+!', ' ', $searchField);
-                $result = preg_replace('!\s!', '&', $result);
-                $search = $result . ':*';
-            }
+            $search = $this->getHelpers()
+                ->handleSearchValue($searchField, $parameterBag->get('strict') === true);
         } else {
             $search = $searchField;
         }
@@ -149,7 +141,7 @@ class ShopRepository extends ServiceEntityRepository
         ';
         if ($search) {
             $query .= '
-                JOIN to_tsquery(:search) query_search
+                JOIN to_tsquery(\'simple\', :search) query_search
                 ON to_tsvector(\'english\',coalesce(name,\'\')||\' \') @@ query_search
             ';
         }

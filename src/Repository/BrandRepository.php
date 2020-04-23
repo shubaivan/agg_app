@@ -110,7 +110,7 @@ class BrandRepository extends ServiceEntityRepository
         $searchField = $parameterBag->get('search');
         if ($searchField) {
             $search = $this->getHelpers()
-                ->handleSearchValue($searchField, $parameterBag->get('strict') !== true);
+                ->handleSearchValue($searchField, $parameterBag->get('strict') === true);
         } else {
             $search = $searchField;
         }
@@ -140,7 +140,7 @@ class BrandRepository extends ServiceEntityRepository
         ';
         if ($search) {
             $query .= '
-                JOIN to_tsquery(:search) query_search
+                JOIN to_tsquery(\'simple\', :search) query_search
                 ON to_tsvector(\'english\',coalesce(name,\'\')||\' \') @@ query_search
             ';
         }

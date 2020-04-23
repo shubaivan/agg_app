@@ -231,7 +231,7 @@ class ProductRepository extends ServiceEntityRepository
         ';
         if ($search) {
             $query .= '
-                JOIN to_tsquery(:search) query_search
+                JOIN to_tsquery(\'simple\', :search) query_search
                 ON to_tsvector(\'english\',name||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')) @@ query_search
         ';
         }
@@ -250,7 +250,7 @@ class ProductRepository extends ServiceEntityRepository
             ';
 
             $query .= '
-                JOIN to_tsquery(:category_word) cps_query_search
+                JOIN to_tsquery(\'simple\', :category_word) cps_query_search
                 ON to_tsvector(\'english\',coalesce(category_name,\'\')||\' \') @@ cps_query_search
             ';
         }
