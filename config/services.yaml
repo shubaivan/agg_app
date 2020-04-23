@@ -95,6 +95,7 @@ services:
         $pdo_shop_cache_pool: '@pdo_shop_cache_pool'
         $pdo_category_cache_pool: '@pdo_category_cache_pool'
         $pdo_product_cache_pool: '@pdo_product_cache_pool'
+        $pdo_brand_cache_pool: '@pdo_brand_cache_pool'
         $doctrine_result_cache_pool: '@doctrine.result_cache_pool'
         $doctrine_system_cache_pool: '@doctrine.system_cache_pool'
       lazy: true

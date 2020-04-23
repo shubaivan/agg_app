@@ -58,7 +58,7 @@ class CacheManager
         TagAwareAdapter $pdo_product_cache_pool,
         TagAwareAdapter $pdo_shop_cache_pool,
         TagAwareAdapter $pdo_category_cache_pool,
-        TagAwareQueryResultCacheBrand $pdo_brand_cache_pool,
+        TagAwareAdapter $pdo_brand_cache_pool,
         TraceableAdapter $doctrine_result_cache_pool,
         TraceableAdapter $doctrine_system_cache_pool)
     {
