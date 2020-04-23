@@ -167,8 +167,8 @@ class ProductRepository extends ServiceEntityRepository
     {
         $sort_by = isset($_REQUEST['sort_by']);
         $connection = $this->getEntityManager()->getConnection();
-        $limit = $parameterBag->get('count');
-        $offset = $limit * ($parameterBag->get('page') - 1);
+        $limit = (int)$parameterBag->get('count');
+        $offset = $limit * ((int)$parameterBag->get('page') - 1);
         $sortBy = $parameterBag->get('sort_by');
         $sortOrder = $parameterBag->get('sort_order');
 
