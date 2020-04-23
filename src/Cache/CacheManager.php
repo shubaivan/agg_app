@@ -39,11 +39,17 @@ class CacheManager
     private $doctrine_system_cache_pool;
 
     /**
+     * @var TagAwareAdapter
+     */
+    private $pdo_brand_cache_pool;
+
+    /**
      * CacheManager constructor.
      * @param TagAwareAdapter $pdo_common_cache_pool
      * @param TagAwareAdapter $pdo_product_cache_pool
      * @param TagAwareAdapter $pdo_shop_cache_pool
      * @param TagAwareAdapter $pdo_category_cache_pool
+     * @param TagAwareAdapter $pdo_brand_cache_pool
      * @param TraceableAdapter $doctrine_result_cache_pool
      * @param TraceableAdapter $doctrine_system_cache_pool
      */
@@ -52,6 +58,7 @@ class CacheManager
         TagAwareAdapter $pdo_product_cache_pool,
         TagAwareAdapter $pdo_shop_cache_pool,
         TagAwareAdapter $pdo_category_cache_pool,
+        TagAwareQueryResultCacheBrand $pdo_brand_cache_pool,
         TraceableAdapter $doctrine_result_cache_pool,
         TraceableAdapter $doctrine_system_cache_pool)
     {
@@ -59,6 +66,7 @@ class CacheManager
         $this->pdo_product_cache_pool = $pdo_product_cache_pool;
         $this->pdo_shop_cache_pool = $pdo_shop_cache_pool;
         $this->pdo_category_cache_pool = $pdo_category_cache_pool;
+        $this->pdo_brand_cache_pool = $pdo_brand_cache_pool;
         $this->doctrine_result_cache_pool = $doctrine_result_cache_pool;
         $this->doctrine_system_cache_pool = $doctrine_system_cache_pool;
     }
@@ -71,5 +79,6 @@ class CacheManager
         $this->pdo_common_cache_pool->clear();
         $this->pdo_shop_cache_pool->clear();
         $this->pdo_category_cache_pool->clear();
+        $this->pdo_brand_cache_pool->clear();
     }
 }
