@@ -80,7 +80,8 @@ EOF;
                         $prefixName = $explode[1];
                         $blockName = $explode[2];
                         $shopName = $explode[3];
-                        $statisticByShops[$date][ucfirst($blockName)][$prefixName][$shopName] = $hashValue;
+                        $statisticByShops[$date][ucfirst($blockName)][$prefixName][$shopName] =
+                            $blockName == 'failed' ? $hashValue/4 : $hashValue;
                     }
                 }
             }
