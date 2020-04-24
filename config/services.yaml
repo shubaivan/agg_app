@@ -5,7 +5,7 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     adtraction_download_urls:
-        'Pyret': '%env(ANDRACTION_DOWNLOAD_URL_Ahlens)%'
+        'Pyret': '%env(ANDRACTION_DOWNLOAD_URL_Pyret)%'
         'Babyshop': '%env(ANDRACTION_DOWNLOAD_URL_Babyshop)%'
         'Jollyroom': '%env(ANDRACTION_DOWNLOAD_URL_Jollyroom)%'
         'Reima': '%env(ANDRACTION_DOWNLOAD_URL_Reima)%'

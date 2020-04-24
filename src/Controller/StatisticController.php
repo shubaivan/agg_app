@@ -66,21 +66,23 @@ EOF;
     {
         $prefixes = Shop::getPrefixes();
         $statisticByShops = [];
-        foreach ($prefixes as $blockName => $block) {
-            if (is_array($block)) {
-                foreach ($block as $prefixName => $prefix) {
-                    $shopData = $this->getRedisHelper()->keys($prefix . '*');
-                    if (is_array($shopData)) {
-                        foreach ($shopData as $data) {
-                            if (preg_match('/([^:]*)$/', $data, $matches) > 0) {
-                                $shopName = array_shift($matches);
-                                $statisticByShops[ucfirst($blockName)][$prefixName][$shopName] = $this->getRedisHelper()
-                                    ->get($data);
-                            }
-                        }
+
+        $statisticByDate = $this->getRedisHelper()->keys(Shop::PREFIX_HASH . '*');
+
+        foreach ($statisticByDate as $keyDateStamp) {
+            $allHashKeys = $this->getRedisHelper()->hGetAll($keyDateStamp);
+
+            if (preg_match('/([^:]*)$/', $keyDateStamp, $matches) > 0) {
+                $date = array_shift($matches);
+                foreach ($allHashKeys as $hashKey => $hashValue) {
+                    $explode = explode(':', $hashKey);
+                    if (count($explode) === 4) {
+                        $prefixName = $explode[1];
+                        $blockName = $explode[2];
+                        $shopName = $explode[3];
+                        $statisticByShops[$date][ucfirst($blockName)][$prefixName][$shopName] = $hashValue;
                     }
                 }
-
             }
         }
 

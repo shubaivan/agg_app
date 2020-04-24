@@ -24,6 +24,8 @@ use App\Entity\Product;
  */
 class Shop
 {
+    const PREFIX_HASH = 'statistic:';
+
     const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL = 'shop:processing:successful:';
     const PREFIX_PROCESSING_DATA_SHOP_FAILED = 'shop:processing:failed:';
 

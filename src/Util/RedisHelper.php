@@ -114,6 +114,38 @@ class RedisHelper
     }
 
     /**
+     * @param string $hash
+     * @param string $key
+     * @return int
+     */
+    public function hIncrBy(string $key, string $hash)
+    {
+        $this->connect();
+        return $this->redis->hIncrBy($key, $hash, 1);
+    }
+
+    /**
+     * @param string $hash
+     * @param string $key
+     * @return string
+     */
+    public function hGet(string $key, string $hash)
+    {
+        $this->connect();
+        return $this->redis->hGet($key, $hash);
+    }
+
+    /**
+     * @param string $key
+     * @return array
+     */
+    public function hGetAll(string $key)
+    {
+        $this->connect();
+        return $this->redis->hGetAll($key);
+    }
+
+    /**
      * The ttl is normalised to be 1 second to 1 hour.
      */
     private function normaliseTtl($ttl)

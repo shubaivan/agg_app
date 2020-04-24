@@ -91,6 +91,7 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     public function __invoke(AdtractionDataRow $adtractionDataRow)
     {
         try {
+            $date = date("Ymd");
             $product = $this->getProductService()->createProductFromAndractionCsvRow($adtractionDataRow);
             $this->getBrandService()->createBrandFromProduct($product);
 
@@ -100,21 +101,26 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
             $this->getEm()->persist($product);
 
             $this->getLogger()->info('sku: ' . $product->getSku());
+
             $this->getRedisHelper()
-                ->incr(Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL.$product->getShop());
+                ->hIncrBy(Shop::PREFIX_HASH.$date,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL.$product->getShop());
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->incr(Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
+                ->hIncrBy(Shop::PREFIX_HASH.$date,
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
             throw $e;
         } catch (BadRequestHttpException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->incr(Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
+                ->hIncrBy(Shop::PREFIX_HASH.$date,
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
         } catch (\Exception $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->incr(Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
+                ->hIncrBy(Shop::PREFIX_HASH.$date,
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
             throw $e;
         }
 

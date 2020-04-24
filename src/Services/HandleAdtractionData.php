@@ -56,10 +56,12 @@ class HandleAdtractionData
      */
     public function parseCSVContent(string $filePath, ?string $shop)
     {
+        $date = date("Ymd");
         if (!file_exists($filePath)) {
             $this->getLogger()->error('file ' . $filePath . ' no exist');
             $this->getRedisHelper()
-                ->incr(Shop::PREFIX_HANDLE_DATA_SHOP_FAILED.$shop);
+                ->hIncrBy(Shop::PREFIX_HASH.$date,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED.$shop);
             throw new \Exception('file ' . $filePath . ' no exist');
         }
         /** @var Reader $csv */
@@ -86,7 +88,8 @@ class HandleAdtractionData
                 if ($shop) {
                     $record['shop'] = $shop;
                     $this->getRedisHelper()
-                        ->incr(Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL.$shop);
+                        ->hIncrBy(Shop::PREFIX_HASH.$date,
+                            Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL.$shop);
                 }
                 $this->getBus()->dispatch(new AdtractionDataRow($record));
             }
