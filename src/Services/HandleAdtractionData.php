@@ -93,6 +93,11 @@ class HandleAdtractionData
 
             $offset += 1;
         }
+
+        unlink($filePath);
+        $this->getLogger()->info(
+            'file ' . $filePath . ' was removed'
+        );
     }
 
     /**
