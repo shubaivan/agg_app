@@ -67,14 +67,15 @@ class CategoryService
 
     /**
      * @param Product $product
-     * @return array
+     * @return array|bool
      * @throws \App\Exception\ValidatorException
      */
     public function createCategoriesFromProduct(Product $product)
     {
         $stringCategories = $product->getCategory();
         if (strlen($stringCategories) < 1) {
-            throw new BadRequestHttpException('product id:' . $product->getId() . ' category is empty');
+            return false;
+//            throw new BadRequestHttpException('product id:' . $product->getId() . ' category is empty');
         }
         $matchAll = preg_match_all('/[-]/', $stringCategories, $matches);
         $arrayCategories = [];

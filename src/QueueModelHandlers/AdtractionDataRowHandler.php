@@ -116,6 +116,7 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH.$date,
                     Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
+            throw $e;
         } catch (\Exception $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()

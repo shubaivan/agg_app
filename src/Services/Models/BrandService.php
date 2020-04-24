@@ -34,13 +34,14 @@ class BrandService
 
     /**
      * @param Product $product
-     * @return Brand
+     * @return Brand|bool
      * @throws \Doctrine\ORM\ORMException
      */
     public function createBrandFromProduct(Product $product)
     {
         if (strlen($product->getBrand()) < 1) {
-            throw new BadRequestHttpException('product id:' . $product->getId() . ' brand is empty');
+            return false;
+//            throw new BadRequestHttpException('product id:' . $product->getId() . ' brand is empty');
         }
         $brand = $this->matchExistBrand($product->getBrand());
         if (!($brand instanceof Brand)) {
