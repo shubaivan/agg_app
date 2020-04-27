@@ -20,7 +20,7 @@ final class Version20200427093420 extends AbstractMigration
     public function up(Schema $schema) : void
     {
         $this->addSql('create index ndsprc_swedish_custom_index on products
-using GIN(to_tsvector(\'pg_catalog.swedish\',coalesce(name, ,\'\')||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')))');
+using GIN(to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')))');
     }
 
     public function down(Schema $schema) : void
