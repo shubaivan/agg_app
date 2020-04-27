@@ -178,7 +178,7 @@ class ProductRepository extends ServiceEntityRepository
                 "shipping", "currency", "instock", "productUrl", "imageUrl",
                 "trackingUrl", "brand", "shop", "originalPrice", "ean",
                 "manufacturerArticleNumber", "shopRelationId", "brandRelationId",
-                "extras", "createdAt"], "Invalid field name " . $sortBy);
+                "extras", "createdAt", "numberOfEntries"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()->white_list($sortOrder, [Criteria::DESC, Criteria::ASC], "Invalid ORDER BY direction " . $sortOrder);
 
         $searchField = $parameterBag->get('search');
@@ -216,7 +216,8 @@ class ProductRepository extends ServiceEntityRepository
                             products_alias.created_at AS "createdAt",
                             products_alias.brand_relation_id AS "brandRelationId",
                             products_alias.shop_relation_id AS "shopRelationId",
-                            array_agg(DISTINCT cpt.category_id) AS categoryIds
+                            array_agg(DISTINCT cpt.category_id) AS categoryIds,
+                            COUNT(DISTINCT uip.id) as numberOfEntries
             ';
 
             if ($search) {
@@ -238,7 +239,8 @@ class ProductRepository extends ServiceEntityRepository
 
         $query .= '
                 LEFT JOIN product_category cp on cp.product_id = products_alias.id
-                LEFT JOIN product_category cpt on cpt.product_id = products_alias.id               
+                LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
+                LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id               
         ';
 
         $categoryWord = $parameterBag->get('category_word');
