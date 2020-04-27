@@ -250,8 +250,8 @@ class ProductRepository extends ServiceEntityRepository
             ';
 
             $query .= '
-                JOIN to_tsquery(:category_word) cps_query_search
-                ON to_tsvector(\'swedish\',coalesce(category_name,\'\')||\' \') @@ cps_query_search
+                JOIN to_tsquery(\'pg_catalog.swedish\', :category_word) cps_query_search
+                ON to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \') @@ cps_query_search
             ';
         }
 
