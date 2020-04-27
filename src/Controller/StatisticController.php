@@ -64,7 +64,6 @@ EOF;
      */
     public function bufferTestAction()
     {
-        $prefixes = Shop::getPrefixes();
         $statisticByShops = [];
 
         $statisticByDate = $this->getRedisHelper()->keys(Shop::PREFIX_HASH . '*');
@@ -74,6 +73,7 @@ EOF;
 
             if (preg_match('/([^:]*)$/', $keyDateStamp, $matches) > 0) {
                 $date = array_shift($matches);
+                $dateTime = \DateTime::createFromFormat('Ymd', $date);
                 foreach ($allHashKeys as $hashKey => $hashValue) {
                     $explode = explode(':', $hashKey);
                     if (count($explode) === 4) {
@@ -86,6 +86,11 @@ EOF;
                 }
             }
         }
+        uksort($statisticByShops, function ($a, $b) {
+            $dateTimeA= \DateTime::createFromFormat('Ymd', $a);
+            $dateTimeB= \DateTime::createFromFormat('Ymd', $b);
+            return $dateTimeA > $dateTimeB ? -1 : 1;
+        });
 
         return $this->render('statistics/statistics.html.twig', [
             'data' => $statisticByShops
