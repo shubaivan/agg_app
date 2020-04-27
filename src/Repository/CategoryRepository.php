@@ -129,7 +129,7 @@ class CategoryRepository extends ServiceEntityRepository
 
             if ($search) {
                 $query .= '
-                    ,ts_rank_cd(to_tsvector(\'english\',coalesce(category_name,\'\')||\' \'), query_search) AS rank
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \'), query_search) AS rank
             ';
             }
         }
@@ -139,8 +139,8 @@ class CategoryRepository extends ServiceEntityRepository
         ';
         if ($search) {
             $query .= '
-                JOIN to_tsquery(\'simple\', :search) query_search
-                ON to_tsvector(\'english\',coalesce(category_name,\'\')||\' \') @@ query_search
+                JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
+                ON to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \') @@ query_search
             ';
         }
 
