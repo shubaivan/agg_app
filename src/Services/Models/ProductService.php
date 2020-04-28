@@ -2,21 +2,17 @@
 
 namespace App\Services\Models;
 
-use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Collection\ProductCollection;
-use App\Entity\Collection\ProductsCollection;
 use App\Entity\Collection\SearchProductCollection;
 use App\Entity\Product;
 use App\Entity\UserIp;
 use App\Entity\UserIpProduct;
 use App\Exception\ValidatorException;
 use App\QueueModel\AdtractionDataRow;
-use App\Repository\BrandRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserIpProductRepository;
-use App\Repository\UserIpRepository;
 use App\Services\ObjectsHandler;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
@@ -91,17 +87,6 @@ class ProductService
 
         return $handleObject;
     }
-
-//    public function getProductsByFilter(ParamFetcher $paramFetcher, $count = false)
-//    {
-//        $parameterBag = new ParameterBag($paramFetcher->all());
-//        if ($paramFetcher->get('category_word')) {
-//
-//            $this->getCategoryRepository()
-//                ->fullTextSearchByParameterBag()
-//        }
-//        return $this->fullTextSearchByParameterBag($parameterBag, $count);
-//    }
 
     /**
      * @param Product $product

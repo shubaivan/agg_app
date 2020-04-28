@@ -217,7 +217,7 @@ class ProductRepository extends ServiceEntityRepository
                             products_alias.brand_relation_id AS "brandRelationId",
                             products_alias.shop_relation_id AS "shopRelationId",
                             array_agg(DISTINCT cpt.category_id) AS categoryIds,
-                            COUNT(DISTINCT uip.id) as numberOfEntries
+                            COUNT(DISTINCT uip.id) as "numberOfEntries"
             ';
 
             if ($search) {
