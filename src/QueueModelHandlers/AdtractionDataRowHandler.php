@@ -2,6 +2,7 @@
 
 namespace App\QueueModelHandlers;
 
+use App\Cache\CacheManager;
 use App\Entity\Shop;
 use App\Exception\ValidatorException;
 use App\QueueModel\AdtractionDataRow;
@@ -105,6 +106,9 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH.$date,
                     Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL.$product->getShop());
+
+            $this->getRedisHelper()
+                ->set(CacheManager::HTTP_CACHE_EXPIRES_TIME, (new \DateTime())->getTimestamp());
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()

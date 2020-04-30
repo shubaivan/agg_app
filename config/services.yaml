@@ -26,21 +26,12 @@ parameters:
     redis_host: '%env(REDIS_HOST)%'
     redis_port: '%env(REDIS_PORT)%'
     redis_access: '%redis_host%:%redis_port%'
-    app.cache.handlers.config:
-      products:
-        - 'pdo_product_cache_pool'
-
-      common:
-        - 'pdo_common_cache_pool'
 
 #    jms_serializer.camel_case_naming_strategy.class: JMS\Serializer\Naming\IdenticalPropertyNamingStrategy
 #    jms_serializer.serialized_name_annotation_strategy.class: JMS\Serializer\Naming\SerializedNameAnnotationStrategy
 services:
     # default configuration for services in *this* file
     _defaults:
-        bind:
-            # optionally you can define both the name and type of the argument to match
-            array $config: '%app.cache.handlers.config%'
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
@@ -139,3 +130,14 @@ services:
       arguments: ['@fos_rest.decoder_provider', '%fos_rest.throw_exception_on_unsupported_content_type%']
       calls:
         - [setDefaultFormat, ['%fos_rest.body_default_format%']]
+
+    my.json_handler:
+     class: App\View\JsonHandler
+
+    my.view_handler:
+     parent: fos_rest.view_handler.default
+     public: true
+     autowire: true
+     autoconfigure: false
+     calls:
+      - ['registerHandler', [ 'json', ["@my.json_handler", 'createResponse'] ] ]

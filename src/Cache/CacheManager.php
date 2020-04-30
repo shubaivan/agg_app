@@ -8,6 +8,8 @@ use Symfony\Component\Cache\Adapter\TraceableAdapter;
 
 class CacheManager
 {
+    const HTTP_CACHE_EXPIRES_TIME = 'http_cache_expires_time';
+
     /**
      * @var TagAwareAdapter
      */

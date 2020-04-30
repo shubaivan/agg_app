@@ -16,6 +16,8 @@ fos_rest:
         rules:
             - { path: ^/api, prefer_extension: true, fallback_format: json, priorities: [ json ] }
             - { path: ^/, priorities: [ json, xml, html ], fallback_format: ~, prefer_extension: true }
+    service:
+      view_handler: my.view_handler
     view:
       view_response_listener: 'force'
       formats:
