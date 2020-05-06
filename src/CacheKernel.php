@@ -11,6 +11,8 @@ class CacheKernel extends HttpCache
 {
     protected function invalidate(Request $request, $catch = false)
     {
+        parent::invalidate($request, $catch);
+        
         if ('PURGE' !== $request->getMethod()) {
             return parent::invalidate($request, $catch);
         }

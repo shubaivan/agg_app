@@ -130,14 +130,3 @@ services:
       arguments: ['@fos_rest.decoder_provider', '%fos_rest.throw_exception_on_unsupported_content_type%']
       calls:
         - [setDefaultFormat, ['%fos_rest.body_default_format%']]
-
-    my.json_handler:
-     class: App\View\JsonHandler
-
-    my.view_handler:
-     parent: fos_rest.view_handler.default
-     public: true
-     autowire: true
-     autoconfigure: false
-     calls:
-      - ['registerHandler', [ 'json', ["@my.json_handler", 'createResponse'] ] ]

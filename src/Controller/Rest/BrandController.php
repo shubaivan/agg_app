@@ -52,8 +52,6 @@ class BrandController extends AbstractRestController
      *
      * @param ParamFetcher $paramFetcher
      *
-     * @View(statusCode=Response::HTTP_OK)
-     *
      * @SWG\Tag(name="Brand")
      *
      * @SWG\Response(
@@ -77,14 +75,21 @@ class BrandController extends AbstractRestController
      *     )
      * )
      *
-     * @return BrandsCollection
+     * @return \FOS\RestBundle\View\View
      * @throws DBALException
+     * @throws \Exception
      */
     public function getBrandsAction(
         ParamFetcher $paramFetcher
     )
     {
-        return $this->getBrandService()->getBrandsByFilter($paramFetcher);
+        $brandsCollection = $this->getBrandService()->getBrandsByFilter($paramFetcher);
+        $view = $this->createSuccessResponse($brandsCollection);
+        $view
+            ->getResponse()
+            ->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
     }
 
     /**
@@ -105,13 +110,19 @@ class BrandController extends AbstractRestController
      *
      * @param Brand $brand
      *
-     * @return Brand
+     * @return \FOS\RestBundle\View\View
+     * @throws \Exception
      */
     public function getBrandByIdAction(
         Brand $brand
     )
     {
-        return $brand;
+        $view = $this->createSuccessResponse($brand, [Brand::SERIALIZED_GROUP_LIST]);
+        $view
+            ->getResponse()
+            ->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
     }
 
     /**

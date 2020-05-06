@@ -1,7 +1,5 @@
 <?php
 
-use JMS\SerializerBundle\JMSSerializerBundle;
-
 return [
     Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
     Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
@@ -19,5 +17,5 @@ return [
     Nelmio\ApiDocBundle\NelmioApiDocBundle::class => ['all' => true],
     Nelmio\CorsBundle\NelmioCorsBundle::class => ['all' => true],
     Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle::class => ['all' => true],
-    JMSSerializerBundle::class => ['all' => true]
+    JMS\SerializerBundle\JMSSerializerBundle::class => ['all' => true],
 ];

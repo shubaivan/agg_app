@@ -8,6 +8,7 @@ use Symfony\Component\Cache\Adapter\TraceableAdapter;
 
 class CacheManager
 {
+    const HTTP_CACHE_MODIFY_PRODUCT_LAST_SHOW_TIME = '_modify_product_last_show';
     const HTTP_CACHE_EXPIRES_TIME = 'http_cache_expires_time';
 
     /**

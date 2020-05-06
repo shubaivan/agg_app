@@ -78,23 +78,27 @@ class ShopController extends AbstractRestController
      *     )
      * )
      *
-     * @return ShopsCollection
+     * @return \FOS\RestBundle\View\View
      * @throws DBALException
+     * @throws \Exception
      */
     public function getShopsAction(ParamFetcher $paramFetcher)
     {
         $collection = $this->getShopRepository()->fullTextSearchByParameterFetcher($paramFetcher);
         $count = $this->getShopRepository()->fullTextSearchByParameterFetcher($paramFetcher, true);
+        $shopsCollection = new ShopsCollection($collection, $count);
+        $view = $this->createSuccessResponse($shopsCollection);
+        $view
+            ->getResponse()
+            ->setExpires($this->getHelpers()->getExpiresHttpCache());
 
-        return (new ShopsCollection($collection, $count));
+        return $view;
     }
 
     /**
      * get Shop by id.
      *
      * @Rest\Get("/api/shop/{id}", requirements={"id"="\d+"})
-     *
-     * @View(serializerGroups={Shop::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
      *
      * @SWG\Tag(name="Shop")
      *
@@ -107,13 +111,20 @@ class ShopController extends AbstractRestController
      *
      * @param Shop $shop
      *
-     * @return Shop
+     * @return \FOS\RestBundle\View\View
+     *
+     * @throws \Exception
      */
     public function getCategoryByIdAction(
         Shop $shop
     )
     {
-        return $shop;
+        $view = $this->createSuccessResponse($shop, [Shop::SERIALIZED_GROUP_LIST]);
+        $view
+            ->getResponse()
+            ->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
     }
 
     /**

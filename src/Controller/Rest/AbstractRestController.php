@@ -33,7 +33,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
      *
      * @return View
      */
-    protected function createSuccessResponse($data, array $groups = null, $withEmptyField = null)
+    protected function createSuccessResponse($data, array $groups = [], $withEmptyField = null)
     {
         $context = new Context();
         if ($groups) {

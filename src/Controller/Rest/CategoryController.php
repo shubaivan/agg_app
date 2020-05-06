@@ -77,20 +77,25 @@ class CategoryController extends AbstractRestController
      *     )
      * )
      *
-     * @return CategoriesCollection
+     * @return \FOS\RestBundle\View\View
      * @throws DBALException
+     * @throws \Exception
      */
     public function getCategoriesAction(ParamFetcher $paramFetcher)
     {
-        return $this->getCategoryService()->getCategoriesByFilter($paramFetcher);
+        $categoriesCollection = $this->getCategoryService()->getCategoriesByFilter($paramFetcher);
+        $view = $this->createSuccessResponse($categoriesCollection);
+        $view
+            ->getResponse()
+            ->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
     }
 
     /**
      * get Category by id.
      *
      * @Rest\Get("/api/category/{id}", requirements={"id"="\d+"})
-     *
-     * @View(serializerGroups={Category::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
      *
      * @SWG\Tag(name="Category")
      *
@@ -103,13 +108,20 @@ class CategoryController extends AbstractRestController
      *
      * @param Category $category
      *
-     * @return Category
+     * @return \FOS\RestBundle\View\View
+     *
+     * @throws \Exception
      */
     public function getCategoryByIdAction(
         Category $category
     )
     {
-        return $category;
+        $view = $this->createSuccessResponse($category, [Category::SERIALIZED_GROUP_LIST]);
+        $view
+            ->getResponse()
+            ->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
     }
 
     /**

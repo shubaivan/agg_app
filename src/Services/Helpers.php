@@ -3,8 +3,11 @@
 
 namespace App\Services;
 
+use App\Cache\CacheManager;
+use App\Util\RedisHelper;
 use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Helpers
@@ -15,12 +18,22 @@ class Helpers
     private $serilizer;
 
     /**
-     * Helpers constructor.
-     * @param Serializer $serilizer
+     * @var RedisHelper
      */
-    public function __construct(SerializerInterface $serilizer)
+    private $redisHelper;
+
+    /**
+     * Helpers constructor.
+     * @param SerializerInterface $serilizer
+     * @param RedisHelper $redisHelper
+     */
+    public function __construct(
+        SerializerInterface $serilizer,
+        RedisHelper $redisHelper
+    )
     {
         $this->serilizer = $serilizer;
+        $this->redisHelper = $redisHelper;
     }
 
     /**
@@ -70,5 +83,28 @@ class Helpers
             $search = $result . ($strict !== true ? ':*' : '');
         }
         return $search;
+    }
+
+    /**
+     * @return \DateTime|false
+     * @throws \Exception
+     */
+    public function getExpiresHttpCache()
+    {
+        $expiresTime = (int) $this->redisHelper
+            ->get(CacheManager::HTTP_CACHE_EXPIRES_TIME);
+        $expiresTimeDateTime = new \DateTime();
+        if ($expiresTime) {
+            $expiresTimeDateTime->setTimestamp($expiresTime);
+        }
+
+        $middleDay = (new \DateTime('today'))->setTime(12, 00, 00);
+        if ($expiresTimeDateTime < $middleDay) {
+            $date = (new \DateTime('today'))->setTime(11, 59, 00);
+        } else {
+            $date = (new \DateTime('today'))->setTime(23, 59, 00);
+        }
+
+        return $date;
     }
 }

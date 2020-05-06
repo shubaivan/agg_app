@@ -16,8 +16,6 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Symfony\Component\Cache\Adapter\TagAwareAdapter;
-use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
@@ -69,7 +67,7 @@ class ProductController extends AbstractRestController
      * )
      *
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function getUserIpAction(Request $request)
     {
@@ -92,14 +90,18 @@ class ProductController extends AbstractRestController
      *     description="Json collection object Products",
      * )
      *
-     * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @return \FOS\RestBundle\View\View
+     * @throws DBALException
+     * @throws \Exception
      */
     public function fetchProductExtraFieldsAction()
     {
         $allExtrasKey = $this->getProductRepository()
             ->fetchAllExtrasFieldsWithCache();
-        return $allExtrasKey;
+        $view = $this->createSuccessResponse($allExtrasKey);
+        $view->getResponse()->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
     }
 
     /**
@@ -176,9 +178,7 @@ class ProductController extends AbstractRestController
      * )
      *
      * @return SearchProductCollection
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function getProductsAction(ParamFetcher $paramFetcher, Request $request)
     {
@@ -192,7 +192,6 @@ class ProductController extends AbstractRestController
      * get Product data by id.
      *
      * @Rest\Get("/api/product/{id}", requirements={"id"="\d+"})
-     *
      * @View(serializerGroups={Product::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
      *
      * @SWG\Tag(name="Products")
@@ -260,8 +259,6 @@ class ProductController extends AbstractRestController
      *
      * @Rest\Get("/api/products/by/ids")
      *
-     * @View(serializerGroups={Product::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
-     *
      * @SWG\Tag(name="Products")
      *
      * @Rest\QueryParam(map=true, name="ids", nullable=false, strict=true, requirements="\d+", default="0", description="List products by ids")
@@ -279,17 +276,20 @@ class ProductController extends AbstractRestController
      *     @SWG\Schema(ref=@Model(type=ProductsCollection::class, groups={Product::SERIALIZED_GROUP_LIST}))
      * )
      *
-     * @return ProductsCollection
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\DBAL\DBALException
+     * @return \FOS\RestBundle\View\View
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws \Exception
      */
     public function getProductByIdsAction(ParamFetcher $paramFetcher)
     {
         $collection = $this->getProductRepository()->getProductByIds($paramFetcher);
         $count = $this->getProductRepository()->getProductByIds($paramFetcher, true);
+        $productsCollection = new ProductsCollection($collection, $count);
+        $view = $this->createSuccessResponse($productsCollection, [Product::SERIALIZED_GROUP_LIST]);
+        $view->getResponse()->setExpires($this->getHelpers()->getExpiresHttpCache());
 
-        return (new ProductsCollection($collection, $count));
+        return $view;
     }
 
     /**
