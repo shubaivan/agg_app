@@ -177,15 +177,20 @@ class ProductController extends AbstractRestController
      *     )
      * )
      *
-     * @return SearchProductCollection
+     * @return \FOS\RestBundle\View\View
      * @throws DBALException
      */
     public function getProductsAction(ParamFetcher $paramFetcher, Request $request)
     {
         $collection = $this->getProductRepository()->fullTextSearchByParameterFetcher($paramFetcher);
         $count = $this->getProductRepository()->fullTextSearchByParameterFetcher($paramFetcher, true);
+        $searchProductCollection = new SearchProductCollection($collection, $count);
+        $view = $this->createSuccessResponse($searchProductCollection);
+        $view->getResponse()
+            ->setPublic()
+            ->setMaxAge(600);
 
-        return (new SearchProductCollection($collection, $count));
+        return $view;
     }
 
     /**

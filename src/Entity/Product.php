@@ -572,6 +572,7 @@ class Product implements EntityValidatorException
     public function getSearchDataForRelatedProductItems()
     {
         $pieces = [
+            $this->getName(),
             $this->getPrice(),
             $this->getBrandRelation()->getName()
         ];

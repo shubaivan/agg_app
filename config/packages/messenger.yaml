@@ -35,7 +35,7 @@ framework:
               name: productrow
               default_publish_routing_key: normal
             queues:
-              messages_normal:
+              adraction_download_file:
                 binding_keys: [normal]
         andraction_parse_row_success:
           dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
