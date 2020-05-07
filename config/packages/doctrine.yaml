@@ -21,7 +21,7 @@ doctrine:
             _text: text[]
         schema_filter: '~^(?!messenger_messages)~'
         driver: 'pdo_pgsql'
-        server_version: '9.6'
+        server_version: '11'
         charset: utf8
         default_table_options:
             charset: utf8
