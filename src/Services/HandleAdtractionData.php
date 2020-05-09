@@ -106,7 +106,7 @@ class HandleAdtractionData
     /**
      * @return TraceableMessageBus
      */
-    protected function getBus(): TraceableMessageBus
+    protected function getBus()
     {
         return $this->bus;
     }
