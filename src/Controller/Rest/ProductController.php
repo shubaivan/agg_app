@@ -4,6 +4,7 @@ namespace App\Controller\Rest;
 
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
+use App\Repository\BrandRepository;
 use App\Repository\ProductRepository;
 use App\Services\Helpers;
 use App\Services\Models\ProductService;
@@ -20,7 +21,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 use App\Entity\Product;
-use App\Entity\Collection\SearchProductCollection;
 use App\Validation\Constraints\ExtraFields;
 use App\Validation\Constraints\SearchQueryParam;
 
@@ -48,6 +48,7 @@ class ProductController extends AbstractRestController
         ProductService $productService)
     {
         parent::__construct($helpers);
+
         $this->productRepository = $productRepository;
         $this->productService = $productService;
     }
@@ -182,9 +183,8 @@ class ProductController extends AbstractRestController
      */
     public function getProductsAction(ParamFetcher $paramFetcher, Request $request)
     {
-        $collection = $this->getProductRepository()->fullTextSearchByParameterFetcher($paramFetcher);
-        $count = $this->getProductRepository()->fullTextSearchByParameterFetcher($paramFetcher, true);
-        $searchProductCollection = new SearchProductCollection($collection, $count);
+        $searchProductCollection = $this->getProductService()
+            ->searchProductsByFilter($paramFetcher);
         $view = $this->createSuccessResponse($searchProductCollection);
         $view->getResponse()
             ->setPublic()
@@ -354,7 +354,7 @@ class ProductController extends AbstractRestController
      *     )
      * )
      *
-     * @return SearchProductCollection
+     * @return \FOS\RestBundle\View\View
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws ORMException
@@ -362,7 +362,11 @@ class ProductController extends AbstractRestController
      */
     public function getProductByIpAction(ParamFetcher $paramFetcher)
     {
-        return $this->getProductService()->getProductByIp($paramFetcher);
+        $searchProductCollection = $this->getProductService()->getProductByIp($paramFetcher);
+        $view = $this->createSuccessResponse($searchProductCollection);
+        $view->getResponse()->setMaxAge(180);
+
+        return $view;
     }
 
 

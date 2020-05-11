@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Cache\TagAwareQueryResultCacheBrand;
+use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -36,21 +37,29 @@ class BrandRepository extends ServiceEntityRepository
     private $tagAwareQueryResultCacheBrand;
 
     /**
+     * @var TagAwareQueryResultCacheProduct
+     */
+    private $tagAwareQueryResultCacheProduct;
+
+    /**
      * BrandRepository constructor.
      * @param ManagerRegistry $registry
      * @param Helpers $helpers
      * @param TagAwareQueryResultCacheBrand $tagAwareQueryResultCacheBrand
+     * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
      */
     public function __construct(
         ManagerRegistry $registry,
         Helpers $helpers,
-        TagAwareQueryResultCacheBrand $tagAwareQueryResultCacheBrand
+        TagAwareQueryResultCacheBrand $tagAwareQueryResultCacheBrand,
+        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
     )
     {
         parent::__construct($registry, Brand::class);
 
         $this->helpers = $helpers;
         $this->tagAwareQueryResultCacheBrand = $tagAwareQueryResultCacheBrand;
+        $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
     }
 
     /**
@@ -198,35 +207,86 @@ class BrandRepository extends ServiceEntityRepository
         );
 
         if ($count) {
-            $shops = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            $shops = isset($shops[0]['count']) ? (int)$shops[0]['count'] : 0;
+            $brands = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $brands = isset($brands[0]['count']) ? (int)$brands[0]['count'] : 0;
         } else {
-            $shops = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $brands = $statement->fetchAll(\PDO::FETCH_ASSOC);
         }
         $statement->closeCursor();
 
-        return $shops;
+        return $brands;
     }
 
-    public function getAvailableBrandByProductSearchQuery()
+    /**
+     * @param ParameterBag $parameterBag
+     * @param string $query
+     * @param array $params
+     * @param array $types
+     * @param bool $count
+     * @return int|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function facetFiltersBrand(
+        ParameterBag $parameterBag,
+        string $query,
+        array $params,
+        array $types,
+        bool $count = false
+    )
     {
-//        SELECT
-//        brand_alias.id,
-//        brand_alias.name
-//
-//        FROM brand brand_alias
-//        INNER JOIN products products_alias ON products_alias.brand_relation_id = brand_alias.id
-//
-//        JOIN to_tsquery('ball:*') query_search
-//        ON to_tsvector('english',products_alias.name||' '||coalesce(description,'')||' '||coalesce(sku,'')||' '||coalesce(price,0)||' '||coalesce(category,'')||' '||coalesce(brand,'')||' '||coalesce(shop,'')) @@ query_search
-//
-//        LEFT JOIN product_category cp on cp.product_id = products_alias.id
-//        LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
-//
-//        GROUP BY brand_alias.id, brand_alias.name
-//
-//        LIMIT 3
-//        OFFSET 0;
+        $connection = $this->getEntityManager()->getConnection();
+        $limit = (int)$parameterBag->get('count');
+        $offset = $limit * ((int)$parameterBag->get('page') - 1);
+        $sortBy = $parameterBag->get('sort_by');
+        $sortOrder = $parameterBag->get('sort_order');
+
+        $sortBy = $this->getHelpers()->white_list($sortBy,
+            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+        $sortOrder = $this->getHelpers()
+            ->white_list(
+                $sortOrder,
+                [Criteria::DESC, Criteria::ASC],
+                "Invalid ORDER BY direction " . $sortOrder
+            );
+
+        if (!$count) {
+            $query .=
+                ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' . '                                          
+                    LIMIT :limit
+                    OFFSET :offset;
+            ';
+
+            $params = array_merge($params, [':offset' => $offset, ':limit' => $limit]);
+            $types = array_merge($types, [':offset' => \PDO::PARAM_INT, ':limit' => \PDO::PARAM_INT]);
+        }
+
+        $this->getTagAwareQueryResultCacheBrand()->setQueryCacheTags(
+            $query,
+            $params,
+            $types,
+            ['brand_facet_filter'],
+            0, $count ? "brand_facet_filter_cont" : "brand_facet_filter_collection"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheBrand()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+
+        if ($count) {
+            $brands = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $brands = isset($brands[0]['count']) ? (int)$brands[0]['count'] : 0;
+        } else {
+            $brands = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        $statement->closeCursor();
+
+        return $brands;
     }
 
     /**
@@ -243,5 +303,13 @@ class BrandRepository extends ServiceEntityRepository
     private function getTagAwareQueryResultCacheBrand(): TagAwareQueryResultCacheBrand
     {
         return $this->tagAwareQueryResultCacheBrand;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheProduct
+     */
+    private function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
+    {
+        return $this->tagAwareQueryResultCacheProduct;
     }
 }

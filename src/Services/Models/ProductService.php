@@ -109,6 +109,30 @@ class ProductService
     }
 
     /**
+     * @param ParamFetcher $paramFetcher
+     * @return SearchProductCollection
+     * @throws DBALException
+     */
+    public function searchProductsByFilter(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getProductRepository()
+            ->fullTextSearchByParameterFetcher($paramFetcher);
+        $count = $this->getProductRepository()
+            ->fullTextSearchByParameterFetcher($paramFetcher, true);
+
+        return (new SearchProductCollection(
+            $collection, $count, $this->getFacetQueryFilter()
+        ));
+    }
+
+    private function getFacetQueryFilter()
+    {
+        $encryptMainQuery = $this->getProductRepository()->getEncryptMainQuery();
+
+        return $encryptMainQuery;
+    }
+
+    /**
      * @param Product $product
      * @param ParameterBag $parameterBag
      * @return ProductCollection

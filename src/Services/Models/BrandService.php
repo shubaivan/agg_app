@@ -2,11 +2,13 @@
 
 namespace App\Services\Models;
 
+use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
 use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\CategoriesCollection;
 use App\Entity\Product;
 use App\Repository\BrandRepository;
+use App\Repository\ProductRepository;
 use Doctrine\DBAL\Cache\CacheException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,12 +26,22 @@ class BrandService
     private $em;
 
     /**
+     * @var TagAwareQueryResultCacheProduct
+     */
+    private $tagAwareQueryResultCacheProduct;
+
+    /**
      * BrandService constructor.
      * @param EntityManagerInterface $em
+     * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
      */
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(
+        EntityManagerInterface $em,
+        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
+    )
     {
         $this->em = $em;
+        $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
     }
 
     /**
@@ -82,6 +94,67 @@ class BrandService
     }
 
     /**
+     * @param $uniqIdentificationQuery
+     * @param ParamFetcher $paramFetcher
+     * @return BrandsCollection
+     * @throws CacheException
+     * @throws \Exception
+     */
+    public function facetFilters(
+        $uniqIdentificationQuery,
+        ParamFetcher $paramFetcher
+    )
+    {
+        $facetQueries = $this->getTagAwareQueryResultCacheProduct()
+            ->fetch($uniqIdentificationQuery);
+
+        if (!is_array($facetQueries)) {
+            throw new \Exception('facet key empty');
+        }
+
+        if (count($facetQueries) < 1) {
+            throw new \Exception('facet key empty');
+        }
+
+        if (!isset($facetQueries[ProductRepository::FACET_BRAND_QUERY_KEY])) {
+            throw new \Exception('facet key empty');
+        }
+
+        $brandQuery = $facetQueries[ProductRepository::FACET_BRAND_QUERY_KEY];
+        $pregSplitBrandQuery = preg_split('/&/', $brandQuery[0]);
+        $query = preg_replace('/query=/', '', $pregSplitBrandQuery[0]);
+        $params = unserialize(preg_replace('/params=/', '', $pregSplitBrandQuery[1]));
+        $types = unserialize(preg_replace('/types=/', '', $pregSplitBrandQuery[2]));
+
+        $facetFiltersBrandCountQuery = preg_replace(
+            '/SELECT(.|\n*)+FROM/',
+            'SELECT COUNT(DISTINCT brand_alias.id) FROM ',
+            $query
+        );
+
+        $facetFiltersBrand = $this->getBrandRepository()
+            ->facetFiltersBrand(
+                (new ParameterBag($paramFetcher->all())),
+                $query,
+                $params,
+                $types
+            );
+
+        $facetFiltersBrandCount = $this->getBrandRepository()
+            ->facetFiltersBrand(
+                (new ParameterBag($paramFetcher->all())),
+                $facetFiltersBrandCountQuery,
+                $params,
+                $types,
+                true
+            );
+
+        $brandsCollection = new BrandsCollection($facetFiltersBrand, $facetFiltersBrandCount);
+
+        return $brandsCollection;
+    }
+
+    /**
      * @param string $name
      * @return Brand|object|null
      */
@@ -105,5 +178,13 @@ class BrandService
     private function getBrandRepository()
     {
         return $this->getEm()->getRepository(Brand::class);
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheProduct
+     */
+    private function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
+    {
+        return $this->tagAwareQueryResultCacheProduct;
     }
 }

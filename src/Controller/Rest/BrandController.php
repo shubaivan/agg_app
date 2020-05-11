@@ -2,7 +2,6 @@
 
 namespace App\Controller\Rest;
 
-use App\Entity\Collection\BrandsCollection;
 use App\Repository\BrandRepository;
 use App\Entity\Brand;
 use App\Services\Helpers;
@@ -28,7 +27,10 @@ class BrandController extends AbstractRestController
      * @param BrandService $brandService
      * @param Helpers $helpers
      */
-    public function __construct(BrandService $brandService, Helpers $helpers)
+    public function __construct(
+        BrandService $brandService,
+        Helpers $helpers
+    )
     {
         parent::__construct($helpers);
         $this->brandService = $brandService;
@@ -118,6 +120,43 @@ class BrandController extends AbstractRestController
     )
     {
         $view = $this->createSuccessResponse($brand, [Brand::SERIALIZED_GROUP_LIST]);
+        $view
+            ->getResponse()
+            ->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
+    }
+
+    /**
+     * get Brand Facet filters.
+     *
+     * @Rest\Get("/api/brand/facet_filters/{uniqIdentificationQuery}")
+     *
+     * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
+     * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
+     * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
+     * @Rest\QueryParam(name="sort_order", strict=true, requirements="^[a-zA-Z]+", default="DESC", description="Sort order", nullable=true)
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Brand")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object"
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws DBALException
+     * @throws \Exception
+     */
+    public function getBrandsFacetFiltersAction(ParamFetcher $paramFetcher, $uniqIdentificationQuery)
+    {
+        $brandsCollection = $this->getBrandService()
+            ->facetFilters($uniqIdentificationQuery, $paramFetcher);
+        $view = $this->createSuccessResponse($brandsCollection);
         $view
             ->getResponse()
             ->setExpires($this->getHelpers()->getExpiresHttpCache());

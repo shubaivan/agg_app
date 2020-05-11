@@ -22,15 +22,27 @@ class SearchProductCollection
     private $count;
 
     /**
+     * @var string
+     * @Annotation\Type("string")
+     */
+    private $uniqIdentificationQuery;
+
+    /**
      * SearchProductCollection constructor.
      * @param array $collection
      * @param int $count
+     * @param string $uniqIdentificationQuery
      */
-    public function __construct(array $collection, int $count)
+    public function __construct(
+        array $collection,
+        int $count,
+        string $uniqIdentificationQuery = null)
     {
         $this->collection = $collection;
         $this->count = $count;
+        $this->uniqIdentificationQuery = $uniqIdentificationQuery;
     }
+
 
     public function getAccessorCollection()
     {

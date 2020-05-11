@@ -28,6 +28,14 @@ class ProductRepository extends ServiceEntityRepository
 {
     use PaginationRepository;
 
+    const FACET_BRAND_QUERY_KEY = 'brand_query';
+    const FACET_PRODUCT_QUERY_KEY = 'product_query';
+    const FACET_CATEGORY_QUERY_KEY = 'category_query';
+    const FACET_SHOP_QUERY_KEY = 'shop_query';
+    const FACET_FILTERS = 'facet_filters_';
+
+    private $mainQuery = '', $conditions = [], $variables = [], $params = [], $types = [], $queryMainCondition = '';
+
     /**
      * @var Helpers
      */
@@ -167,8 +175,7 @@ class ProductRepository extends ServiceEntityRepository
     {
         $sort_by = isset($_REQUEST['sort_by']);
         $connection = $this->getEntityManager()->getConnection();
-        $limit = (int)$parameterBag->get('count');
-        $offset = $limit * ((int)$parameterBag->get('page') - 1);
+
         $sortBy = $parameterBag->get('sort_by');
         $sortOrder = $parameterBag->get('sort_order');
 
@@ -179,14 +186,274 @@ class ProductRepository extends ServiceEntityRepository
                 "trackingUrl", "brand", "shop", "originalPrice", "ean",
                 "manufacturerArticleNumber", "shopRelationId", "brandRelationId",
                 "extras", "createdAt", "numberOfEntries"], "Invalid field name " . $sortBy);
-        $sortOrder = $this->getHelpers()->white_list($sortOrder, [Criteria::DESC, Criteria::ASC], "Invalid ORDER BY direction " . $sortOrder);
+        $sortOrder = $this->getHelpers()->white_list(
+            $sortOrder,
+            [Criteria::DESC, Criteria::ASC],
+            "Invalid ORDER BY direction " . $sortOrder
+        );
 
-        $searchField = $parameterBag->get('search');
-        if ($searchField) {
-            $search = $this->getHelpers()->handleSearchValue($searchField, false);
-        } else {
-            $search = $searchField;
+        if ($parameterBag->get('search')) {
+            $parameterBag->set(
+                'search',
+                $this->getHelpers()
+                    ->handleSearchValue($parameterBag->get('search'), false)
+            );
         }
+        $searchProductQuery = $this->getSearchProductQuery($parameterBag, $count, $sort_by, $sortBy, $sortOrder);
+        if (!$count) {
+            $this->mainQuery = $searchProductQuery;
+        }
+
+        $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
+            $searchProductQuery,
+            $this->params,
+            $this->types,
+            ['product_full_text_search'],
+            0, $count ? "product_search_cont" : "product_search_collection"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+
+        if ($count) {
+            $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $products = isset($products[0]['count']) ? (int)$products[0]['count'] : 0;
+        } else {
+            $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $this->prepareFacetFilterQueries();
+        }
+        $statement->closeCursor();
+
+        return $products;
+    }
+
+    /**
+     * @return Helpers
+     */
+    public function getHelpers(): Helpers
+    {
+        return $this->helpers;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheCommon
+     */
+    public function getTagAwareQueryResultCacheCommon(): TagAwareQueryResultCacheCommon
+    {
+        return $this->tagAwareQueryResultCacheCommon;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheProduct
+     */
+    public function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
+    {
+        return $this->tagAwareQueryResultCacheProduct;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEncryptMainQuery(): string
+    {
+        $encrypt_decrypt = $this->getHelpers()->encrypt_decrypt('encrypt', $this->mainQuery);
+
+        return self::FACET_FILTERS . sha1($this->mainQuery);
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param string $query
+     * @return string
+     */
+    private function prepareMainCondition(
+        ParameterBag &$parameterBag,
+        string &$query
+    ): string
+    {
+        $this->queryMainCondition = '';
+        if ($parameterBag->get('search')) {
+            $this->queryMainCondition .= '
+                JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
+                ON to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')) @@ query_search
+        ';
+        }
+
+        $this->queryMainCondition .= '
+                LEFT JOIN product_category cp on cp.product_id = products_alias.id
+                LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
+                LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id               
+        ';
+
+        if ($parameterBag->get('category_word')) {
+            $parameterBag->set('category_word', $this->getHelpers()
+                ->handleSearchValue($parameterBag->get('category_word'), false));
+            $this->queryMainCondition .= '
+                INNER JOIN product_category cps on cps.product_id = products_alias.id                                   
+                INNER JOIN category cat on cps.category_id = cat.id         
+            ';
+
+            $this->queryMainCondition .= '
+                JOIN to_tsquery(\'pg_catalog.swedish\', :category_word) cps_query_search
+                ON to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \') @@ cps_query_search
+            ';
+        }
+
+        if (is_array($parameterBag->get('extra_array'))
+            && array_search('0', $parameterBag->get('extra_array'), true) === false
+        ) {
+            $extraArray = $parameterBag->get('extra_array');
+            $commonExtraConditionsArray = [];
+            $preparedExtraArray = [];
+            foreach ($extraArray as $key => $extraFieldData) {
+                $commonExtraConditionArray = [];
+                foreach ($extraFieldData as $childKey => $extraData) {
+                    $preparedExtraArrayString = $this->getHelpers()
+                        ->executeSerializerArray([$key => $extraData]);
+                    $conditionExtraFields = 'products_alias.extras @> :var_extra_arrays_' . $key . '_' . $childKey;
+                    $preparedExtraArray[':var_extra_arrays_' . $key . '_' . $childKey] = $preparedExtraArrayString;
+                    array_push($commonExtraConditionArray, $conditionExtraFields);
+                }
+                $commonExtraConditionString = '(' . implode(' OR ', $commonExtraConditionArray) . ')';
+                array_push($commonExtraConditionsArray, $commonExtraConditionString);
+            }
+            $commonExtraConditionsString = '(' . implode(' AND ', $commonExtraConditionsArray) . ')';
+
+            array_push($this->conditions, $commonExtraConditionsString);
+            $this->variables = array_merge($this->variables, $preparedExtraArray);
+        }
+
+        if (is_array($parameterBag->get('exclude_ids'))
+            && array_search('0', $parameterBag->get('exclude_ids'), true) === false
+        ) {
+            $excludeIds = $parameterBag->get('exclude_ids');
+            $preparedInValuesIds = array_combine(
+                array_map(function ($key) {
+                    return ':var_exclude_id' . $key;
+                }, array_keys($excludeIds)),
+                array_values($excludeIds)
+            );
+            $bindKeysIds = implode(',', array_keys($preparedInValuesIds));
+            $conditionIds = "                           
+                            products_alias.id NOT IN ($bindKeysIds)
+                        ";
+            array_push($this->conditions, $conditionIds);
+            $this->variables = array_merge($this->variables, $preparedInValuesIds);
+        }
+
+        if (is_array($parameterBag->get('shop_ids'))
+            && array_search('0', $parameterBag->get('shop_ids'), true) === false) {
+            $shopIds = $parameterBag->get('shop_ids');
+            $preparedInValuesShop = array_combine(
+                array_map(function ($key) {
+                    return ':var_shop_id' . $key;
+                }, array_keys($shopIds)),
+                array_values($shopIds)
+            );
+            $bindKeysShop = implode(',', array_keys($preparedInValuesShop));
+            $conditionShop = "
+                            products_alias.shop_relation_id IN ($bindKeysShop)
+                        ";
+
+            array_push($this->conditions, $conditionShop);
+            $this->variables = array_merge($this->variables, $preparedInValuesShop);
+        }
+
+        if (is_array($parameterBag->get('category_ids'))
+            && array_search('0', $parameterBag->get('category_ids'), true) === false) {
+            $categoryIds = $parameterBag->get('category_ids');
+            $preparedInValuesCategory = array_combine(
+                array_map(function ($key) {
+                    return ':var_category_id' . $key;
+                }, array_keys($categoryIds)),
+                array_values($categoryIds)
+            );
+            $bindKeysCategory = implode(',', array_keys($preparedInValuesCategory));
+            $conditionCategory = "
+                            cp.category_id IN ($bindKeysCategory)
+                        ";
+            array_push($this->conditions, $conditionCategory);
+            $this->variables = array_merge($this->variables, $preparedInValuesCategory);
+        }
+
+        if (is_array($parameterBag->get('brand_ids'))
+            && array_search('0', $parameterBag->get('brand_ids'), true) === false
+        ) {
+            $brandIds = $parameterBag->get('brand_ids');
+            $preparedInValuesBrand = array_combine(
+                array_map(function ($key) {
+                    return ':var_brand_id' . $key;
+                }, array_keys($brandIds)),
+                array_values($brandIds)
+            );
+            $bindKeysBrand = implode(',', array_keys($preparedInValuesBrand));
+            $conditionBrand = "                           
+                            products_alias.brand_relation_id IN ($bindKeysBrand)
+                        ";
+
+            array_push($this->conditions, $conditionBrand);
+            $this->variables = array_merge($this->variables, $preparedInValuesBrand);
+        }
+
+        if (count($this->conditions)) {
+            $this->queryMainCondition .= 'WHERE ' . implode(' AND ', $this->conditions);
+        }
+
+        $query .= $this->queryMainCondition;
+
+        return $this->queryMainCondition;
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param $count
+     * @return array
+     */
+    private function prepareParamAndType(ParameterBag $parameterBag, bool $count): array
+    {
+        foreach ($this->variables as $key => $val) {
+            $this->params[$key] = $val;
+        }
+
+        if ($parameterBag->get('search')) {
+            $this->params[':search'] = $parameterBag->get('search');
+            $this->types[':search'] = \PDO::PARAM_STR;
+        }
+
+        if ($parameterBag->get('category_word')) {
+            $this->params[':category_word'] = $parameterBag->get('category_word');
+            $this->types[':category_word'] = \PDO::PARAM_STR;
+        }
+
+        if (!$count) {
+            $limit = (int)$parameterBag->get('count');
+            $offset = $limit * ((int)$parameterBag->get('page') - 1);
+            $this->params[':offset'] = $offset;
+            $this->params[':limit'] = $limit;
+            $this->types[':offset'] = \PDO::PARAM_INT;
+            $this->types[':limit'] = \PDO::PARAM_INT;
+        }
+
+        return array($this->params, $this->types);
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param $count
+     * @param bool $sort_by
+     * @param $sortBy
+     * @param $sortOrder
+     * @return string
+     */
+    private function getSearchProductQuery(ParameterBag $parameterBag, $count, bool $sort_by, $sortBy, $sortOrder): string
+    {
         $query = '';
         if ($count) {
             $query .= '
@@ -220,7 +487,7 @@ class ProductRepository extends ServiceEntityRepository
                             COUNT(DISTINCT uip.id) as "numberOfEntries"
             ';
 
-            if ($search) {
+            if ($parameterBag->get('search')) {
                 $query .= '
                     ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')), query_search) AS rank
             ';
@@ -230,142 +497,18 @@ class ProductRepository extends ServiceEntityRepository
         $query .= '
                 FROM products products_alias 
         ';
-        if ($search) {
-            $query .= '
-                JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')) @@ query_search
-        ';
-        }
 
-        $query .= '
-                LEFT JOIN product_category cp on cp.product_id = products_alias.id
-                LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
-                LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id               
-        ';
+        $this->prepareMainCondition($parameterBag, $query);
 
-        $categoryWord = $parameterBag->get('category_word');
-        if ($categoryWord) {
-            $categoryWord = $this->getHelpers()->handleSearchValue($categoryWord, false);
-            $query .= '
-                INNER JOIN product_category cps on cps.product_id = products_alias.id                                   
-                INNER JOIN category cat on cps.category_id = cat.id         
-            ';
-
-            $query .= '
-                JOIN to_tsquery(\'pg_catalog.swedish\', :category_word) cps_query_search
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \') @@ cps_query_search
-            ';
-        }
-
-        $conditions = [];
-        $variables = [];
-        if (is_array($parameterBag->get('extra_array'))
-            && array_search('0', $parameterBag->get('extra_array'), true) === false
-        ) {
-            $extraArray = $parameterBag->get('extra_array');
-            $commonExtraConditionsArray = [];
-            $preparedExtraArray = [];
-            foreach ($extraArray as $key => $extraFieldData) {
-                $commonExtraConditionArray = [];
-                foreach ($extraFieldData as $childKey => $extraData) {
-                    $preparedExtraArrayString = $this->getHelpers()
-                        ->executeSerializerArray([$key => $extraData]);
-                    $conditionExtraFields = 'products_alias.extras @> :var_extra_arrays_' . $key . '_' . $childKey;
-                    $preparedExtraArray[':var_extra_arrays_' . $key . '_' . $childKey] = $preparedExtraArrayString;
-                    array_push($commonExtraConditionArray, $conditionExtraFields);
-                }
-                $commonExtraConditionString = '(' . implode(' OR ', $commonExtraConditionArray) . ')';
-                array_push($commonExtraConditionsArray, $commonExtraConditionString);
-            }
-            $commonExtraConditionsString = '(' . implode(' AND ', $commonExtraConditionsArray) . ')';
-
-            array_push($conditions, $commonExtraConditionsString);
-            $variables = array_merge($variables, $preparedExtraArray);
-        }
-
-        if (is_array($parameterBag->get('exclude_ids'))
-            && array_search('0', $parameterBag->get('exclude_ids'), true) === false
-        ) {
-            $excludeIds = $parameterBag->get('exclude_ids');
-            $preparedInValuesIds = array_combine(
-                array_map(function ($key) {
-                    return ':var_exclude_id' . $key;
-                }, array_keys($excludeIds)),
-                array_values($excludeIds)
-            );
-            $bindKeysIds = implode(',', array_keys($preparedInValuesIds));
-            $conditionIds = "                           
-                            products_alias.id NOT IN ($bindKeysIds)
-                        ";
-            array_push($conditions, $conditionIds);
-            $variables = array_merge($variables, $preparedInValuesIds);
-        }
-
-        if (is_array($parameterBag->get('shop_ids'))
-            && array_search('0', $parameterBag->get('shop_ids'), true) === false) {
-            $shopIds = $parameterBag->get('shop_ids');
-            $preparedInValuesShop = array_combine(
-                array_map(function ($key) {
-                    return ':var_shop_id' . $key;
-                }, array_keys($shopIds)),
-                array_values($shopIds)
-            );
-            $bindKeysShop = implode(',', array_keys($preparedInValuesShop));
-            $conditionShop = "
-                            products_alias.shop_relation_id IN ($bindKeysShop)
-                        ";
-
-            array_push($conditions, $conditionShop);
-            $variables = array_merge($variables, $preparedInValuesShop);
-        }
-
-        if (is_array($parameterBag->get('category_ids'))
-            && array_search('0', $parameterBag->get('category_ids'), true) === false) {
-            $categoryIds = $parameterBag->get('category_ids');
-            $preparedInValuesCategory = array_combine(
-                array_map(function ($key) {
-                    return ':var_category_id' . $key;
-                }, array_keys($categoryIds)),
-                array_values($categoryIds)
-            );
-            $bindKeysCategory = implode(',', array_keys($preparedInValuesCategory));
-            $conditionCategory = "
-                            cp.category_id IN ($bindKeysCategory)
-                        ";
-            array_push($conditions, $conditionCategory);
-            $variables = array_merge($variables, $preparedInValuesCategory);
-        }
-
-        if (is_array($parameterBag->get('brand_ids'))
-            && array_search('0', $parameterBag->get('brand_ids'), true) === false
-        ) {
-            $brandIds = $parameterBag->get('brand_ids');
-            $preparedInValuesBrand = array_combine(
-                array_map(function ($key) {
-                    return ':var_brand_id' . $key;
-                }, array_keys($brandIds)),
-                array_values($brandIds)
-            );
-            $bindKeysBrand = implode(',', array_keys($preparedInValuesBrand));
-            $conditionBrand = "                           
-                            products_alias.brand_relation_id IN ($bindKeysBrand)
-                        ";
-
-            array_push($conditions, $conditionBrand);
-            $variables = array_merge($variables, $preparedInValuesBrand);
-        }
-        if (count($conditions)) {
-            $query .= 'WHERE ' . implode(' AND ', $conditions);
-        }
         if (!$count) {
             $query .= '
                     GROUP BY products_alias.id';
-            if ($search) {
+            if ($parameterBag->get('search')) {
                 $query .= ', query_search.query_search';
             }
 
             $query .=
-                ($search ?
+                ($parameterBag->get('search') ?
                     ($sort_by
                         ? ' ORDER BY rank DESC, ' . '"' . $sortBy . '"' . ' ' . $sortOrder . ''
                         : ' ORDER BY rank DESC')
@@ -376,79 +519,79 @@ class ProductRepository extends ServiceEntityRepository
             ';
         }
 
-        $params = [];
-        $types = [];
-        foreach ($variables as $key => $val) {
-            $params[$key] = $val;
-        }
+        $this->prepareParamAndType($parameterBag, $count);
+        return $query;
+    }
 
-        if ($search) {
-            $params[':search'] = $search;
-            $types[':search'] = \PDO::PARAM_STR;
-        }
-
-        if ($categoryWord) {
-            $params[':category_word'] = $categoryWord;
-            $types[':category_word'] = \PDO::PARAM_STR;
-        }
-
-        if (!$count) {
-            $params[':offset'] = $offset;
-            $params[':limit'] = $limit;
-            $types[':offset'] = \PDO::PARAM_INT;
-            $types[':limit'] = \PDO::PARAM_INT;
-        }
-
-        $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
-            $query,
-            $params,
-            $types,
-            ['product_full_text_search'],
-            0, $count ? "product_search_cont" : "product_search_collection"
-        );
-        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
-            ->prepareParamsForExecuteCacheQuery();
-
-        /** @var ResultCacheStatement $statement */
-        $statement = $connection->executeCacheQuery(
-            $query,
-            $params,
-            $types,
-            $queryCacheProfile
+    private function prepareFacetFilterQueries()
+    {
+        $cacheKey = $this->getEncryptMainQuery();
+        $this->setFacetQueryFilterInProductCache(
+            $cacheKey,
+            self::FACET_PRODUCT_QUERY_KEY,
+            $this->mainQuery
         );
 
-        if ($count) {
-            $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            $products = isset($products[0]['count']) ? (int)$products[0]['count'] : 0;
-        } else {
-            $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $this->setFacetQueryFilterInProductCache(
+            $cacheKey,
+            self::FACET_BRAND_QUERY_KEY,
+            $this->prepareBrandFacetFilterQuery()
+        );
+    }
+
+    private function prepareBrandFacetFilterQuery()
+    {
+        $connectionParams = $this->getEntityManager()->getConnection()->getParams();
+
+        $queryBrandFacet = '
+            SELECT
+                DISTINCT brand_alias.id,
+                brand_alias.name AS "name",
+                brand_alias.created_at AS "createdAt"
+            FROM brand brand_alias
+            INNER JOIN products products_alias ON products_alias.brand_relation_id = brand_alias.id
+        ';
+
+        $queryBrandFacet .= $this->queryMainCondition;
+
+        $queryBrandFacet .= '
+            GROUP BY brand_alias.id, brand_alias.name
+        ';
+
+        $realCacheKey = 'query=' . $queryBrandFacet .
+            '&params=' . serialize($this->params) .
+            '&types=' . serialize($this->types) .
+            '&connectionParams=' . hash('sha256', serialize($connectionParams));
+
+        return $realCacheKey;
+    }
+
+    /**
+     * @param string $cacheKey
+     * @param string $realKey
+     * @return bool
+     */
+    private function setFacetQueryFilterInProductCache(
+        string $cacheKey,
+        string $realKey,
+        $queryExample
+    )
+    {
+        if ($queryExample === null) {
+            return true;
         }
-        $statement->closeCursor();
+        $queryData[] = $queryExample;
+        $resultCache = $this->getTagAwareQueryResultCacheProduct();
 
-        return $products;
-    }
+        $data = $resultCache->fetch($cacheKey);
+        if (!$data) {
+            $data = [];
+        }
+        $data[$realKey] = $queryData;
 
-    /**
-     * @return Helpers
-     */
-    public function getHelpers(): Helpers
-    {
-        return $this->helpers;
-    }
+        $resultCache->save($cacheKey, $data, 0);
+        unset($queryExample);
 
-    /**
-     * @return TagAwareQueryResultCacheCommon
-     */
-    public function getTagAwareQueryResultCacheCommon(): TagAwareQueryResultCacheCommon
-    {
-        return $this->tagAwareQueryResultCacheCommon;
-    }
-
-    /**
-     * @return TagAwareQueryResultCacheProduct
-     */
-    public function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
-    {
-        return $this->tagAwareQueryResultCacheProduct;
+        return true;
     }
 }

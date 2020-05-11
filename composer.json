@@ -9,6 +9,7 @@
         "ext-json": "*",
         "ext-pdo": "*",
         "ext-redis": "*",
+      "ext-openssl": "*",
         "friendsofsymfony/rest-bundle": "master",
         "guzzlehttp/guzzle": "~6.0",
         "jms/serializer-bundle": "^3.5@dev",
