@@ -553,6 +553,12 @@ class ProductRepository extends ServiceEntityRepository
 
         $this->setFacetQueryFilterInProductCache(
             $cacheKey,
+            self::FACET_SHOP_QUERY_KEY,
+            $this->prepareShopFacetFilterQuery()
+        );
+
+        $this->setFacetQueryFilterInProductCache(
+            $cacheKey,
             self::FACET_CATEGORY_QUERY_KEY,
             $this->prepareCategoriesFacetFilterQuery()
         );
@@ -575,6 +581,37 @@ class ProductRepository extends ServiceEntityRepository
             $this->prepareBrandFacetFilterQuery()
         );
     }
+
+    /**
+     * @return string
+     */
+    private function prepareShopFacetFilterQuery()
+    {
+        $connectionParams = $this->getEntityManager()->getConnection()->getParams();
+
+        $queryFacet = '
+            SELECT
+                DISTINCT shop_alias.id,
+                shop_alias.name AS "name",
+                shop_alias.created_at AS "createdAt"
+            FROM shop shop_alias
+            INNER JOIN products products_alias ON products_alias.shop_relation_id = shop_alias.id
+        ';
+
+        $queryFacet .= $this->queryMainCondition;
+
+        $queryFacet .= '
+            GROUP BY shop_alias.id
+        ';
+
+        $realCacheKey = 'query=' . $queryFacet .
+            '&params=' . serialize($this->params) .
+            '&types=' . serialize($this->types) .
+            '&connectionParams=' . hash('sha256', serialize($connectionParams));
+
+        return $realCacheKey;
+    }
+
 
     /**
      * @return string

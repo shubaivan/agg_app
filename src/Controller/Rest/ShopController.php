@@ -2,10 +2,9 @@
 
 namespace App\Controller\Rest;
 
-use App\Entity\Collection\ShopsCollection;
 use App\Entity\Shop;
-use App\Repository\ShopRepository;
 use App\Services\Helpers;
+use App\Services\Models\ShopService;
 use Doctrine\DBAL\DBALException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
@@ -18,21 +17,21 @@ use App\Validation\Constraints\SearchQueryParam;
 class ShopController extends AbstractRestController
 {
     /**
-     * @var ShopRepository
+     * @var ShopService
      */
-    private $shopRepository;
+    private $shopService;
 
     /**
      * ShopController constructor.
-     * @param ShopRepository $shopRepository
+     * @param ShopService $shopService
      */
     public function __construct(
-        ShopRepository $shopRepository,
+        ShopService $shopService,
         Helpers $helpers
     )
     {
         parent::__construct($helpers);
-        $this->shopRepository = $shopRepository;
+        $this->shopService = $shopService;
     }
 
     /**
@@ -84,9 +83,7 @@ class ShopController extends AbstractRestController
      */
     public function getShopsAction(ParamFetcher $paramFetcher)
     {
-        $collection = $this->getShopRepository()->fullTextSearchByParameterFetcher($paramFetcher);
-        $count = $this->getShopRepository()->fullTextSearchByParameterFetcher($paramFetcher, true);
-        $shopsCollection = new ShopsCollection($collection, $count);
+        $shopsCollection = $this->getShopService()->getShopsByFilter($paramFetcher);
         $view = $this->createSuccessResponse($shopsCollection);
         $view
             ->getResponse()
@@ -115,7 +112,7 @@ class ShopController extends AbstractRestController
      *
      * @throws \Exception
      */
-    public function getCategoryByIdAction(
+    public function getShopByIdAction(
         Shop $shop
     )
     {
@@ -128,10 +125,46 @@ class ShopController extends AbstractRestController
     }
 
     /**
-     * @return ShopRepository
+     * get Shop Facet filters.
+     *
+     * @Rest\Get("/api/shop/facet_filters/{uniqIdentificationQuery}")
+     *
+     * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
+     * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
+     * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
+     * @Rest\QueryParam(name="sort_order", strict=true, requirements="^[a-zA-Z]+", default="DESC", description="Sort order", nullable=true)
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Shop")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object"
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws \Exception
      */
-    public function getShopRepository(): ShopRepository
+    public function getShopFacetFiltersAction(ParamFetcher $paramFetcher, $uniqIdentificationQuery)
     {
-        return $this->shopRepository;
+        $brandsCollection = $this->getShopService()
+            ->facetFilters($uniqIdentificationQuery, $paramFetcher);
+        $view = $this->createSuccessResponse($brandsCollection);
+        $view
+            ->getResponse()
+            ->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
+    }
+
+    /**
+     * @return ShopService
+     */
+    public function getShopService(): ShopService
+    {
+        return $this->shopService;
     }
 }

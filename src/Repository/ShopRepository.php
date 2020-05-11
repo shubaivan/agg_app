@@ -210,6 +210,78 @@ class ShopRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param ParameterBag $parameterBag
+     * @param string $query
+     * @param array $params
+     * @param array $types
+     * @param bool $count
+     * @return int|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function facetFilters(
+        ParameterBag $parameterBag,
+        string $query,
+        array $params,
+        array $types,
+        bool $count = false
+    )
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $limit = (int)$parameterBag->get('count');
+        $offset = $limit * ((int)$parameterBag->get('page') - 1);
+        $sortBy = $parameterBag->get('sort_by');
+        $sortOrder = $parameterBag->get('sort_order');
+
+        $sortBy = $this->getHelpers()->white_list($sortBy,
+            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+        $sortOrder = $this->getHelpers()
+            ->white_list(
+                $sortOrder,
+                [Criteria::DESC, Criteria::ASC],
+                "Invalid ORDER BY direction " . $sortOrder
+            );
+
+        if (!$count) {
+            $query .=
+                ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' . '                                          
+                    LIMIT :limit
+                    OFFSET :offset;
+            ';
+
+            $params = array_merge($params, [':offset' => $offset, ':limit' => $limit]);
+            $types = array_merge($types, [':offset' => \PDO::PARAM_INT, ':limit' => \PDO::PARAM_INT]);
+        }
+
+        $this->getTagAwareQueryResultCacheShop()->setQueryCacheTags(
+            $query,
+            $params,
+            $types,
+            ['shop_facet_filter'],
+            0, $count ? "shop_facet_filter_cont" : "shop_facet_filter_collection"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheShop()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+
+        if ($count) {
+            $shops = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $shops = isset($shops[0]['count']) ? (int)$shops[0]['count'] : 0;
+        } else {
+            $shops = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        $statement->closeCursor();
+
+        return $shops;
+    }
+
+    /**
      * @return Helpers
      */
     private function getHelpers(): Helpers
