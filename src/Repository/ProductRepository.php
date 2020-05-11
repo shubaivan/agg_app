@@ -80,7 +80,6 @@ class ProductRepository extends ServiceEntityRepository
     {
 //        $this->getTagAwareQueryResultCacheCommon()
 //            ->getTagAwareAdapter()->invalidateTags(['fetch_all_extras_fields']);
-        $connection = $this->getEntityManager()->getConnection();
 
         $query = '
             select 
@@ -92,34 +91,11 @@ class ProductRepository extends ServiceEntityRepository
             GROUP BY e.key
         ';
 
-        $this->getTagAwareQueryResultCacheCommon()->setQueryCacheTags(
+        return $this->facetFiltersExtraFields(
             $query,
             [':exclude_key' => 'ALTERNATIVE_IMAGE'],
-            [':exclude_key' => ParameterType::STRING],
-            ['fetch_all_extras_fields'],
-            0, "extras_fields"
+            [':exclude_key' => ParameterType::STRING]
         );
-        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCommon()
-            ->prepareParamsForExecuteCacheQuery();
-        /** @var ResultCacheStatement $statement */
-        $statement = $connection->executeCacheQuery(
-            $query, $params, $types, $queryCacheProfile
-        );
-        $fetchAll = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $statement->closeCursor();
-
-        $result = [];
-        foreach ($fetchAll as $key => $value) {
-            if (isset($value['fields']) && isset($value['key'])) {
-                preg_match_all('/\["([^_]+)"\]/', $value['fields'], $matches);
-                if (isset($matches[1][0])) {
-                    $value['fields'] = explode('", "', $matches[1][0]);
-                }
-                $result[$value['key']] = $value['fields'];
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -577,6 +553,12 @@ class ProductRepository extends ServiceEntityRepository
 
         $this->setFacetQueryFilterInProductCache(
             $cacheKey,
+            self::FACET_CATEGORY_QUERY_KEY,
+            $this->prepareCategoriesFacetFilterQuery()
+        );
+
+        $this->setFacetQueryFilterInProductCache(
+            $cacheKey,
             self::FACET_EXTRA_FIELDS_QUERY_KEY,
             $this->prepareExtraFieldsFacetFilterQuery()
         );
@@ -592,6 +574,40 @@ class ProductRepository extends ServiceEntityRepository
             self::FACET_BRAND_QUERY_KEY,
             $this->prepareBrandFacetFilterQuery()
         );
+    }
+
+    /**
+     * @return string
+     */
+    private function prepareCategoriesFacetFilterQuery()
+    {
+        $connectionParams = $this->getEntityManager()->getConnection()->getParams();
+
+        $queryFacet = '
+            SELECT                         
+                DISTINCT category_alias.id,
+                category_alias.category_name AS "categoryName",
+                category_alias.created_at AS "createdAt"
+            FROM category category_alias
+            INNER JOIN product_category product_category_alias ON product_category_alias.category_id = category_alias.id
+            INNER JOIN products products_alias ON products_alias.id = product_category_alias.product_id                    
+        ';
+
+        $queryFacet .= str_replace(
+            '\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \'',
+            '\'pg_catalog.swedish\',coalesce(category_alias.category_name,\'\')||\' \'',
+            $this->queryMainCondition
+        );
+
+        $queryFacet .= '
+                    GROUP BY category_alias.id';
+
+        $realCacheKey = 'query=' . $queryFacet .
+            '&params=' . serialize($this->params) .
+            '&types=' . serialize($this->types) .
+            '&connectionParams=' . hash('sha256', serialize($connectionParams));
+
+        return $realCacheKey;
     }
 
     /**
@@ -631,7 +647,7 @@ class ProductRepository extends ServiceEntityRepository
     {
         $connectionParams = $this->getEntityManager()->getConnection()->getParams();
 
-        $queryBrandFacet = '
+        $queryFacet = '
             SELECT
                 DISTINCT brand_alias.id,
                 brand_alias.name AS "name",
@@ -640,13 +656,13 @@ class ProductRepository extends ServiceEntityRepository
             INNER JOIN products products_alias ON products_alias.brand_relation_id = brand_alias.id
         ';
 
-        $queryBrandFacet .= $this->queryMainCondition;
+        $queryFacet .= $this->queryMainCondition;
 
-        $queryBrandFacet .= '
+        $queryFacet .= '
             GROUP BY brand_alias.id, brand_alias.name
         ';
 
-        $realCacheKey = 'query=' . $queryBrandFacet .
+        $realCacheKey = 'query=' . $queryFacet .
             '&params=' . serialize($this->params) .
             '&types=' . serialize($this->types) .
             '&connectionParams=' . hash('sha256', serialize($connectionParams));

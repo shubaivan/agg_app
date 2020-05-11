@@ -118,7 +118,7 @@ class CategoryRepository extends ServiceEntityRepository
         if ($count) {
             $query .= '
                         SELECT COUNT(DISTINCT category_alias.id)
-                    ';
+            ';
         } else {
             $query .= '
                     SELECT                         
@@ -130,12 +130,12 @@ class CategoryRepository extends ServiceEntityRepository
             if ($search) {
                 $query .= '
                     ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \'), query_search) AS rank
-            ';
+                ';
             }
         }
 
         $query .= '
-                FROM category category_alias 
+            FROM category category_alias 
         ';
         if ($search) {
             $query .= '
@@ -205,6 +205,78 @@ class CategoryRepository extends ServiceEntityRepository
         $statement->closeCursor();
 
         return $shops;
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param string $query
+     * @param array $params
+     * @param array $types
+     * @param bool $count
+     * @return int|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function facetFilters(
+        ParameterBag $parameterBag,
+        string $query,
+        array $params,
+        array $types,
+        bool $count = false
+    )
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $limit = (int)$parameterBag->get('count');
+        $offset = $limit * ((int)$parameterBag->get('page') - 1);
+        $sortBy = $parameterBag->get('sort_by');
+        $sortOrder = $parameterBag->get('sort_order');
+
+        $sortBy = $this->getHelpers()->white_list($sortBy,
+            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+        $sortOrder = $this->getHelpers()
+            ->white_list(
+                $sortOrder,
+                [Criteria::DESC, Criteria::ASC],
+                "Invalid ORDER BY direction " . $sortOrder
+            );
+
+        if (!$count) {
+            $query .=
+                ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' . '                                          
+                    LIMIT :limit
+                    OFFSET :offset;
+            ';
+
+            $params = array_merge($params, [':offset' => $offset, ':limit' => $limit]);
+            $types = array_merge($types, [':offset' => \PDO::PARAM_INT, ':limit' => \PDO::PARAM_INT]);
+        }
+
+        $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
+            $query,
+            $params,
+            $types,
+            ['category_facet_filter'],
+            0, $count ? "category_facet_filter_cont" : "category_facet_filter_collection"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+
+        if ($count) {
+            $categories = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $categories = isset($categories[0]['count']) ? (int)$categories[0]['count'] : 0;
+        } else {
+            $categories = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        $statement->closeCursor();
+
+        return $categories;
     }
 
     /**

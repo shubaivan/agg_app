@@ -2,10 +2,13 @@
 
 namespace App\Services\Models;
 
+use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Category;
+use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\CategoriesCollection;
 use App\Entity\Product;
 use App\Repository\CategoryRepository;
+use App\Repository\ProductRepository;
 use App\Services\ObjectsHandler;
 use Doctrine\DBAL\Cache\CacheException;
 use Doctrine\ORM\EntityManager;
@@ -28,12 +31,23 @@ class CategoryService
     private $objecHandler;
 
     /**
+     * @var TagAwareQueryResultCacheProduct
+     */
+    private $tagAwareQueryResultCacheProduct;
+
+    /**
      * CategoryService constructor.
      * @param CategoryRepository $categoryRepository
      * @param ObjectsHandler $objecHandler
+     * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
      */
-    public function __construct(CategoryRepository $categoryRepository, ObjectsHandler $objecHandler)
+    public function __construct(
+        CategoryRepository $categoryRepository,
+        ObjectsHandler $objecHandler,
+        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
+    )
     {
+        $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
         $this->categoryRepository = $categoryRepository;
         $this->objecHandler = $objecHandler;
     }
@@ -89,6 +103,64 @@ class CategoryService
     }
 
     /**
+     * @param string $uniqIdentificationQuery
+     * @param ParamFetcher $paramFetcher
+     * @return CategoriesCollection
+     * @throws \Exception
+     */
+    public function facetFilters(
+        string $uniqIdentificationQuery,
+        ParamFetcher $paramFetcher
+    )
+    {
+        $facetQueries = $this->getTagAwareQueryResultCacheProduct()
+            ->fetch($uniqIdentificationQuery);
+
+        if (!is_array($facetQueries)) {
+            throw new \Exception('redis key not present');
+        }
+
+        if (count($facetQueries) < 1) {
+            throw new \Exception('redis key is empty');
+        }
+
+        if (!isset($facetQueries[ProductRepository::FACET_CATEGORY_QUERY_KEY])) {
+            throw new \Exception('facet key ' . ProductRepository::FACET_CATEGORY_QUERY_KEY . ' not present');
+        }
+
+        $categoryQuery = $facetQueries[ProductRepository::FACET_CATEGORY_QUERY_KEY];
+        $pregSplitCategoryQuery = preg_split('/&/', $categoryQuery[0]);
+        $query = preg_replace('/query=/', '', $pregSplitCategoryQuery[0]);
+        $params = unserialize(preg_replace('/params=/', '', $pregSplitCategoryQuery[1]));
+        $types = unserialize(preg_replace('/types=/', '', $pregSplitCategoryQuery[2]));
+
+        $facetFilters = $this->getCategoryRepository()
+            ->facetFilters(
+                (new ParameterBag($paramFetcher->all())),
+                $query,
+                $params,
+                $types
+            );
+
+        $facetFiltersCountQuery = preg_replace(
+            '/SELECT(.|\n*)+FROM/',
+            'SELECT COUNT(DISTINCT category_alias.id) FROM ',
+            $query
+        );
+
+        $facetFiltersCount = $this->getCategoryRepository()
+            ->facetFilters(
+                (new ParameterBag($paramFetcher->all())),
+                $facetFiltersCountQuery,
+                $params,
+                $types,
+                true
+            );
+
+        return new CategoriesCollection($facetFilters, $facetFiltersCount);
+    }
+
+    /**
      * @param array $arrayCategories
      * @param Product $product
      * @return array
@@ -138,5 +210,13 @@ class CategoryService
     private function getCategoryRepository(): CategoryRepository
     {
         return $this->categoryRepository;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheProduct
+     */
+    private function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
+    {
+        return $this->tagAwareQueryResultCacheProduct;
     }
 }

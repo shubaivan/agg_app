@@ -125,6 +125,43 @@ class CategoryController extends AbstractRestController
     }
 
     /**
+     * get Category Facet filters.
+     *
+     * @Rest\Get("/api/category/facet_filters/{uniqIdentificationQuery}")
+     *
+     * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
+     * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
+     * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
+     * @Rest\QueryParam(name="sort_order", strict=true, requirements="^[a-zA-Z]+", default="DESC", description="Sort order", nullable=true)
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Category")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object"
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws \Exception
+     */
+    public function getCategoriesFacetFiltersAction(ParamFetcher $paramFetcher, $uniqIdentificationQuery)
+    {
+        $collection = $this->getCategoryService()
+            ->facetFilters($uniqIdentificationQuery, $paramFetcher);
+        $view = $this->createSuccessResponse($collection);
+        $view
+            ->getResponse()
+            ->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
+    }
+
+
+    /**
      * @return CategoryService
      */
     private function getCategoryService(): CategoryService
