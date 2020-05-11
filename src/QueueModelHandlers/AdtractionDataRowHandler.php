@@ -93,7 +93,7 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     {
         try {
             $date = date("Ymd");
-            $product = $this->getProductService()->createProductFromAndractionCsvRow($adtractionDataRow);
+            $product = $this->getProductService()->createProductFromAdractionCsvRow($adtractionDataRow);
             $this->getBrandService()->createBrandFromProduct($product);
 
             $this->getCategoryService()->createCategoriesFromProduct($product);

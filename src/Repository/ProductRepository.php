@@ -30,6 +30,7 @@ class ProductRepository extends ServiceEntityRepository
 
     const FACET_BRAND_QUERY_KEY = 'brand_query';
     const FACET_PRODUCT_QUERY_KEY = 'product_query';
+    const FACET_EXTRA_FIELDS_QUERY_KEY = 'extra_fields_query';
     const FACET_CATEGORY_QUERY_KEY = 'category_query';
     const FACET_SHOP_QUERY_KEY = 'shop_query';
     const FACET_FILTERS = 'facet_filters_';
@@ -98,6 +99,52 @@ class ProductRepository extends ServiceEntityRepository
             ['fetch_all_extras_fields'],
             0, "extras_fields"
         );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCommon()
+            ->prepareParamsForExecuteCacheQuery();
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query, $params, $types, $queryCacheProfile
+        );
+        $fetchAll = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $statement->closeCursor();
+
+        $result = [];
+        foreach ($fetchAll as $key => $value) {
+            if (isset($value['fields']) && isset($value['key'])) {
+                preg_match_all('/\["([^_]+)"\]/', $value['fields'], $matches);
+                if (isset($matches[1][0])) {
+                    $value['fields'] = explode('", "', $matches[1][0]);
+                }
+                $result[$value['key']] = $value['fields'];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param string $query
+     * @param array $params
+     * @param array $type
+     * @return array
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function facetFiltersExtraFields(
+        string $query,
+        array $params,
+        array $type
+    )
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $this->getTagAwareQueryResultCacheCommon()->setQueryCacheTags(
+            $query,
+            $params,
+            $type,
+            ['fetch_all_extras_fields'],
+            0, "extras_fields"
+        );
+
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCommon()
             ->prepareParamsForExecuteCacheQuery();
         /** @var ResultCacheStatement $statement */
@@ -520,12 +567,20 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         $this->prepareParamAndType($parameterBag, $count);
+
         return $query;
     }
 
     private function prepareFacetFilterQueries()
     {
         $cacheKey = $this->getEncryptMainQuery();
+
+        $this->setFacetQueryFilterInProductCache(
+            $cacheKey,
+            self::FACET_EXTRA_FIELDS_QUERY_KEY,
+            $this->prepareExtraFieldsFacetFilterQuery()
+        );
+
         $this->setFacetQueryFilterInProductCache(
             $cacheKey,
             self::FACET_PRODUCT_QUERY_KEY,
@@ -539,6 +594,39 @@ class ProductRepository extends ServiceEntityRepository
         );
     }
 
+    /**
+     * @return string
+     */
+    private function prepareExtraFieldsFacetFilterQuery()
+    {
+        $connectionParams = $this->getEntityManager()->getConnection()->getParams();
+
+        $queryFacet = '
+            SELECT 
+            DISTINCT e.key,  
+            jsonb_agg(DISTINCT e.value) as fields 
+            FROM products AS products_alias 
+            JOIN jsonb_each_text(products_alias.extras) e on true
+        ';
+
+        $queryFacet .= $this->queryMainCondition;
+
+        $queryFacet .= (count($this->conditions) > 1 ? 'AND' : 'WHERE') . '
+             e.key != :exclude_key 
+            GROUP BY e.key
+        ';
+
+        $realCacheKey = 'query=' . $queryFacet .
+            '&params=' . serialize(array_merge($this->params, [':exclude_key' => 'ALTERNATIVE_IMAGE'])) .
+            '&types=' . serialize(array_merge($this->types, [':exclude_key' => ParameterType::STRING])) .
+            '&connectionParams=' . hash('sha256', serialize($connectionParams));
+
+        return $realCacheKey;
+    }
+
+    /**
+     * @return string
+     */
     private function prepareBrandFacetFilterQuery()
     {
         $connectionParams = $this->getEntityManager()->getConnection()->getParams();

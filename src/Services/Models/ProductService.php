@@ -3,6 +3,7 @@
 namespace App\Services\Models;
 
 use App\Entity\Category;
+use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\SearchProductCollection;
 use App\Entity\Product;
@@ -14,6 +15,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserIpProductRepository;
 use App\Services\ObjectsHandler;
+use Doctrine\DBAL\Cache\CacheException;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -72,12 +74,48 @@ class ProductService
     }
 
     /**
+     * @param $uniqIdentificationQuery
+     * @return array
+     * @throws CacheException
+     * @throws \Exception
+     */
+    public function facetFilters(
+        $uniqIdentificationQuery
+    )
+    {
+        $facetQueries = $this->getProductRepository()
+            ->getTagAwareQueryResultCacheProduct()
+            ->fetch($uniqIdentificationQuery);
+
+        if (!is_array($facetQueries)) {
+            throw new \Exception('redis key not present');
+        }
+
+        if (count($facetQueries) < 1) {
+            throw new \Exception('redis key is empty');
+        }
+
+        if (!isset($facetQueries[ProductRepository::FACET_EXTRA_FIELDS_QUERY_KEY])) {
+            throw new \Exception('facet key ' . ProductRepository::FACET_EXTRA_FIELDS_QUERY_KEY . ' not present');
+        }
+
+        $brandQuery = $facetQueries[ProductRepository::FACET_EXTRA_FIELDS_QUERY_KEY];
+        $pregSplitBrandQuery = preg_split('/&/', $brandQuery[0]);
+        $query = preg_replace('/query=/', '', $pregSplitBrandQuery[0]);
+        $params = unserialize(preg_replace('/params=/', '', $pregSplitBrandQuery[1]));
+        $types = unserialize(preg_replace('/types=/', '', $pregSplitBrandQuery[2]));
+
+        return $this->getProductRepository()
+            ->facetFiltersExtraFields($query, $params, $types);
+    }
+
+    /**
      * @param AdtractionDataRow $adtractionDataRow
      * @return Product
      * @throws ValidatorException
      * @throws \Doctrine\ORM\ORMException
      */
-    public function createProductFromAndractionCsvRow(AdtractionDataRow $adtractionDataRow)
+    public function createProductFromAdractionCsvRow(AdtractionDataRow $adtractionDataRow)
     {
         $this->prepareDataForExistProduct($adtractionDataRow);
         $row = $adtractionDataRow->getRow();

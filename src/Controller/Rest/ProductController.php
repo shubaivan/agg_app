@@ -106,6 +106,39 @@ class ProductController extends AbstractRestController
     }
 
     /**
+     * get Extra Fields Facet filters.
+     *
+     * @Rest\Get("/api/products/extra_fields/facet_filters/{uniqIdentificationQuery}")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Products")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object"
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws DBALException
+     * @throws \Exception
+     */
+    public function fetchFacetProductExtraFieldsAction($uniqIdentificationQuery)
+    {
+        $extraFields = $this->getProductService()
+            ->facetFilters($uniqIdentificationQuery);
+        $view = $this->createSuccessResponse($extraFields);
+        $view
+            ->getResponse()
+            ->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
+    }
+
+
+    /**
      * get Products.
      *
      * @Rest\Get("/api/products")

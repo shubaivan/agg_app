@@ -109,15 +109,15 @@ class BrandService
             ->fetch($uniqIdentificationQuery);
 
         if (!is_array($facetQueries)) {
-            throw new \Exception('facet key empty');
+            throw new \Exception('redis key not present');
         }
 
         if (count($facetQueries) < 1) {
-            throw new \Exception('facet key empty');
+            throw new \Exception('redis key is empty');
         }
 
         if (!isset($facetQueries[ProductRepository::FACET_BRAND_QUERY_KEY])) {
-            throw new \Exception('facet key empty');
+            throw new \Exception('facet key ' . ProductRepository::FACET_BRAND_QUERY_KEY . ' not present');
         }
 
         $brandQuery = $facetQueries[ProductRepository::FACET_BRAND_QUERY_KEY];
@@ -126,12 +126,6 @@ class BrandService
         $params = unserialize(preg_replace('/params=/', '', $pregSplitBrandQuery[1]));
         $types = unserialize(preg_replace('/types=/', '', $pregSplitBrandQuery[2]));
 
-        $facetFiltersBrandCountQuery = preg_replace(
-            '/SELECT(.|\n*)+FROM/',
-            'SELECT COUNT(DISTINCT brand_alias.id) FROM ',
-            $query
-        );
-
         $facetFiltersBrand = $this->getBrandRepository()
             ->facetFiltersBrand(
                 (new ParameterBag($paramFetcher->all())),
@@ -139,6 +133,12 @@ class BrandService
                 $params,
                 $types
             );
+
+        $facetFiltersBrandCountQuery = preg_replace(
+            '/SELECT(.|\n*)+FROM/',
+            'SELECT COUNT(DISTINCT brand_alias.id) FROM ',
+            $query
+        );
 
         $facetFiltersBrandCount = $this->getBrandRepository()
             ->facetFiltersBrand(
