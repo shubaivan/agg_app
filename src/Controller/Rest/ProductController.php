@@ -396,7 +396,7 @@ class ProductController extends AbstractRestController
     public function getProductByIpAction(ParamFetcher $paramFetcher)
     {
         $searchProductCollection = $this->getProductService()->getProductByIp($paramFetcher);
-        $view = $this->createSuccessResponse($searchProductCollection);
+        $view = $this->createSuccessResponse($searchProductCollection, [], false);
         $view->getResponse()->setMaxAge(180);
 
         return $view;

@@ -40,8 +40,8 @@ abstract class AbstractRestController extends AbstractFOSRestController
             $context->setGroups($groups);
         }
 
-        if ($withEmptyField) {
-            $context->setSerializeNull(true);
+        if ($withEmptyField !== null) {
+            $context->setSerializeNull($withEmptyField);
         }
 
         return View::create()
