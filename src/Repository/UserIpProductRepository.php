@@ -88,8 +88,9 @@ class UserIpProductRepository extends ServiceEntityRepository
             ->select('
             COUNT(DISTINCT IDENTITY(uip.products))
             ')
-            ->where('uip.ips = :ip')
-            ->setParameter('ip', $userIp);
+//            ->where('uip.ips = :ip')
+//            ->setParameter('ip', $userIp)
+        ;
         $query = $qb->getQuery();
         $result = $query->getSingleScalarResult();
 
