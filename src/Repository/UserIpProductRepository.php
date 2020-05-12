@@ -79,21 +79,25 @@ class UserIpProductRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param UserIp $userIp
+     * @param UserIp|null $userIp
      * @return mixed
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getCountTopProductByIp(UserIp $userIp)
+    public function getCountTopProductByIp(?UserIp $userIp = null)
     {
         $qb = $this->createQueryBuilder('uip');
         $qb
             ->select('
             COUNT(DISTINCT IDENTITY(uip.products))
-            ')
-//            ->where('uip.ips = :ip')
-//            ->setParameter('ip', $userIp)
-        ;
+            ');
+
+        if ($userIp) {
+            $qb
+                ->where('uip.ips = :ip')
+                ->setParameter('ip', $userIp);
+        }
+
         $query = $qb->getQuery();
         $result = $query->getSingleScalarResult();
 

@@ -216,7 +216,7 @@ class ProductService
         $collection = $this->getUserIpProductRepository()
             ->getTopProductByIp($paramFetcher);
         $count = $this->getUserIpProductRepository()
-            ->getCountTopProductByIp($this->getUserIp());
+            ->getCountTopProductByIp();
 
         return (new SearchProductCollection($collection, $count));
     }
