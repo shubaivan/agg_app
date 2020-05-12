@@ -196,7 +196,25 @@ class ProductService
     public function getProductByIp(ParamFetcher $paramFetcher)
     {
         $collection = $this->getUserIpProductRepository()
-            ->getTopProductByIp($this->getUserIp(), $paramFetcher);
+            ->getTopProductByIp($paramFetcher, $this->getUserIp());
+        $count = $this->getUserIpProductRepository()
+            ->getCountTopProductByIp($this->getUserIp());
+
+        return (new SearchProductCollection($collection, $count));
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @return SearchProductCollection
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function getMostPopularProducts(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getUserIpProductRepository()
+            ->getTopProductByIp($paramFetcher);
         $count = $this->getUserIpProductRepository()
             ->getCountTopProductByIp($this->getUserIp());
 

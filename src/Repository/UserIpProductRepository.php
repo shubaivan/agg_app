@@ -25,13 +25,11 @@ class UserIpProductRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param UserIp $userIp
      * @param ParamFetcher $paramFetcher
-     * @return array|int
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @param UserIp|null $userIp
+     * @return mixed
      */
-    public function getTopProductByIp(UserIp $userIp, ParamFetcher $paramFetcher)
+    public function getTopProductByIp(ParamFetcher $paramFetcher, ?UserIp $userIp = null)
     {
         $qb = $this->createQueryBuilder('s');
         $qb
@@ -62,10 +60,15 @@ class UserIpProductRepository extends ServiceEntityRepository
                 group_concat(categoryRelation.id) AS categoryIds
                 ')
             ->innerJoin('s.products', 'products_alias')
-            ->leftJoin('products_alias.categoryRelation', 'categoryRelation')
-//            ->where('s.ips = :ip')
-//            ->setParameter('ip', $userIp)
-            ->groupBy('s.products')
+            ->leftJoin('products_alias.categoryRelation', 'categoryRelation');
+
+        if ($userIp) {
+            $qb
+                ->where('s.ips = :ip')
+                ->setParameter('ip', $userIp);
+        }
+
+        $qb->groupBy('s.products')
             ->addGroupBy('products_alias')
             ->orderBy('number_of_entries', Criteria::DESC)
             ->setFirstResult($paramFetcher->get('count') * ($paramFetcher->get('page') - 1))

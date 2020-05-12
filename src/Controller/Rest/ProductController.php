@@ -395,13 +395,86 @@ class ProductController extends AbstractRestController
      */
     public function getProductByIpAction(ParamFetcher $paramFetcher)
     {
-        $searchProductCollection = $this->getProductService()->getProductByIp($paramFetcher);
+        $searchProductCollection = $this->getProductService()
+            ->getProductByIp($paramFetcher);
         $view = $this->createSuccessResponse($searchProductCollection, [], false);
         $view->getResponse()->setMaxAge(180);
 
         return $view;
     }
 
+    /**
+     * get Top Products.
+     *
+     * @Rest\Get("/api/top/products")
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Products")
+     *
+     * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
+     * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object Products",
+     *     @SWG\Schema(
+     *         type="object",
+     *         properties={
+     *             @SWG\Property(
+     *                  property="collection",
+     *                  type="array",
+     *                  @SWG\Items(
+     *                        type="object",
+     *                      @SWG\Property(property="product_id", type="integer"),
+     *                      @SWG\Property(property="number_of_entries", type="integer"),
+     *                      @SWG\Property(property="id", type="integer"),
+     *                      @SWG\Property(property="sku", type="string"),
+     *                      @SWG\Property(property="name", type="string"),
+     *                      @SWG\Property(property="description", type="string"),
+     *                      @SWG\Property(property="category", type="string"),
+     *                      @SWG\Property(property="price", type="string"),
+     *                      @SWG\Property(property="shipping", type="string"),
+     *                      @SWG\Property(property="currency", type="string"),
+     *                      @SWG\Property(property="instock", type="string"),
+     *                      @SWG\Property(property="productUrl", type="string"),
+     *                      @SWG\Property(property="imageUrl", type="string"),
+     *                      @SWG\Property(property="trackingUrl", type="string"),
+     *                      @SWG\Property(property="brand", type="string"),
+     *                      @SWG\Property(property="originalPrice", type="string"),
+     *                      @SWG\Property(property="ean", type="string"),
+     *                      @SWG\Property(property="manufacturerArticleNumber", type="string"),
+     *                      @SWG\Property(property="extras", type="string"),
+     *                      @SWG\Property(property="createdAt", type="string"),
+     *                      @SWG\Property(property="rank", type="string"),
+     *                      @SWG\Property(property="brandRelationId", type="integer"),
+     *                      @SWG\Property(property="categoryIds", type="string"),
+     *                      @SWG\Property(property="shopId", type="integer"),
+     *                      @SWG\Property(property="shop", type="string"),
+     *                  )
+     *             ),
+     *             @SWG\Property(property="count", type="integer")
+     *         }
+     *     )
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function getMostPopularProductAction(ParamFetcher $paramFetcher)
+    {
+        $searchProductCollection = $this->getProductService()
+            ->getMostPopularProducts($paramFetcher);
+        $view = $this->createSuccessResponse($searchProductCollection, [], false);
+        $view->getResponse()->setMaxAge(180);
+
+        return $view;
+    }
 
     /**
      * @return ProductRepository
