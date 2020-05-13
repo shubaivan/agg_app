@@ -54,17 +54,49 @@ class SearchProductCollection
      */
     public function getCollection(): array
     {
-        $array_map = array_map(function ($key) {
-            if (isset($key['extras']) && !is_array($key['extras'])) {
-                $val = json_decode($key['extras'], true);
-
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw ConversionException::conversionFailed($key['extras'], $key['sku']);
+        $array_map = array_map(function ($data) {
+            foreach ($data as $key => $row) {
+                $substr = substr($row, 1, -1); //explode(',', $substr)
+                if ($key == 'extras' && !is_array($row)) {
+                    if (preg_match_all('#\{(.*?)\}#', $substr, $match) > 1) {
+                        $setExtra = array_shift($match);
+                        $setExtraResult = [];
+                        foreach ($setExtra as $partExtra) {
+                            $partExtraArray = json_decode($partExtra, true);
+                            if (json_last_error() !== JSON_ERROR_NONE) {
+                                throw ConversionException::conversionFailed($key['extras'], $key['allSku']);
+                            }
+                            $setExtraResult = array_merge_recursive($setExtraResult, $partExtraArray);
+                        }
+                        array_walk($setExtraResult, function (&$v) {
+                            $v = array_unique($v);
+                        });
+                        $val = $setExtraResult;
+                    } else {
+                        $val = json_decode($substr, true);
+                        if (json_last_error() !== JSON_ERROR_NONE) {
+                            throw ConversionException::conversionFailed($key['extras'], $key['allSku']);
+                        }
+                    }
+                } else {
+                    if (preg_match_all('/\"([^\"]*?)\"/', $row, $commonMatches) > 0) {
+                        $extractValue = array_shift($commonMatches);
+                        array_walk($extractValue, function (&$v) {
+                            $v = trim($v, '"');
+                        });
+                        if (count($extractValue) > 1) {
+                            $val = $extractValue;
+                        }
+                    } else {
+                        $val = trim($substr, '"');
+                        if (count(explode(',', $val)) > 1) {
+                            $val = explode(',', $val);
+                        }
+                    }
                 }
-                $key['extras'] = $val;
+                $data[$key] = $val;
             }
-
-            return $key;
+            return $data;
         }, $this->collection);
 
         return $array_map;

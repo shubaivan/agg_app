@@ -217,7 +217,7 @@ class ProductController extends AbstractRestController
     public function getProductsAction(ParamFetcher $paramFetcher, Request $request)
     {
         $searchProductCollection = $this->getProductService()
-            ->searchProductsByFilter($paramFetcher);
+            ->newSearchProductsByFilter($paramFetcher);
         $view = $this->createSuccessResponse($searchProductCollection);
         $view->getResponse()
             ->setPublic()

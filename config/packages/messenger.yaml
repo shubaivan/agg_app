@@ -27,7 +27,7 @@ framework:
       failure_transport: failed
 
       transports:
-        success:
+        adraction_download_file:
           dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
           options:
             exchange:
@@ -37,7 +37,7 @@ framework:
             queues:
               adraction_download_file:
                 binding_keys: [normal]
-        andraction_parse_row_success:
+        andraction_parse_row:
           dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
           serializer: App\Messenger\ExternalJsonMessageSerializer
           options:
@@ -51,6 +51,6 @@ framework:
         failed: 'doctrine://default?queue_name=failed'
 
       routing:
-          'App\QueueModel\FileReadyDownloaded': success
-          'App\QueueModel\AdtractionDataRow': andraction_parse_row_success
+        'App\QueueModel\FileReadyDownloaded': adraction_download_file
+        'App\QueueModel\AdtractionDataRow': andraction_parse_row
 

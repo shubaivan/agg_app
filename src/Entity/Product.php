@@ -50,6 +50,15 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\NotBlank(
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $groupIdentity;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
@@ -573,9 +582,11 @@ class Product implements EntityValidatorException
     {
         $pieces = [
             $this->getName(),
-            $this->getPrice(),
-            $this->getBrandRelation()->getName()
+            $this->getPrice()
         ];
+        if ($this->getBrandRelation()) {
+            array_push($pieces, $this->getBrandRelation()->getName());
+        }
         if ($this->getCategoryRelation()->count()) {
             array_push($pieces, implode(',', $this->getCategoriesNameArray()));
         }
@@ -716,6 +727,18 @@ class Product implements EntityValidatorException
                 $userIpProduct->setProducts(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getGroupIdentity(): ?string
+    {
+        return $this->groupIdentity;
+    }
+
+    public function setGroupIdentity(?string $groupIdentity): self
+    {
+        $this->groupIdentity = $groupIdentity;
 
         return $this;
     }

@@ -203,12 +203,10 @@ class ProductRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "sku", "name",
-                "description", "category", "price",
-                "shipping", "currency", "instock", "productUrl", "imageUrl",
-                "trackingUrl", "brand", "shop", "originalPrice", "ean",
-                "manufacturerArticleNumber", "shopRelationId", "brandRelationId",
-                "extras", "createdAt", "numberOfEntries"], "Invalid field name " . $sortBy);
+            ["allSku", "createdAt", "ids",
+                "names", "description", "price",
+                "numberOfEntries", "shop", "shopRelationId", "brand"], "Invalid field name " . $sortBy);
+
         $sortOrder = $this->getHelpers()->white_list(
             $sortOrder,
             [Criteria::DESC, Criteria::ASC],
@@ -222,7 +220,13 @@ class ProductRepository extends ServiceEntityRepository
                     ->handleSearchValue($parameterBag->get('search'), false)
             );
         }
-        $searchProductQuery = $this->getSearchProductQuery($parameterBag, $count, $sort_by, $sortBy, $sortOrder);
+        $searchProductQuery = $this->getMainSearchProductQuery(
+            $parameterBag,
+            $count,
+            $sort_by,
+            $sortBy,
+            $sortOrder
+        );
         if (!$count) {
             $this->mainQuery = $searchProductQuery;
         }
@@ -258,40 +262,6 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Helpers
-     */
-    public function getHelpers(): Helpers
-    {
-        return $this->helpers;
-    }
-
-    /**
-     * @return TagAwareQueryResultCacheCommon
-     */
-    public function getTagAwareQueryResultCacheCommon(): TagAwareQueryResultCacheCommon
-    {
-        return $this->tagAwareQueryResultCacheCommon;
-    }
-
-    /**
-     * @return TagAwareQueryResultCacheProduct
-     */
-    public function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
-    {
-        return $this->tagAwareQueryResultCacheProduct;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEncryptMainQuery(): string
-    {
-        $encrypt_decrypt = $this->getHelpers()->encrypt_decrypt('encrypt', $this->mainQuery);
-
-        return self::FACET_FILTERS . sha1($this->mainQuery);
-    }
-
-    /**
      * @param ParameterBag $parameterBag
      * @param string $query
      * @return string
@@ -306,7 +276,7 @@ class ProductRepository extends ServiceEntityRepository
             $this->queryMainCondition .= '
                 JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
                 ON to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')) @@ query_search
-        ';
+            ';
         }
 
         $this->queryMainCondition .= '
@@ -475,7 +445,84 @@ class ProductRepository extends ServiceEntityRepository
      * @param $sortOrder
      * @return string
      */
-    private function getSearchProductQuery(ParameterBag $parameterBag, $count, bool $sort_by, $sortBy, $sortOrder): string
+    private function getMainSearchProductQuery(
+        ParameterBag $parameterBag,
+        $count,
+        bool $sort_by,
+        $sortBy,
+        $sortOrder): string
+    {
+        $mainQuery = '';
+        if ($count) {
+            $mainQuery .= '
+                SELECT COUNT(*) FROM (
+                    SELECT COUNT(DISTINCT main_products_alias.id)
+            ';
+        } else {
+            $mainQuery .= 'SELECT                         
+                 array_agg(DISTINCT main_products_alias.sku) AS "allSku",
+                 array_agg(DISTINCT main_products_alias."createdAt") AS "createdAt",
+                 array_agg(DISTINCT main_products_alias.id) AS ids,
+                 array_agg(DISTINCT main_products_alias.name) AS names,
+                 array_agg(DISTINCT main_products_alias.description) AS description,
+                 jsonb_agg(DISTINCT main_products_alias.extras) AS extras,
+                 array_agg(DISTINCT main_products_alias.price) AS price,
+                 array_agg(DISTINCT main_products_alias."numberOfEntries") AS "numberOfEntries",
+                 array_agg(DISTINCT main_products_alias.shop) AS shop,
+                 array_agg(DISTINCT main_products_alias."shopRelationId") AS "shopRelationId",
+                 array_agg(DISTINCT main_products_alias.brand) AS brand,
+                 array_agg(DISTINCT main_products_alias.rank) AS rank,
+                 array_agg(DISTINCT main_products_alias."imageUrl") AS "imageUrl",
+                 array_agg(DISTINCT main_products_alias.currency) AS currency
+            ';
+
+            if ($parameterBag->get('search')) {
+                $mainQuery .= ',array_agg(DISTINCT main_products_alias.rank) AS rank';
+            }
+        }
+
+        $mainQuery .= '
+                FROM (
+            ';
+
+        $mainQuery .= $this->getSearchProductQuery(
+            $parameterBag,
+            $count
+        );
+
+        $mainQuery .= '
+            ) AS main_products_alias
+            GROUP BY main_products_alias.group_identity';
+
+
+        if (!$count) {
+            $mainQuery .=
+                ($parameterBag->get('search') ?
+                    ($sort_by
+                        ? ' ORDER BY rank DESC, ' . '"' . $sortBy . '"' . ' ' . $sortOrder . ''
+                        : ' ORDER BY rank DESC')
+                    : ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '') . '
+                                          
+                    LIMIT :limit
+                    OFFSET :offset;
+            ';
+        } else {
+            $mainQuery .= ') as count';
+        }
+
+        return $mainQuery;
+    }
+
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param $count
+     * @param bool $sort_by
+     * @param $sortBy
+     * @param $sortOrder
+     * @return string
+     */
+    private function oldgetSearchProductQuery(ParameterBag $parameterBag, $count, bool $sort_by, $sortBy, $sortOrder): string
     {
         $query = '';
         if ($count) {
@@ -540,6 +587,68 @@ class ProductRepository extends ServiceEntityRepository
                     LIMIT :limit
                     OFFSET :offset;
             ';
+        }
+
+        $this->prepareParamAndType($parameterBag, $count);
+
+        return $query;
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param bool $count
+     * @return string
+     */
+    private function getSearchProductQuery(
+        ParameterBag $parameterBag,
+        bool $count
+    ): string
+    {
+        $query = '';
+        $query .= '
+                    SELECT                         
+                            products_alias.id,
+                            products_alias.group_identity,
+                            products_alias.sku,
+                            products_alias.name AS "name",
+                            products_alias.description,
+                            products_alias.category,
+                            products_alias.price,
+                            products_alias.shipping,
+                            products_alias.currency,
+                            products_alias.instock,
+                            products_alias.product_url AS "productUrl",
+                            products_alias.image_url AS "imageUrl",
+                            products_alias.tracking_url AS "trackingUrl",
+                            products_alias.brand,
+                            products_alias.shop,
+                            products_alias.original_price AS "originalPrice",
+                            products_alias.ean,
+                            products_alias.manufacturer_article_number AS "manufacturerArticleNumber",
+                            products_alias.extras,
+                            products_alias.created_at AS "createdAt",
+                            products_alias.brand_relation_id AS "brandRelationId",
+                            products_alias.shop_relation_id AS "shopRelationId",
+                            array_agg(DISTINCT cpt.category_id) AS categoryIds,
+                            COUNT(DISTINCT uip.id) as "numberOfEntries"
+            ';
+
+        if ($parameterBag->get('search')) {
+            $query .= '
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')), query_search) AS rank
+            ';
+        }
+
+        $query .= '
+                FROM products products_alias 
+        ';
+
+        $this->prepareMainCondition($parameterBag, $query);
+
+        $query .= '
+                    GROUP BY products_alias.id';
+        if ($parameterBag->get('search')) {
+            $query .= ', query_search.query_search';
         }
 
         $this->prepareParamAndType($parameterBag, $count);
@@ -735,4 +844,93 @@ class ProductRepository extends ServiceEntityRepository
 
         return true;
     }
+
+    public function groupProducts()
+    {
+//        SELECT
+//
+//array_agg(DISTINCT main_products_alias.sku) AS allsku,
+//array_agg(DISTINCT main_products_alias."createdAt") AS "createdAt",
+//array_agg(DISTINCT main_products_alias.id) AS ids,
+//array_agg(DISTINCT main_products_alias.name) AS names,
+//array_agg(DISTINCT main_products_alias.description) AS description,
+//array_agg(DISTINCT main_products_alias.extras) AS extras,
+//array_agg(DISTINCT main_products_alias.price) AS price,
+//array_agg(DISTINCT main_products_alias."numberOfEntries") AS "numberOfEntries",
+//array_agg(DISTINCT main_products_alias.shop) AS shop
+//
+//FROM (
+//    SELECT
+//products_alias.id,
+//products_alias.group_identity,
+//products_alias.sku,
+//products_alias.shop,
+//products_alias.name AS "name",
+//products_alias.description,
+//products_alias.category,
+//products_alias.price,
+//products_alias.extras,
+//products_alias.created_at AS "createdAt",
+//products_alias.brand_relation_id AS "brandRelationId",
+//products_alias.shop_relation_id AS "shopRelationId",
+//array_agg(DISTINCT cpt.category_id) AS categoryIds,
+//COUNT(DISTINCT uip.id) as "numberOfEntries"
+//
+//    --,ts_rank_cd(to_tsvector('pg_catalog.swedish',coalesce(name,'')||' '||coalesce(description,'')||' '||coalesce(sku,'')||' '||coalesce(price,0)||' '||coalesce(category,'')||' '||coalesce(brand,'')||' '||coalesce(shop,'')), query_search) AS rank
+//
+//FROM products products_alias
+//
+//    -- JOIN to_tsquery('pg_catalog.swedish', 'short:*') query_search
+//    -- ON to_tsvector('pg_catalog.swedish',coalesce(name,'')||' '||coalesce(description,'')||' '||coalesce(sku,'')||' '||coalesce(price,0)||' '||coalesce(category,'')||' '||coalesce(brand,'')||' '||coalesce(shop,'')) @@ query_search
+//
+//LEFT JOIN product_category cp on cp.product_id = products_alias.id
+//LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
+//LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id
+//
+//GROUP BY products_alias.id
+//
+//) AS main_products_alias
+//
+//GROUP BY main_products_alias.group_identity
+//
+//ORDER BY "numberOfEntries" DESC
+//
+
+
+    }
+
+    /**
+     * @return Helpers
+     */
+    public function getHelpers(): Helpers
+    {
+        return $this->helpers;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheCommon
+     */
+    public function getTagAwareQueryResultCacheCommon(): TagAwareQueryResultCacheCommon
+    {
+        return $this->tagAwareQueryResultCacheCommon;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheProduct
+     */
+    public function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
+    {
+        return $this->tagAwareQueryResultCacheProduct;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEncryptMainQuery(): string
+    {
+//        $encrypt_decrypt = $this->getHelpers()->encrypt_decrypt('encrypt', $this->mainQuery);
+
+        return self::FACET_FILTERS . sha1($this->mainQuery);
+    }
+
 }

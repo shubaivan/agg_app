@@ -3,7 +3,6 @@
 namespace App\Services\Models;
 
 use App\Entity\Category;
-use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\SearchProductCollection;
 use App\Entity\Product;
@@ -54,23 +53,31 @@ class ProductService
     private $requestStack;
 
     /**
+     * @var ManagerShopsService
+     */
+    private $managerShopsService;
+
+    /**
      * ProductService constructor.
      * @param LoggerInterface $logger
      * @param ObjectsHandler $objectHandler
      * @param EntityManagerInterface $em
      * @param RequestStack $requestStack
+     * @param ManagerShopsService $managerShopsService
      */
     public function __construct(
         LoggerInterface $logger,
         ObjectsHandler $objectHandler,
         EntityManagerInterface $em,
-        RequestStack $requestStack
+        RequestStack $requestStack,
+        ManagerShopsService $managerShopsService
     )
     {
         $this->logger = $logger;
         $this->objectHandler = $objectHandler;
         $this->em = $em;
         $this->requestStack = $requestStack;
+        $this->managerShopsService = $managerShopsService;
     }
 
     /**
@@ -121,9 +128,26 @@ class ProductService
         $row = $adtractionDataRow->getRow();
         /** @var Product $handleObject */
         $handleObject = $this->getObjectHandler()
-            ->handleObject($row, Product::class, [Product::SERIALIZED_GROUP_CREATE]);
+            ->handleObject(
+                $row,
+                Product::class,
+                [Product::SERIALIZED_GROUP_CREATE],
+                'json',
+                false
+            );
+        $this->setGroupIdentity($handleObject);
+        $this->getObjectHandler()
+            ->validateEntity($handleObject, [Product::SERIALIZED_GROUP_CREATE]);
 
         return $handleObject;
+    }
+
+    private function setGroupIdentity(Product $product)
+    {
+        $shop = $product->getShop();
+        if ($shop) {
+            call_user_func_array([$this->getManagerShopsService(), $shop], [$product]);
+        }
     }
 
     /**
@@ -152,6 +176,23 @@ class ProductService
      * @throws DBALException
      */
     public function searchProductsByFilter(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getProductRepository()
+            ->fullTextSearchByParameterFetcher($paramFetcher);
+        $count = $this->getProductRepository()
+            ->fullTextSearchByParameterFetcher($paramFetcher, true);
+
+        return (new SearchProductCollection(
+            $collection, $count, $this->getFacetQueryFilter()
+        ));
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @return SearchProductCollection
+     * @throws DBALException
+     */
+    public function newSearchProductsByFilter(ParamFetcher $paramFetcher)
     {
         $collection = $this->getProductRepository()
             ->fullTextSearchByParameterFetcher($paramFetcher);
@@ -347,5 +388,13 @@ class ProductService
     private function getClientIp()
     {
         return $this->getRequestStack()->getCurrentRequest()->getClientIp();
+    }
+
+    /**
+     * @return ManagerShopsService
+     */
+    private function getManagerShopsService(): ManagerShopsService
+    {
+        return $this->managerShopsService;
     }
 }
