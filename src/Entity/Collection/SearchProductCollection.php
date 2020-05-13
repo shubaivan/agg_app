@@ -79,6 +79,7 @@ class SearchProductCollection
                         }
                     }
                 } else {
+                    $val = trim($substr, '"');
                     if (preg_match_all('/\"([^\"]*?)\"/', $row, $commonMatches) > 0) {
                         $extractValue = array_shift($commonMatches);
                         array_walk($extractValue, function (&$v) {
