@@ -4,6 +4,8 @@ namespace App\Controller\Rest;
 
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
+use App\Entity\Collection\SearchProductCollection;
+use App\Exception\ValidatorException;
 use App\Repository\BrandRepository;
 use App\Repository\ProductRepository;
 use App\Services\Helpers;
@@ -213,12 +215,16 @@ class ProductController extends AbstractRestController
      *
      * @return \FOS\RestBundle\View\View
      * @throws DBALException
+     * @throws ValidatorException
      */
     public function getProductsAction(ParamFetcher $paramFetcher, Request $request)
     {
         $searchProductCollection = $this->getProductService()
             ->newSearchProductsByFilter($paramFetcher);
-        $view = $this->createSuccessResponse($searchProductCollection);
+        $view = $this->createSuccessResponse(
+            $searchProductCollection,
+            [SearchProductCollection::GROUP_GET]
+        );
         $view->getResponse()
             ->setPublic()
             ->setMaxAge(600);

@@ -11,16 +11,19 @@ class AhlensService implements IdentityGroup
 
     public function identityGroupColumn(Product $product)
     {
-        $sku = $product->getSku();
-        $productUrl = $product->getProductUrl();
-        preg_replace('/' . $sku . '/', '', $productUrl);
 
-        if (preg_match(
-            '/\-(.|\n*)+\//',
-            $productUrl,
-            $match
-        )) {
-            $product->setGroupIdentity(array_shift($match));
+        $productUrl = $product->getProductUrl();
+        $lastChar = substr($productUrl, -1);
+        if ($lastChar == '/') {
+            $productUrl = substr_replace($productUrl, "", -1);
+        }
+        $productUrl = preg_replace("/[^\/]+$/", '', $productUrl);
+        $lastChar = substr($productUrl, -1);
+        if ($lastChar == '/') {
+            $productUrl = substr_replace($productUrl, "", -1);
+        }
+        if (preg_match("/[^\/]+$/", $productUrl, $matches) > 0) {
+            $product->setGroupIdentity(array_shift($matches));
         }
     }
 }

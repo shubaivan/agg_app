@@ -2,7 +2,6 @@
 
 namespace App\Entity\Collection;
 
-use App\Entity\Brand;
 use JMS\Serializer\Annotation;
 
 class BrandsCollection

@@ -459,20 +459,26 @@ class ProductRepository extends ServiceEntityRepository
                     SELECT COUNT(DISTINCT main_products_alias.id)
             ';
         } else {
-            $mainQuery .= 'SELECT                         
-                 array_agg(DISTINCT main_products_alias.sku) AS "allSku",
+            $mainQuery .= '
+            SELECT                         
+                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.sku::text)) AS "storeSku",
                  array_agg(DISTINCT main_products_alias."createdAt") AS "createdAt",
+                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."createdAt"::text)) AS "storeCreatedAt",
                  array_agg(DISTINCT main_products_alias.id) AS ids,
                  array_agg(DISTINCT main_products_alias.name) AS names,
+                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.name)) AS "storeNames",
                  array_agg(DISTINCT main_products_alias.description) AS description,
+                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.description)) AS "storeDescription",
+                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.extras::text)) AS "storeExtras",
                  jsonb_agg(DISTINCT main_products_alias.extras) AS extras,
                  array_agg(DISTINCT main_products_alias.price) AS price,
+                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.price::text)) AS "storePrice",
                  array_agg(DISTINCT main_products_alias."numberOfEntries") AS "numberOfEntries",
+                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."numberOfEntries"::text)) AS "storeNumberOfEntries",
                  array_agg(DISTINCT main_products_alias.shop) AS shop,
                  array_agg(DISTINCT main_products_alias."shopRelationId") AS "shopRelationId",
-                 array_agg(DISTINCT main_products_alias.brand) AS brand,
-                 array_agg(DISTINCT main_products_alias.rank) AS rank,
-                 array_agg(DISTINCT main_products_alias."imageUrl") AS "imageUrl",
+                 array_agg(DISTINCT main_products_alias.brand) AS brand,                							 
+                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."imageUrl")) AS "storeImageUrl",
                  array_agg(DISTINCT main_products_alias.currency) AS currency
             ';
 

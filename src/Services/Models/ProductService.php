@@ -5,6 +5,9 @@ namespace App\Services\Models;
 use App\Entity\Category;
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\SearchProductCollection;
+use App\Entity\Collection\SearchProducts\AdjacentProduct;
+use App\Entity\Collection\SearchProducts\GroupAdjacent;
+use App\Entity\Collection\SearchProducts\GroupProductEntity;
 use App\Entity\Product;
 use App\Entity\UserIp;
 use App\Entity\UserIpProduct;
@@ -191,6 +194,7 @@ class ProductService
      * @param ParamFetcher $paramFetcher
      * @return SearchProductCollection
      * @throws DBALException
+     * @throws ValidatorException
      */
     public function newSearchProductsByFilter(ParamFetcher $paramFetcher)
     {
@@ -199,9 +203,44 @@ class ProductService
         $count = $this->getProductRepository()
             ->fullTextSearchByParameterFetcher($paramFetcher, true);
 
-        return (new SearchProductCollection(
-            $collection, $count, $this->getFacetQueryFilter()
-        ));
+        $searchProductCollection = $this->getObjectHandler()
+            ->handleObject(
+                [
+                    'count' => $count,
+                    'collection' => $collection,
+                    'uniqIdentificationQuery' => $this->getFacetQueryFilter()
+                ],
+                SearchProductCollection::class,
+                [SearchProductCollection::GROUP_CREATE]
+            );
+        $this->analysisSearchProductCollection($searchProductCollection);
+
+        return $searchProductCollection;
+    }
+
+    /**
+     * @param SearchProductCollection $productCollection
+     * @throws ValidatorException
+     */
+    private function analysisSearchProductCollection(SearchProductCollection $productCollection)
+    {
+        foreach ($productCollection->getCollection()->getIterator() as $groupProductEntity) {
+            /** @var $groupProductEntity GroupProductEntity */
+            $presentAdjacentProducts = $groupProductEntity->getPresentAdjacentProducts();
+            if (count($presentAdjacentProducts) > 1) {
+                /** @var GroupAdjacent $handleObject */
+                $handleObject = $this->getObjectHandler()
+                    ->handleObject(
+                        ['adjacentProducts' => $presentAdjacentProducts],
+                        GroupAdjacent::class,
+                        [AdjacentProduct::GROUP_GENERATE_ADJACENT]
+                    );
+                $groupProductEntity->setAdjacentProducts(
+                    $handleObject->getAdjacentProducts()
+                );
+            }
+        }
+
     }
 
     private function getFacetQueryFilter()
