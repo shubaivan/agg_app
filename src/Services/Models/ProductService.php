@@ -177,26 +177,9 @@ class ProductService
      * @param ParamFetcher $paramFetcher
      * @return SearchProductCollection
      * @throws DBALException
-     */
-    public function searchProductsByFilter(ParamFetcher $paramFetcher)
-    {
-        $collection = $this->getProductRepository()
-            ->fullTextSearchByParameterFetcher($paramFetcher);
-        $count = $this->getProductRepository()
-            ->fullTextSearchByParameterFetcher($paramFetcher, true);
-
-        return (new SearchProductCollection(
-            $collection, $count, $this->getFacetQueryFilter()
-        ));
-    }
-
-    /**
-     * @param ParamFetcher $paramFetcher
-     * @return SearchProductCollection
-     * @throws DBALException
      * @throws ValidatorException
      */
-    public function newSearchProductsByFilter(ParamFetcher $paramFetcher)
+    public function searchProductsByFilter(ParamFetcher $paramFetcher)
     {
         $collection = $this->getProductRepository()
             ->fullTextSearchByParameterFetcher($paramFetcher);

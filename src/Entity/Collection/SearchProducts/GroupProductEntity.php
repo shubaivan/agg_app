@@ -165,13 +165,13 @@ class GroupProductEntity
      * @var ArrayCollection|AdjacentProduct[]
      * @Annotation\Groups({SearchProductCollection::GROUP_GET})
      */
-    private $adjacentProducts;
+    private $adjacentProducts = [];
 
     /**
      * @var AdjacentProduct
      * @Annotation\Groups({SearchProductCollection::GROUP_GET})
      */
-    private $currentProduct;
+    private $currentProduct = [];
 
     /**
      * @var array
