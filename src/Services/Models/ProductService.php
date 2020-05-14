@@ -240,21 +240,29 @@ class ProductService
                 );
             }
 
-            $presentCurrentProduct = $groupProductEntity->getPresentCurrentProduct();
-            if (count($presentCurrentProduct) > 0) {
-                /** @var AdjacentProduct $handleObject */
-                $handleObject = $this->getObjectHandler()
-                    ->handleObject(
-                        $presentCurrentProduct,
-                        AdjacentProduct::class,
-                        [AdjacentProduct::GROUP_GENERATE_ADJACENT]
-                    );
-                $groupProductEntity->setCurrentProduct(
-                    $handleObject
-                );
-            }
+            $this->analysisSearchProductOnCurrentCollection($groupProductEntity);
         }
+    }
 
+    /**
+     * @param GroupProductEntity $groupProductEntity
+     * @throws ValidatorException
+     */
+    private function analysisSearchProductOnCurrentCollection(GroupProductEntity $groupProductEntity)
+    {
+        $presentCurrentProduct = $groupProductEntity->getPresentCurrentProduct();
+        if (count($presentCurrentProduct) > 0) {
+            /** @var AdjacentProduct $handleObject */
+            $handleObject = $this->getObjectHandler()
+                ->handleObject(
+                    $presentCurrentProduct,
+                    AdjacentProduct::class,
+                    [AdjacentProduct::GROUP_GENERATE_ADJACENT]
+                );
+            $groupProductEntity->setCurrentProduct(
+                $handleObject
+            );
+        }
     }
 
     private function getFacetQueryFilter()
