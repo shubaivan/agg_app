@@ -106,7 +106,7 @@ class GroupProductEntity
     private $description;
 
     /**
-     * @var string
+     * @var array
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
      * @Annotation\Accessor(setter="setExtrasAccessor")
@@ -168,9 +168,20 @@ class GroupProductEntity
     private $adjacentProducts;
 
     /**
+     * @var AdjacentProduct
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     */
+    private $currentProduct;
+
+    /**
      * @var array
      */
     private $presentAdjacentProducts = [];
+
+    /**
+     * @var array
+     */
+    private $presentCurrentProduct = [];
 
     /**
      * @param string $value
@@ -380,11 +391,11 @@ class GroupProductEntity
      */
     public function postDeserializer()
     {
-        if (is_array($this->ids) && count($this->ids) > 1) {
+        if (is_array($this->ids)) {
             $resultArray = [];
             foreach ($this->ids as $id) {
                 $id = (int)$id;
-                $resultArray[] = [
+                $arr = [
                     'id' => $id,
                     'extras' => $this->storeExtras[$id],
                     'imageUrl' => $this->storeImageUrl[$id],
@@ -396,10 +407,46 @@ class GroupProductEntity
                     'shopRelationId' => $this->shopRelationId,
                     'description' => $this->storeDescription[$id]
                 ];
+                $resultArray[] = $arr;
             }
-
+            if (!$this->presentCurrentProduct) {
+                $this->presentCurrentProduct = $arr;
+            }
             $this->presentAdjacentProducts = $resultArray;
+        } elseif (is_string($this->ids)) {
+            $currentProduct = [
+                'id' => $this->ids,
+                'extras' => $this->extras,
+                'imageUrl' => $this->storeImageUrl[$this->ids],
+                'brand' => $this->brand,
+                'name' => $this->names,
+                'price' => $this->price,
+                'currency' => $this->currency,
+                'shop' => $this->shop,
+                'shopRelationId' => $this->shopRelationId,
+                'description' => $this->description
+            ];
+
+            $this->presentCurrentProduct = $currentProduct;
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getPresentCurrentProduct(): array
+    {
+        return $this->presentCurrentProduct;
+    }
+
+    /**
+     * @param AdjacentProduct $currentProduct
+     * @return GroupProductEntity
+     */
+    public function setCurrentProduct(AdjacentProduct $currentProduct): GroupProductEntity
+    {
+        $this->currentProduct = $currentProduct;
+        return $this;
     }
 
     /**
@@ -514,5 +561,17 @@ class GroupProductEntity
     public function getStoreNumberOfEntriesValue()
     {
         return $this->storeNumberOfEntries;
+    }
+
+    /**
+     * @return array
+     * @Annotation\VirtualProperty()
+     * @Annotation\SerializedName("extras")
+     * @Annotation\Type("array")
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     */
+    public function getExtrasValue()
+    {
+        return $this->extras;
     }
 }

@@ -227,7 +227,7 @@ class ProductService
         foreach ($productCollection->getCollection()->getIterator() as $groupProductEntity) {
             /** @var $groupProductEntity GroupProductEntity */
             $presentAdjacentProducts = $groupProductEntity->getPresentAdjacentProducts();
-            if (count($presentAdjacentProducts) > 1) {
+            if (count($presentAdjacentProducts) > 0) {
                 /** @var GroupAdjacent $handleObject */
                 $handleObject = $this->getObjectHandler()
                     ->handleObject(
@@ -237,6 +237,20 @@ class ProductService
                     );
                 $groupProductEntity->setAdjacentProducts(
                     $handleObject->getAdjacentProducts()
+                );
+            }
+
+            $presentCurrentProduct = $groupProductEntity->getPresentCurrentProduct();
+            if (count($presentCurrentProduct) > 0) {
+                /** @var AdjacentProduct $handleObject */
+                $handleObject = $this->getObjectHandler()
+                    ->handleObject(
+                        $presentCurrentProduct,
+                        AdjacentProduct::class,
+                        [AdjacentProduct::GROUP_GENERATE_ADJACENT]
+                    );
+                $groupProductEntity->setCurrentProduct(
+                    $handleObject
                 );
             }
         }
