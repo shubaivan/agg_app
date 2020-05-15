@@ -592,17 +592,13 @@ class ProductRepository extends ServiceEntityRepository
         $queryFacet = '
             SELECT
                 DISTINCT shop_alias.id,
-                shop_alias.name AS "name",
+                shop_alias.shop_name AS "shopName",
                 shop_alias.created_at AS "createdAt"
             FROM shop shop_alias
             INNER JOIN products products_alias ON products_alias.shop_relation_id = shop_alias.id
         ';
 
         $queryFacet .= $this->queryMainCondition;
-
-        $queryFacet .= '
-            GROUP BY shop_alias.id
-        ';
 
         $realCacheKey = 'query=' . $queryFacet .
             '&params=' . serialize($this->params) .
@@ -635,9 +631,6 @@ class ProductRepository extends ServiceEntityRepository
             '\'pg_catalog.swedish\',coalesce(category_alias.category_name,\'\')||\' \'',
             $this->queryMainCondition
         );
-
-        $queryFacet .= '
-                    GROUP BY category_alias.id';
 
         $realCacheKey = 'query=' . $queryFacet .
             '&params=' . serialize($this->params) .
@@ -687,17 +680,13 @@ class ProductRepository extends ServiceEntityRepository
         $queryFacet = '
             SELECT
                 DISTINCT brand_alias.id,
-                brand_alias.name AS "name",
+                brand_alias.brand_name AS "brandName",
                 brand_alias.created_at AS "createdAt"
             FROM brand brand_alias
             INNER JOIN products products_alias ON products_alias.brand_relation_id = brand_alias.id
         ';
 
         $queryFacet .= $this->queryMainCondition;
-
-        $queryFacet .= '
-            GROUP BY brand_alias.id, brand_alias.name
-        ';
 
         $realCacheKey = 'query=' . $queryFacet .
             '&params=' . serialize($this->params) .

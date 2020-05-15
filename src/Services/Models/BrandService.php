@@ -59,7 +59,7 @@ class BrandService
         if (!($brand instanceof Brand)) {
             $brand = new Brand();
             $brand
-                ->setName($product->getBrand());
+                ->setBrandName($product->getBrand());
         }
         $product->setBrandRelation($brand);
 
@@ -161,7 +161,7 @@ class BrandService
     private function matchExistBrand(string $name)
     {
         return $this->getBrandRepository()
-            ->findOneBy(['name' => $name]);
+            ->findOneBy(['brandName' => $name]);
     }
 
     /**

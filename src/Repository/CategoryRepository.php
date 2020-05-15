@@ -231,7 +231,7 @@ class CategoryRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "categoryName", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()
             ->white_list(
                 $sortOrder,
@@ -239,7 +239,31 @@ class CategoryRepository extends ServiceEntityRepository
                 "Invalid ORDER BY direction " . $sortOrder
             );
 
+        $searchField = $parameterBag->get('search');
+        if ($searchField) {
+            $search = $this->getHelpers()
+                ->handleSearchValue($searchField, $parameterBag->get('strict') === true);
+        } else {
+            $search = $searchField;
+        }
+        $aliasCategoryTable = '';
+        if (array_key_exists(':category_word', $params)) {
+            $query .= 'LEFT JOIN category as category_alias_facet ON category_alias.id = category_alias_facet.id';
+            $aliasCategoryTable = 'category_alias_facet.';
+        }
+        if ($search) {
+            $query .= '
+                JOIN to_tsquery(\'pg_catalog.swedish\', :search_facet) query_search_facet
+                ON to_tsvector(\'pg_catalog.swedish\',coalesce(' . $aliasCategoryTable . 'category_name,\'\')||\' \') @@ query_search_facet
+            ';
+        }
+
         if (!$count) {
+            $query .= '
+                    GROUP BY category_alias.id';
+            if ($search) {
+                $query .= ', query_search_facet.query_search_facet';
+            }
             $query .=
                 ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' . '                                          
                     LIMIT :limit
@@ -248,6 +272,11 @@ class CategoryRepository extends ServiceEntityRepository
 
             $params = array_merge($params, [':offset' => $offset, ':limit' => $limit]);
             $types = array_merge($types, [':offset' => \PDO::PARAM_INT, ':limit' => \PDO::PARAM_INT]);
+        }
+
+        if ($search) {
+            $params[':search_facet'] = $search;
+            $types[':search_facet'] = \PDO::PARAM_STR;
         }
 
         $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(

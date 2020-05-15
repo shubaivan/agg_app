@@ -108,7 +108,7 @@ class BrandRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "brandName", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()
             ->white_list(
                 $sortOrder,
@@ -133,13 +133,13 @@ class BrandRepository extends ServiceEntityRepository
             $query .= '
                     SELECT                         
                             DISTINCT brand_alias.id,
-                            brand_alias.name AS "name",
+                            brand_alias.brand_name AS "brandName",
                             brand_alias.created_at AS "createdAt"
             ';
 
             if ($search) {
                 $query .= '
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'), query_search) AS rank
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(brand_name,\'\')||\' \'), query_search) AS rank
             ';
             }
         }
@@ -150,7 +150,7 @@ class BrandRepository extends ServiceEntityRepository
         if ($search) {
             $query .= '
                 JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \') @@ query_search
+                ON to_tsvector(\'pg_catalog.swedish\',coalesce(brand_name,\'\')||\' \') @@ query_search
             ';
         }
 
@@ -241,7 +241,7 @@ class BrandRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "brandName", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()
             ->white_list(
                 $sortOrder,
@@ -249,7 +249,29 @@ class BrandRepository extends ServiceEntityRepository
                 "Invalid ORDER BY direction " . $sortOrder
             );
 
+        $searchField = $parameterBag->get('search');
+        if ($searchField) {
+            $search = $this->getHelpers()
+                ->handleSearchValue($searchField, $parameterBag->get('strict') === true);
+        } else {
+            $search = $searchField;
+        }
+
+        if ($search) {
+            $query .= '
+                JOIN to_tsquery(\'pg_catalog.swedish\', :search_facet) query_search_facet
+                ON to_tsvector(\'pg_catalog.swedish\',coalesce(brand_name,\'\')||\' \') @@ query_search_facet
+            ';
+        }
+
         if (!$count) {
+
+            $query .= '
+                GROUP BY brand_alias.id
+            ';
+            if ($search) {
+                $query .= ', query_search_facet.query_search_facet';
+            }
             $query .=
                 ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' . '                                          
                     LIMIT :limit
@@ -258,6 +280,11 @@ class BrandRepository extends ServiceEntityRepository
 
             $params = array_merge($params, [':offset' => $offset, ':limit' => $limit]);
             $types = array_merge($types, [':offset' => \PDO::PARAM_INT, ':limit' => \PDO::PARAM_INT]);
+        }
+
+        if ($search) {
+            $params[':search_facet'] = $search;
+            $types[':search_facet'] = \PDO::PARAM_STR;
         }
 
         $this->getTagAwareQueryResultCacheBrand()->setQueryCacheTags(

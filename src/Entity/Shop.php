@@ -16,10 +16,10 @@ use App\Entity\Product;
  * @ORM\Table(name="shop",
  *    uniqueConstraints={
  *        @UniqueConstraint(name="shop_name_idx",
- *            columns={"name"})
+ *            columns={"shop_name"})
  *    }
  * )
- * @UniqueEntity(fields={"name"})
+ * @UniqueEntity(fields={"shopName"})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
  */
 class Shop
@@ -61,7 +61,7 @@ class Shop
      * @ORM\Column(type="string", length=255)
      * @Annotation\Groups({Shop::SERIALIZED_GROUP_LIST})
      */
-    private $name;
+    private $shopName;
 
     /**
      * @var Collection|Product[]
@@ -80,14 +80,14 @@ class Shop
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getShopName(): ?string
     {
-        return $this->name;
+        return $this->shopName;
     }
 
-    public function setName(string $name): self
+    public function setShopName(string $shopName): self
     {
-        $this->name = $name;
+        $this->shopName = $shopName;
 
         return $this;
     }
