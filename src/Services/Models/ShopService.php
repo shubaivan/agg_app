@@ -53,7 +53,7 @@ class ShopService
         if (!($shop instanceof Shop)) {
             $shop = new Shop();
             $shop
-                ->setName($product->getShop());
+                ->setShopName($product->getShop());
         }
         $product->setShopRelation($shop);
 
@@ -152,7 +152,7 @@ class ShopService
     private function matchExistShop(string $name)
     {
         return $this->getShopRepository()
-            ->findOneBy(['name' => $name]);
+            ->findOneBy(['shopName' => $name]);
     }
 
     /**

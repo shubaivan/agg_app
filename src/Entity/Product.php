@@ -642,7 +642,7 @@ class Product implements EntityValidatorException
     public function setShopRelation(?Shop $shopRelation): self
     {
         $this->shopRelation = $shopRelation;
-        $this->setShop($shopRelation->getName());
+        $this->setShop($shopRelation->getShopName());
 
         return $this;
     }
