@@ -452,6 +452,56 @@ class GroupProductEntity
         return $val;
     }
 
+    public function getStoreSkuDataByKey($key)
+    {
+        return isset($this->storeSku[$key]) ? $this->storeSku[$key] : null;
+    }
+
+    public function getStoreCreatedAtDataByKey($key)
+    {
+        return isset($this->storeCreatedAt[$key]) ? $this->storeCreatedAt[$key] : null;
+    }
+
+    public function getStoreNamesDataByKey($key)
+    {
+        return isset($this->storeNames[$key]) ? $this->storeNames[$key] : null;
+    }
+
+    public function getStoreDescriptionDataByKey($key)
+    {
+        return isset($this->storeDescription[$key]) ? $this->storeDescription[$key] : null;
+    }
+
+    /**
+     * @param $key
+     * @return mixed|null
+     */
+    public function getStoreExtrasDataByKey($key)
+    {
+        return isset($this->storeExtras[$key]) ? $this->storeExtras[$key] : null;
+    }
+
+
+    public function getStorePriceDataByKey($key)
+    {
+        return isset($this->storePrice[$key]) ? $this->storePrice[$key] : null;
+    }
+
+    public function getStoreImageUrlDataByKey($key)
+    {
+        return isset($this->storeImageUrl[$key]) ? $this->storeImageUrl[$key] : null;
+    }
+
+    public function getStoreProductUrlDataByKey($key)
+    {
+        return isset($this->storeProductUrl[$key]) ? $this->storeProductUrl[$key] : null;
+    }
+
+    public function getStoreNumberOfEntriesDataByKey($key)
+    {
+        return isset($this->storeNumberOfEntries[$key]) ? $this->storeNumberOfEntries[$key] : null;
+    }
+
     /**
      * @Annotation\PostDeserialize()
      */
@@ -463,16 +513,16 @@ class GroupProductEntity
                 $id = (int)$id;
                 $arr = [
                     'id' => $id,
-                    'extras' => $this->storeExtras[$id],
-                    'imageUrl' => $this->storeImageUrl[$id],
-                    'productUrl' => $this->storeProductUrl[$id],
+                    'extras' => $this->getStoreExtrasDataByKey($id),
+                    'imageUrl' => $this->getStoreImageUrlDataByKey($id),
+                    'productUrl' => $this->getStoreProductUrlDataByKey($id),
                     'brand' => $this->brand,
-                    'name' => $this->storeNames[$id],
-                    'price' => $this->storePrice[$id],
+                    'name' => $this->getStoreNamesDataByKey($id),
+                    'price' => $this->getStorePriceDataByKey($id),
                     'currency' => $this->currency,
                     'shop' => $this->shop,
                     'shopRelationId' => $this->shopRelationId,
-                    'description' => $this->storeDescription[$id]
+                    'description' => $this->getStoreDescriptionDataByKey($id)
                 ];
                 $resultArray[] = $arr;
             }
@@ -484,8 +534,8 @@ class GroupProductEntity
             $currentProduct = [
                 'id' => $this->ids,
                 'extras' => $this->extras,
-                'imageUrl' => $this->storeImageUrl[$this->ids],
-                'productUrl' => $this->storeProductUrl[$this->ids],
+                'imageUrl' => $this->getStoreImageUrlDataByKey($this->ids),
+                'productUrl' => $this->getStoreImageUrlDataByKey($this->ids),
                 'brand' => $this->brand,
                 'name' => $this->names,
                 'price' => $this->price,
