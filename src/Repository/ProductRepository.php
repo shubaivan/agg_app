@@ -636,9 +636,6 @@ class ProductRepository extends ServiceEntityRepository
             $this->queryMainCondition
         );
 
-        $queryFacet .= '
-                    GROUP BY category_alias.id';
-
         $realCacheKey = 'query=' . $queryFacet .
             '&params=' . serialize($this->params) .
             '&types=' . serialize($this->types) .
