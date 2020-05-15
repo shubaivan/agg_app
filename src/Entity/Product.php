@@ -537,7 +537,7 @@ class Product implements EntityValidatorException
     public function setBrandRelation(?Brand $brandRelation): self
     {
         $this->brandRelation = $brandRelation;
-        $this->setBrand($brandRelation->getName());
+        $this->setBrand($brandRelation->getBrandName());
 
         return $this;
     }
@@ -574,7 +574,7 @@ class Product implements EntityValidatorException
         $pieces = [
             $this->getName(),
             $this->getPrice(),
-            $this->getBrandRelation()->getName()
+            $this->getBrandRelation()->getBrandName()
         ];
         if ($this->getCategoryRelation()->count()) {
             array_push($pieces, implode(',', $this->getCategoriesNameArray()));

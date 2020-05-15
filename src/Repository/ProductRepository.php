@@ -687,17 +687,13 @@ class ProductRepository extends ServiceEntityRepository
         $queryFacet = '
             SELECT
                 DISTINCT brand_alias.id,
-                brand_alias.name AS "name",
+                brand_alias.brand_name AS "brandName",
                 brand_alias.created_at AS "createdAt"
             FROM brand brand_alias
             INNER JOIN products products_alias ON products_alias.brand_relation_id = brand_alias.id
         ';
 
         $queryFacet .= $this->queryMainCondition;
-
-        $queryFacet .= '
-            GROUP BY brand_alias.id, brand_alias.name
-        ';
 
         $realCacheKey = 'query=' . $queryFacet .
             '&params=' . serialize($this->params) .

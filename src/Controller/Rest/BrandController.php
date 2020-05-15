@@ -132,6 +132,12 @@ class BrandController extends AbstractRestController
      *
      * @Rest\Get("/api/brand/facet_filters/{uniqIdentificationQuery}")
      *
+     * @Rest\QueryParam(
+     *     name="search",
+     *     strict=true,
+     *     requirements=@SearchQueryParam,
+     *     nullable=true,
+     *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by brand_name fields")
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
      * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
      * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
