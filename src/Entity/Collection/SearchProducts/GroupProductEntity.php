@@ -69,6 +69,14 @@ class GroupProductEntity
      * @var array
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreProductUrlAccessor")
+     */
+    private $storeProductUrl;
+
+    /**
+     * @var array
+     * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
      * @Annotation\Accessor(setter="setStoreNumberOfEntriesAccessor")
      */
     private $storeNumberOfEntries;
@@ -171,7 +179,7 @@ class GroupProductEntity
      * @var AdjacentProduct
      * @Annotation\Groups({SearchProductCollection::GROUP_GET})
      */
-    private $currentProduct = [];
+    private $currentProduct;
 
     /**
      * @var array
@@ -248,26 +256,49 @@ class GroupProductEntity
         $this->storeExtras = $storeContainOneProduct;
     }
 
+    /**
+     * @param string $value
+     */
     public function setStoreImageUrlAccessor(string $value)
     {
         $this->storeImageUrl = $this->storePropertyAccessor($value);
     }
 
+    /**
+     * @param string $value
+     */
+    public function setStoreProductUrlAccessor(string $value)
+    {
+        $this->storeProductUrl = $this->storePropertyAccessor($value);
+    }
+
+    /**
+     * @param string $value
+     */
     public function setStoreNumberOfEntriesAccessor(string $value)
     {
         $this->storeNumberOfEntries = $this->storePropertyAccessor($value);
     }
 
+    /**
+     * @param string $value
+     */
     public function setStorePriceAccessor(string $value)
     {
         $this->storePrice = $this->storePropertyAccessor($value);
     }
 
+    /**
+     * @param string $value
+     */
     public function setStoreDescriptionAccessor(string $value)
     {
         $this->storeDescription = $this->storePropertyAccessor($value);
     }
 
+    /**
+     * @param string $value
+     */
     public function setStoreNamesAccessor(string $value)
     {
         $this->storeNames = $this->storePropertyAccessor($value);
@@ -297,41 +328,65 @@ class GroupProductEntity
         return $this;
     }
 
+    /**
+     * @param string $data
+     */
     public function setCreatedAtAccessor(string $data)
     {
         $this->createdAt = $this->simplePropertyAccess($data);
     }
 
+    /**
+     * @param string $data
+     */
     public function setNamesAccessor(string $data)
     {
         $this->names = $this->simplePropertyAccess($data);
     }
 
+    /**
+     * @param string $data
+     */
     public function setDescriptionAccessor(string $data)
     {
         $this->description = $this->simplePropertyAccess($data);
     }
 
+    /**
+     * @param string $data
+     */
     public function setPriceAccessor(string $data)
     {
         $this->price = $this->simplePropertyAccess($data);
     }
 
+    /**
+     * @param string $data
+     */
     public function setNumberOfEntriesAccessor(string $data)
     {
         $this->numberOfEntries = $this->simplePropertyAccess($data);
     }
 
+    /**
+     * @param string $data
+     */
     public function setShopAccessor(string $data)
     {
         $this->shop = $this->simplePropertyAccess($data);
     }
 
+    /**
+     * @param string $data
+     */
     public function setShopRelationIdAccessor(string $data)
     {
         $this->shopRelationId = $this->simplePropertyAccess($data);
     }
 
+    /**
+     * @param string $data
+     */
     public function setBrandAccessor(string $data)
     {
         $this->brand = $this->simplePropertyAccess($data);
@@ -342,11 +397,18 @@ class GroupProductEntity
         $this->currency = $this->simplePropertyAccess($data);
     }
 
+    /**
+     * @param string $data
+     */
     public function setIdsAccessor(string $data)
     {
         $this->ids = $this->simplePropertyAccess($data);
     }
 
+    /**
+     * @param string $storeData
+     * @return array
+     */
     private function storePropertyAccessor(string $storeData)
     {
         $storeData = str_replace('"', '', $storeData);
@@ -364,7 +426,11 @@ class GroupProductEntity
         return $storeContainOneProduct;
     }
 
-    private function simplePropertyAccess($data)
+    /**
+     * @param string $data
+     * @return array|mixed|string
+     */
+    private function simplePropertyAccess(string $data)
     {
         $substr = substr($data, 1, -1);
         $val = trim($substr, '"');
@@ -399,6 +465,7 @@ class GroupProductEntity
                     'id' => $id,
                     'extras' => $this->storeExtras[$id],
                     'imageUrl' => $this->storeImageUrl[$id],
+                    'productUrl' => $this->storeProductUrl[$id],
                     'brand' => $this->brand,
                     'name' => $this->storeNames[$id],
                     'price' => $this->storePrice[$id],
@@ -418,6 +485,7 @@ class GroupProductEntity
                 'id' => $this->ids,
                 'extras' => $this->extras,
                 'imageUrl' => $this->storeImageUrl[$this->ids],
+                'productUrl' => $this->storeProductUrl[$this->ids],
                 'brand' => $this->brand,
                 'name' => $this->names,
                 'price' => $this->price,
@@ -561,6 +629,18 @@ class GroupProductEntity
     public function getStoreNumberOfEntriesValue()
     {
         return $this->storeNumberOfEntries;
+    }
+
+    /**
+     * @return array
+     * @Annotation\VirtualProperty()
+     * @Annotation\SerializedName("storeProductUrl")
+     * @Annotation\Type("array")
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     */
+    public function getStoreProductUrlValue()
+    {
+        return $this->storeProductUrl;
     }
 
     /**

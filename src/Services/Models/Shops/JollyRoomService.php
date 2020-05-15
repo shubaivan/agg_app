@@ -9,6 +9,8 @@ use App\Entity\Product;
 class JollyRoomService implements IdentityGroup
 {
     /**
+     * name: "Paw Patrol Baddräkt, Lila, 6 År"
+     *
      * @param Product $product
      * @return mixed|void
      */
@@ -17,11 +19,14 @@ class JollyRoomService implements IdentityGroup
         $name = $product->getName();
         $explodeName = explode(',', $name);
         if (count($explodeName) > 1) {
-            $product->setGroupIdentity(array_shift($explodeName));
-            if (count($explodeName) > 1) {
-                $product->setExtras(array_merge($product->getExtras(), ['COLOUR' => array_shift($explodeName)]));
-                if (count($explodeName) > 1) {
-                    $product->setExtras(array_merge($product->getExtras(), ['AGE_GROUP' => array_shift($explodeName)]));
+            $groupIdentity = str_replace(' ', '_', mb_strtolower(array_shift($explodeName)));
+            $product->setGroupIdentity($groupIdentity);
+            if (count($explodeName) > 0) {
+                $color = trim(array_shift($explodeName));
+                $product->setSeparateExtra('COLOUR', $color);
+                if (count($explodeName) > 0) {
+                    $ageGroup = trim(array_shift($explodeName));
+                    $product->setSeparateExtra('AGE_GROUP', $ageGroup);
                 }
             }
         }

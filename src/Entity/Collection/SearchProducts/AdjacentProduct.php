@@ -33,6 +33,14 @@ class AdjacentProduct
     /**
      * @var string
      * @Annotation\Type("string")
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET})
+     */
+    private $productUrl;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
      * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, SearchProductCollection::GROUP_GET})
      */
     private $brand;

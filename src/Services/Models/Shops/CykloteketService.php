@@ -7,6 +7,9 @@ use App\Entity\Product;
 class CykloteketService implements IdentityGroup
 {
     /**
+     * sku: "40345100"
+     * sku: "40345200"
+     *
      * @param Product $product
      * @return mixed|void
      */
@@ -14,7 +17,7 @@ class CykloteketService implements IdentityGroup
     {
         $sku = $product->getSku();
         $pregSplitSku = preg_split('//', $sku, -1, PREG_SPLIT_NO_EMPTY);
-        $groupIdentity = implode('', array_splice($pregSplitSku, -3, 3));
+        implode('', array_splice($pregSplitSku, -3, 3));
         $product->setGroupIdentity(implode('', $pregSplitSku));
     }
 }

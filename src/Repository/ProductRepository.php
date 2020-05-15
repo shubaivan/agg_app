@@ -479,7 +479,9 @@ class ProductRepository extends ServiceEntityRepository
                  array_agg(DISTINCT main_products_alias."shopRelationId") AS "shopRelationId",
                  array_agg(DISTINCT main_products_alias.brand) AS brand,                							 
                  hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."imageUrl")) AS "storeImageUrl",
-                 array_agg(DISTINCT main_products_alias.currency) AS currency
+                 array_agg(DISTINCT main_products_alias.currency) AS currency,
+                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."productUrl")) AS "storeProductUrl"
+
             ';
 
             if ($parameterBag->get('search')) {
@@ -528,7 +530,7 @@ class ProductRepository extends ServiceEntityRepository
      * @param $sortOrder
      * @return string
      */
-    private function oldgetSearchProductQuery(ParameterBag $parameterBag, $count, bool $sort_by, $sortBy, $sortOrder): string
+    private function oldGetSearchProductQuery(ParameterBag $parameterBag, $count, bool $sort_by, $sortBy, $sortOrder): string
     {
         $query = '';
         if ($count) {

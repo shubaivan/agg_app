@@ -11,8 +11,11 @@ class ReimaService implements IdentityGroup
      */
     public function identityGroupColumn(Product $product)
     {
-        $explode = explode($product->getSku(), '-');
+        $explode = explode('-', $product->getSku());
         if (count($explode) > 0) {
+            $groupIdentity = array_shift($explode);
+            $product->setGroupIdentity($groupIdentity);
+        } else {
             $groupIdentity = array_shift($explode);
             $product->setGroupIdentity($groupIdentity);
         }

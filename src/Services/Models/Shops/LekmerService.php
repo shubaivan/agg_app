@@ -10,6 +10,8 @@ class LekmerService implements IdentityGroup
 {
 
     /**
+     * productUrl: "https://lekmer.se/penguin-vinteroverall-gra/p/36019?country_override=SE&dfw_tracker=42152-174894"
+     *
      * @param Product $product
      */
     public function identityGroupColumn(Product $product)
@@ -21,7 +23,11 @@ class LekmerService implements IdentityGroup
             $productUrl,
             $match
         )) {
-            $product->setGroupIdentity(array_shift($match));
+            $matchData = array_shift($match);
+            $matchData = str_replace('p/', '', $matchData);
+            $matchData = str_replace('?', '', $matchData);
+
+            $product->setGroupIdentity($matchData);
         }
     }
 }

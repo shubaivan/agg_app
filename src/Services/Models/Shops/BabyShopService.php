@@ -9,6 +9,9 @@ use App\Entity\Product;
 class BabyShopService implements IdentityGroup
 {
     /**
+     * productUrl: "https://www.babyshop.se/nate-lace-sneakers-green-nubuck/p/270322?country_override=SE"
+     * productUrl: "https://www.babyshop.se/nate-lace-sneakers-green-nubuck/p/270322?country_override=SE"
+     *
      * @param Product $product
      * @return mixed|void
      */
@@ -20,7 +23,11 @@ class BabyShopService implements IdentityGroup
             $productUrl,
             $match
         )) {
-            $product->setGroupIdentity(array_shift($match));
+            $matchData = array_shift($match);
+            $matchData = str_replace('p/', '', $matchData);
+            $matchData = str_replace('?', '', $matchData);
+
+            $product->setGroupIdentity($matchData);
         }
 
     }

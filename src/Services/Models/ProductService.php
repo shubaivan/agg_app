@@ -135,12 +135,12 @@ class ProductService
                 $row,
                 Product::class,
                 [Product::SERIALIZED_GROUP_CREATE],
-                'json',
-                false
+                'json'
             );
         $this->setGroupIdentity($handleObject);
+
         $this->getObjectHandler()
-            ->validateEntity($handleObject, [Product::SERIALIZED_GROUP_CREATE]);
+            ->validateEntity($handleObject, [Product::SERIALIZED_GROUP_CREATE_IDENTITY]);
 
         return $handleObject;
     }

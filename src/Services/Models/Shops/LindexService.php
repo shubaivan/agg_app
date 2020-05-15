@@ -14,9 +14,10 @@ class LindexService implements IdentityGroup
      */
     public function identityGroupColumn(Product $product)
     {
-        $lastPartUrl = preg_match('/([^\/]+$)/', $product->getProductUrl());
-        $explodeLastPartUrl = explode('-', $lastPartUrl);
-        if (count($explodeLastPartUrl) > 1) {
+        $lastPartUrl = preg_match("/[^\/]+$/", $product->getProductUrl(), $m);
+        if ($lastPartUrl > 0) {
+            $identityPart = array_shift($m);
+            $explodeLastPartUrl = explode('-', $identityPart);
             $groupIdentity = array_shift($explodeLastPartUrl);
             $product->setGroupIdentity($groupIdentity);
         }
