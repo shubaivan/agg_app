@@ -657,7 +657,7 @@ class ProductRepository extends ServiceEntityRepository
 
         $queryFacet .= $this->queryMainCondition;
 
-        $queryFacet .= (count($this->conditions) > 1 ? 'AND' : 'WHERE') . '
+        $queryFacet .= (count($this->conditions) > 0 ? 'AND' : 'WHERE') . '
              e.key != :exclude_key 
             GROUP BY e.key
         ';
