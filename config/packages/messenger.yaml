@@ -27,7 +27,7 @@ framework:
       failure_transport: failed
 
       transports:
-        success:
+        download_file:
           dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
           options:
             exchange:
@@ -35,22 +35,36 @@ framework:
               name: productrow
               default_publish_routing_key: normal
             queues:
-              adraction_download_file:
+              download_file:
                 binding_keys: [normal]
-        andraction_parse_row_success:
+        andraction_parse_row:
           dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
           serializer: App\Messenger\ExternalJsonMessageSerializer
           options:
             exchange:
               type: direct
               name: andraction_parse_row
-              default_publish_routing_key: parse_row
+              default_publish_routing_key: andraction_parse_row
             queues:
               andraction_parse_row:
-                binding_keys: [parse_row]
+                binding_keys: [andraction_parse_row]
+
+        adrecord_parse_row:
+          dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+          serializer: App\Messenger\ExternalJsonMessageSerializer
+          options:
+            exchange:
+              type: direct
+              name: adrecord_parse_row
+              default_publish_routing_key: adrecord_parse_row
+            queues:
+              adrecord_parse_row:
+                binding_keys: [adrecord_parse_row]
+
         failed: 'doctrine://default?queue_name=failed'
 
       routing:
-          'App\QueueModel\FileReadyDownloaded': success
-          'App\QueueModel\AdtractionDataRow': andraction_parse_row_success
+        'App\QueueModel\FileReadyDownloaded': download_file
+        'App\QueueModel\AdtractionDataRow': andraction_parse_row
+        'App\QueueModel\AdrecordDataRow': adrecord_parse_row
 

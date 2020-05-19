@@ -3,23 +3,23 @@
 namespace App\QueueModelHandlers;
 
 use App\QueueModel\FileReadyDownloaded;
-use App\Services\HandleAdtractionData;
+use App\Services\HandleDownloadFileData;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 class FileReadyDownloadedHandler implements MessageHandlerInterface
 {
     /**
-     * @var HandleAdtractionData
+     * @var HandleDownloadFileData
      */
-    private $handleAdtractionData;
+    private $handleDownloadData;
 
     /**
      * FileReadyDownloadedHandler constructor.
-     * @param HandleAdtractionData $handleAdtractionData
+     * @param HandleDownloadFileData $handleAdtractionData
      */
-    public function __construct(HandleAdtractionData $handleAdtractionData)
+    public function __construct(HandleDownloadFileData $handleAdtractionData)
     {
-        $this->handleAdtractionData = $handleAdtractionData;
+        $this->handleDownloadData = $handleAdtractionData;
     }
 
     /**
@@ -29,7 +29,7 @@ class FileReadyDownloadedHandler implements MessageHandlerInterface
      */
     public function __invoke(FileReadyDownloaded $fileReadyDownloaded)
     {
-        $this->getHandleAdtractionData()->parseCSVContent(
+        $this->getHandleDownloadData()->parseCSVContent(
             $fileReadyDownloaded->getAbsoluteFilePath(),
             $fileReadyDownloaded->getShop()
         );
@@ -38,10 +38,10 @@ class FileReadyDownloadedHandler implements MessageHandlerInterface
     }
 
     /**
-     * @return HandleAdtractionData
+     * @return HandleDownloadFileData
      */
-    public function getHandleAdtractionData(): HandleAdtractionData
+    public function getHandleDownloadData(): HandleDownloadFileData
     {
-        return $this->handleAdtractionData;
+        return $this->handleDownloadData;
     }
 }

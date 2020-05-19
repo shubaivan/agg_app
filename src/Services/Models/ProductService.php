@@ -10,7 +10,9 @@ use App\Entity\Product;
 use App\Entity\UserIp;
 use App\Entity\UserIpProduct;
 use App\Exception\ValidatorException;
+use App\QueueModel\AdrecordDataRow;
 use App\QueueModel\AdtractionDataRow;
+use App\QueueModel\ResourceDataRow;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserIpProductRepository;
@@ -110,12 +112,12 @@ class ProductService
     }
 
     /**
-     * @param AdtractionDataRow $adtractionDataRow
+     * @param ResourceDataRow $adtractionDataRow
      * @return Product
      * @throws ValidatorException
      * @throws \Doctrine\ORM\ORMException
      */
-    public function createProductFromAdractionCsvRow(AdtractionDataRow $adtractionDataRow)
+    public function createProductFromCsvRow(ResourceDataRow $adtractionDataRow)
     {
         $this->prepareDataForExistProduct($adtractionDataRow);
         $row = $adtractionDataRow->getRow();
@@ -262,10 +264,10 @@ class ProductService
     }
 
     /**
-     * @param AdtractionDataRow $adtractionDataRow
-     * @return AdtractionDataRow
+     * @param ResourceDataRow $adtractionDataRow
+     * @return ResourceDataRow
      */
-    private function prepareDataForExistProduct(AdtractionDataRow $adtractionDataRow)
+    private function prepareDataForExistProduct(ResourceDataRow $adtractionDataRow)
     {
         $product = $this->matchExistProduct($adtractionDataRow->getSku());
         if ($product && $product->getId()) {

@@ -1,10 +1,8 @@
 <?php
 
-# project/src/QueueModel/FileReadyDownloaded.phpded.php
-
 namespace App\QueueModel;
 
-class AdtractionDataRow
+class AdtractionDataRow implements ResourceDataRow
 {
     /**
      * @var array

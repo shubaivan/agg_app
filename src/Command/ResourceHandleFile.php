@@ -3,14 +3,14 @@
 namespace App\Command;
 
 use App\Kernel;
-use App\Services\HandleAdtractionData;
+use App\Services\HandleDownloadFileData;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-class AdtractionResourceHandleFile extends Command
+class ResourceHandleFile extends Command
 {
     protected static $defaultName = 'app:adtraction:handle';
 
@@ -20,22 +20,22 @@ class AdtractionResourceHandleFile extends Command
     private $kernel;
 
     /**
-     * @var HandleAdtractionData
+     * @var HandleDownloadFileData
      */
-    private $handleAdtractionData;
+    private $handleDownloadData;
 
     /**
-     * AdtractionResourceHandleFile constructor.
+     * ResourceHandleFile constructor.
      * @param KernelInterface $kernel
-     * @param HandleAdtractionData $handleAdtractionData
+     * @param HandleDownloadFileData $handleAdtractionData
      * {@inheritDoc}
      */
     public function __construct(
         KernelInterface $kernel,
-        HandleAdtractionData $handleAdtractionData
+        HandleDownloadFileData $handleAdtractionData
     )
     {
-        $this->handleAdtractionData = $handleAdtractionData;
+        $this->handleDownloadData = $handleAdtractionData;
         $this->kernel = $kernel;
         parent::__construct();
     }
@@ -46,8 +46,8 @@ class AdtractionResourceHandleFile extends Command
     protected function configure()
     {
         $this
-            ->setName('app:adtraction:handle')
-            ->setDescription('Handle adtraction resource file by absolute file path on the server')
+            ->setName('app:resource:handle')
+            ->setDescription('Handle some resource file by absolute file path on the server')
             ->addArgument('filePath', InputArgument::REQUIRED, 'Absolute file path on the server')
             ->addArgument('shop', InputArgument::REQUIRED, 'Identity shop for file');
     }
@@ -75,14 +75,14 @@ class AdtractionResourceHandleFile extends Command
      */
     public function parseCSVContent(string $filePath, string $shop)
     {
-        $this->getHandleAdtractionData()->parseCSVContent($filePath, $shop);
+        $this->getHandleDownloadData()->parseCSVContent($filePath, $shop);
     }
 
     /**
-     * @return HandleAdtractionData
+     * @return HandleDownloadFileData
      */
-    public function getHandleAdtractionData(): HandleAdtractionData
+    public function getHandleDownloadData(): HandleDownloadFileData
     {
-        return $this->handleAdtractionData;
+        return $this->handleDownloadData;
     }
 }
