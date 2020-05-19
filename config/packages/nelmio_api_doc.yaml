@@ -4,7 +4,7 @@ nelmio_api_doc:
       - ^/api(?!/doc$)
 
     documentation:
-      host: symfony.localhost
+      host: '%env(MAIN_HOST)%'
       schemes: [http, https]
       info:
         title: Minimoj
