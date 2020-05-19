@@ -28,9 +28,10 @@ class JmsEventSubscriber implements EventSubscriberInterface
         $data = $event->getData();
         array_map(function ($key, $value) use (&$data) {
             unset($data[$key]);
-            if ($key === 'SKU') {
+            if ($key === 'SKU' || $key === 'EAN' || $key === 'inStock') {
                 $key = mb_strtolower($key);
             }
+
             $data[lcfirst($key)] = ($value === '' ? null : $value);
             return [];
         }, array_keys($data), $data);

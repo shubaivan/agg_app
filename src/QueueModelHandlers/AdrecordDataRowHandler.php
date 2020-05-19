@@ -5,6 +5,7 @@ namespace App\QueueModelHandlers;
 use App\Cache\CacheManager;
 use App\Entity\Shop;
 use App\Exception\ValidatorException;
+use App\QueueModel\AdrecordDataRow;
 use App\QueueModel\AdtractionDataRow;
 use App\Services\Models\BrandService;
 use App\Services\Models\CategoryService;
@@ -18,7 +19,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-class AdtractionDataRowHandler implements MessageHandlerInterface
+class AdrecordDataRowHandler implements MessageHandlerInterface
 {
     /**
      * @var Logger
@@ -85,11 +86,11 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     }
 
     /**
-     * @param AdtractionDataRow $adtractionDataRow
+     * @param AdrecordDataRow $adtractionDataRow
      * @throws ValidatorException
      * @throws \Exception
      */
-    public function __invoke(AdtractionDataRow $adtractionDataRow)
+    public function __invoke(AdrecordDataRow $adtractionDataRow)
     {
         try {
             $date = date("Ymd");
@@ -104,27 +105,27 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
             $this->getLogger()->info('sku: ' . $product->getSku());
 
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH.$date,
-                    Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL.$product->getShop());
+                ->hIncrBy(Shop::PREFIX_HASH . $date,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $product->getShop());
 
             $this->getRedisHelper()
                 ->set(CacheManager::HTTP_CACHE_EXPIRES_TIME, (new \DateTime())->getTimestamp());
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH.$date,
+                ->hIncrBy(Shop::PREFIX_HASH . $date,
                     Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
             throw $e;
         } catch (BadRequestHttpException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH.$date,
+                ->hIncrBy(Shop::PREFIX_HASH . $date,
                     Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
             throw $e;
         } catch (\Exception $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH.$date,
+                ->hIncrBy(Shop::PREFIX_HASH . $date,
                     Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $adtractionDataRow->getShop());
             throw $e;
         }

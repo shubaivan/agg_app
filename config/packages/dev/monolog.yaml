@@ -1,11 +1,11 @@
 monolog:
-    channels: ['adtraction_log', 'console_command_log', 'adtraction_file_handler', 'messenger_handler', 'adtraction_csv_row_handler']
+  channels: ['adrecord_log', 'adtraction_log', 'console_command_log', 'adtraction_file_handler', 'messenger_handler', 'adtraction_csv_row_handler']
     handlers:
         main:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
-            channels: ['!event', '!adtraction_log', '!console_command_log', '!adtraction_file_handler', '!messenger_handler', '!adtraction_csv_row_handler']
+            channels: ['!event', '!adrecord_log', '!adtraction_log', '!console_command_log', '!adtraction_file_handler', '!messenger_handler', '!adtraction_csv_row_handler']
         console_command_log:
             type: stream
             path: '%kernel.logs_dir%/%kernel.environment%_console_command_log.log'
@@ -16,6 +16,12 @@ monolog:
             path: '%kernel.logs_dir%/%kernel.environment%_adtraction_log.log'
             level: debug
             channels: adtraction_log
+        adrecord_log:
+          type: stream
+          path: '%kernel.logs_dir%/%kernel.environment%_adrecord_log.log'
+          level: debug
+          channels: adrecord_log
+
         adtraction_csv_row_handler:
           type: stream
           path: '%kernel.logs_dir%/%kernel.environment%_adtraction_csv_row_handler.log'
