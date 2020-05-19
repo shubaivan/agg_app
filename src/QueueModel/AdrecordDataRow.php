@@ -22,7 +22,10 @@ class AdrecordDataRow implements ResourceDataRow
     {
         $rowData = $this->getRow();
         array_walk($rowData, function ($v, $k) use (&$row) {
-            return $row[$k] = utf8_encode($v);
+            if ($k !== 'shop') {
+                return $row[$k] = utf8_encode($v);
+            }
+            return $row[$k] = $v;
         });
 
         $row['ImageUrl'] = $row['graphicUrl'];
