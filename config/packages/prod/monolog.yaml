@@ -1,5 +1,5 @@
 monolog:
-  channels: ['adrecord_log', 'adtraction_log', 'console_command_log', 'adtraction_file_handler', 'messenger_handler', 'adtraction_csv_row_handler']
+    channels: ['adrecord_log', 'adtraction_log', 'console_command_log', 'adtraction_file_handler', 'messenger_handler', 'adtraction_csv_row_handler']
     handlers:
         main:
             type: fingers_crossed
