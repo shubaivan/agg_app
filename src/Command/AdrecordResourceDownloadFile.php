@@ -20,7 +20,7 @@ class AdrecordResourceDownloadFile extends ResourceDownloadFile
     protected static $defaultName = 'app:adrecord:download';
 
     /**
-     * AdtractionResourceDownloadFile constructor.
+     * AdrecordResourceDownloadFile constructor.
      * @param KernelInterface $kernel
      * @param MessageBusInterface $bus
      * @param LoggerInterface $adtractionLogLogger

@@ -3,20 +3,18 @@
 namespace App\Services\Models;
 
 use App\Cache\TagAwareQueryResultCacheProduct;
+use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\CategoriesCollection;
+use App\Entity\Collection\Search\SearchCategoriesCollection;
 use App\Entity\Product;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Services\ObjectsHandler;
 use Doctrine\DBAL\Cache\CacheException;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CategoryService
 {
@@ -55,7 +53,7 @@ class CategoryService
     /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
-     * @return CategoriesCollection
+     * @return SearchCategoriesCollection
      * @throws CacheException
      */
     public function getCategoriesByFilter(ParamFetcher $paramFetcher, $count = false)
@@ -68,7 +66,7 @@ class CategoryService
             $strictCategoriesCollection = $this->getCategoryRepository()
                 ->fullTextSearchByParameterBag($parameterBag);
 
-            return (new CategoriesCollection($strictCategoriesCollection, $countStrict));
+            return (new SearchCategoriesCollection($strictCategoriesCollection, $countStrict));
         }
         $parameterBag->remove('strict');
         $count = $this->getCategoryRepository()
@@ -76,7 +74,7 @@ class CategoryService
         $categoriesCollection = $this->getCategoryRepository()
             ->fullTextSearchByParameterBag($parameterBag);
 
-        return (new CategoriesCollection($categoriesCollection, $count));
+        return (new SearchCategoriesCollection($categoriesCollection, $count));
     }
 
     /**
@@ -105,7 +103,7 @@ class CategoryService
     /**
      * @param string $uniqIdentificationQuery
      * @param ParamFetcher $paramFetcher
-     * @return CategoriesCollection
+     * @return SearchCategoriesCollection
      * @throws \Exception
      */
     public function facetFilters(
@@ -157,7 +155,7 @@ class CategoryService
                 true
             );
 
-        return new CategoriesCollection($facetFilters, $facetFiltersCount);
+        return new SearchCategoriesCollection($facetFilters, $facetFiltersCount);
     }
 
     /**
@@ -184,6 +182,23 @@ class CategoryService
         }
 
         return $arrayModelsCategory;
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @return Category[]|CategoriesCollection|int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getCategoryByIds(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getCategoryRepository()
+            ->getCategoryByIds($paramFetcher);
+        $count = $this->getCategoryRepository()
+            ->getCategoryByIds($paramFetcher, true);
+        $collection = new CategoriesCollection($collection, $count);
+
+        return $collection;
     }
 
     /**

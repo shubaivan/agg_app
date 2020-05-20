@@ -3,6 +3,9 @@
 namespace App\Services\Models;
 
 use App\Cache\TagAwareQueryResultCacheProduct;
+use App\Entity\Brand;
+use App\Entity\Collection\BrandsCollection;
+use App\Entity\Collection\Search\SearchShopsCollection;
 use App\Entity\Collection\ShopsCollection;
 use App\Entity\Product;
 use App\Entity\Shop;
@@ -62,7 +65,7 @@ class ShopService
 
     /**
      * @param ParamFetcher $paramFetcher
-     * @return ShopsCollection
+     * @return SearchShopsCollection
      * @throws CacheException
      */
     public function getShopsByFilter(ParamFetcher $paramFetcher)
@@ -75,7 +78,7 @@ class ShopService
             $strictCollection = $this->getShopRepository()
                 ->fullTextSearchByParameterBag($parameterBag);
 
-            return (new ShopsCollection($strictCollection, $countStrict));
+            return (new SearchShopsCollection($strictCollection, $countStrict));
         }
         $parameterBag->remove('strict');
         $count = $this->getShopRepository()
@@ -83,13 +86,13 @@ class ShopService
         $collection = $this->getShopRepository()
             ->fullTextSearchByParameterBag($parameterBag);
 
-        return (new ShopsCollection($collection, $count));
+        return (new SearchShopsCollection($collection, $count));
     }
 
     /**
      * @param $uniqIdentificationQuery
      * @param ParamFetcher $paramFetcher
-     * @return ShopsCollection
+     * @return SearchShopsCollection
      * @throws CacheException
      * @throws \Exception
      */
@@ -142,7 +145,24 @@ class ShopService
                 true
             );
 
-        return new ShopsCollection($facetFiltersBrand, $facetFiltersBrandCount);
+        return new SearchShopsCollection($facetFiltersBrand, $facetFiltersBrandCount);
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @return Shop[]|ShopsCollection|int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getShopsByIds(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getShopRepository()
+            ->getShopsByIds($paramFetcher);
+        $count = $this->getShopRepository()
+            ->getShopsByIds($paramFetcher, true);
+        $collection = new ShopsCollection($collection, $count);
+
+        return $collection;
     }
 
     /**

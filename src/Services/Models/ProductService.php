@@ -3,15 +3,12 @@
 namespace App\Services\Models;
 
 use App\Entity\Category;
-use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\ProductCollection;
-use App\Entity\Collection\SearchProductCollection;
+use App\Entity\Collection\Search\SearchProductCollection;
 use App\Entity\Product;
 use App\Entity\UserIp;
 use App\Entity\UserIpProduct;
 use App\Exception\ValidatorException;
-use App\QueueModel\AdrecordDataRow;
-use App\QueueModel\AdtractionDataRow;
 use App\QueueModel\ResourceDataRow;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;

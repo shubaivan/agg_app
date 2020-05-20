@@ -2,12 +2,12 @@
 
 namespace App\Controller\Rest;
 
-use App\Entity\Collection\CategoriesCollection;
-use App\Repository\CategoryRepository;
 use App\Entity\Category;
 use App\Services\Helpers;
 use App\Services\Models\CategoryService;
 use Doctrine\DBAL\DBALException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
@@ -15,6 +15,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 use App\Validation\Constraints\SearchQueryParam;
+use App\Entity\Collection\CategoriesCollection;
 
 class CategoryController extends AbstractRestController
 {
@@ -162,6 +163,45 @@ class CategoryController extends AbstractRestController
         $view
             ->getResponse()
             ->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
+    }
+
+    /**
+     * get Categories by ids.
+     *
+     * @Rest\Get("/api/categories/by/ids")
+     *
+     * @SWG\Tag(name="Category")
+     *
+     * @Rest\QueryParam(map=true, name="ids", nullable=false, strict=true, requirements="\d+", default="0", description="List products by ids")
+     *
+     * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
+     * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
+     * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
+     * @Rest\QueryParam(name="sort_order", strict=true, requirements="^[a-zA-Z]+", default="DESC", description="Sort order", nullable=true)
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object",
+     *     @SWG\Schema(ref=@Model(type=CategoriesCollection::class, groups={Category::SERIALIZED_GROUP_LIST}))
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws \Exception
+     */
+    public function getCategoriesByIdsAction(ParamFetcher $paramFetcher)
+    {
+        $productsCollection = $this->getCategoryService()
+            ->getCategoryByIds($paramFetcher);
+        $view = $this->createSuccessResponse(
+            $productsCollection, [Category::SERIALIZED_GROUP_LIST]
+        );
+        $view->getResponse()->setExpires($this->getHelpers()->getExpiresHttpCache());
 
         return $view;
     }

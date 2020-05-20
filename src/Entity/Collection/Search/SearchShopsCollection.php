@@ -1,28 +1,26 @@
 <?php
 
-namespace App\Entity\Collection;
+namespace App\Entity\Collection\Search;
 
 use App\Entity\Shop;
 use JMS\Serializer\Annotation;
 
-class ShopsCollection
+class SearchShopsCollection
 {
     /**
      * @var array
-     * @Annotation\Groups({Shop::SERIALIZED_GROUP_LIST})
-     * @Annotation\Type("array<App\Entity\Shop>")
+     * @Annotation\Type("array")
      */
     private $collection;
 
     /**
      * @var int
-     * @Annotation\Groups({Shop::SERIALIZED_GROUP_LIST})
      * @Annotation\Type("int")
      */
     private $count;
 
     /**
-     * ProductsCollection constructor.
+     * ShopsCollection constructor.
      * @param array $collection
      * @param int $count
      */
@@ -30,5 +28,21 @@ class ShopsCollection
     {
         $this->collection = $collection;
         $this->count = $count;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCollection(): array
+    {
+        return $this->collection;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCount(): int
+    {
+        return $this->count;
     }
 }

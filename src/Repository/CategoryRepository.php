@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Cache\TagAwareQueryResultCacheBrand;
 use App\Cache\TagAwareQueryResultCacheCategory;
+use App\Entity\Brand;
 use App\Entity\Category;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -14,6 +15,7 @@ use Doctrine\DBAL\Cache\ResultCacheStatement;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @method Category|null find($id, $lockMode = null, $lockVersion = null)
@@ -247,21 +249,20 @@ class CategoryRepository extends ServiceEntityRepository
             $search = $searchField;
         }
         $aliasCategoryTable = '';
-        if (array_key_exists(':category_word', $params)) {
-            $query .= 'LEFT JOIN category as category_alias_facet ON category_alias.id = category_alias_facet.id';
-            $aliasCategoryTable = 'category_alias_facet.';
-        }
+
         if ($search) {
-            $query .= '
-                JOIN to_tsquery(\'pg_catalog.swedish\', :search_facet) query_search_facet
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(' . $aliasCategoryTable . 'category_name,\'\')||\' \') @@ query_search_facet
-            ';
+            if (!array_key_exists(':category_word', $params)) {
+                $query .= '
+                    JOIN to_tsquery(\'pg_catalog.swedish\', :search_facet) query_search_facet
+                    ON to_tsvector(\'pg_catalog.swedish\',coalesce(' . $aliasCategoryTable . 'category_name,\'\')||\' \') @@ query_search_facet
+                ';
+            }
         }
 
         if (!$count) {
             $query .= '
                     GROUP BY category_alias.id';
-            if ($search) {
+            if ($search && !array_key_exists(':category_word', $params)) {
                 $query .= ', query_search_facet.query_search_facet';
             }
             $query .=
@@ -275,8 +276,12 @@ class CategoryRepository extends ServiceEntityRepository
         }
 
         if ($search) {
-            $params[':search_facet'] = $search;
-            $types[':search_facet'] = \PDO::PARAM_STR;
+            if (array_key_exists(':category_word', $params)) {
+                $params[':category_word'] .= '&' . $search;
+            } else {
+                $params[':search_facet'] = $search;
+                $types[':search_facet'] = \PDO::PARAM_STR;
+            }
         }
 
         $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
@@ -306,6 +311,36 @@ class CategoryRepository extends ServiceEntityRepository
         $statement->closeCursor();
 
         return $categories;
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param bool $count
+     * @return Category[]|int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getCategoryByIds(ParamFetcher $paramFetcher, $count = false)
+    {
+        $ids = $paramFetcher->get('ids');
+        if (is_array($ids)
+            && array_search('0', $ids, true) === false) {
+            $ids = array_filter($ids, function ($value, $key) {
+                return boolval($value);
+            }, ARRAY_FILTER_USE_BOTH);
+            $qb = $this->createQueryBuilder('s');
+            $qb
+                ->where($qb->expr()->in('s.id', $ids));
+
+            return $this->getList(
+                $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
+                $qb,
+                $paramFetcher,
+                $count
+            );
+        } else {
+            throw new BadRequestHttpException($ids . ' not valid');
+        }
     }
 
     /**

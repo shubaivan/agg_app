@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Cache\TagAwareQueryResultCacheBrand;
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
+use App\Entity\Product;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Cache\Cache as ResultCacheDriver;
@@ -14,6 +15,7 @@ use Doctrine\DBAL\Cache\ResultCacheStatement;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @method Brand|null find($id, $lockMode = null, $lockVersion = null)
@@ -314,6 +316,36 @@ class BrandRepository extends ServiceEntityRepository
         $statement->closeCursor();
 
         return $brands;
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param bool $count
+     * @return Brand[]|int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getBrandByIds(ParamFetcher $paramFetcher, $count = false)
+    {
+        $ids = $paramFetcher->get('ids');
+        if (is_array($ids)
+            && array_search('0', $ids, true) === false) {
+            $ids = array_filter($ids, function ($value, $key) {
+                return boolval($value);
+            }, ARRAY_FILTER_USE_BOTH);
+            $qb = $this->createQueryBuilder('s');
+            $qb
+                ->where($qb->expr()->in('s.id', $ids));
+
+            return $this->getList(
+                $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
+                $qb,
+                $paramFetcher,
+                $count
+            );
+        } else {
+            throw new BadRequestHttpException($ids . ' not valid');
+        }
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\Collection;
+namespace App\Entity\Collection\Search;
 
 use App\Entity\Product;
 use Doctrine\DBAL\Types\ConversionException;
