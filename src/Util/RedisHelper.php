@@ -137,6 +137,18 @@ class RedisHelper
 
     /**
      * @param string $key
+     * @param array $data
+     * @return bool
+     */
+    public function hMSet(string $key, array $data)
+    {
+        $this->connect();
+        return $this->redis->hMSet($key, $data);
+    }
+
+
+    /**
+     * @param string $key
      * @return array
      */
     public function hGetAll(string $key)
