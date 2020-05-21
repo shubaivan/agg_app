@@ -63,9 +63,7 @@ use function League\Csv\delimiter_detect;
  */
 class HandleDownloadFileData
 {
-    const REDIS_ADRACTION_CARRIAGE = 'REDIS_ADRACTION_CARRIAGE';
-    const REDIS_ADRECORD_CARRIAGE = 'REDIS_ARECORD_CARRIAGE';
-    const HANDLE_STEP = 5;
+    const HANDLE_STEP = 100;
 
     /**
      * @var TraceableMessageBus
@@ -146,8 +144,8 @@ class HandleDownloadFileData
         }
         $shopCarriage = (int)$this->getRedisHelper()
             ->hGet(
-                Shop::PREFIX_HASH . $date,
-                Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop
+                'counter_' . $date,
+                $shop
             );
         /** @var Reader $csv */
         $csv = Reader::createFromPath($filePath, 'r');
@@ -191,6 +189,10 @@ class HandleDownloadFileData
                 $this->getRedisHelper()
                     ->hIncrBy(Shop::PREFIX_HASH . $date,
                         Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
+                $this->getRedisHelper()
+                    ->hIncrBy(
+                        'counter_' . $date,
+                        $shop);
 
                 if (isset($this->adtractionDownloadUrls[$shop])) {
                     $this->getBus()->dispatch(new AdtractionDataRow($record));
@@ -207,15 +209,19 @@ class HandleDownloadFileData
         }
 
         if ((int)$offset >= $count) {
+            $this->getRedisHelper()
+                ->hMSet(
+                    'counter_' . $date,
+                    [$shop => 0]
+                );
             $this->getCacheManager()->clearAllPoolsCache();
             unlink($filePath);
+            $this->getLogger()->info(
+                'file ' . $filePath . ' was removed'
+            );
         } else {
             $this->getBus()->dispatch(new FileReadyDownloaded($filePath, $shop));
         }
-
-        $this->getLogger()->info(
-            'file ' . $filePath . ' was removed'
-        );
     }
 
     /**
