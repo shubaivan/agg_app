@@ -137,8 +137,7 @@ class HandleDownloadFileData
             $csv->setDelimiter(',');
             $csv->setEnclosure('\'');
 
-            $result = delimiter_detect($csv, [','], 10);
-            $count = $result[','];
+            $count = $csv->count();
             $this->getLogger()->info(
                 'file ' . $filePath . ' count row ' . $count
             );
@@ -148,8 +147,7 @@ class HandleDownloadFileData
             $csv->setHeaderOffset(0);
             $csv->setDelimiter(';');
 
-            $result = delimiter_detect($csv, [';'], 10);
-            $count = $result[';'];
+            $count = $csv->count();
             $this->getLogger()->info(
                 'file ' . $filePath . ' count row ' . $count
             );
