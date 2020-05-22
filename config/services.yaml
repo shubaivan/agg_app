@@ -45,8 +45,10 @@ parameters:
     locale: 'en'
     redis_host: '%env(REDIS_HOST)%'
     redis_port: '%env(REDIS_PORT)%'
-    redis_access: '%redis_host%:%redis_port%'
-
+    redis_host_cache: '%env(REDIS_HOST_CACHE)%'
+    redis_port_cache: '%env(REDIS_PORT_CACHE)%'
+    redis_access: '%redis_host_cache%:%redis_port_cache%'
+    csv_handle_step: '%env(CSV_HANDLE_STEP)%'
 #    jms_serializer.camel_case_naming_strategy.class: JMS\Serializer\Naming\IdenticalPropertyNamingStrategy
 #    jms_serializer.serialized_name_annotation_strategy.class: JMS\Serializer\Naming\SerializedNameAnnotationStrategy
 services:
@@ -142,6 +144,7 @@ services:
       arguments:
         $adtractionDownloadUrls: '%adtraction_download_urls%'
         $adrecordDownloadUrls: '%adrecord_download_urls%'
+        $csvHandleStep: '%csv_handle_step%'
       lazy: true
 
     App\Command\ResourceDownloadFile:

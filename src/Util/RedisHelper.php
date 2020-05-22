@@ -136,6 +136,17 @@ class RedisHelper
     }
 
     /**
+     * @param string $hash
+     * @param string $key
+     * @return string
+     */
+    public function hExists(string $key, string $hash)
+    {
+        $this->connect();
+        return $this->redis->hExists($key, $hash);
+    }
+
+    /**
      * @param string $key
      * @param array $data
      * @return bool

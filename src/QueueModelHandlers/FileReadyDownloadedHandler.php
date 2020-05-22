@@ -29,7 +29,7 @@ class FileReadyDownloadedHandler implements MessageHandlerInterface
      */
     public function __invoke(FileReadyDownloaded $fileReadyDownloaded)
     {
-        $this->getHandleDownloadData()->parseCSVContent(
+        $this->getHandleDownloadData()->newParseCSVContent(
             $fileReadyDownloaded->getAbsoluteFilePath(),
             $fileReadyDownloaded->getShop()
         );

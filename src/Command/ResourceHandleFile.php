@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class ResourceHandleFile extends Command
 {
-    protected static $defaultName = 'app:adtraction:handle';
+    protected static $defaultName = 'app:file:handle';
 
     /**
      * @var Kernel

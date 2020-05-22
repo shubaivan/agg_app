@@ -66,7 +66,8 @@ EOF;
     {
         $statisticByShops = [];
 
-        $statisticByDate = $this->getRedisHelper()->keys(Shop::PREFIX_HASH . '*');
+        $statisticByDate = $this->getRedisHelper()
+            ->keys(Shop::PREFIX_HASH . '*');
 
         foreach ($statisticByDate as $keyDateStamp) {
             $allHashKeys = $this->getRedisHelper()->hGetAll($keyDateStamp);
