@@ -106,7 +106,7 @@ class AdrecordDataRowHandler implements MessageHandlerInterface
 
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $date,
-                    Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $product->getShop());
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL . $product->getShop());
 
             $this->getRedisHelper()
                 ->set(CacheManager::HTTP_CACHE_EXPIRES_TIME, (new \DateTime())->getTimestamp());
