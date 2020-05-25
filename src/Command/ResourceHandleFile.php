@@ -75,7 +75,7 @@ class ResourceHandleFile extends Command
      */
     public function parseCSVContent(string $filePath, string $shop)
     {
-        $this->getHandleDownloadData()->newParseCSVContent($filePath, $shop);
+        $this->getHandleDownloadData()->creatingCarriageShop($filePath, $shop);
     }
 
     /**

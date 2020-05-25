@@ -61,10 +61,23 @@ framework:
               adrecord_parse_row:
                 binding_keys: [adrecord_parse_row]
 
+        carriage_shop:
+          dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+          serializer: App\Messenger\ExternalJsonMessageSerializer
+          options:
+            exchange:
+              type: direct
+              name: carriage_shop
+              default_publish_routing_key: carriage_shop
+            queues:
+              carriage_shop:
+                binding_keys: [carriage_shop]
+
         failed: 'doctrine://default?queue_name=failed'
 
       routing:
         'App\QueueModel\FileReadyDownloaded': download_file
         'App\QueueModel\AdtractionDataRow': andraction_parse_row
         'App\QueueModel\AdrecordDataRow': adrecord_parse_row
+        'App\QueueModel\CarriageShop': carriage_shop
 

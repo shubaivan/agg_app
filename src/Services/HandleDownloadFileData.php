@@ -6,6 +6,7 @@ use App\Cache\CacheManager;
 use App\Entity\Shop;
 use App\QueueModel\AdrecordDataRow;
 use App\QueueModel\AdtractionDataRow;
+use App\QueueModel\CarriageShop;
 use App\QueueModel\FileReadyDownloaded;
 use App\Util\RedisHelper;
 use League\Csv\Reader;
@@ -127,91 +128,58 @@ class HandleDownloadFileData
         $this->csvHandleStep = (int)$csvHandleStep;
     }
 
-//    /**
-//     * @param string $filePath
-//     * @param string|null $shop
-//     * @throws \League\Csv\Exception
-//     * @throws \Throwable
-//     */
-//    public function parseCSVContent(string $filePath, ?string $shop)
-//    {
-//        if (!$this->checkExistResourceWithShop($shop)) {
-//            $this->getLogger()->error('shop ' . $shop . ' not present on resources');
-//        }
-//
-//        $date = date("Ymd");
-//        if (!file_exists($filePath)) {
-//            $this->getLogger()->error('file ' . $filePath . ' no exist');
-//            $this->getRedisHelper()
-//                ->hIncrBy(Shop::PREFIX_HASH . $date,
-//                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
-//            throw new \Exception('file ' . $filePath . ' no exist');
-//        }
-//
-//
-//        if (isset($this->adtractionDownloadUrls[$shop])) {
-//            /** @var Reader $csv */
-//            $csv = Reader::createFromPath($filePath, 'r');
-//            $csv->setHeaderOffset(0);
-//            $csv->setDelimiter(',');
-//            $csv->setEnclosure('\'');
-//
-//            $result = delimiter_detect($csv, [','], 10);
-//            $count = $result[','];
-//            $this->getLogger()->info(
-//                'file ' . $filePath . ' count row ' . $count
-//            );
-//        } elseif (isset($this->adrecordDownloadUrls[$shop])) {
-//            /** @var Reader $csv */
-//            $csv = Reader::createFromPath($filePath, 'r');
-//            $csv->setHeaderOffset(0);
-//            $csv->setDelimiter(';');
-//
-//            $result = delimiter_detect($csv, [';'], 10);
-//            $count = $result[';'];
-//            $this->getLogger()->info(
-//                'file ' . $filePath . ' count row ' . $count
-//            );
-//        }
-//
-//        $offset = 0;
-//        while ($offset < $count) {
-//            //build a statement
-//            $stmt = (new Statement())
-//                ->offset($offset)
-//                ->limit(1);
-//
-//            //query your records from the document
-//            $records = $stmt->process($csv);
-//            $header = $csv->getHeader();
-//            foreach ($records as $record) {
-//                if ($shop) {
-//                    $record['shop'] = $shop;
-//                    $this->getRedisHelper()
-//                        ->hIncrBy(Shop::PREFIX_HASH . $date,
-//                            Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
-//                }
-//
-//                if (isset($this->adtractionDownloadUrls[$shop])) {
-//                    $this->getBus()->dispatch(new AdtractionDataRow($record));
-//                }
-//
-//                if (isset($this->adrecordDownloadUrls[$shop])) {
-//                    $adrecordDataRow = new AdrecordDataRow($record);
-//                    $adrecordDataRow
-//                        ->transform();
-//                    $this->getBus()->dispatch($adrecordDataRow);
-//                }
-//            }
-//
-//            $offset += 1;
-//        }
-//
-////        unlink($filePath);
-//        $this->getLogger()->info(
-//            'file ' . $filePath . ' was removed'
-//        );
-//    }
+    /**
+     * @param string $offset
+     * @param string $limit
+     * @param string $filePath
+     * @param string $shop
+     * @throws \League\Csv\Exception
+     * @throws \Throwable
+     */
+    public function handleCsvByCarriage(
+        string $offset, string $limit, string $filePath, string $shop
+    )
+    {
+        if (!$this->checkExistResourceWithShop($shop)) {
+            $this->getLogger()->error('shop ' . $shop . ' not present on resources');
+        }
+
+        $date = date("Ymd");
+        if (!file_exists($filePath)) {
+            $this->getLogger()->error('file ' . $filePath . ' no exist');
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $date,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+            throw new \Exception('file ' . $filePath . ' no exist');
+        }
+
+        $csv = $this->generateCsvReader($filePath, $shop);
+
+        //build a statement
+        $stmt = (new Statement())
+            ->offset($offset)
+            ->limit($limit);
+
+        //query your records from the document
+        $records = $stmt->process($csv);
+//        $header = $csv->getHeader();
+        $date = date("Ymd");
+        foreach ($records as $offsetRecord=>$record) {
+            $this->handleProductJobInQueue(
+                $shop,
+                $offsetRecord,
+                $record,
+                $date
+            );
+        }
+        if ((int)$offsetRecord >= $this->getCount($filePath, $date)) {
+            unlink($filePath);
+            $this->getCacheManager()->clearAllPoolsCache();
+            $this->getLogger()->info(
+                'file ' . $filePath . ' was removed'
+            );
+        }
+    }
 
     /**
      * @param string $filePath
@@ -219,7 +187,7 @@ class HandleDownloadFileData
      * @throws \League\Csv\Exception
      * @throws \Throwable
      */
-    public function newParseCSVContent(string $filePath, ?string $shop)
+    public function creatingCarriageShop(string $filePath, ?string $shop)
     {
         if (!$this->checkExistResourceWithShop($shop)) {
             $this->getLogger()->error('shop ' . $shop . ' not present on resources');
@@ -236,22 +204,9 @@ class HandleDownloadFileData
             }
         }
 
-        /** @var Reader $csv */
-        $csv = Reader::createFromPath($filePath, 'r');
-        if (isset($this->adtractionDownloadUrls[$shop])) {
-            $csv->setHeaderOffset(0);
-            $csv->setDelimiter(',');
-            $csv->setEnclosure('\'');
-        } elseif (isset($this->adrecordDownloadUrls[$shop])) {
-            $csv->setHeaderOffset(0);
-            $csv->setDelimiter(';');
-        }
-        $count = (int)$this->getRedisHelper()
-            ->hGet(
-                'count_products_shop_' . $date,
-                $filePath
-            );
+        $count = $this->getCount($filePath, $date);
         if (!$count) {
+            $csv = $this->generateCsvReader($filePath, $shop);
             $count = (int)$csv->count();
             $this->getRedisHelper()
                 ->hMSet('count_products_shop_' . $date,
@@ -259,65 +214,16 @@ class HandleDownloadFileData
                 );
         }
 
-        $shopCarriage = (int)$this->getRedisHelper()
-            ->hGet(
-                'carriage_' . $date,
-                $filePath
+        for($i = 0; $i<=$count; $i = $i + $this->csvHandleStep) {
+            $this->getBus()->dispatch(
+                new CarriageShop(
+                    $i,
+                    ($i + $this->csvHandleStep >= $count
+                        ? $count - $i : $this->csvHandleStep),
+                    $filePath,
+                    $shop
+                )
             );
-//        $this->getLogger()->info(
-//            'file ' . $filePath . ' count row ' . $count . 'and left ' . ($count - $shopCarriage)
-//        );
-        $offset = $shopCarriage;
-        $countIteration = ($shopCarriage + $this->csvHandleStep) > $count ? $count : $shopCarriage + $this->csvHandleStep;
-        $this->getRedisHelper()
-            ->hMSet(
-                'carriage_' . $date,
-                [$filePath => $countIteration]
-            );
-        while ($offset < $countIteration) {
-            //build a statement
-            $stmt = (new Statement())
-                ->offset($offset)
-                ->limit(1);
-
-            //query your records from the document
-            /** @var  $records ResultSet */
-            $records = $stmt->process($csv);
-            $header = $csv->getHeader();
-
-            foreach ($records as $offsetRecord => $record) {
-                echo $offsetRecord . PHP_EOL;
-                $record['shop'] = $shop;
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $date,
-                        Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
-//                $this->getRedisHelper()
-//                    ->hIncrBy(
-//                        'carriage_' . $date,
-//                        $filePath);
-
-                if (isset($this->adtractionDownloadUrls[$shop])) {
-                    $this->getBus()->dispatch(new AdtractionDataRow($record));
-                }
-
-                if (isset($this->adrecordDownloadUrls[$shop])) {
-                    $adrecordDataRow = new AdrecordDataRow($record);
-                    $adrecordDataRow->transform();
-                    $this->getBus()->dispatch($adrecordDataRow);
-                }
-            }
-
-            $offset += 1;
-        }
-
-        if ((int)$offset >= $count) {
-            unlink($filePath);
-            $this->getCacheManager()->clearAllPoolsCache();
-            $this->getLogger()->info(
-                'file ' . $filePath . ' was removed'
-            );
-        } else {
-            $this->getBus()->dispatch(new FileReadyDownloaded($filePath, $shop));
         }
     }
 
@@ -366,5 +272,69 @@ class HandleDownloadFileData
     protected function getCacheManager(): CacheManager
     {
         return $this->cacheManager;
+    }
+
+    /**
+     * @param string $filePath
+     * @param string|null $shop
+     * @return Reader
+     * @throws \League\Csv\Exception
+     */
+    private function generateCsvReader(string $filePath, ?string $shop): Reader
+    {
+        /** @var Reader $csv */
+        $csv = Reader::createFromPath($filePath, 'r');
+        if (isset($this->adtractionDownloadUrls[$shop])) {
+            $csv->setHeaderOffset(0);
+            $csv->setDelimiter(',');
+            $csv->setEnclosure('\'');
+        } elseif (isset($this->adrecordDownloadUrls[$shop])) {
+            $csv->setHeaderOffset(0);
+            $csv->setDelimiter(';');
+        }
+
+        return $csv;
+    }
+
+    /**
+     * @param string|null $shop
+     * @param $offsetRecord
+     * @param $record
+     * @param string $date
+     * @throws \Throwable
+     */
+    private function handleProductJobInQueue(?string $shop, $offsetRecord, $record, string $date): void
+    {
+        echo 'shop' . $shop . ' offset ' . $offsetRecord . PHP_EOL;
+        $record['shop'] = $shop;
+        $this->getRedisHelper()
+            ->hIncrBy(Shop::PREFIX_HASH . $date,
+                Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
+
+        if (isset($this->adtractionDownloadUrls[$shop])) {
+            $this->getBus()->dispatch(new AdtractionDataRow($record));
+        }
+
+        if (isset($this->adrecordDownloadUrls[$shop])) {
+            $adrecordDataRow = new AdrecordDataRow($record);
+            $adrecordDataRow->transform();
+            $this->getBus()->dispatch($adrecordDataRow);
+        }
+    }
+
+    /**
+     * @param string $filePath
+     * @param string $date
+     * @return int
+     */
+    private function getCount(string $filePath, string $date)
+    {
+        $count = (int)$this->getRedisHelper()
+            ->hGet(
+                'count_products_shop_' . $date,
+                $filePath
+            );
+
+        return (int) $count;
     }
 }
