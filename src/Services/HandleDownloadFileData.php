@@ -282,6 +282,7 @@ class HandleDownloadFileData
             $header = $csv->getHeader();
 
             foreach ($records as $offsetRecord => $record) {
+                echo $offsetRecord . PHP_EOL;
                 $record['shop'] = $shop;
                 $this->getRedisHelper()
                     ->hIncrBy(Shop::PREFIX_HASH . $date,
