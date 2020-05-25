@@ -264,9 +264,9 @@ class HandleDownloadFileData
                 'carriage_' . $date,
                 $filePath
             );
-        $this->getLogger()->info(
-            'file ' . $filePath . ' count row ' . $count . 'and left ' . ($count - $shopCarriage)
-        );
+//        $this->getLogger()->info(
+//            'file ' . $filePath . ' count row ' . $count . 'and left ' . ($count - $shopCarriage)
+//        );
         $offset = $shopCarriage;
         $countIteration = ($shopCarriage + $this->csvHandleStep) > $count ? $count : $shopCarriage + $this->csvHandleStep;
         $this->getRedisHelper()
