@@ -236,11 +236,6 @@ class HandleDownloadFileData
             }
         }
 
-        $shopCarriage = (int)$this->getRedisHelper()
-            ->hGet(
-                'carriage_' . $date,
-                $filePath
-            );
         /** @var Reader $csv */
         $csv = Reader::createFromPath($filePath, 'r');
         if (isset($this->adtractionDownloadUrls[$shop])) {
@@ -264,12 +259,21 @@ class HandleDownloadFileData
                 );
         }
 
+        $shopCarriage = (int)$this->getRedisHelper()
+            ->hGet(
+                'carriage_' . $date,
+                $filePath
+            );
         $this->getLogger()->info(
             'file ' . $filePath . ' count row ' . $count . 'and left ' . ($count - $shopCarriage)
         );
-
         $offset = $shopCarriage;
         $countIteration = ($shopCarriage + $this->csvHandleStep) > $count ? $count : $shopCarriage + $this->csvHandleStep;
+        $this->getRedisHelper()
+            ->hMSet(
+                'carriage_' . $date,
+                [$filePath => $countIteration]
+            );
         while ($offset < $countIteration) {
             //build a statement
             $stmt = (new Statement())
@@ -287,10 +291,10 @@ class HandleDownloadFileData
                 $this->getRedisHelper()
                     ->hIncrBy(Shop::PREFIX_HASH . $date,
                         Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
-                $this->getRedisHelper()
-                    ->hIncrBy(
-                        'carriage_' . $date,
-                        $filePath);
+//                $this->getRedisHelper()
+//                    ->hIncrBy(
+//                        'carriage_' . $date,
+//                        $filePath);
 
                 if (isset($this->adtractionDownloadUrls[$shop])) {
                     $this->getBus()->dispatch(new AdtractionDataRow($record));
