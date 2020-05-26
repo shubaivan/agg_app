@@ -574,7 +574,7 @@ class Product implements EntityValidatorException
         $pieces = [
             $this->getName(),
             $this->getPrice(),
-            $this->getBrandRelation()->getBrandName()
+            $this->getBrandRelation() ? $this->getBrandRelation()->getBrandName() : ''
         ];
         if ($this->getCategoryRelation()->count()) {
             array_push($pieces, implode(',', $this->getCategoriesNameArray()));
