@@ -10,12 +10,29 @@ class AdrecordDataRow implements ResourceDataRow
     private $row;
 
     /**
+     * @var bool
+     */
+    private $lastProduct;
+
+    /**
+     * @var string
+     */
+    private $filePath;
+
+    /**
      * AdrecordDataRow constructor.
      * @param array $row
+     * @param string $filePath
+     * @param bool $lastProduct
      */
-    public function __construct(array $row)
-    {
+    public function __construct(
+        array $row,
+        string $filePath,
+        bool $lastProduct = false
+    ) {
         $this->row = $row;
+        $this->lastProduct = $lastProduct;
+        $this->filePath = $filePath;
     }
 
     public function transform()
@@ -80,5 +97,30 @@ class AdrecordDataRow implements ResourceDataRow
         }
 
         return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getLastProduct(): bool
+    {
+        return $this->lastProduct;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setLastProduct(bool $lastProduct)
+    {
+        $this->lastProduct = $lastProduct;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilePath()
+    {
+        return $this->filePath;
     }
 }

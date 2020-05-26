@@ -64,6 +64,10 @@ use function League\Csv\delimiter_detect;
  */
 class HandleDownloadFileData
 {
+    const TIME_SPEND_PRODUCTS_SHOP_END = 'time_spend_products_shop_end_';
+    const TIME_SPEND_PRODUCTS_SHOP_START = 'time_spend_products_shop_start_';
+    const COUNT_PRODUCTS_SHOP = 'count_products_shop_';
+
     /**
      * @var TraceableMessageBus
      */
@@ -149,7 +153,7 @@ class HandleDownloadFileData
             $this->getLogger()->error('file ' . $filePath . ' no exist');
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $date,
-                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
             throw new \Exception('file ' . $filePath . ' no exist');
         }
 
@@ -169,7 +173,8 @@ class HandleDownloadFileData
                 $shop,
                 $offsetRecord,
                 $record,
-                $date
+                $date,
+                $filePath
             );
         }
         if ((int)$offsetRecord >= $this->getCount($filePath, $date)) {
@@ -194,12 +199,12 @@ class HandleDownloadFileData
         }
 
         $date = date("Ymd");
-        if (!$this->getRedisHelper()->hExists('counter_' . $date, $filePath)) {
+        if (!$this->getRedisHelper()->hExists(self::COUNT_PRODUCTS_SHOP . $date, $filePath)) {
             if (!file_exists($filePath)) {
                 $this->getLogger()->error('file ' . $filePath . ' no exist');
                 $this->getRedisHelper()
                     ->hIncrBy(Shop::PREFIX_HASH . $date,
-                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
                 throw new \Exception('file ' . $filePath . ' no exist');
             }
         }
@@ -208,8 +213,14 @@ class HandleDownloadFileData
         if (!$count) {
             $csv = $this->generateCsvReader($filePath, $shop);
             $count = (int)$csv->count();
+
             $this->getRedisHelper()
-                ->hMSet('count_products_shop_' . $date,
+                ->hMSet(self::TIME_SPEND_PRODUCTS_SHOP_START . $date,
+                    [$filePath => (new \DateTime())->getTimestamp()]
+                );
+
+            $this->getRedisHelper()
+                ->hMSet(self::COUNT_PRODUCTS_SHOP . $date,
                     [$filePath => $count]
                 );
         }
@@ -301,22 +312,37 @@ class HandleDownloadFileData
      * @param $offsetRecord
      * @param $record
      * @param string $date
+     * @param string $filePath
      * @throws \Throwable
      */
-    private function handleProductJobInQueue(?string $shop, $offsetRecord, $record, string $date): void
+    private function handleProductJobInQueue(
+        ?string $shop,
+        $offsetRecord,
+        $record,
+        string $date,
+        string $filePath
+    ): void
     {
         echo 'shop' . $shop . ' offset ' . $offsetRecord . PHP_EOL;
         $record['shop'] = $shop;
         $this->getRedisHelper()
             ->hIncrBy(Shop::PREFIX_HASH . $date,
-                Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
+                Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $filePath);
 
         if (isset($this->adtractionDownloadUrls[$shop])) {
-            $this->getBus()->dispatch(new AdtractionDataRow($record));
+            $this->getBus()->dispatch(new AdtractionDataRow(
+                $record,
+                $filePath,
+                ((int)$offsetRecord >= $this->getCount($filePath, $date))
+            ));
         }
 
         if (isset($this->adrecordDownloadUrls[$shop])) {
-            $adrecordDataRow = new AdrecordDataRow($record);
+            $adrecordDataRow = new AdrecordDataRow(
+                $record,
+                $filePath,
+                ((int)$offsetRecord >= $this->getCount($filePath, $date))
+            );
             $adrecordDataRow->transform();
             $this->getBus()->dispatch($adrecordDataRow);
         }
@@ -331,7 +357,7 @@ class HandleDownloadFileData
     {
         $count = (int)$this->getRedisHelper()
             ->hGet(
-                'count_products_shop_' . $date,
+                self::COUNT_PRODUCTS_SHOP . $date,
                 $filePath
             );
 

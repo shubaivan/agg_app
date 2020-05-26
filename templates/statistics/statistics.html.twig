@@ -18,38 +18,56 @@
 {% block body %}
     <h1>Statistics</h1>
 
+
     <table >
-        <tr>
-            {% for date in data|keys  %}
-                <th colspan="2">{{date}}</th>
-            {% endfor %}
-        </tr>
-        <tr>
-            {% for dateData in data  %}
+    <tr>
+        {% for date in data|keys  %}
+            <th colspan="2">{{date}}</th>
+        {% endfor %}
+    </tr>
+    <tr>
+        <td>
+            {% for dateKey, dateData in data  %}
                 {% for blockName, typeEvent in dateData  %}
-                    <td>
                         <ul>
                             {% if typeEvent is iterable %}
-                                <h2>{{blockName}}</h2>
+                                <h2>{{blockName|capitalize  }}</h2>
                                 <li>
-                                    {% for eventName, events in typeEvent  %}
-                                        {% if events is iterable %}
-                                            <h3>{{eventName}}</h3>
-                                            <ul>
-                                                {% for shopName, counter in events %}
-                                                    <li>{{ shopName }} - {{ counter }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% endif %}
-                                    {% endfor %}
+                                    {% if typeEvent is iterable %}
+                                        {% for eventName, events in typeEvent  %}
+                                            {% if events is iterable %}
+                                                <h3>{{eventName}}</h3>
+                                                <ul>
+                                                    {% for filePath, shopData in events %}
+                                                        {% if shopData is iterable %}
+                                                            <li>
+                                                                {% for key, value in shopData %}
+                                                                    <ul>
+                                                                        <li>{{ key }} - {{ value }}</li>
+                                                                    </ul>
+                                                                {% endfor %}
+                                                            </li>
+                                                            <br>
+                                                        {% else %}
+                                                            <li>
+                                                                {{ filePath }} - {{ shopData }}
+                                                            </li>
+                                                            <br>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {%  endif %}
+
                                 </li>
                             {% endif %}
                         </ul>
-                    </td>
+
                 {% endfor %}
             {% endfor %}
-        </tr>
+        </td>
+    </tr>
     </table>
-
     {% block page_contents %}{% endblock %}
 {% endblock %}

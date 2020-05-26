@@ -24,4 +24,20 @@ interface ResourceDataRow
      * @return $this
      */
     public function setExistProductId(int $id);
+
+    /**
+     * @return string
+     */
+    public function getFilePath();
+
+    /**
+     * @return bool
+     */
+    public function getLastProduct(): bool;
+
+    /**
+     * @param bool $isEndProduct
+     * @return $this
+     */
+    public function setLastProduct(bool $isEndProduct);
 }
