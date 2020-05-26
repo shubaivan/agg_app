@@ -286,9 +286,12 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function getEncryptMainQuery(): string
     {
-        $encrypt_decrypt = $this->getHelpers()->encrypt_decrypt('encrypt', $this->mainQuery);
+//        $encrypt_decrypt = $this->getHelpers()->encrypt_decrypt('encrypt', $this->mainQuery);
+        $resultIdentity = 'query=' . $this->mainQuery .
+            '&params=' . serialize($this->params) .
+            '&types=' . serialize($this->types);
 
-        return self::FACET_FILTERS . sha1($this->mainQuery);
+        return self::FACET_FILTERS . sha1($resultIdentity);
     }
 
     /**
