@@ -82,6 +82,9 @@ class Helpers
             $result = preg_replace('!\s!', '&', $result);
             $search = $result . ($strict !== true ? ':*' : '');
         }
+
+        $search = str_replace(':*|:*|', ':*|', $search);
+
         return $search;
     }
 
