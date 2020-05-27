@@ -647,8 +647,8 @@ class ProductRepository extends ServiceEntityRepository
         ';
 
         $queryFacet .= $this->clearFacetQueryFromJoin();
-
-        $queryFacet .= (count($this->conditions) > 0 ? 'AND' : 'WHERE') . '
+        $queryFacet .= preg_match('/\b(WHERE)\b/', $queryFacet, $matches) > 0 ? ' AND ' : ' WHERE ';
+        $queryFacet .= '
              e.key != :exclude_key 
             GROUP BY e.key
         ';
