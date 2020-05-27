@@ -285,14 +285,11 @@ class ProductController extends AbstractRestController
      * @throws OptimisticLockException
      */
     public function getProductByIdAction(
-        $id
+        Product $product
     )
     {
-        $product = $this->getProductRepository()
-            ->find($id);
-        $t = 1;
-//        return $this->getProductService()
-//            ->getProductById($product);
+        return $this->getProductService()
+            ->getProductById($product);
     }
 
     /**
