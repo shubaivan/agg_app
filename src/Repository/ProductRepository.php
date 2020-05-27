@@ -257,29 +257,7 @@ class ProductRepository extends ServiceEntityRepository
         return $products;
     }
 
-    /**
-     * @return Helpers
-     */
-    public function getHelpers(): Helpers
-    {
-        return $this->helpers;
-    }
 
-    /**
-     * @return TagAwareQueryResultCacheCommon
-     */
-    public function getTagAwareQueryResultCacheCommon(): TagAwareQueryResultCacheCommon
-    {
-        return $this->tagAwareQueryResultCacheCommon;
-    }
-
-    /**
-     * @return TagAwareQueryResultCacheProduct
-     */
-    public function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
-    {
-        return $this->tagAwareQueryResultCacheProduct;
-    }
 
     /**
      * @return string
@@ -308,12 +286,11 @@ class ProductRepository extends ServiceEntityRepository
         if ($parameterBag->get('search')) {
             $this->queryMainCondition .= '
                 JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')) @@ query_search
+                ON to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description) @@ query_search               
         ';
         }
 
         $this->queryMainCondition .= '
-                LEFT JOIN product_category cp on cp.product_id = products_alias.id
                 LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
                 LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id               
         ';
@@ -326,10 +303,7 @@ class ProductRepository extends ServiceEntityRepository
                 INNER JOIN category cat on cps.category_id = cat.id         
             ';
 
-            $this->queryMainCondition .= '
-                JOIN to_tsquery(\'pg_catalog.swedish\', :category_word) cps_query_search
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \') @@ cps_query_search
-            ';
+            $this->queryMainCondition .= 'WHERE cat.category_name ~ :category_word';
         }
 
         if (is_array($parameterBag->get('extra_array'))
@@ -402,6 +376,11 @@ class ProductRepository extends ServiceEntityRepository
                 array_values($categoryIds)
             );
             $bindKeysCategory = implode(',', array_keys($preparedInValuesCategory));
+
+            $this->queryMainCondition .= '
+                LEFT JOIN product_category cp on cp.product_id = products_alias.id               
+            ';
+
             $conditionCategory = "
                             cp.category_id IN ($bindKeysCategory)
                         ";
@@ -515,7 +494,7 @@ class ProductRepository extends ServiceEntityRepository
 
             if ($parameterBag->get('search')) {
                 $query .= '
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')), query_search) AS rank
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description), query_search) AS rank
             ';
             }
         }
@@ -601,7 +580,7 @@ class ProductRepository extends ServiceEntityRepository
             INNER JOIN products products_alias ON products_alias.shop_relation_id = shop_alias.id
         ';
 
-        $queryFacet .= $this->queryMainCondition;
+        $queryFacet .= $this->clearFacetQueryFromJoin();
 
         $realCacheKey = 'query=' . $queryFacet .
             '&params=' . serialize($this->params) .
@@ -629,10 +608,19 @@ class ProductRepository extends ServiceEntityRepository
             INNER JOIN products products_alias ON products_alias.id = product_category_alias.product_id                    
         ';
 
-        $queryFacet .= str_replace(
-            '\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \'',
-            '\'pg_catalog.swedish\',coalesce(category_alias.category_name,\'\')||\' \'',
-            $this->queryMainCondition
+        $queryFacet .= $this->clearFacetQueryFromJoin();
+
+        $queryFacet = str_replace(
+            'WHERE cat.category_name',
+            'WHERE category_alias.category_name',
+            $queryFacet
+        );
+
+        $queryFacet = str_replace(
+            'INNER JOIN product_category cps on cps.product_id = products_alias.id                                   
+                INNER JOIN category cat on cps.category_id = cat.id',
+            '',
+            $queryFacet
         );
 
         $realCacheKey = 'query=' . $queryFacet .
@@ -658,7 +646,7 @@ class ProductRepository extends ServiceEntityRepository
             JOIN jsonb_each_text(products_alias.extras) e on true
         ';
 
-        $queryFacet .= $this->queryMainCondition;
+        $queryFacet .= $this->clearFacetQueryFromJoin();
 
         $queryFacet .= (count($this->conditions) > 0 ? 'AND' : 'WHERE') . '
              e.key != :exclude_key 
@@ -689,7 +677,7 @@ class ProductRepository extends ServiceEntityRepository
             INNER JOIN products products_alias ON products_alias.brand_relation_id = brand_alias.id
         ';
 
-        $queryFacet .= $this->queryMainCondition;
+        $queryFacet .= $this->clearFacetQueryFromJoin();
 
         $realCacheKey = 'query=' . $queryFacet .
             '&params=' . serialize($this->params) .
@@ -697,6 +685,18 @@ class ProductRepository extends ServiceEntityRepository
             '&connectionParams=' . hash('sha256', serialize($connectionParams));
 
         return $realCacheKey;
+    }
+
+    private function clearFacetQueryFromJoin()
+    {
+        $result = str_replace(
+            'LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
+                LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id',
+            '',
+            $this->queryMainCondition
+        );
+
+        return $result;
     }
 
     /**
@@ -726,5 +726,29 @@ class ProductRepository extends ServiceEntityRepository
         unset($queryExample);
 
         return true;
+    }
+
+    /**
+     * @return Helpers
+     */
+    private function getHelpers(): Helpers
+    {
+        return $this->helpers;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheCommon
+     */
+    private function getTagAwareQueryResultCacheCommon(): TagAwareQueryResultCacheCommon
+    {
+        return $this->tagAwareQueryResultCacheCommon;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheProduct
+     */
+    private function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
+    {
+        return $this->tagAwareQueryResultCacheProduct;
     }
 }

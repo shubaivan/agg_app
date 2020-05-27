@@ -141,7 +141,7 @@ class BrandRepository extends ServiceEntityRepository
 
             if ($search) {
                 $query .= '
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(brand_name,\'\')||\' \'), query_search) AS rank
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',brand_alias.brand_name), query_search) AS rank
             ';
             }
         }
@@ -152,7 +152,7 @@ class BrandRepository extends ServiceEntityRepository
         if ($search) {
             $query .= '
                 JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(brand_name,\'\')||\' \') @@ query_search
+                ON to_tsvector(\'pg_catalog.swedish\',brand_alias.brand_name) @@ query_search
             ';
         }
 
@@ -260,9 +260,9 @@ class BrandRepository extends ServiceEntityRepository
         }
 
         if ($search) {
+            $query .= preg_match('/\b(WHERE)\b/', $query, $matches) > 0 ? ' AND ' : ' WHERE ';
             $query .= '
-                JOIN to_tsquery(\'pg_catalog.swedish\', :search_facet) query_search_facet
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(brand_name,\'\')||\' \') @@ query_search_facet
+                brand_alias.brand_name ~ :search_facet
             ';
         }
 
@@ -271,9 +271,7 @@ class BrandRepository extends ServiceEntityRepository
             $query .= '
                 GROUP BY brand_alias.id
             ';
-            if ($search) {
-                $query .= ', query_search_facet.query_search_facet';
-            }
+
             $query .=
                 ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' . '                                          
                     LIMIT :limit

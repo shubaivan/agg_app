@@ -131,7 +131,7 @@ class CategoryRepository extends ServiceEntityRepository
 
             if ($search) {
                 $query .= '
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \'), query_search) AS rank
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',category_alias.category_name), query_search) AS rank
                 ';
             }
         }
@@ -142,7 +142,7 @@ class CategoryRepository extends ServiceEntityRepository
         if ($search) {
             $query .= '
                 JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \') @@ query_search
+                ON to_tsvector(\'pg_catalog.swedish\',category_alias.category_name) @@ query_search
             ';
         }
 
@@ -248,13 +248,15 @@ class CategoryRepository extends ServiceEntityRepository
         } else {
             $search = $searchField;
         }
-        $aliasCategoryTable = '';
 
         if ($search) {
             if (!array_key_exists(':category_word', $params)) {
                 $query .= '
-                    JOIN to_tsquery(\'pg_catalog.swedish\', :search_facet) query_search_facet
-                    ON to_tsvector(\'pg_catalog.swedish\',coalesce(' . $aliasCategoryTable . 'category_name,\'\')||\' \') @@ query_search_facet
+                    WHERE category_alias.category_name ~ :category_word
+                ';
+            } else {
+                $query .= '
+                    AND category_alias.category_name ~ :add_category_word
                 ';
             }
         }
@@ -262,9 +264,6 @@ class CategoryRepository extends ServiceEntityRepository
         if (!$count) {
             $query .= '
                     GROUP BY category_alias.id';
-            if ($search && !array_key_exists(':category_word', $params)) {
-                $query .= ', query_search_facet.query_search_facet';
-            }
             $query .=
                 ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' . '                                          
                     LIMIT :limit
@@ -277,7 +276,7 @@ class CategoryRepository extends ServiceEntityRepository
 
         if ($search) {
             if (array_key_exists(':category_word', $params)) {
-                $params[':category_word'] .= '&' . $search;
+                $params[':add_category_word'] = $search;
             } else {
                 $params[':search_facet'] = $search;
                 $types[':search_facet'] = \PDO::PARAM_STR;
