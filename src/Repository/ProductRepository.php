@@ -303,7 +303,9 @@ class ProductRepository extends ServiceEntityRepository
                 INNER JOIN category cat on cps.category_id = cat.id         
             ';
 
-            $this->queryMainCondition .= 'WHERE cat.category_name ~ :category_word';
+            $this->queryMainCondition .= '
+                    WHERE cat.category_name ~ :category_word
+            ';
         }
 
         if (is_array($parameterBag->get('extra_array'))
@@ -408,7 +410,14 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         if (count($this->conditions)) {
-            $this->queryMainCondition .= 'WHERE ' . implode(' AND ', $this->conditions);
+
+            $this->queryMainCondition .= preg_match(
+                '/\b(WHERE)\b/',
+                $this->queryMainCondition,
+                $matches
+            ) > 0 ? ' AND ' : ' WHERE ';
+
+            $this->queryMainCondition .= implode(' AND ', $this->conditions);
         }
 
         $query .= $this->queryMainCondition;
