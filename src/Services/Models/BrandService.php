@@ -120,7 +120,7 @@ class BrandService
         }
 
         $brandQuery = $facetQueries[ProductRepository::FACET_BRAND_QUERY_KEY];
-        $pregSplitBrandQuery = preg_split('/&/', $brandQuery[0]);
+        $pregSplitBrandQuery = preg_split('/&&/', $brandQuery[0]);
         $query = preg_replace('/query=/', '', $pregSplitBrandQuery[0]);
         $params = unserialize(preg_replace('/params=/', '', $pregSplitBrandQuery[1]));
         $types = unserialize(preg_replace('/types=/', '', $pregSplitBrandQuery[2]));

@@ -117,7 +117,7 @@ class ShopService
         }
 
         $shopQuery = $facetQueries[ProductRepository::FACET_SHOP_QUERY_KEY];
-        $pregSplitShopQuery = preg_split('/&/', $shopQuery[0]);
+        $pregSplitShopQuery = preg_split('/&&/', $shopQuery[0]);
         $query = preg_replace('/query=/', '', $pregSplitShopQuery[0]);
         $params = unserialize(preg_replace('/params=/', '', $pregSplitShopQuery[1]));
         $types = unserialize(preg_replace('/types=/', '', $pregSplitShopQuery[2]));

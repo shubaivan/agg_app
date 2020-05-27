@@ -127,7 +127,7 @@ class CategoryService
         }
 
         $categoryQuery = $facetQueries[ProductRepository::FACET_CATEGORY_QUERY_KEY];
-        $pregSplitCategoryQuery = preg_split('/&/', $categoryQuery[0]);
+        $pregSplitCategoryQuery = preg_split('/&&/', $categoryQuery[0]);
         $query = preg_replace('/query=/', '', $pregSplitCategoryQuery[0]);
         $params = unserialize(preg_replace('/params=/', '', $pregSplitCategoryQuery[1]));
         $types = unserialize(preg_replace('/types=/', '', $pregSplitCategoryQuery[2]));
