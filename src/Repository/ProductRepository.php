@@ -569,8 +569,6 @@ class ProductRepository extends ServiceEntityRepository
      */
     private function prepareShopFacetFilterQuery()
     {
-        $connectionParams = $this->getEntityManager()->getConnection()->getParams();
-
         $queryFacet = '
             SELECT
                 DISTINCT shop_alias.id,
@@ -582,10 +580,7 @@ class ProductRepository extends ServiceEntityRepository
 
         $queryFacet .= $this->clearFacetQueryFromJoin();
 
-        $realCacheKey = 'query=' . $queryFacet .
-            '&params=' . serialize($this->params) .
-            '&types=' . serialize($this->types) .
-            '&connectionParams=' . hash('sha256', serialize($connectionParams));
+        $realCacheKey = $this->getRealCacheKeyFacet($queryFacet);
 
         return $realCacheKey;
     }
@@ -596,8 +591,6 @@ class ProductRepository extends ServiceEntityRepository
      */
     private function prepareCategoriesFacetFilterQuery()
     {
-        $connectionParams = $this->getEntityManager()->getConnection()->getParams();
-
         $queryFacet = '
             SELECT                         
                 DISTINCT category_alias.id,
@@ -623,10 +616,7 @@ class ProductRepository extends ServiceEntityRepository
             $queryFacet
         );
 
-        $realCacheKey = 'query=' . $queryFacet .
-            '&params=' . serialize($this->params) .
-            '&types=' . serialize($this->types) .
-            '&connectionParams=' . hash('sha256', serialize($connectionParams));
+        $realCacheKey = $this->getRealCacheKeyFacet($queryFacet);
 
         return $realCacheKey;
     }
@@ -654,9 +644,9 @@ class ProductRepository extends ServiceEntityRepository
         ';
 
         $realCacheKey = 'query=' . $queryFacet .
-            '&params=' . serialize(array_merge($this->params, [':exclude_key' => 'ALTERNATIVE_IMAGE'])) .
-            '&types=' . serialize(array_merge($this->types, [':exclude_key' => ParameterType::STRING])) .
-            '&connectionParams=' . hash('sha256', serialize($connectionParams));
+            '&&params=' . serialize(array_merge($this->params, [':exclude_key' => 'ALTERNATIVE_IMAGE'])) .
+            '&&types=' . serialize(array_merge($this->types, [':exclude_key' => ParameterType::STRING])) .
+            '&&connectionParams=' . hash('sha256', serialize($connectionParams));
 
         return $realCacheKey;
     }
@@ -666,8 +656,6 @@ class ProductRepository extends ServiceEntityRepository
      */
     private function prepareBrandFacetFilterQuery()
     {
-        $connectionParams = $this->getEntityManager()->getConnection()->getParams();
-
         $queryFacet = '
             SELECT
                 DISTINCT brand_alias.id,
@@ -679,10 +667,7 @@ class ProductRepository extends ServiceEntityRepository
 
         $queryFacet .= $this->clearFacetQueryFromJoin();
 
-        $realCacheKey = 'query=' . $queryFacet .
-            '&params=' . serialize($this->params) .
-            '&types=' . serialize($this->types) .
-            '&connectionParams=' . hash('sha256', serialize($connectionParams));
+        $realCacheKey = $this->getRealCacheKeyFacet($queryFacet);
 
         return $realCacheKey;
     }
@@ -750,5 +735,21 @@ class ProductRepository extends ServiceEntityRepository
     public function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
     {
         return $this->tagAwareQueryResultCacheProduct;
+    }
+
+    /**
+     * @param string $queryFacet
+     * @param array $connectionParams
+     * @return string
+     */
+    private function getRealCacheKeyFacet(string $queryFacet): string
+    {
+        $connectionParams = $this->getEntityManager()->getConnection()->getParams();
+
+        $realCacheKey = 'query=' . $queryFacet .
+            '&&params=' . serialize($this->params) .
+            '&&types=' . serialize($this->types) .
+            '&&connectionParams=' . hash('sha256', serialize($connectionParams));
+        return $realCacheKey;
     }
 }

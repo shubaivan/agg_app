@@ -40,7 +40,7 @@ class SearchProductCollection
     {
         $this->collection = $collection;
         $this->count = $count;
-        $this->uniqIdentificationQuery = $uniqIdentificationQuery;
+        $this->uniqIdentificationQuery = ($count > 0) ? $uniqIdentificationQuery : '';
     }
 
 
