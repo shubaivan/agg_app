@@ -747,7 +747,7 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @return TagAwareQueryResultCacheProduct
      */
-    private function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
+    public function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
     {
         return $this->tagAwareQueryResultCacheProduct;
     }
