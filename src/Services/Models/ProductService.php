@@ -137,7 +137,7 @@ class ProductService
         $parameterBag = new ParameterBag([
             'page' => 1,
             'count' => 4,
-            'exclude_ids' => [$product->getId()],
+            'exclude_id' => $product->getId(),
             'search' => $product->getSearchDataForRelatedProductItems()
         ]);
         $this->recordIpToProduct($product);
@@ -179,7 +179,7 @@ class ProductService
     {
         return (new ProductCollection(
             $this->getProductRepository()
-                ->fullTextSearchByParameterBag($parameterBag),
+                ->getProductRelations($parameterBag),
             $product
         ));
     }

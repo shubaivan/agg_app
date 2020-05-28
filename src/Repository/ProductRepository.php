@@ -761,4 +761,89 @@ class ProductRepository extends ServiceEntityRepository
             '&&connectionParams=' . hash('sha256', serialize($connectionParams));
         return $realCacheKey;
     }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function getProductRelations(ParameterBag $parameterBag)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $query  = '
+            SELECT
+                products_alias.id,
+                products_alias.sku,
+                products_alias.name AS "name",
+                products_alias.description,
+                products_alias.category,
+                products_alias.price,
+                products_alias.shipping,
+                products_alias.currency,
+                products_alias.instock,
+                products_alias.product_url AS "productUrl",
+                products_alias.image_url AS "imageUrl",
+                products_alias.tracking_url AS "trackingUrl",
+                products_alias.brand,
+                products_alias.shop,
+                products_alias.original_price AS "originalPrice",
+                products_alias.ean,
+                products_alias.manufacturer_article_number AS "manufacturerArticleNumber",
+                products_alias.extras,
+                products_alias.created_at AS "createdAt",
+                products_alias.brand_relation_id AS "brandRelationId",
+                products_alias.shop_relation_id AS "shopRelationId",
+                ts_rank_cd(to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand||products_alias.category||products_alias.shop), to_tsquery(\'pg_catalog.swedish\', :search)) AS rank
+            FROM products products_alias
+        
+            WHERE to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand||products_alias.category||products_alias.shop) @@ to_tsquery(\'pg_catalog.swedish\', :search)
+            AND products_alias.id != :exclude_id
+            ORDER BY rank DESC
+            LIMIT :limit
+            OFFSET :offset
+        ';
+
+        $parameterBag->set(
+            'search',
+            $this->getHelpers()
+                ->handleSearchValue($parameterBag->get('search'), false)
+        );
+
+        $limit = (int)$parameterBag->get('count');
+        $offset = $limit * ((int)$parameterBag->get('page') - 1);
+
+        $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
+            $query,
+            [
+                ':search' => $parameterBag->get('search'),
+                ':exclude_id' => $parameterBag->get('exclude_id'),
+                ':limit' => $limit,
+                ':offset' => $offset,
+            ],
+            [
+                ':search' => \PDO::PARAM_STR,
+                ':exclude_id' => \PDO::PARAM_INT,
+                ':limit' => \PDO::PARAM_INT,
+                ':offset' => \PDO::PARAM_INT,
+            ],
+            ['product_full_text_search_relations'],
+            0,
+            "product_full_text_search_relations_cont"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+
+        $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $statement->closeCursor();
+
+        return $products;
+    }
 }

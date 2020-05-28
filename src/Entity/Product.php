@@ -617,7 +617,7 @@ class Product implements EntityValidatorException
     public function addCategoryRelation(Category $categoryRelation): self
     {
         if (!$this->getCategoryRelation()->contains($categoryRelation)) {
-            $this->categoryRelation[] = $categoryRelation;
+            $this->getCategoryRelation()->add($categoryRelation);
             $categoryNames = $this->getCategoryRelation()->map(function (Category $category) {
                 return $category->getCategoryName();
             });
