@@ -5,7 +5,7 @@ namespace App\Services\Models;
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
 use App\Entity\Collection\BrandsCollection;
-use App\Entity\Collection\CategoriesCollection;
+use App\Entity\Collection\Search\SearchBrandsCollection;
 use App\Entity\Product;
 use App\Repository\BrandRepository;
 use App\Repository\ProductRepository;
@@ -16,7 +16,6 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class BrandService
 {
@@ -59,7 +58,7 @@ class BrandService
         if (!($brand instanceof Brand)) {
             $brand = new Brand();
             $brand
-                ->setName($product->getBrand());
+                ->setBrandName($product->getBrand());
         }
         $product->setBrandRelation($brand);
 
@@ -69,7 +68,7 @@ class BrandService
     /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
-     * @return BrandsCollection
+     * @return SearchBrandsCollection
      * @throws CacheException
      */
     public function getBrandsByFilter(ParamFetcher $paramFetcher, $count = false)
@@ -82,7 +81,7 @@ class BrandService
             $strictCollection = $this->getBrandRepository()
                 ->fullTextSearchByParameterBag($parameterBag);
 
-            return (new BrandsCollection($strictCollection, $countStrict));
+            return (new SearchBrandsCollection($strictCollection, $countStrict));
         }
         $parameterBag->remove('strict');
         $count = $this->getBrandRepository()
@@ -90,13 +89,13 @@ class BrandService
         $collection = $this->getBrandRepository()
             ->fullTextSearchByParameterBag($parameterBag);
 
-        return (new BrandsCollection($collection, $count));
+        return (new SearchBrandsCollection($collection, $count));
     }
 
     /**
      * @param $uniqIdentificationQuery
      * @param ParamFetcher $paramFetcher
-     * @return BrandsCollection
+     * @return SearchBrandsCollection
      * @throws CacheException
      * @throws \Exception
      */
@@ -121,7 +120,7 @@ class BrandService
         }
 
         $brandQuery = $facetQueries[ProductRepository::FACET_BRAND_QUERY_KEY];
-        $pregSplitBrandQuery = preg_split('/&/', $brandQuery[0]);
+        $pregSplitBrandQuery = preg_split('/&&/', $brandQuery[0]);
         $query = preg_replace('/query=/', '', $pregSplitBrandQuery[0]);
         $params = unserialize(preg_replace('/params=/', '', $pregSplitBrandQuery[1]));
         $types = unserialize(preg_replace('/types=/', '', $pregSplitBrandQuery[2]));
@@ -149,9 +148,26 @@ class BrandService
                 true
             );
 
-        $brandsCollection = new BrandsCollection($facetFiltersBrand, $facetFiltersBrandCount);
+        $brandsCollection = new SearchBrandsCollection($facetFiltersBrand, $facetFiltersBrandCount);
 
         return $brandsCollection;
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @return Brand[]|BrandsCollection|int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getBrandsByIds(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getBrandRepository()
+            ->getBrandByIds($paramFetcher);
+        $count = $this->getBrandRepository()
+            ->getBrandByIds($paramFetcher, true);
+        $collection = new BrandsCollection($collection, $count);
+
+        return $collection;
     }
 
     /**
@@ -161,7 +177,7 @@ class BrandService
     private function matchExistBrand(string $name)
     {
         return $this->getBrandRepository()
-            ->findOneBy(['name' => $name]);
+            ->findOneBy(['brandName' => $name]);
     }
 
     /**

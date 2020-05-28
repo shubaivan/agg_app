@@ -3,11 +3,11 @@
 namespace App\QueueModelHandlers;
 
 use App\Exception\ValidatorException;
-use App\QueueModel\AdtractionDataRow;
+use App\QueueModel\AdrecordDataRow;
 use App\Services\Queue\ProductDataRowHandler;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-class AdtractionDataRowHandler implements MessageHandlerInterface
+class AdrecordDataRowHandler implements MessageHandlerInterface
 {
     /**
      * @var ProductDataRowHandler
@@ -24,13 +24,13 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     }
 
     /**
-     * @param AdtractionDataRow $adtractionDataRow
+     * @param AdrecordDataRow $adrecordDataRow
      * @throws ValidatorException
      * @throws \Exception
      */
-    public function __invoke(AdtractionDataRow $adtractionDataRow)
+    public function __invoke(AdrecordDataRow $adrecordDataRow)
     {
-        $this->getProductDataRowHandler()->handleCsvRow($adtractionDataRow);
+        $this->getProductDataRowHandler()->handleCsvRow($adrecordDataRow);
     }
 
     /**

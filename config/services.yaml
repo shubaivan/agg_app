@@ -19,14 +19,36 @@ parameters:
         'Cykloteket': '%env(ANDRACTION_DOWNLOAD_URL_Cykloteket)%'
         'Ahlens': '%env(ANDRACTION_DOWNLOAD_URL_Ahlens)%'
     adtraction_download_file_path: '%env(ANDRACTION_DOWNLOAD_FILE_PATH)%'
+
+    adrecord_download_urls:
+      'Baby Björn': '%env(ADRECORD_DOWNLOAD_URL_Baby_Bjorn)%'
+      'Cardoonia': '%env(ADRECORD_DOWNLOAD_URL_Cardoonia)%'
+      'EbbeKids': '%env(ADRECORD_DOWNLOAD_URL_EbbeKids)%'
+      'FrankDandy': '%env(ADRECORD_DOWNLOAD_URL_FrankDandy)%'
+      'Gus Textil': '%env(ADRECORD_DOWNLOAD_URL_Gus_Textil)%'
+      'Jultröja': '%env(ADRECORD_DOWNLOAD_URL_Jultroja)%'
+      'LaplandEcostore': '%env(ADRECORD_DOWNLOAD_URL_LaplandEcostore)%'
+      'Leksakscity': '%env(ADRECORD_DOWNLOAD_URL_Leksakscity)%'
+      'Nalleriet.se': '%env(ADRECORD_DOWNLOAD_URL_Nalleriet_se)%'
+      'Namnband': '%env(ADRECORD_DOWNLOAD_URL_Namnband)%'
+      'Shirtstore': '%env(ADRECORD_DOWNLOAD_URL_Shirtstore)%'
+      'Spelexperten': '%env(ADRECORD_DOWNLOAD_URL_Spelexperten)%'
+      'Sportshopen': '%env(ADRECORD_DOWNLOAD_URL_Sportshopen)%'
+      'StigaSports': '%env(ADRECORD_DOWNLOAD_URL_StigaSports)%'
+      'Strumpgalen.se': '%env(ADRECORD_DOWNLOAD_URL_Strumpgalen_se)%'
+      'Twar.se': '%env(ADRECORD_DOWNLOAD_URL_Twar_se)%'
+    adrecord_download_file_path: '%env(ADRECORD_DOWNLOAD_FILE_PATH)%'
+
     support_email: '%env(SUPPORT_EMAIL)%'
     fos_rest.throw_exception_on_unsupported_content_type: true
     fos_rest.body_default_format: 'json'
     locale: 'en'
     redis_host: '%env(REDIS_HOST)%'
     redis_port: '%env(REDIS_PORT)%'
-    redis_access: '%redis_host%:%redis_port%'
-
+    redis_host_cache: '%env(REDIS_HOST_CACHE)%'
+    redis_port_cache: '%env(REDIS_PORT_CACHE)%'
+    redis_access: '%redis_host_cache%:%redis_port_cache%'
+    csv_handle_step: '%env(CSV_HANDLE_STEP)%'
 #    jms_serializer.camel_case_naming_strategy.class: JMS\Serializer\Naming\IdenticalPropertyNamingStrategy
 #    jms_serializer.serialized_name_annotation_strategy.class: JMS\Serializer\Naming\SerializedNameAnnotationStrategy
 services:
@@ -117,6 +139,18 @@ services:
       class: App\Symfony\Component\Serializer\Normalizer\FlattenExceptionNormalizer
       tags:
         - {name: serializer.normalizer, priority: -915}
+
+    App\Services\HandleDownloadFileData:
+      arguments:
+        $adtractionDownloadUrls: '%adtraction_download_urls%'
+        $adrecordDownloadUrls: '%adrecord_download_urls%'
+        $csvHandleStep: '%csv_handle_step%'
+      lazy: true
+
+    App\Command\ResourceDownloadFile:
+      arguments:
+        $filePath: ''
+        $urls: {}
 
     App\Serializer\ConstraintViolationListHandler:
       public: false

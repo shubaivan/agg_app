@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\Collection;
+namespace App\Entity\Collection\Search;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation;

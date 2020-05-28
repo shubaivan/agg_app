@@ -2,11 +2,11 @@
 
 namespace App\QueueModelHandlers;
 
-use App\QueueModel\FileReadyDownloaded;
+use App\QueueModel\CarriageShop;
 use App\Services\HandleDownloadFileData;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-class FileReadyDownloadedHandler implements MessageHandlerInterface
+class CarriageShopHandler implements MessageHandlerInterface
 {
     /**
      * @var HandleDownloadFileData
@@ -14,7 +14,7 @@ class FileReadyDownloadedHandler implements MessageHandlerInterface
     private $handleDownloadData;
 
     /**
-     * FileReadyDownloadedHandler constructor.
+     * CarriageShopHandler constructor.
      * @param HandleDownloadFileData $handleAdtractionData
      */
     public function __construct(HandleDownloadFileData $handleAdtractionData)
@@ -23,18 +23,23 @@ class FileReadyDownloadedHandler implements MessageHandlerInterface
     }
 
     /**
-     * @param FileReadyDownloaded $fileReadyDownloaded
+     * @param CarriageShop $carriageShop
      * @throws \League\Csv\Exception
      * @throws \Throwable
      */
-    public function __invoke(FileReadyDownloaded $fileReadyDownloaded)
+    public function __invoke(CarriageShop $carriageShop)
     {
-        $this->getHandleDownloadData()->creatingCarriageShop(
-            $fileReadyDownloaded->getAbsoluteFilePath(),
-            $fileReadyDownloaded->getShop()
-        );
-
-        echo $fileReadyDownloaded->getAbsoluteFilePath() . PHP_EOL;
+        $this->getHandleDownloadData()
+            ->handleCsvByCarriage(
+                $carriageShop->getOffset(),
+                $carriageShop->getLimit(),
+                $carriageShop->getFilePath(),
+                $carriageShop->getShop()
+            );
+        echo 'offset ' . $carriageShop->getOffset()
+            . ' limit ' . $carriageShop->getLimit()
+            . ' filepath ' . $carriageShop->getFilePath()
+            . PHP_EOL;
     }
 
     /**

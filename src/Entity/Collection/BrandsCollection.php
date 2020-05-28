@@ -8,18 +8,20 @@ class BrandsCollection
 {
     /**
      * @var array
-     * @Annotation\Type("array")
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
+     * @Annotation\Type("array<App\Entity\Brand>")
      */
     private $collection;
 
     /**
      * @var int
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
      * @Annotation\Type("int")
      */
     private $count;
 
     /**
-     * BrandsCollection constructor.
+     * ProductsCollection constructor.
      * @param array $collection
      * @param int $count
      */
@@ -27,41 +29,5 @@ class BrandsCollection
     {
         $this->collection = $collection;
         $this->count = $count;
-    }
-
-    /**
-     * @return array
-     */
-    public function getCollection(): array
-    {
-        return $this->collection;
-    }
-
-    /**
-     * @param array $collection
-     * @return BrandsCollection
-     */
-    public function setCollection(array $collection): BrandsCollection
-    {
-        $this->collection = $collection;
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCount(): int
-    {
-        return $this->count;
-    }
-
-    /**
-     * @param int $count
-     * @return BrandsCollection
-     */
-    public function setCount(int $count): BrandsCollection
-    {
-        $this->count = $count;
-        return $this;
     }
 }

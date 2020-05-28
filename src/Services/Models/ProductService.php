@@ -8,11 +8,12 @@ use App\Entity\Collection\SearchProductCollection;
 use App\Entity\Collection\SearchProducts\AdjacentProduct;
 use App\Entity\Collection\SearchProducts\GroupAdjacent;
 use App\Entity\Collection\SearchProducts\GroupProductEntity;
+use App\Entity\Collection\Search\SearchProductCollection;
 use App\Entity\Product;
 use App\Entity\UserIp;
 use App\Entity\UserIpProduct;
 use App\Exception\ValidatorException;
-use App\QueueModel\AdtractionDataRow;
+use App\QueueModel\ResourceDataRow;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserIpProductRepository;
@@ -110,7 +111,7 @@ class ProductService
         }
 
         $brandQuery = $facetQueries[ProductRepository::FACET_EXTRA_FIELDS_QUERY_KEY];
-        $pregSplitBrandQuery = preg_split('/&/', $brandQuery[0]);
+        $pregSplitBrandQuery = preg_split('/&&/', $brandQuery[0]);
         $query = preg_replace('/query=/', '', $pregSplitBrandQuery[0]);
         $params = unserialize(preg_replace('/params=/', '', $pregSplitBrandQuery[1]));
         $types = unserialize(preg_replace('/types=/', '', $pregSplitBrandQuery[2]));
@@ -120,12 +121,12 @@ class ProductService
     }
 
     /**
-     * @param AdtractionDataRow $adtractionDataRow
+     * @param ResourceDataRow $adtractionDataRow
      * @return Product
      * @throws ValidatorException
      * @throws \Doctrine\ORM\ORMException
      */
-    public function createProductFromAdractionCsvRow(AdtractionDataRow $adtractionDataRow)
+    public function createProductFromCsvRow(ResourceDataRow $adtractionDataRow)
     {
         $this->prepareDataForExistProduct($adtractionDataRow);
         $row = $adtractionDataRow->getRow();
@@ -165,7 +166,7 @@ class ProductService
         $parameterBag = new ParameterBag([
             'page' => 1,
             'count' => 4,
-            'exclude_ids' => [$product->getId()],
+            'exclude_id' => $product->getId(),
             'search' => $product->getSearchDataForRelatedProductItems()
         ]);
         $this->recordIpToProduct($product);
@@ -265,7 +266,7 @@ class ProductService
     {
         return (new ProductCollection(
             $this->getProductRepository()
-                ->fullTextSearchByParameterBag($parameterBag),
+                ->getProductRelations($parameterBag),
             $product
         ));
     }
@@ -347,10 +348,10 @@ class ProductService
     }
 
     /**
-     * @param AdtractionDataRow $adtractionDataRow
-     * @return AdtractionDataRow
+     * @param ResourceDataRow $adtractionDataRow
+     * @return ResourceDataRow
      */
-    private function prepareDataForExistProduct(AdtractionDataRow $adtractionDataRow)
+    private function prepareDataForExistProduct(ResourceDataRow $adtractionDataRow)
     {
         $product = $this->matchExistProduct($adtractionDataRow->getSku());
         if ($product && $product->getId()) {

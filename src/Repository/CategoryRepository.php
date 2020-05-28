@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Cache\TagAwareQueryResultCacheBrand;
 use App\Cache\TagAwareQueryResultCacheCategory;
+use App\Entity\Brand;
 use App\Entity\Category;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -14,6 +15,7 @@ use Doctrine\DBAL\Cache\ResultCacheStatement;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @method Category|null find($id, $lockMode = null, $lockVersion = null)
@@ -129,7 +131,7 @@ class CategoryRepository extends ServiceEntityRepository
 
             if ($search) {
                 $query .= '
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \'), query_search) AS rank
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',category_alias.category_name), query_search) AS rank
                 ';
             }
         }
@@ -140,7 +142,7 @@ class CategoryRepository extends ServiceEntityRepository
         if ($search) {
             $query .= '
                 JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(category_name,\'\')||\' \') @@ query_search
+                ON to_tsvector(\'pg_catalog.swedish\',category_alias.category_name) @@ query_search
             ';
         }
 
@@ -231,7 +233,7 @@ class CategoryRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "categoryName", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()
             ->white_list(
                 $sortOrder,
@@ -239,7 +241,29 @@ class CategoryRepository extends ServiceEntityRepository
                 "Invalid ORDER BY direction " . $sortOrder
             );
 
+        $searchField = $parameterBag->get('search');
+        if ($searchField) {
+            $search = $this->getHelpers()
+                ->handleSearchValue($searchField, $parameterBag->get('strict') === true);
+        } else {
+            $search = $searchField;
+        }
+
+        if ($search) {
+            if (!array_key_exists(':category_word', $params)) {
+                $query .= '
+                    WHERE category_alias.category_name ~ :category_word
+                ';
+            } else {
+                $query .= '
+                    AND category_alias.category_name ~ :add_category_word
+                ';
+            }
+        }
+
         if (!$count) {
+            $query .= '
+                    GROUP BY category_alias.id';
             $query .=
                 ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' . '                                          
                     LIMIT :limit
@@ -248,6 +272,16 @@ class CategoryRepository extends ServiceEntityRepository
 
             $params = array_merge($params, [':offset' => $offset, ':limit' => $limit]);
             $types = array_merge($types, [':offset' => \PDO::PARAM_INT, ':limit' => \PDO::PARAM_INT]);
+        }
+
+        if ($search) {
+            if (array_key_exists(':category_word', $params)) {
+                $params[':add_category_word'] = $search;
+            } else {
+                $params[':category_word'] = $search;
+                $params[':search_facet'] = $search;
+                $types[':search_facet'] = \PDO::PARAM_STR;
+            }
         }
 
         $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
@@ -277,6 +311,36 @@ class CategoryRepository extends ServiceEntityRepository
         $statement->closeCursor();
 
         return $categories;
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param bool $count
+     * @return Category[]|int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getCategoryByIds(ParamFetcher $paramFetcher, $count = false)
+    {
+        $ids = $paramFetcher->get('ids');
+        if (is_array($ids)
+            && array_search('0', $ids, true) === false) {
+            $ids = array_filter($ids, function ($value, $key) {
+                return boolval($value);
+            }, ARRAY_FILTER_USE_BOTH);
+            $qb = $this->createQueryBuilder('s');
+            $qb
+                ->where($qb->expr()->in('s.id', $ids));
+
+            return $this->getList(
+                $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
+                $qb,
+                $paramFetcher,
+                $count
+            );
+        } else {
+            throw new BadRequestHttpException($ids . ' not valid');
+        }
     }
 
     /**

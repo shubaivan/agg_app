@@ -15,12 +15,12 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\TraceableMessageBus;
 
-class AdtractionResourceDownloadFile extends ResourceDownloadFile
+class AdrecordResourceDownloadFile extends ResourceDownloadFile
 {
-    protected static $defaultName = 'app:adtraction:download';
+    protected static $defaultName = 'app:adrecord:download';
 
     /**
-     * AdtractionResourceDownloadFile constructor.
+     * AdrecordResourceDownloadFile constructor.
      * @param KernelInterface $kernel
      * @param MessageBusInterface $bus
      * @param LoggerInterface $adtractionLogLogger
@@ -30,31 +30,31 @@ class AdtractionResourceDownloadFile extends ResourceDownloadFile
     public function __construct(
         KernelInterface $kernel,
         MessageBusInterface $bus,
-        LoggerInterface $adtractionLogLogger,
+        LoggerInterface $adrecordLogLogger,
         ContainerBagInterface $params,
         CacheManager $cacheManager
     )
     {
 
-        $urls = $params->get('adtraction_download_urls');
-        $filePath = $params->get('adtraction_download_file_path');
-
+        $url = $params->get('adrecord_download_urls');
+        $dirForFiles = $params->get('adrecord_download_file_path');
         parent::__construct(
             $kernel,
             $bus,
-            $adtractionLogLogger,
+            $adrecordLogLogger,
             $cacheManager,
-            $filePath,
-            $urls
+            $dirForFiles,
+            $url
         );
+
     }
 
     protected function configure()
     {
         $this
-            ->setDescription('Download file from adtraction resource')
+            ->setDescription('Download file from adrecord resource')
             ->setHelp('
-                This command download file from adtraction resource and save it in ' . $this->getDirForFiles() . ' with timestamp name
+                This command download file from adrecord resource and save it in ' . $this->getDirForFiles() . ' with timestamp name
             ');
     }
 
@@ -66,10 +66,10 @@ class AdtractionResourceDownloadFile extends ResourceDownloadFile
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->logger->info('test');
+        $this->logger->info('adrecord');
         $this->setOutput($output);
         $output->writeln([
-            'Adtraction resource download file',
+            'adrecord resource download file',
             '============',
             '<fg=green;options=bold,underscore>Start</>',
         ]);

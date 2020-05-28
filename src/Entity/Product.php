@@ -547,7 +547,7 @@ class Product implements EntityValidatorException
     public function setBrandRelation(?Brand $brandRelation): self
     {
         $this->brandRelation = $brandRelation;
-        $this->setBrand($brandRelation->getName());
+        $this->setBrand($brandRelation->getBrandName());
 
         return $this;
     }
@@ -585,14 +585,17 @@ class Product implements EntityValidatorException
             $this->getName(),
             $this->getPrice()
         ];
+
         if ($this->getBrandRelation()) {
-            array_push($pieces, $this->getBrandRelation()->getName());
+            array_push($pieces, $this->getBrandRelation()->getBrandName());
         }
+
         if ($this->getCategoryRelation()->count()) {
             array_push($pieces, implode(',', $this->getCategoriesNameArray()));
         }
+
         $search = implode(',', $pieces);
-        $replace = preg_replace('/[^a-zA-Z0-9 ,.éäöåÉÄÖÅ]/', "", $search);
+        $replace = preg_replace('/[^a-zA-Z0-9 ,.éäöåÉÄÖÅ™]/', "", $search);
 
         return $replace;
     }
@@ -624,7 +627,7 @@ class Product implements EntityValidatorException
     public function addCategoryRelation(Category $categoryRelation): self
     {
         if (!$this->getCategoryRelation()->contains($categoryRelation)) {
-            $this->categoryRelation[] = $categoryRelation;
+            $this->getCategoryRelation()->add($categoryRelation);
             $categoryNames = $this->getCategoryRelation()->map(function (Category $category) {
                 return $category->getCategoryName();
             });
@@ -654,7 +657,7 @@ class Product implements EntityValidatorException
     public function setShopRelation(?Shop $shopRelation): self
     {
         $this->shopRelation = $shopRelation;
-        $this->setShop($shopRelation->getName());
+        $this->setShop($shopRelation->getShopName());
 
         return $this;
     }

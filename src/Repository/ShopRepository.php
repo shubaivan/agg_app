@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Cache\TagAwareQueryResultCacheShop;
+use App\Entity\Category;
 use App\Entity\Shop;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -13,6 +14,7 @@ use Doctrine\DBAL\Cache\ResultCacheStatement;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @method Shop|null find($id, $lockMode = null, $lockVersion = null)
@@ -100,7 +102,7 @@ class ShopRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "shopName", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()
             ->white_list(
                 $sortOrder,
@@ -125,13 +127,13 @@ class ShopRepository extends ServiceEntityRepository
             $query .= '
                     SELECT                         
                             DISTINCT shop_alias.id,
-                            shop_alias.name AS "name",
+                            shop_alias.shop_name AS "shopName",
                             shop_alias.created_at AS "createdAt"
             ';
 
             if ($search) {
                 $query .= '
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'), query_search) AS rank
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',shop_alias.shop_name), query_search) AS rank
             ';
             }
         }
@@ -142,7 +144,7 @@ class ShopRepository extends ServiceEntityRepository
         if ($search) {
             $query .= '
                 JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \') @@ query_search
+                ON to_tsvector(\'pg_catalog.swedish\',shop_alias.shop_name) @@ query_search
             ';
         }
 
@@ -233,7 +235,7 @@ class ShopRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "shopName", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()
             ->white_list(
                 $sortOrder,
@@ -241,7 +243,27 @@ class ShopRepository extends ServiceEntityRepository
                 "Invalid ORDER BY direction " . $sortOrder
             );
 
+        $searchField = $parameterBag->get('search');
+        if ($searchField) {
+            $search = $this->getHelpers()
+                ->handleSearchValue($searchField, $parameterBag->get('strict') === true);
+        } else {
+            $search = $searchField;
+        }
+
+        if ($search) {
+            $query .= preg_match('/\b(WHERE)\b/', $query, $matches) > 0 ? ' AND ' : ' WHERE ';
+            $query .= '
+                shop_alias.shop_name ~ :search_facet
+            ';
+        }
+
         if (!$count) {
+
+            $query .= '
+                GROUP BY shop_alias.id
+            ';
+
             $query .=
                 ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' . '                                          
                     LIMIT :limit
@@ -250,6 +272,11 @@ class ShopRepository extends ServiceEntityRepository
 
             $params = array_merge($params, [':offset' => $offset, ':limit' => $limit]);
             $types = array_merge($types, [':offset' => \PDO::PARAM_INT, ':limit' => \PDO::PARAM_INT]);
+        }
+
+        if ($search) {
+            $params[':search_facet'] = $search;
+            $types[':search_facet'] = \PDO::PARAM_STR;
         }
 
         $this->getTagAwareQueryResultCacheShop()->setQueryCacheTags(
@@ -279,6 +306,36 @@ class ShopRepository extends ServiceEntityRepository
         $statement->closeCursor();
 
         return $shops;
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param bool $count
+     * @return Shop[]|int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getShopsByIds(ParamFetcher $paramFetcher, $count = false)
+    {
+        $ids = $paramFetcher->get('ids');
+        if (is_array($ids)
+            && array_search('0', $ids, true) === false) {
+            $ids = array_filter($ids, function ($value, $key) {
+                return boolval($value);
+            }, ARRAY_FILTER_USE_BOTH);
+            $qb = $this->createQueryBuilder('s');
+            $qb
+                ->where($qb->expr()->in('s.id', $ids));
+
+            return $this->getList(
+                $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
+                $qb,
+                $paramFetcher,
+                $count
+            );
+        } else {
+            throw new BadRequestHttpException($ids . ' not valid');
+        }
     }
 
     /**

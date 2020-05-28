@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Cache\TagAwareQueryResultCacheBrand;
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
+use App\Entity\Product;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Cache\Cache as ResultCacheDriver;
@@ -14,6 +15,7 @@ use Doctrine\DBAL\Cache\ResultCacheStatement;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @method Brand|null find($id, $lockMode = null, $lockVersion = null)
@@ -108,7 +110,7 @@ class BrandRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "brandName", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()
             ->white_list(
                 $sortOrder,
@@ -133,13 +135,13 @@ class BrandRepository extends ServiceEntityRepository
             $query .= '
                     SELECT                         
                             DISTINCT brand_alias.id,
-                            brand_alias.name AS "name",
+                            brand_alias.brand_name AS "brandName",
                             brand_alias.created_at AS "createdAt"
             ';
 
             if ($search) {
                 $query .= '
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'), query_search) AS rank
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',brand_alias.brand_name), query_search) AS rank
             ';
             }
         }
@@ -150,7 +152,7 @@ class BrandRepository extends ServiceEntityRepository
         if ($search) {
             $query .= '
                 JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
-                ON to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \') @@ query_search
+                ON to_tsvector(\'pg_catalog.swedish\',brand_alias.brand_name) @@ query_search
             ';
         }
 
@@ -241,7 +243,7 @@ class BrandRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "name", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "brandName", "createdAt"], "Invalid field name " . $sortBy);
         $sortOrder = $this->getHelpers()
             ->white_list(
                 $sortOrder,
@@ -249,7 +251,27 @@ class BrandRepository extends ServiceEntityRepository
                 "Invalid ORDER BY direction " . $sortOrder
             );
 
+        $searchField = $parameterBag->get('search');
+        if ($searchField) {
+            $search = $this->getHelpers()
+                ->handleSearchValue($searchField, $parameterBag->get('strict') === true);
+        } else {
+            $search = $searchField;
+        }
+
+        if ($search) {
+            $query .= preg_match('/\b(WHERE)\b/', $query, $matches) > 0 ? ' AND ' : ' WHERE ';
+            $query .= '
+                brand_alias.brand_name ~ :search_facet
+            ';
+        }
+
         if (!$count) {
+
+            $query .= '
+                GROUP BY brand_alias.id
+            ';
+
             $query .=
                 ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '' . '                                          
                     LIMIT :limit
@@ -258,6 +280,11 @@ class BrandRepository extends ServiceEntityRepository
 
             $params = array_merge($params, [':offset' => $offset, ':limit' => $limit]);
             $types = array_merge($types, [':offset' => \PDO::PARAM_INT, ':limit' => \PDO::PARAM_INT]);
+        }
+
+        if ($search) {
+            $params[':search_facet'] = $search;
+            $types[':search_facet'] = \PDO::PARAM_STR;
         }
 
         $this->getTagAwareQueryResultCacheBrand()->setQueryCacheTags(
@@ -287,6 +314,36 @@ class BrandRepository extends ServiceEntityRepository
         $statement->closeCursor();
 
         return $brands;
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param bool $count
+     * @return Brand[]|int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getBrandByIds(ParamFetcher $paramFetcher, $count = false)
+    {
+        $ids = $paramFetcher->get('ids');
+        if (is_array($ids)
+            && array_search('0', $ids, true) === false) {
+            $ids = array_filter($ids, function ($value, $key) {
+                return boolval($value);
+            }, ARRAY_FILTER_USE_BOTH);
+            $qb = $this->createQueryBuilder('s');
+            $qb
+                ->where($qb->expr()->in('s.id', $ids));
+
+            return $this->getList(
+                $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
+                $qb,
+                $paramFetcher,
+                $count
+            );
+        } else {
+            throw new BadRequestHttpException($ids . ' not valid');
+        }
     }
 
     /**
