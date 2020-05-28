@@ -286,7 +286,7 @@ class ProductRepository extends ServiceEntityRepository
         if ($parameterBag->get('search')) {
             $this->queryMainCondition .= '
                 JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
-                ON to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand) @@ query_search               
+                ON to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand||products_alias.category||products_alias.shop) @@ query_search               
         ';
         }
 
@@ -503,7 +503,7 @@ class ProductRepository extends ServiceEntityRepository
 
             if ($parameterBag->get('search')) {
                 $query .= '
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand), query_search) AS rank
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand||products_alias.category||products_alias.shop), query_search) AS rank
             ';
             }
         }
