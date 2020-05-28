@@ -278,6 +278,7 @@ class CategoryRepository extends ServiceEntityRepository
             if (array_key_exists(':category_word', $params)) {
                 $params[':add_category_word'] = $search;
             } else {
+                $params[':category_word'] = $search;
                 $params[':search_facet'] = $search;
                 $types[':search_facet'] = \PDO::PARAM_STR;
             }
