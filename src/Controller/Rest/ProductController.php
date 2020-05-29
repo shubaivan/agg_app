@@ -4,9 +4,8 @@ namespace App\Controller\Rest;
 
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
-use App\Entity\Collection\SearchProductCollection;
+use App\Entity\Collection\Search\SearchProductCollection;
 use App\Exception\ValidatorException;
-use App\Repository\BrandRepository;
 use App\Repository\ProductRepository;
 use App\Services\Helpers;
 use App\Services\Models\ProductService;

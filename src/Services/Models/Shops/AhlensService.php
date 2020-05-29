@@ -15,12 +15,12 @@ class AhlensService implements IdentityGroup
         $productUrl = $product->getProductUrl();
         $lastChar = substr($productUrl, -1);
         if ($lastChar == '/') {
-            $productUrl = str_replace($productUrl, "", -1);
+            $productUrl = substr($productUrl, 0, -1);
         }
         $productUrl = preg_replace("/[^\/]+$/", '', $productUrl);
         $lastChar = substr($productUrl, -1);
         if ($lastChar == '/') {
-            $productUrl = str_replace($productUrl, "", -1);
+            $productUrl = substr($productUrl, 0, -1);
         }
         if (preg_match("/[^\/]+$/", $productUrl, $matches) > 0) {
             $product->setGroupIdentity(array_shift($matches));

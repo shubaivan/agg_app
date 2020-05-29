@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200528090725 extends AbstractMigration
+final class Version20200529081742 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -24,13 +24,13 @@ final class Version20200528090725 extends AbstractMigration
         $this->addSql('drop index if exists npdbcs_swedish_custom_index');
 
         $this->addSql('
-                create index npdbcs_swedish_custom_index on products
-                    using GIN(to_tsvector(\'pg_catalog.swedish\', name||price||description||brand||category||shop))
+                create index npdb_swedish_custom_index on products
+                    using GIN(to_tsvector(\'pg_catalog.swedish\', name||price||description||brand))
         ');
     }
 
     public function down(Schema $schema) : void
     {
-        $this->addSql('drop index if exists npdbcs_swedish_custom_index');
+        $this->addSql('drop index if exists npdb_swedish_custom_index');
     }
 }

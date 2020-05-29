@@ -536,7 +536,7 @@ class Product implements EntityValidatorException
      */
     public function getIdentity()
     {
-        return $this->getSku();
+        return 'shop: ' . $this->getShop() . ' sku: ' . $this->getSku();
     }
 
     public function getBrandRelation(): ?Brand

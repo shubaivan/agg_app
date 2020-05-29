@@ -39,4 +39,12 @@ class SearchProductCollection
     {
         return $this->collection;
     }
+
+    /**
+     * @Annotation\PostDeserialize()
+     */
+    public function postDeserializer()
+    {
+        $this->count < 1 ? $this->uniqIdentificationQuery = '' : '';
+    }
 }

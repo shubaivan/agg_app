@@ -18,7 +18,7 @@ class JollyRoomService implements IdentityGroup
     {
         $name = $product->getName();
         $explodeName = explode(',', $name);
-        if (count($explodeName) > 1) {
+        if (count($explodeName) > 0) {
             $groupIdentity = str_replace(' ', '_', mb_strtolower(array_shift($explodeName)));
             $product->setGroupIdentity($groupIdentity);
             if (count($explodeName) > 0) {

@@ -2,9 +2,7 @@
 
 namespace App\Entity\Collection\SearchProducts;
 
-use Doctrine\DBAL\Types\ConversionException;
 use JMS\Serializer\Annotation;
-use App\Entity\Collection\SearchProductCollection;
 
 class GroupAdjacent
 {

@@ -3,7 +3,7 @@
 namespace App\Entity\Collection\SearchProducts;
 
 use JMS\Serializer\Annotation;
-use App\Entity\Collection\SearchProductCollection;
+use App\Entity\Collection\Search\SearchProductCollection;
 
 class AdjacentProduct
 {

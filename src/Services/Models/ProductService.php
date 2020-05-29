@@ -4,7 +4,6 @@ namespace App\Services\Models;
 
 use App\Entity\Category;
 use App\Entity\Collection\ProductCollection;
-use App\Entity\Collection\SearchProductCollection;
 use App\Entity\Collection\SearchProducts\AdjacentProduct;
 use App\Entity\Collection\SearchProducts\GroupAdjacent;
 use App\Entity\Collection\SearchProducts\GroupProductEntity;

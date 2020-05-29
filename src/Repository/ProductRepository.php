@@ -203,9 +203,9 @@ class ProductRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["allSku", "createdAt", "ids",
-                "names", "description", "price",
-                "numberOfEntries", "shop", "shopRelationId", "brand"], "Invalid field name " . $sortBy);
+            ["createdAt", "numberOfEntries", "price"],
+            "Invalid field name " . $sortBy
+        );
 
         $sortOrder = $this->getHelpers()->white_list(
             $sortOrder,
@@ -262,7 +262,6 @@ class ProductRepository extends ServiceEntityRepository
     }
 
 
-
     /**
      * @return string
      */
@@ -288,9 +287,10 @@ class ProductRepository extends ServiceEntityRepository
     {
         $this->queryMainCondition = '';
         if ($parameterBag->get('search')) {
-            $this->queryMainCondition .= '
-                JOIN to_tsquery(\'pg_catalog.swedish\', :search) query_search
-                ON to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand||products_alias.category||products_alias.shop) @@ query_search               
+            $this->queryMainCondition .= '               
+                WHERE to_tsvector(\'pg_catalog.swedish\',
+                 products_alias.name||products_alias.price||products_alias.description||products_alias.brand) 
+                    @@ to_tsquery(\'pg_catalog.swedish\', :search)                      
         ';
         }
 
@@ -306,9 +306,13 @@ class ProductRepository extends ServiceEntityRepository
                 INNER JOIN product_category cps on cps.product_id = products_alias.id                                   
                 INNER JOIN category cat on cps.category_id = cat.id         
             ';
-
+            $this->queryMainCondition .= preg_match(
+                '/\b(WHERE)\b/',
+                $this->queryMainCondition,
+                $matches
+            ) > 0 ? ' AND ' : ' WHERE ';
             $this->queryMainCondition .= '
-                    WHERE cat.category_name ~ :category_word
+                    cat.category_name ~ :category_word
             ';
         }
 
@@ -461,6 +465,7 @@ class ProductRepository extends ServiceEntityRepository
 
         return array($this->params, $this->types);
     }
+//{"2020-05-28 16:02:32"}	{34613,34614}	{"K-Way Le Vrai 3.0 Claude Jacka Fuchsia 12 years","K-Way Le Vrai 3.0 Claude Jacka Fuchsia 14 years"}	"34613"=>"K-Way Le Vrai 3.0 Claude Jacka Fuchsia 12 years", "34614"=>"K-Way Le Vrai 3.0 Claude Jacka Fuchsia 14 years"	"34613"=>"{\"SIZE\": \"152 cm\", \"COLOUR\": \"Rosa\", \"DELIVERY_TIME\": \"1-3 vardagar\"}", "34614"=>"{\"SIZE\": \"164 cm\", \"COLOUR\": \"Rosa\", \"DELIVERY_TIME\": \"1-3 vardagar\"}"	{925.00,1049.00}	"34613"=>"925.00", "34614"=>"1049.00"	"34613"=>"https://www.babyshop.com/images/711562/external-large.jpg", "34614"=>"https://www.babyshop.com/images/711562/external-large.jpg"
 
     /**
      * @param ParameterBag $parameterBag
@@ -484,33 +489,44 @@ class ProductRepository extends ServiceEntityRepository
                     SELECT COUNT(DISTINCT main_products_alias.id)
             ';
         } else {
+//            hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.sku::text)) AS "storeSku",
+//                 array_agg(DISTINCT main_products_alias."createdAt") AS "createdAt",
+//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."createdAt"::text)) AS "storeCreatedAt",
+//                 array_agg(DISTINCT main_products_alias.id) AS ids,
+//                 array_agg(DISTINCT main_products_alias.name) AS names,
+//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.name)) AS "storeNames",
+//                 array_agg(DISTINCT main_products_alias.description) AS description,
+//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.description)) AS "storeDescription",
+//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.extras::text)) AS "storeExtras",
+//                 jsonb_agg(DISTINCT main_products_alias.extras) AS extras,
+//                 array_agg(DISTINCT main_products_alias.price) AS price,
+//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.price::text)) AS "storePrice",
+//                 array_agg(DISTINCT main_products_alias."numberOfEntries") AS "numberOfEntries",
+//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."numberOfEntries"::text)) AS "storeNumberOfEntries",
+//                 array_agg(DISTINCT main_products_alias.shop) AS shop,
+//                 array_agg(DISTINCT main_products_alias."shopRelationId") AS "shopRelationId",
+//                 array_agg(DISTINCT main_products_alias.brand) AS brand,
+//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."imageUrl")) AS "storeImageUrl",
+//                 array_agg(DISTINCT main_products_alias.currency) AS currency,
+//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."productUrl")) AS "storeProductUrl"
             $mainQuery .= '
             SELECT                         
-                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.sku::text)) AS "storeSku",
-                 array_agg(DISTINCT main_products_alias."createdAt") AS "createdAt",
-                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."createdAt"::text)) AS "storeCreatedAt",
-                 array_agg(DISTINCT main_products_alias.id) AS ids,
-                 array_agg(DISTINCT main_products_alias.name) AS names,
-                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.name)) AS "storeNames",
-                 array_agg(DISTINCT main_products_alias.description) AS description,
-                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.description)) AS "storeDescription",
-                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.extras::text)) AS "storeExtras",
-                 jsonb_agg(DISTINCT main_products_alias.extras) AS extras,
-                 array_agg(DISTINCT main_products_alias.price) AS price,
-                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.price::text)) AS "storePrice",
-                 array_agg(DISTINCT main_products_alias."numberOfEntries") AS "numberOfEntries",
-                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."numberOfEntries"::text)) AS "storeNumberOfEntries",
-                 array_agg(DISTINCT main_products_alias.shop) AS shop,
-                 array_agg(DISTINCT main_products_alias."shopRelationId") AS "shopRelationId",
-                 array_agg(DISTINCT main_products_alias.brand) AS brand,                							 
-                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."imageUrl")) AS "storeImageUrl",
-                 array_agg(DISTINCT main_products_alias.currency) AS currency,
-                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."productUrl")) AS "storeProductUrl"
-
+                (array_agg(DISTINCT main_products_alias.created_at))[1]::TIMESTAMP AS "createdAt",
+                (array_agg(DISTINCT main_products_alias.number_of_entries))[1]::INTEGER AS "numberOfEntries",
+                (array_agg(DISTINCT main_products_alias.price))[1]::INTEGER AS price
+                
+                ,array_agg(DISTINCT main_products_alias.shop) AS shop
+                ,array_agg(DISTINCT main_products_alias.brand) AS brand
+                ,jsonb_agg(DISTINCT main_products_alias.extras) AS extras
+                
+                ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.price::text)) AS "storePrice"
+                ,hstore(array_agg(main_products_alias.id::TEXT), array_agg(main_products_alias.image_url)) AS "storeImageUrl"
+                ,hstore(array_agg(main_products_alias.id::TEXT), array_agg(main_products_alias.name)) AS "storeNames"
+                ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.extras::text)) AS "storeExtras"
             ';
 
             if ($parameterBag->get('search')) {
-                $mainQuery .= ',array_agg(DISTINCT main_products_alias.rank) AS rank';
+                $mainQuery .= ',CAST((array_agg(DISTINCT main_products_alias.rank))[1] AS double precision) AS rank';
             }
         }
 
@@ -546,87 +562,6 @@ class ProductRepository extends ServiceEntityRepository
         return $mainQuery;
     }
 
-
-    /**
-     * @param ParameterBag $parameterBag
-     * @param $count
-     * @param bool $sort_by
-     * @param $sortBy
-     * @param $sortOrder
-     * @return string
-     */
-    private function oldGetSearchProductQuery(ParameterBag $parameterBag, $count, bool $sort_by, $sortBy, $sortOrder): string
-    {
-        $query = '';
-        if ($count) {
-            $query .= '
-                        SELECT COUNT(DISTINCT products_alias.id)
-                    ';
-        } else {
-            $query .= '
-                    SELECT                         
-                            products_alias.id,
-                            products_alias.sku,
-                            products_alias.name AS "name",
-                            products_alias.description,
-                            products_alias.category,
-                            products_alias.price,
-                            products_alias.shipping,
-                            products_alias.currency,
-                            products_alias.instock,
-                            products_alias.product_url AS "productUrl",
-                            products_alias.image_url AS "imageUrl",
-                            products_alias.tracking_url AS "trackingUrl",
-                            products_alias.brand,
-                            products_alias.shop,
-                            products_alias.original_price AS "originalPrice",
-                            products_alias.ean,
-                            products_alias.manufacturer_article_number AS "manufacturerArticleNumber",
-                            products_alias.extras,
-                            products_alias.created_at AS "createdAt",
-                            products_alias.brand_relation_id AS "brandRelationId",
-                            products_alias.shop_relation_id AS "shopRelationId",
-                            array_agg(DISTINCT cpt.category_id) AS categoryIds,
-                            COUNT(DISTINCT uip.id) as "numberOfEntries"
-            ';
-
-            if ($parameterBag->get('search')) {
-                $query .= '
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand||products_alias.category||products_alias.shop), query_search) AS rank
-            ';
-            }
-        }
-
-        $query .= '
-                FROM products products_alias 
-        ';
-
-        $this->prepareMainCondition($parameterBag, $query);
-
-        if (!$count) {
-            $query .= '
-                    GROUP BY products_alias.id';
-            if ($parameterBag->get('search')) {
-                $query .= ', query_search.query_search';
-            }
-
-            $query .=
-                ($parameterBag->get('search') ?
-                    ($sort_by
-                        ? ' ORDER BY rank DESC, ' . '"' . $sortBy . '"' . ' ' . $sortOrder . ''
-                        : ' ORDER BY rank DESC')
-                    : ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '') . '
-                                          
-                    LIMIT :limit
-                    OFFSET :offset;
-            ';
-        }
-
-        $this->prepareParamAndType($parameterBag, $count);
-
-        return $query;
-    }
-
     /**
      * @param ParameterBag $parameterBag
      * @param bool $count
@@ -640,35 +575,29 @@ class ProductRepository extends ServiceEntityRepository
         $query = '';
         $query .= '
                     SELECT                         
-                            products_alias.id,
-                            products_alias.group_identity,
-                            products_alias.sku,
-                            products_alias.name AS "name",
-                            products_alias.description,
-                            products_alias.category,
-                            products_alias.price,
-                            products_alias.shipping,
-                            products_alias.currency,
-                            products_alias.instock,
-                            products_alias.product_url AS "productUrl",
-                            products_alias.image_url AS "imageUrl",
-                            products_alias.tracking_url AS "trackingUrl",
-                            products_alias.brand,
-                            products_alias.shop,
-                            products_alias.original_price AS "originalPrice",
-                            products_alias.ean,
-                            products_alias.manufacturer_article_number AS "manufacturerArticleNumber",
-                            products_alias.extras,
-                            products_alias.created_at AS "createdAt",
-                            products_alias.brand_relation_id AS "brandRelationId",
-                            products_alias.shop_relation_id AS "shopRelationId",
-                            array_agg(DISTINCT cpt.category_id) AS categoryIds,
-                            COUNT(DISTINCT uip.id) as "numberOfEntries"
+                        products_alias.id,
+                        products_alias.name
+                        ,products_alias.image_url									
+                        ,products_alias.brand
+                        ,products_alias.shop
+												
+                        ,products_alias.group_identity,
+                        products_alias.price,
+                        products_alias.extras,
+                        products_alias.created_at
+																	
+                        ,COUNT(DISTINCT uip.id) as number_of_entries
             ';
 
         if ($parameterBag->get('search')) {
-            $query .= '
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',coalesce(name,\'\')||\' \'||coalesce(description,\'\')||\' \'||coalesce(sku,\'\')||\' \'||coalesce(price,0)||\' \'||coalesce(category,\'\')||\' \'||coalesce(brand,\'\')||\' \'||coalesce(shop,\'\')), query_search) AS rank
+            $query .= '                                      
+                    ,ts_rank_cd(
+                      to_tsvector(
+                        \'pg_catalog.swedish\',
+                         products_alias.name||products_alias.price||products_alias.description||products_alias.brand
+                         ),
+                      to_tsquery(\'pg_catalog.swedish\',
+                       :search)) AS rank
             ';
         }
 
@@ -680,9 +609,6 @@ class ProductRepository extends ServiceEntityRepository
 
         $query .= '
                     GROUP BY products_alias.id';
-        if ($parameterBag->get('search')) {
-            $query .= ', query_search.query_search';
-        }
 
         $this->prepareParamAndType($parameterBag, $count);
 
@@ -921,7 +847,7 @@ class ProductRepository extends ServiceEntityRepository
     public function getProductRelations(ParameterBag $parameterBag)
     {
         $connection = $this->getEntityManager()->getConnection();
-        $query  = '
+        $query = '
             SELECT
                 products_alias.id,
                 products_alias.sku,
@@ -944,10 +870,10 @@ class ProductRepository extends ServiceEntityRepository
                 products_alias.created_at AS "createdAt",
                 products_alias.brand_relation_id AS "brandRelationId",
                 products_alias.shop_relation_id AS "shopRelationId",
-                ts_rank_cd(to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand||products_alias.category||products_alias.shop), to_tsquery(\'pg_catalog.swedish\', :search)) AS rank
+                ts_rank_cd(to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand), to_tsquery(\'pg_catalog.swedish\', :search)) AS rank
             FROM products products_alias
         
-            WHERE to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand||products_alias.category||products_alias.shop) @@ to_tsquery(\'pg_catalog.swedish\', :search)
+            WHERE to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand) @@ to_tsquery(\'pg_catalog.swedish\', :search)
             AND products_alias.id != :exclude_id
             ORDER BY rank DESC
             LIMIT :limit

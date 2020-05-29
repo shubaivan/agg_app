@@ -5,25 +5,14 @@ namespace App\Entity\Collection\SearchProducts;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\ConversionException;
 use JMS\Serializer\Annotation;
-use App\Entity\Collection\SearchProductCollection;
+use App\Entity\Collection\Search\SearchProductCollection;
 
 class GroupProductEntity
 {
     /**
      * @var array
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setStoreSkuAccessor")
      */
-    private $storeSku;
-
-    /**
-     * @var array
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setStoreCreatedAtAccessor")
-     */
-    private $storeCreatedAt;
+    private $ids;
 
     /**
      * @var array
@@ -32,14 +21,6 @@ class GroupProductEntity
      * @Annotation\Accessor(setter="setStoreNamesAccessor")
      */
     private $storeNames;
-
-    /**
-     * @var array
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setStoreDescriptionAccessor")
-     */
-    private $storeDescription;
 
     /**
      * @var array
@@ -66,52 +47,11 @@ class GroupProductEntity
     private $storeImageUrl;
 
     /**
-     * @var array
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setStoreProductUrlAccessor")
-     */
-    private $storeProductUrl;
-
-    /**
-     * @var array
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setStoreNumberOfEntriesAccessor")
-     */
-    private $storeNumberOfEntries;
-
-    /**
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setCreatedAtAccessor")
      */
     private $createdAt;
-
-    /**
-     * @var string
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setIdsAccessor")
-     */
-    private $ids;
-
-    /**
-     * @var string
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setNamesAccessor")
-     */
-    private $names;
-
-    /**
-     * @var string
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setDescriptionAccessor")
-     */
-    private $description;
 
     /**
      * @var array
@@ -125,7 +65,6 @@ class GroupProductEntity
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setPriceAccessor")
      */
     private $price;
 
@@ -133,7 +72,6 @@ class GroupProductEntity
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setNumberOfEntriesAccessor")
      */
     private $numberOfEntries;
 
@@ -149,25 +87,9 @@ class GroupProductEntity
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setShopRelationIdAccessor")
-     */
-    private $shopRelationId;
-
-    /**
-     * @var string
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
      * @Annotation\Accessor(setter="setBrandAccessor")
      */
     private $brand;
-
-    /**
-     * @var string
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setCurrencyAccessor")
-     */
-    private $currency;
 
     /**
      * @var ArrayCollection|AdjacentProduct[]
@@ -267,22 +189,6 @@ class GroupProductEntity
     /**
      * @param string $value
      */
-    public function setStoreProductUrlAccessor(string $value)
-    {
-        $this->storeProductUrl = $this->storePropertyAccessor($value);
-    }
-
-    /**
-     * @param string $value
-     */
-    public function setStoreNumberOfEntriesAccessor(string $value)
-    {
-        $this->storeNumberOfEntries = $this->storePropertyAccessor($value);
-    }
-
-    /**
-     * @param string $value
-     */
     public function setStorePriceAccessor(string $value)
     {
         $this->storePrice = $this->storePropertyAccessor($value);
@@ -291,81 +197,9 @@ class GroupProductEntity
     /**
      * @param string $value
      */
-    public function setStoreDescriptionAccessor(string $value)
-    {
-        $this->storeDescription = $this->storePropertyAccessor($value);
-    }
-
-    /**
-     * @param string $value
-     */
     public function setStoreNamesAccessor(string $value)
     {
         $this->storeNames = $this->storePropertyAccessor($value);
-    }
-
-    /**
-     * @param string $value
-     * @return $this
-     */
-    public function setStoreCreatedAtAccessor(string $value)
-    {
-        $data = $this->storePropertyAccessor($value);
-        $this->storeCreatedAt = $data;
-
-        return $this;
-    }
-
-    /**
-     * @param string|null $value
-     * @return $this
-     */
-    public function setStoreSkuAccessor(?string $value = null)
-    {
-        $data = $this->storePropertyAccessor($value);
-        $this->storeSku = $data;
-
-        return $this;
-    }
-
-    /**
-     * @param string $data
-     */
-    public function setCreatedAtAccessor(string $data)
-    {
-        $this->createdAt = $this->simplePropertyAccess($data);
-    }
-
-    /**
-     * @param string $data
-     */
-    public function setNamesAccessor(string $data)
-    {
-        $this->names = $this->simplePropertyAccess($data);
-    }
-
-    /**
-     * @param string $data
-     */
-    public function setDescriptionAccessor(string $data)
-    {
-        $this->description = $this->simplePropertyAccess($data);
-    }
-
-    /**
-     * @param string $data
-     */
-    public function setPriceAccessor(string $data)
-    {
-        $this->price = $this->simplePropertyAccess($data);
-    }
-
-    /**
-     * @param string $data
-     */
-    public function setNumberOfEntriesAccessor(string $data)
-    {
-        $this->numberOfEntries = $this->simplePropertyAccess($data);
     }
 
     /**
@@ -379,30 +213,9 @@ class GroupProductEntity
     /**
      * @param string $data
      */
-    public function setShopRelationIdAccessor(string $data)
-    {
-        $this->shopRelationId = $this->simplePropertyAccess($data);
-    }
-
-    /**
-     * @param string $data
-     */
     public function setBrandAccessor(string $data)
     {
         $this->brand = $this->simplePropertyAccess($data);
-    }
-
-    public function setCurrencyAccessor(string $data)
-    {
-        $this->currency = $this->simplePropertyAccess($data);
-    }
-
-    /**
-     * @param string $data
-     */
-    public function setIdsAccessor(string $data)
-    {
-        $this->ids = $this->simplePropertyAccess($data);
     }
 
     /**
@@ -421,6 +234,9 @@ class GroupProductEntity
                 $newArray[$nums[0]] = $nums[1];
             }
         });
+        if (is_null($this->ids)) {
+            $this->ids = array_keys($newArray);
+        }
         $storeContainOneProduct = $newArray;
 
         return $storeContainOneProduct;
@@ -452,24 +268,9 @@ class GroupProductEntity
         return $val;
     }
 
-    public function getStoreSkuDataByKey($key)
-    {
-        return isset($this->storeSku[$key]) ? $this->storeSku[$key] : null;
-    }
-
-    public function getStoreCreatedAtDataByKey($key)
-    {
-        return isset($this->storeCreatedAt[$key]) ? $this->storeCreatedAt[$key] : null;
-    }
-
     public function getStoreNamesDataByKey($key)
     {
         return isset($this->storeNames[$key]) ? $this->storeNames[$key] : null;
-    }
-
-    public function getStoreDescriptionDataByKey($key)
-    {
-        return isset($this->storeDescription[$key]) ? $this->storeDescription[$key] : null;
     }
 
     /**
@@ -492,16 +293,6 @@ class GroupProductEntity
         return isset($this->storeImageUrl[$key]) ? $this->storeImageUrl[$key] : null;
     }
 
-    public function getStoreProductUrlDataByKey($key)
-    {
-        return isset($this->storeProductUrl[$key]) ? $this->storeProductUrl[$key] : null;
-    }
-
-    public function getStoreNumberOfEntriesDataByKey($key)
-    {
-        return isset($this->storeNumberOfEntries[$key]) ? $this->storeNumberOfEntries[$key] : null;
-    }
-
     /**
      * @Annotation\PostDeserialize()
      */
@@ -515,14 +306,10 @@ class GroupProductEntity
                     'id' => $id,
                     'extras' => $this->getStoreExtrasDataByKey($id),
                     'imageUrl' => $this->getStoreImageUrlDataByKey($id),
-                    'productUrl' => $this->getStoreProductUrlDataByKey($id),
                     'brand' => $this->brand,
                     'name' => $this->getStoreNamesDataByKey($id),
                     'price' => $this->getStorePriceDataByKey($id),
-                    'currency' => $this->currency,
                     'shop' => $this->shop,
-                    'shopRelationId' => $this->shopRelationId,
-                    'description' => $this->getStoreDescriptionDataByKey($id)
                 ];
                 $resultArray[] = $arr;
             }
@@ -537,12 +324,8 @@ class GroupProductEntity
                 'imageUrl' => $this->getStoreImageUrlDataByKey($this->ids),
                 'productUrl' => $this->getStoreImageUrlDataByKey($this->ids),
                 'brand' => $this->brand,
-                'name' => $this->names,
                 'price' => $this->price,
-                'currency' => $this->currency,
                 'shop' => $this->shop,
-                'shopRelationId' => $this->shopRelationId,
-                'description' => $this->description
             ];
 
             $this->presentCurrentProduct = $currentProduct;
@@ -588,30 +371,6 @@ class GroupProductEntity
     /**
      * @return array
      * @Annotation\VirtualProperty()
-     * @Annotation\SerializedName("storeSku")
-     * @Annotation\Type("array")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
-     */
-    public function getStoreSkuValue()
-    {
-        return $this->storeSku;
-    }
-
-    /**
-     * @return array
-     * @Annotation\VirtualProperty()
-     * @Annotation\SerializedName("storeCreatedAt")
-     * @Annotation\Type("array")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
-     */
-    public function getStoreCreatedAtValue()
-    {
-        return $this->storeCreatedAt;
-    }
-
-    /**
-     * @return array
-     * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("storeNames")
      * @Annotation\Type("array")
      * @Annotation\Groups({SearchProductCollection::GROUP_GET})
@@ -619,18 +378,6 @@ class GroupProductEntity
     public function getStoreNamesValue()
     {
         return $this->storeNames;
-    }
-
-    /**
-     * @return array
-     * @Annotation\VirtualProperty()
-     * @Annotation\SerializedName("storeDescription")
-     * @Annotation\Type("array")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
-     */
-    public function getStoreDescriptionValue()
-    {
-        return $this->storeDescription;
     }
 
     /**
@@ -667,30 +414,6 @@ class GroupProductEntity
     public function getStoreImageUrlValue()
     {
         return $this->storeImageUrl;
-    }
-
-    /**
-     * @return array
-     * @Annotation\VirtualProperty()
-     * @Annotation\SerializedName("storeNumberOfEntries")
-     * @Annotation\Type("array")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
-     */
-    public function getStoreNumberOfEntriesValue()
-    {
-        return $this->storeNumberOfEntries;
-    }
-
-    /**
-     * @return array
-     * @Annotation\VirtualProperty()
-     * @Annotation\SerializedName("storeProductUrl")
-     * @Annotation\Type("array")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
-     */
-    public function getStoreProductUrlValue()
-    {
-        return $this->storeProductUrl;
     }
 
     /**
