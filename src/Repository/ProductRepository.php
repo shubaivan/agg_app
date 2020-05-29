@@ -282,10 +282,17 @@ class ProductRepository extends ServiceEntityRepository
      */
     private function prepareMainCondition(
         ParameterBag &$parameterBag,
-        string &$query
+        string &$query,
+        bool $count = false
     ): string
     {
         $this->queryMainCondition = '';
+        if (!$count) {
+            $this->queryMainCondition .= '
+                LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id               
+            ';
+        }
+
         if ($parameterBag->get('search')) {
             $this->queryMainCondition .= '               
                 WHERE to_tsvector(\'pg_catalog.swedish\',
@@ -293,11 +300,6 @@ class ProductRepository extends ServiceEntityRepository
                     @@ to_tsquery(\'pg_catalog.swedish\', :search)                      
         ';
         }
-
-        $this->queryMainCondition .= '
-                LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
-                LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id               
-        ';
 
         if ($parameterBag->get('category_word')) {
             $parameterBag->set('category_word', $this->getHelpers()
@@ -489,36 +491,16 @@ class ProductRepository extends ServiceEntityRepository
                     SELECT COUNT(DISTINCT main_products_alias.id)
             ';
         } else {
-//            hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.sku::text)) AS "storeSku",
-//                 array_agg(DISTINCT main_products_alias."createdAt") AS "createdAt",
-//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."createdAt"::text)) AS "storeCreatedAt",
-//                 array_agg(DISTINCT main_products_alias.id) AS ids,
-//                 array_agg(DISTINCT main_products_alias.name) AS names,
-//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.name)) AS "storeNames",
-//                 array_agg(DISTINCT main_products_alias.description) AS description,
-//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.description)) AS "storeDescription",
-//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.extras::text)) AS "storeExtras",
-//                 jsonb_agg(DISTINCT main_products_alias.extras) AS extras,
-//                 array_agg(DISTINCT main_products_alias.price) AS price,
-//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.price::text)) AS "storePrice",
-//                 array_agg(DISTINCT main_products_alias."numberOfEntries") AS "numberOfEntries",
-//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."numberOfEntries"::text)) AS "storeNumberOfEntries",
-//                 array_agg(DISTINCT main_products_alias.shop) AS shop,
-//                 array_agg(DISTINCT main_products_alias."shopRelationId") AS "shopRelationId",
-//                 array_agg(DISTINCT main_products_alias.brand) AS brand,
-//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."imageUrl")) AS "storeImageUrl",
-//                 array_agg(DISTINCT main_products_alias.currency) AS currency,
-//                 hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias."productUrl")) AS "storeProductUrl"
             $mainQuery .= '
             SELECT                         
                 (array_agg(DISTINCT main_products_alias.created_at))[1]::TIMESTAMP AS "createdAt",
                 (array_agg(DISTINCT main_products_alias.number_of_entries))[1]::INTEGER AS "numberOfEntries",
                 (array_agg(DISTINCT main_products_alias.price))[1]::INTEGER AS price
                 
-                ,array_agg(DISTINCT main_products_alias.shop) AS shop
-                ,array_agg(DISTINCT main_products_alias.brand) AS brand
+                ,(array_agg(DISTINCT main_products_alias.shop))[1]::TEXT AS shop
                 ,jsonb_agg(DISTINCT main_products_alias.extras) AS extras
                 
+                ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.brand::text)) AS "storeBrand"
                 ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.price::text)) AS "storePrice"
                 ,hstore(array_agg(main_products_alias.id::TEXT), array_agg(main_products_alias.image_url)) AS "storeImageUrl"
                 ,hstore(array_agg(main_products_alias.id::TEXT), array_agg(main_products_alias.name)) AS "storeNames"
@@ -569,28 +551,29 @@ class ProductRepository extends ServiceEntityRepository
      */
     private function getSearchProductQuery(
         ParameterBag $parameterBag,
-        bool $count
+        bool $count = false
     ): string
     {
         $query = '';
         $query .= '
-                    SELECT                         
-                        products_alias.id,
-                        products_alias.name
-                        ,products_alias.image_url									
-                        ,products_alias.brand
-                        ,products_alias.shop
-												
-                        ,products_alias.group_identity,
-                        products_alias.price,
-                        products_alias.extras,
-                        products_alias.created_at
-																	
-                        ,COUNT(DISTINCT uip.id) as number_of_entries
+            SELECT                         
+                products_alias.id,
+                products_alias.name
+                ,products_alias.image_url									
+                ,products_alias.brand
+                ,products_alias.shop
+                                        
+                ,products_alias.group_identity,
+                products_alias.price,
+                products_alias.extras,
+                products_alias.created_at              
+        ';
+        if (!$count) {
+            $query .= '
+                ,COUNT(DISTINCT uip.id) as number_of_entries
             ';
-
-        if ($parameterBag->get('search')) {
-            $query .= '                                      
+            if ($parameterBag->get('search')) {
+                $query .= '                                      
                     ,ts_rank_cd(
                       to_tsvector(
                         \'pg_catalog.swedish\',
@@ -599,13 +582,14 @@ class ProductRepository extends ServiceEntityRepository
                       to_tsquery(\'pg_catalog.swedish\',
                        :search)) AS rank
             ';
+            }
         }
 
         $query .= '
                 FROM products products_alias 
         ';
 
-        $this->prepareMainCondition($parameterBag, $query);
+        $this->prepareMainCondition($parameterBag, $query, $count);
 
         $query .= '
                     GROUP BY products_alias.id';
@@ -761,8 +745,7 @@ class ProductRepository extends ServiceEntityRepository
     private function clearFacetQueryFromJoin()
     {
         $result = str_replace(
-            'LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
-                LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id',
+            'LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id',
             '',
             $this->queryMainCondition
         );

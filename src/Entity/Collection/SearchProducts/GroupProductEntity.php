@@ -15,6 +15,14 @@ class GroupProductEntity
     private $ids;
 
     /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreBrandAccessor")
+     */
+    private $storeBrand;
+
+    /**
      * @var array
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
@@ -79,17 +87,8 @@ class GroupProductEntity
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setShopAccessor")
      */
     private $shop;
-
-    /**
-     * @var string
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setBrandAccessor")
-     */
-    private $brand;
 
     /**
      * @var ArrayCollection|AdjacentProduct[]
@@ -113,69 +112,13 @@ class GroupProductEntity
      */
     private $presentCurrentProduct = [];
 
-    /**
-     * @param string $value
-     * @throws ConversionException
-     */
-    public function setExtrasAccessor(string $value)
-    {
-        $substr = substr($value, 1, -1); //explode(',', $substr)
-        if (preg_match_all('#\{(.*?)\}#', $substr, $match) > 1) {
-            $setExtra = array_shift($match);
-            $setExtraResult = [];
-            foreach ($setExtra as $partExtra) {
-                $partExtraArray = json_decode($partExtra, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw ConversionException::conversionFailed($value, $this->ids);
-                }
-                $setExtraResult = array_merge_recursive($setExtraResult, $partExtraArray);
-            }
-            array_walk($setExtraResult, function (&$v) {
-                $v = array_unique($v);
-            });
-            $val = $setExtraResult;
-        } else {
-            $val = json_decode($substr, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw ConversionException::conversionFailed($value, $this->ids);
-            }
-        }
-
-        $this->extras = $val;
-    }
 
     /**
      * @param string $value
      */
-    public function setStoreExtrasAccessor(string $value)
+    public function setStoreBrandAccessor(string $value)
     {
-        $substr = substr($value, 1, -1);
-        $substr = str_replace('\\', '', $substr);
-        $substr = str_replace('"', '', $substr);
-        $storeContainOneProduct = explode('}, ', $substr);
-
-        $newArray = [];
-        array_walk($storeContainOneProduct, function ($v, $k) use (&$newArray) {
-            $v = str_replace('}', '', $v);
-            $v = str_replace('{', '', $v);
-            $nums = explode('=>', $v);
-            if (isset($nums[0]) && isset($nums[1])) {
-                $newExtraArray = [];
-                $setExtra = explode(', ', $nums[1]);
-
-                array_walk($setExtra, function ($v, $k) use (&$newExtraArray) {
-                    $nums = explode(':', $v);
-                    if (isset($nums[0]) && isset($nums[1])) {
-                        $newExtraArray[$nums[0]] = trim($nums[1]);
-                    }
-                });
-
-                $newArray[$nums[0]] = $newExtraArray;
-            }
-        });
-        $storeContainOneProduct = $newArray;
-
-        $this->storeExtras = $storeContainOneProduct;
+        $this->storeBrand = $this->storePropertyAccessor($value);
     }
 
     /**
@@ -216,6 +159,72 @@ class GroupProductEntity
     public function setBrandAccessor(string $data)
     {
         $this->brand = $this->simplePropertyAccess($data);
+    }
+
+
+    /**
+     * @param string $value
+     * @throws ConversionException
+     */
+    public function setExtrasAccessor(string $value)
+    {
+        $substr = substr($value, 1, -1); //explode(',', $substr)
+        if (preg_match_all('#\{(.*?)\}#', $substr, $match) > 1) {
+            $setExtra = array_shift($match);
+            $setExtraResult = [];
+            foreach ($setExtra as $partExtra) {
+                $partExtraArray = json_decode($partExtra, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw ConversionException::conversionFailed($value, $this->ids ? array_shift($this->ids) : '');
+                }
+                $setExtraResult = array_merge_recursive($setExtraResult, $partExtraArray);
+            }
+            array_walk($setExtraResult, function (&$v) {
+                $v = array_unique($v);
+            });
+            $val = $setExtraResult;
+        } else {
+            $val = json_decode($substr, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw ConversionException::conversionFailed($value, $this->ids ? array_shift($this->ids) : '');
+            }
+        }
+
+        $this->extras = $val;
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setStoreExtrasAccessor(string $value)
+    {
+        $substr = substr($value, 1, -1);
+        $substr = str_replace('\\', '', $substr);
+        $substr = str_replace('"', '', $substr);
+        $storeContainOneProduct = explode('}, ', $substr);
+
+        $newArray = [];
+        array_walk($storeContainOneProduct, function ($v, $k) use (&$newArray) {
+            $v = str_replace('}', '', $v);
+            $v = str_replace('{', '', $v);
+            $nums = explode('=>', $v);
+            if (isset($nums[0]) && isset($nums[1])) {
+                $newExtraArray = [];
+                $setExtra = explode(', ', $nums[1]);
+
+                array_walk($setExtra, function ($v, $k) use (&$newExtraArray) {
+                    $nums = explode(':', $v);
+                    if (isset($nums[0]) && isset($nums[1])) {
+                        $newExtraArray[$nums[0]] = trim($nums[1]);
+                    }
+                });
+
+                $newArray[$nums[0]] = $newExtraArray;
+            }
+        });
+        $storeContainOneProduct = $newArray;
+
+        $this->storeExtras = $storeContainOneProduct;
     }
 
     /**
@@ -288,6 +297,11 @@ class GroupProductEntity
         return isset($this->storePrice[$key]) ? $this->storePrice[$key] : null;
     }
 
+    public function getStoreBrandDataByKey($key)
+    {
+        return isset($this->storeBrand[$key]) ? $this->storeBrand[$key] : null;
+    }
+
     public function getStoreImageUrlDataByKey($key)
     {
         return isset($this->storeImageUrl[$key]) ? $this->storeImageUrl[$key] : null;
@@ -306,7 +320,7 @@ class GroupProductEntity
                     'id' => $id,
                     'extras' => $this->getStoreExtrasDataByKey($id),
                     'imageUrl' => $this->getStoreImageUrlDataByKey($id),
-                    'brand' => $this->brand,
+                    'brand' => $this->getStoreBrandDataByKey($id),
                     'name' => $this->getStoreNamesDataByKey($id),
                     'price' => $this->getStorePriceDataByKey($id),
                     'shop' => $this->shop,
@@ -317,18 +331,6 @@ class GroupProductEntity
                 $this->presentCurrentProduct = $arr;
             }
             $this->presentAdjacentProducts = $resultArray;
-        } elseif (is_string($this->ids)) {
-            $currentProduct = [
-                'id' => $this->ids,
-                'extras' => $this->extras,
-                'imageUrl' => $this->getStoreImageUrlDataByKey($this->ids),
-                'productUrl' => $this->getStoreImageUrlDataByKey($this->ids),
-                'brand' => $this->brand,
-                'price' => $this->price,
-                'shop' => $this->shop,
-            ];
-
-            $this->presentCurrentProduct = $currentProduct;
         }
     }
 
