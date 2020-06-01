@@ -2,7 +2,7 @@
 
 namespace App\QueueModel;
 
-class AdtractionDataRow implements ResourceDataRow
+class AdtractionDataRow extends Queues implements ResourceDataRow
 {
     /**
      * @var array
@@ -28,10 +28,12 @@ class AdtractionDataRow implements ResourceDataRow
     public function __construct(
         array $row,
         string $filePath,
+        string $redisUniqKey,
         bool $lastProduct = false
     ) {
         $this->row = $row;
         $this->lastProduct = $lastProduct;
+        $this->redisUniqKey = $redisUniqKey;
         $this->filePath = $filePath;
     }
 

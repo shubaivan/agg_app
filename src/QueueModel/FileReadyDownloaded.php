@@ -2,7 +2,7 @@
 
 namespace App\QueueModel;
 
-class FileReadyDownloaded
+class FileReadyDownloaded extends Queues
 {
     /**
      * @var string
@@ -18,12 +18,16 @@ class FileReadyDownloaded
      * FileReadyDownloaded constructor.
      * @param string $absoluteFilePath
      * @param string $shop
+     * @param string $redisUniqKey
      */
-    public function __construct(string $absoluteFilePath, string $shop)
+    public function __construct(
+        string $absoluteFilePath, string $shop, string $redisUniqKey)
     {
         $this->absoluteFilePath = $absoluteFilePath;
         $this->shop = $shop;
+        $this->redisUniqKey = $redisUniqKey;
     }
+
 
     /**
      * @return string

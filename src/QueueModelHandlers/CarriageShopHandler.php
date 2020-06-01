@@ -34,7 +34,8 @@ class CarriageShopHandler implements MessageHandlerInterface
                 $carriageShop->getOffset(),
                 $carriageShop->getLimit(),
                 $carriageShop->getFilePath(),
-                $carriageShop->getShop()
+                $carriageShop->getShop(),
+                $carriageShop->getRedisUniqKey()
             );
         echo 'offset ' . $carriageShop->getOffset()
             . ' limit ' . $carriageShop->getLimit()

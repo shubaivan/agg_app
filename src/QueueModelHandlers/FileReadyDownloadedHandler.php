@@ -31,7 +31,8 @@ class FileReadyDownloadedHandler implements MessageHandlerInterface
     {
         $this->getHandleDownloadData()->creatingCarriageShop(
             $fileReadyDownloaded->getAbsoluteFilePath(),
-            $fileReadyDownloaded->getShop()
+            $fileReadyDownloaded->getShop(),
+            $fileReadyDownloaded->getRedisUniqKey()
         );
 
         echo $fileReadyDownloaded->getAbsoluteFilePath() . PHP_EOL;

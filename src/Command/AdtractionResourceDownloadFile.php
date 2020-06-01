@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Cache\CacheManager;
 use App\Kernel;
 use App\QueueModel\FileReadyDownloaded;
+use App\Util\RedisHelper;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -26,13 +27,15 @@ class AdtractionResourceDownloadFile extends ResourceDownloadFile
      * @param LoggerInterface $adtractionLogLogger
      * @param ContainerBagInterface $params
      * @param CacheManager $cacheManager
+     * @param RedisHelper $redisHelper
      */
     public function __construct(
         KernelInterface $kernel,
         MessageBusInterface $bus,
         LoggerInterface $adtractionLogLogger,
         ContainerBagInterface $params,
-        CacheManager $cacheManager
+        CacheManager $cacheManager,
+        RedisHelper $redisHelper
     )
     {
 
@@ -44,6 +47,7 @@ class AdtractionResourceDownloadFile extends ResourceDownloadFile
             $bus,
             $adtractionLogLogger,
             $cacheManager,
+            $redisHelper,
             $filePath,
             $urls
         );

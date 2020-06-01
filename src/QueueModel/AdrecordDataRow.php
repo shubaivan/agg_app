@@ -2,7 +2,7 @@
 
 namespace App\QueueModel;
 
-class AdrecordDataRow implements ResourceDataRow
+class AdrecordDataRow extends Queues implements ResourceDataRow
 {
     /**
      * @var array
@@ -23,15 +23,18 @@ class AdrecordDataRow implements ResourceDataRow
      * AdrecordDataRow constructor.
      * @param array $row
      * @param string $filePath
+     * @param string $redisUniqKey
      * @param bool $lastProduct
      */
     public function __construct(
         array $row,
         string $filePath,
+        string $redisUniqKey,
         bool $lastProduct = false
     ) {
         $this->row = $row;
         $this->lastProduct = $lastProduct;
+        $this->redisUniqKey = $redisUniqKey;
         $this->filePath = $filePath;
     }
 

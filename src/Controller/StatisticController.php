@@ -67,7 +67,7 @@ EOF;
         $statisticByDate = $this->getRedisHelper()
             ->keys(Shop::PREFIX_HASH . '*');
 
-        foreach ($statisticByDate as $keyDateStamp) {
+        foreach ($statisticByDate as $iter=>$keyDateStamp) {
             $allHashKeys = $this->getRedisHelper()->hGetAll($keyDateStamp);
 
             if (preg_match('/([^:]*)$/', $keyDateStamp, $matches) > 0) {

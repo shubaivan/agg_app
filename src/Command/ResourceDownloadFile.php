@@ -5,7 +5,9 @@ namespace App\Command;
 use App\Cache\CacheManager;
 use App\Kernel;
 use App\QueueModel\FileReadyDownloaded;
+use App\Util\RedisHelper;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -57,11 +59,22 @@ class ResourceDownloadFile extends Command
     private $cacheManager;
 
     /**
+     * @var RedisHelper
+     */
+    private $redisHelper;
+
+    /**
+     * @var string
+     */
+    protected $redisUniqKey;
+
+    /**
      * ResourceDownloadFile constructor.
      * @param KernelInterface $kernel
      * @param MessageBusInterface $bus
      * @param LoggerInterface $logger
      * @param CacheManager $cacheManager
+     * @param RedisHelper $redisHelper
      * @param string $filePath
      * @param array $urls
      */
@@ -70,6 +83,7 @@ class ResourceDownloadFile extends Command
         MessageBusInterface $bus,
         LoggerInterface $logger,
         CacheManager $cacheManager,
+        RedisHelper $redisHelper,
         ?string $filePath,
         ?array $urls
     )
@@ -80,6 +94,8 @@ class ResourceDownloadFile extends Command
         $this->kernel = $kernel;
         $this->bus = $bus;
         $this->logger = $logger;
+        $this->redisHelper = $redisHelper;
+
         parent::__construct();
         $this->postConstruct();
     }
@@ -145,6 +161,12 @@ class ResourceDownloadFile extends Command
      */
     protected function createGuzzleStreamWayForEachUrl()
     {
+        if (!$this->redisUniqKey) {
+            $this->redisHelper
+                ->hIncrBy('attempt', date('Ymd'));
+            $this->redisUniqKey = date('Ymd') . '_' . $this->redisHelper->hGet('attempt', date('Ymd'));
+        }
+
         foreach ($this->getUrl() as $key => $url) {
             $this->guzzleStreamWay($key, $url);
         }
@@ -158,14 +180,22 @@ class ResourceDownloadFile extends Command
     protected function guzzleStreamWay(string $key, string $url)
     {
         $client = new Client();
-        $response = $client->request(
-            'GET',
-            $url,
-            [
-                'stream' => true,
-                'version' => '1.0'
-            ]
-        )->getBody();
+        try {
+            $response = $client->request(
+                'GET',
+                $url,
+                [
+                    'stream' => true,
+                    'version' => '1.0'
+                ]
+            )->getBody();
+        } catch (ClientException $exception) {
+            if ($exception->getCode() === 403) {
+                return;
+            } else {
+                throw $exception;
+            }
+        }
 
         $phpStream = $response->detach();
         unset($client);
@@ -174,7 +204,8 @@ class ResourceDownloadFile extends Command
         $this->getOutput()->writeln(
             '<fg=green>' . date('H:i:s') . ' guzzle stream way get body' . '</>'
         );
-        $fileRelativePath = $this->getDirForFiles($key) . '/' . date('YmdHis') . '.csv';
+        $date = date('YmdHis');
+        $fileRelativePath = $this->getDirForFiles($key) . '/' . $date . '.csv';
         // Read bytes off of the stream until the end of the stream is reached
         while (!feof($phpStream)) {
             $read = fread($phpStream, 1024);
@@ -191,7 +222,7 @@ class ResourceDownloadFile extends Command
         $this->getOutput()->writeln(
             '<fg=green>' . date('H:i:s') . ' finish download file: ' . $fileRelativePath . '</>'
         );
-        $this->getBus()->dispatch(new FileReadyDownloaded($fileRelativePath, $key));
+        $this->getBus()->dispatch(new FileReadyDownloaded($fileRelativePath, $key, $this->redisUniqKey));
         $this->getOutput()->writeln(
             '<bg=yellow;options=bold>' . date('H:i:s') . ' success sent queue' . '</>'
         );
