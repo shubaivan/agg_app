@@ -312,25 +312,14 @@ class GroupProductEntity
      */
     public function postDeserializer()
     {
-        if (is_array($this->ids)) {
-            $resultArray = [];
-            foreach ($this->ids as $id) {
-                $id = (int)$id;
-                $arr = [
-                    'id' => $id,
-                    'extras' => $this->getStoreExtrasDataByKey($id),
-                    'imageUrl' => $this->getStoreImageUrlDataByKey($id),
-                    'brand' => $this->getStoreBrandDataByKey($id),
-                    'name' => $this->getStoreNamesDataByKey($id),
-                    'price' => $this->getStorePriceDataByKey($id),
-                    'shop' => $this->shop,
-                ];
-                $resultArray[] = $arr;
-            }
+        if (is_array($this->ids) && count($this->ids) > 0) {
+            $currentId = array_shift($this->ids);
             if (!$this->presentCurrentProduct) {
-                $this->presentCurrentProduct = $arr;
+                $this->presentCurrentProduct = $this->transformIdToProductModel($currentId);
             }
-            $this->presentAdjacentProducts = $resultArray;
+            if (count($this->ids) > 0) {
+                $this->presentAdjacentProducts = $this->transformIdsToProductModel($this->ids);
+            }
         }
     }
 
@@ -429,4 +418,39 @@ class GroupProductEntity
     {
         return $this->extras;
     }
+
+    /**
+     * @param array $ids
+     * @return array
+     */
+    private function transformIdsToProductModel(array $ids): array
+    {
+        $resultArray = [];
+        foreach ($ids as $id) {
+            $id = (int)$id;
+            $resultArray[] = $this->transformIdToProductModel($id);
+        }
+
+        return $resultArray;
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    private function transformIdToProductModel(int $id): array
+    {
+        $id = (int)$id;
+        $arr = [
+            'id' => $id,
+            'extras' => $this->getStoreExtrasDataByKey($id),
+            'imageUrl' => $this->getStoreImageUrlDataByKey($id),
+            'brand' => $this->getStoreBrandDataByKey($id),
+            'name' => $this->getStoreNamesDataByKey($id),
+            'price' => $this->getStorePriceDataByKey($id),
+            'shop' => $this->shop,
+        ];
+        return  $arr;
+    }
+
 }
