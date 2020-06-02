@@ -12,62 +12,74 @@
         td {
             padding: 5px;
             text-align: left;
+            vertical-align: top;
         }
     </style>
 {% endblock %}
 {% block body %}
     <h1>Statistics</h1>
 
+    <table style="width:100%">
+        <tr>
+            {% for iterRedisKey, iterRedisData in prepareDataTh  %}
+                <th colspan="{{ iterRedisData|length > 0 ? iterRedisData|length : ''}}" >{{iterRedisKey}}</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            {% for iterRedisKey, iterRedisData in prepareDataTh  %}
+                {% if iterRedisData is iterable %}
+                    {% for uniqRedisKey in iterRedisData %}
+                        <td>{{uniqRedisKey}}</td><br>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </tr>
 
-    <table >
-    <tr>
-        {% for date in data|keys  %}
-            <th colspan="2">{{date}}</th>
-        {% endfor %}
-    </tr>
-    <tr>
-        <td>
-            {% for dateKey, dateData in data  %}
-                {% for blockName, typeEvent in dateData  %}
-                        <ul>
-                            {% if typeEvent is iterable %}
-                                <h2>{{blockName|capitalize  }}</h2>
-                                <li>
-                                    {% if typeEvent is iterable %}
-                                        {% for eventName, events in typeEvent  %}
-                                            {% if events is iterable %}
-                                                <h3>{{eventName}}</h3>
-                                                <ul>
-                                                    {% for filePath, shopData in events %}
-                                                        {% if shopData is iterable %}
-                                                            <li>
-                                                                {% for key, value in shopData %}
-                                                                    <ul>
-                                                                        <li>{{ key }} - {{ value }}</li>
-                                                                    </ul>
+        <tr>
+            {% for resultKey, result in resultData  %}
+                <td>
+                    {% if result is iterable %}
+                        {% for keyData, ValueData in result %}
+                            {% if ValueData is iterable %}
+                                <ul>
+                                    {% for resourceKey, resourceValue  in ValueData %}
+                                        <h3>
+                                            {{ resourceKey|capitalize }}
+                                        </h3>
+                                        {% if resourceValue is iterable %}
+                                            {% for prefixNameKey, prefixNameVaue in resourceValue %}
+                                                <h4>
+                                                    {{ prefixNameKey|capitalize }}
+                                                </h4>
+                                                {% if prefixNameVaue is iterable %}
+                                                    {% for blockNameKey, blockNameValue in prefixNameVaue %}
+                                                        <li>
+                                                            {{ blockNameKey }}
+                                                        </li>
+                                                        {% if blockNameValue is iterable %}
+                                                            <ul>
+                                                                {% for shopKey, shopValue in blockNameValue %}
+                                                                    <li>
+                                                                        {{ shopKey|capitalize }} - {{ shopValue }}
+                                                                    </li>
                                                                 {% endfor %}
-                                                            </li>
-                                                            <br>
-                                                        {% else %}
-                                                            <li>
-                                                                {{ filePath }} - {{ shopData }}
-                                                            </li>
-                                                            <br>
+                                                            </ul>
                                                         {% endif %}
                                                     {% endfor %}
-                                                </ul>
-                                            {% endif %}
-                                        {% endfor %}
-                                    {%  endif %}
-
-                                </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                {{keyData}} - {{ ValueData }}
                             {% endif %}
-                        </ul>
-
-                {% endfor %}
+                        {% endfor %}
+                    {% endif %}
+                </td>
             {% endfor %}
-        </td>
-    </tr>
+        </tr>
     </table>
+
     {% block page_contents %}{% endblock %}
 {% endblock %}
