@@ -2,99 +2,49 @@
 
 namespace App\Entity\Collection\Search;
 
-use App\Entity\Product;
-use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation;
+use App\Entity\Collection\SearchProducts\GroupProductEntity;
 
 class SearchProductCollection
 {
+    const GROUP_CREATE = 'group_product_create';
+    const GROUP_GET = 'group_product_get';
+
     /**
-     * @var array
-     * @Annotation\Type("array")
-     * @Annotation\Accessor(getter="getAccessorCollection")
+     * @var ArrayCollection|GroupProductEntity[]
+     * @Annotation\Type("ArrayCollection<App\Entity\Collection\SearchProducts\GroupProductEntity>")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE, SearchProductCollection::GROUP_GET})
      */
     private $collection;
 
     /**
      * @var int
      * @Annotation\Type("int")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE, SearchProductCollection::GROUP_GET})
      */
     private $count;
 
     /**
      * @var string
      * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE, SearchProductCollection::GROUP_GET})
      */
     private $uniqIdentificationQuery;
 
     /**
-     * SearchProductCollection constructor.
-     * @param array $collection
-     * @param int $count
-     * @param string $uniqIdentificationQuery
+     * @return GroupProductEntity[]|ArrayCollection
      */
-    public function __construct(
-        array $collection,
-        int $count,
-        string $uniqIdentificationQuery = null)
+    public function getCollection()
     {
-        $this->collection = $collection;
-        $this->count = $count;
-        $this->uniqIdentificationQuery = ($count > 0) ? $uniqIdentificationQuery : '';
-    }
-
-
-    public function getAccessorCollection()
-    {
-        return $this->getCollection();
+        return $this->collection;
     }
 
     /**
-     * @return array
+     * @Annotation\PostDeserialize()
      */
-    public function getCollection(): array
+    public function postDeserializer()
     {
-        $array_map = array_map(function ($key) {
-            if (isset($key['extras']) && !is_array($key['extras'])) {
-                $val = json_decode($key['extras'], true);
-
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw ConversionException::conversionFailed($key['extras'], $key['sku']);
-                }
-                $key['extras'] = $val;
-            }
-
-            return $key;
-        }, $this->collection);
-
-        return $array_map;
-    }
-
-    /**
-     * @param array $collection
-     * @return SearchProductCollection
-     */
-    public function setCollection(array $collection): SearchProductCollection
-    {
-        $this->collection = $collection;
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCount(): int
-    {
-        return $this->count;
-    }
-
-    /**
-     * @param int $count
-     * @return SearchProductCollection
-     */
-    public function setCount(int $count): SearchProductCollection
-    {
-        $this->count = $count;
-        return $this;
+        $this->count < 1 ? $this->uniqIdentificationQuery = '' : '';
     }
 }

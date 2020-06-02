@@ -40,4 +40,9 @@ interface ResourceDataRow
      * @return $this
      */
     public function setLastProduct(bool $isEndProduct);
+
+    /**
+     * @return string
+     */
+    public function getRedisUniqKey(): string;
 }

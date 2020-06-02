@@ -30,6 +30,7 @@ class Product implements EntityValidatorException
 
     const SERIALIZED_GROUP_CREATE = 'product_group_create';
     const SERIALIZED_GROUP_LIST = 'product_group_list';
+    const SERIALIZED_GROUP_CREATE_IDENTITY = 'product_group_create_identity';
 
     /**
      * @ORM\Id()
@@ -47,6 +48,15 @@ class Product implements EntityValidatorException
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      */
     private $sku;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\NotBlank(
+     *     groups={Product::SERIALIZED_GROUP_CREATE_IDENTITY}
+     * )
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
+     */
+    private $groupIdentity;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -526,7 +536,7 @@ class Product implements EntityValidatorException
      */
     public function getIdentity()
     {
-        return $this->getSku();
+        return 'shop: ' . $this->getShop() . ' sku: ' . $this->getSku();
     }
 
     public function getBrandRelation(): ?Brand
@@ -691,6 +701,16 @@ class Product implements EntityValidatorException
         return $this;
     }
 
+    public function setSeparateExtra($key, $value): self
+    {
+        $extras = $this->getExtras();
+        if (is_array($extras) && !array_key_exists($key, $extras)) {
+            $this->extras = array_merge($extras, [$key => $value]);
+        }
+
+        return $this;
+    }
+
     /**
      * @return Collection|UserIpProduct[]
      */
@@ -721,6 +741,18 @@ class Product implements EntityValidatorException
                 $userIpProduct->setProducts(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getGroupIdentity(): ?string
+    {
+        return $this->groupIdentity;
+    }
+
+    public function setGroupIdentity(?string $groupIdentity): self
+    {
+        $this->groupIdentity = $groupIdentity;
 
         return $this;
     }

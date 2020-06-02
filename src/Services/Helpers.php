@@ -7,7 +7,6 @@ use App\Cache\CacheManager;
 use App\Util\RedisHelper;
 use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Helpers

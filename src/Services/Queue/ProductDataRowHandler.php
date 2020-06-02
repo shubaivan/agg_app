@@ -92,7 +92,7 @@ class ProductDataRowHandler
     {
         try {
             $filePath = $dataRow->getFilePath();
-            $date = date("Ymd");
+
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
             $this->getBrandService()->createBrandFromProduct($product);
 
@@ -104,31 +104,44 @@ class ProductDataRowHandler
             $this->getLogger()->info('sku: ' . $product->getSku());
 
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $date,
+                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL . $filePath);
+
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL . $dataRow->getShop());
 
             if ($dataRow->getLastProduct()) {
                 $this->getRedisHelper()
-                    ->hMSet(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $date,
+                    ->hMSet(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $dataRow->getRedisUniqKey(),
                         [$filePath => (new \DateTime())->getTimestamp()]
                     );
             }
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $date,
+                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
             throw $e;
         } catch (BadRequestHttpException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $date,
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
             throw $e;
         } catch (\Exception $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $date,
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
             throw $e;
         }

@@ -1,4 +1,7 @@
 jms_serializer:
+  visitors:
+    json_serialization:
+      options: [JSON_UNESCAPED_SLASHES, JSON_UNESCAPED_UNICODE]
   object_constructors:
     doctrine:
       fallback_strategy: "null" # possible values ("null" | "exception" | "fallback")
