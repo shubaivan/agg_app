@@ -50,6 +50,14 @@ class GroupProductEntity
      * @var array
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreCurrencyAccessor")
+     */
+    private $storeCurrency;
+
+    /**
+     * @var array
+     * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
      * @Annotation\Accessor(setter="setStoreImageUrlAccessor")
      */
     private $storeImageUrl;
@@ -89,6 +97,13 @@ class GroupProductEntity
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
      */
     private $shop;
+
+    /**
+     * @var integer
+     * @Annotation\Type("integer")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     */
+    private $shopRelationId;
 
     /**
      * @var ArrayCollection|AdjacentProduct[]
@@ -135,6 +150,14 @@ class GroupProductEntity
     public function setStorePriceAccessor(string $value)
     {
         $this->storePrice = $this->storePropertyAccessor($value);
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setStoreCurrencyAccessor(string $value)
+    {
+        $this->storeCurrency = $this->storePropertyAccessor($value);
     }
 
     /**
@@ -288,13 +311,17 @@ class GroupProductEntity
      */
     public function getStoreExtrasDataByKey($key)
     {
-        return isset($this->storeExtras[$key]) ? $this->storeExtras[$key] : null;
+        return isset($this->storeExtras[$key]) ? $this->storeExtras[$key] : [];
     }
-
 
     public function getStorePriceDataByKey($key)
     {
         return isset($this->storePrice[$key]) ? $this->storePrice[$key] : null;
+    }
+
+    public function getStoreCurrencyDataByKey($key)
+    {
+        return isset($this->storeCurrency[$key]) ? $this->storeCurrency[$key] : null;
     }
 
     public function getStoreBrandDataByKey($key)
@@ -448,7 +475,9 @@ class GroupProductEntity
             'brand' => $this->getStoreBrandDataByKey($id),
             'name' => $this->getStoreNamesDataByKey($id),
             'price' => $this->getStorePriceDataByKey($id),
+            'currency' => $this->getStoreCurrencyDataByKey($id),
             'shop' => $this->shop,
+            'shopRelationId' => $this->shopRelationId
         ];
         return  $arr;
     }

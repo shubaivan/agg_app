@@ -498,9 +498,11 @@ class ProductRepository extends ServiceEntityRepository
                 (array_agg(DISTINCT main_products_alias.price))[1]::INTEGER AS price
                 
                 ,(array_agg(DISTINCT main_products_alias.shop))[1]::TEXT AS shop
+                ,(array_agg(DISTINCT main_products_alias.shop_relation_id))[1]::INTEGER AS "shopRelationId"
                 ,jsonb_agg(DISTINCT main_products_alias.extras) FILTER (WHERE main_products_alias.extras IS NOT NULL) AS extras
                 
                 ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.brand::text)) AS "storeBrand"
+                ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.currency::text)) AS "storeCurrency"
                 ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.price::text)) AS "storePrice"
                 ,hstore(array_agg(main_products_alias.id::TEXT), array_agg(main_products_alias.image_url)) AS "storeImageUrl"
                 ,hstore(array_agg(main_products_alias.id::TEXT), array_agg(main_products_alias.name)) AS "storeNames"
@@ -562,9 +564,11 @@ class ProductRepository extends ServiceEntityRepository
                 ,products_alias.image_url									
                 ,products_alias.brand
                 ,products_alias.shop
+                ,products_alias.shop_relation_id
                                         
                 ,products_alias.group_identity,
                 products_alias.price,
+                products_alias.currency,
                 products_alias.extras,
                 products_alias.created_at              
         ';

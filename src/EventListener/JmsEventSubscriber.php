@@ -16,7 +16,7 @@ class JmsEventSubscriber implements EventSubscriberInterface
                 'event' => 'serializer.pre_deserialize',
                 'class' => Product::class,
                 'method' => 'onPreDeserializeProduct',
-            ),
+            )
         );
     }
 
