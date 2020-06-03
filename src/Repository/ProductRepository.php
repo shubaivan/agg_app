@@ -498,7 +498,7 @@ class ProductRepository extends ServiceEntityRepository
                 (array_agg(DISTINCT main_products_alias.price))[1]::INTEGER AS price
                 
                 ,(array_agg(DISTINCT main_products_alias.shop))[1]::TEXT AS shop
-                ,jsonb_agg(DISTINCT main_products_alias.extras) AS extras
+                ,jsonb_agg(DISTINCT main_products_alias.extras) FILTER (WHERE main_products_alias.extras IS NOT NULL) AS extras
                 
                 ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.brand::text)) AS "storeBrand"
                 ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.price::text)) AS "storePrice"
