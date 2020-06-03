@@ -12,7 +12,16 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
- * @ORM\Table(name="products",indexes={@ORM\Index(name="sku_idx", columns={"sku"})})
+ * @ORM\Table(name="products",
+ *     indexes={
+ *     @ORM\Index(name="sku_idx", columns={"sku"}),
+ *     @ORM\Index(name="created_desc_index", columns={"created_at"}),
+ *     @ORM\Index(name="created_asc_index", columns={"created_at"}),
+ *     @ORM\Index(name="price_desc_index", columns={"price"}),
+ *     @ORM\Index(name="price_asc_index", columns={"price"}),
+ *     @ORM\Index(name="products_extras_idx", columns={"extras"})
+ * }
+ *     )
  * @Annotation\AccessorOrder("custom",
  *      custom = {
  *     "id", "sku", "name",
