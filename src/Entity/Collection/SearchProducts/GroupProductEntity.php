@@ -203,7 +203,9 @@ class GroupProductEntity
                 $setExtraResult = array_merge_recursive($setExtraResult, $partExtraArray);
             }
             array_walk($setExtraResult, function (&$v) {
-                $v = array_unique($v);
+                if (is_array($v)) {
+                    $v = array_unique($v);
+                }
             });
             $val = $setExtraResult;
         } else {
