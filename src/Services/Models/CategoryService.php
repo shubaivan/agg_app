@@ -124,13 +124,10 @@ class CategoryService
      */
     public function analysisProductByMainBarnCategory(Product $product)
     {
-        $analysisProductBySubMainCategory = $this->analysisProductBySubMainCategory(
+        $resultAnalysis = $this->analysisProductByMainCategory(
             $product, 'Barn'
         );
-        $analysisProductByMainCategory = $this->analysisProductByMainCategory(
-            $product, 'Barn'
-        );
-        $resultAnalysis = array_merge($analysisProductByMainCategory, $analysisProductBySubMainCategory);
+
         $mainIds = [];
         $subIds = [];
         $subSubIds = [];
@@ -151,7 +148,7 @@ class CategoryService
         $mainArrayIds = array_merge($mainIds, $subIds, $subSubIds);
         $this->addCategoryToProductByIds($mainArrayIds, $product);
 
-        return $analysisProductByMainCategory;
+        return $resultAnalysis;
     }
 
     /**
@@ -169,32 +166,6 @@ class CategoryService
                 $product->addCategoryRelation($category);
             }
         }
-    }
-
-    /**
-     * @param Product $product
-     * @param string $mainCategoryKeyWord
-     * @param bool $explain
-     * @return mixed[]
-     * @throws CacheException
-     */
-    public function analysisProductBySubMainCategory(
-        Product $product,
-        string $mainCategoryKeyWord,
-        bool $explain = false
-    )
-    {
-        $parameterBag = new ParameterBag();
-        $parameterBag->set(CategoryRepository::STRICT, true);
-        $parameterBag->set(self::MAIN_SEARCH, $mainCategoryKeyWord);
-
-        $matchData = preg_replace('!\s+!', ',', $product->getName() . ', ' . $product->getDescription());
-
-        $parameterBag->set(self::SUB_MAIN_SEARCH, $matchData);
-
-        $matchCategoryWithSub = $this->matchCategoryWithSub($parameterBag, $explain);
-
-        return $matchCategoryWithSub;
     }
 
     /**
