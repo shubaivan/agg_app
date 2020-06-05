@@ -97,6 +97,8 @@ class ProductDataRowHandler
             $this->getBrandService()->createBrandFromProduct($product);
 
             $this->getCategoryService()->createCategoriesFromProduct($product);
+            $this->getCategoryService()->analysisProductByMainBarnCategory($product);
+
             $this->getShopService()->createShopFromProduct($product);
 
             $this->getEm()->persist($product);

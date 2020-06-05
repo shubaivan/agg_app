@@ -3,6 +3,7 @@
 namespace App\Controller\Rest;
 
 use App\Entity\Category;
+use App\Entity\Product;
 use App\Services\Helpers;
 use App\Services\Models\CategoryService;
 use Doctrine\DBAL\DBALException;
@@ -12,6 +13,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 use App\Validation\Constraints\SearchQueryParam;
@@ -34,6 +36,131 @@ class CategoryController extends AbstractRestController
         parent::__construct($helpers);
         $this->categoryService = $categoryService;
     }
+
+    /**
+     * analysis Product by category.
+     *
+     * @Rest\Get("/api/main_category/{c_id}/product/{p_id}")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @View()
+     *
+     * @SWG\Tag(name="Category")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object Categories"
+     * )
+     *
+     * @return array
+     *
+     * @ParamConverter("category", class="App\Entity\Category", options={"id" = "c_id"})
+     * @ParamConverter("product", class="App\Entity\Product", options={"id" = "p_id"})
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function getAnalysisProductByCategory(
+        Category $category,
+        Product $product
+    )
+    {
+        return $this->getCategoryService()->analysisProductByMainCategoryManual(
+            $product,
+            $category
+        );
+    }
+
+    /**
+     * get runk Category.
+     *
+     * @Rest\Get("/api/categories/runk")
+     *
+     * @Rest\QueryParam(
+     *     name=CategoryService::MAIN_SEARCH,
+     *     strict=true,
+     *     requirements=@SearchQueryParam,
+     *     nullable=false,
+     *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by keywords fields")
+     *
+     * @Rest\QueryParam(
+     *     name=CategoryService::SUB_MAIN_SEARCH,
+     *     strict=true,
+     *     requirements=@SearchQueryParam,
+     *     nullable=true,
+     *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by keywords fields")
+     *
+     * @Rest\QueryParam(
+     *     name=CategoryService::SUB_SUB_MAIN_SEARCH,
+     *     strict=true,
+     *     requirements=@SearchQueryParam,
+     *     nullable=true,
+     *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by keywords fields")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @View()
+     *
+     * @SWG\Tag(name="Category")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object Categories"
+     * )
+     *
+     * @return array
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function getMatchCategoryWithSub(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getCategoryService()->matchCategoryWithSubFetcher($paramFetcher);
+
+        return $collection;
+    }
+
+    /**
+     * get custom Category.
+     *
+     * @Rest\Get("/api/categories/custom")
+     *
+     * @Rest\QueryParam(
+     *     name="search",
+     *     strict=true,
+     *     requirements=@SearchQueryParam,
+     *     nullable=true,
+     *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by category_name fields")
+     * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
+     * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
+     * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
+     * @Rest\QueryParam(name="sort_order", strict=true, requirements="^[a-zA-Z]+", default="DESC", description="Sort order", nullable=true)
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @View(serializerGroups={Category::SERIALIZED_GROUP_RELATIONS_LIST}, statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Category")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object Categories",
+     *     @SWG\Schema(ref=@Model(type=CategoriesCollection::class, groups={Category::SERIALIZED_GROUP_LIST}))
+     * )
+     *
+     * @return CategoriesCollection
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function getCustomCategoriesAction(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getCategoryService()->getCustomCategories($paramFetcher);
+
+        return $collection;
+    }
+
 
     /**
      * get Category.

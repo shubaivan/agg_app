@@ -6,10 +6,12 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-    class JollyRoomService implements IdentityGroup
+class JollyRoomService implements IdentityGroup
 {
     /**
      * name: "Paw Patrol Baddräkt, Lila, 6 År"
+     * https://www.jollyroom.se/sport/sportskor/traningsskor/adidas-adizero-club-jr-tennisskor
+     * https://www.jollyroom.se/sport/sportskor/traningsskor/adidas-adizero-club-jr-tennisskor
      *
      * @param Product $product
      * @return mixed|void

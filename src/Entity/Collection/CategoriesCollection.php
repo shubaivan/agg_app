@@ -9,14 +9,14 @@ class CategoriesCollection
 {
     /**
      * @var array
-     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST, Category::SERIALIZED_GROUP_RELATIONS_LIST})
      * @Annotation\Type("array<App\Entity\Category>")
      */
     private $collection;
 
     /**
      * @var int
-     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST, Category::SERIALIZED_GROUP_RELATIONS_LIST})
      * @Annotation\Type("int")
      */
     private $count;

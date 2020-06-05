@@ -71,9 +71,13 @@ class Helpers
      */
     public function handleSearchValue($searchField, bool $strict): string
     {
-        $result = preg_replace('!\s+!', ' ', $searchField);
+        $result = str_replace('.', ',', $searchField);
+        $result = strip_tags( $result);
+
+        $result = preg_replace('!\s+!', ' ', $result);
         $result = preg_replace('/\s*,\s*/', ',', $result);
         $result = preg_replace('!\s!', '&', $result);
+        $result = str_replace(',,', ',', $result);
 
         $delimiter = ($strict !== true ? ':*|' : '|');
 

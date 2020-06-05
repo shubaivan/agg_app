@@ -12,7 +12,16 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
- * @ORM\Table(name="products",indexes={@ORM\Index(name="sku_idx", columns={"sku"})})
+ * @ORM\Table(name="products",
+ *     indexes={
+ *     @ORM\Index(name="sku_idx", columns={"sku"}),
+ *     @ORM\Index(name="created_desc_index", columns={"created_at"}),
+ *     @ORM\Index(name="created_asc_index", columns={"created_at"}),
+ *     @ORM\Index(name="price_desc_index", columns={"price"}),
+ *     @ORM\Index(name="price_asc_index", columns={"price"}),
+ *     @ORM\Index(name="products_extras_idx", columns={"extras"})
+ * }
+ *     )
  * @Annotation\AccessorOrder("custom",
  *      custom = {
  *     "id", "sku", "name",
@@ -576,30 +585,6 @@ class Product implements EntityValidatorException
         return $collection->count() ? $collection->toArray() : [];
     }
 
-    /**
-     * @return string
-     */
-    public function getSearchDataForRelatedProductItems()
-    {
-        $pieces = [
-            $this->getName(),
-            $this->getPrice()
-        ];
-
-        if ($this->getBrandRelation()) {
-            array_push($pieces, $this->getBrandRelation()->getBrandName());
-        }
-
-        if ($this->getCategoryRelation()->count()) {
-            array_push($pieces, implode(',', $this->getCategoriesNameArray()));
-        }
-
-        $search = implode(',', $pieces);
-        $replace = preg_replace('/[^a-zA-Z0-9 ,.éäöåÉÄÖÅ™]/', "", $search);
-
-        return $replace;
-    }
-
     public function getShop(): ?string
     {
         return $this->shop;
@@ -755,5 +740,29 @@ class Product implements EntityValidatorException
         $this->groupIdentity = $groupIdentity;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSearchDataForRelatedProductItems()
+    {
+        $pieces = [
+            $this->getName(),
+            $this->getPrice()
+        ];
+
+        if ($this->getBrandRelation()) {
+            array_push($pieces, $this->getBrandRelation()->getBrandName());
+        }
+
+        if ($this->getCategoryRelation()->count()) {
+            array_push($pieces, implode(',', $this->getCategoriesNameArray()));
+        }
+
+        $search = implode(',', $pieces);
+        $replace = preg_replace('/[^a-zA-Z0-9 ,.éäöåÉÄÖÅ™]/', "", $search);
+
+        return $replace;
     }
 }
