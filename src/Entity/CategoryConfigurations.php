@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CategoryConfigurationsRepository")
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
  */
 class CategoryConfigurations
 {
@@ -17,35 +18,20 @@ class CategoryConfigurations
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @var Category
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\OneToOne(targetEntity="Category", inversedBy="categoryConfigurations")
      */
-    private $customCategoryName;
+    private $categoryId;
 
     /**
      * @ORM\Column(type="text")
      */
     private $keyWords;
 
-    /**
-     * @ORM\Column(type="text")
-     */
-    private $subKeyWords;
-
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getCustomCategoryName(): ?string
-    {
-        return $this->customCategoryName;
-    }
-
-    public function setCustomCategoryName(string $customCategoryName): self
-    {
-        $this->customCategoryName = $customCategoryName;
-
-        return $this;
     }
 
     public function getKeyWords(): ?string
@@ -60,14 +46,14 @@ class CategoryConfigurations
         return $this;
     }
 
-    public function getSubKeyWords(): ?string
+    public function getCategoryId(): ?Category
     {
-        return $this->subKeyWords;
+        return $this->categoryId;
     }
 
-    public function setSubKeyWords(string $subKeyWords): self
+    public function setCategoryId(?Category $categoryId): self
     {
-        $this->subKeyWords = preg_replace('/\s+/', '', $subKeyWords);;
+        $this->categoryId = $categoryId;
 
         return $this;
     }

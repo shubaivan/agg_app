@@ -585,30 +585,6 @@ class Product implements EntityValidatorException
         return $collection->count() ? $collection->toArray() : [];
     }
 
-    /**
-     * @return string
-     */
-    public function getSearchDataForRelatedProductItems()
-    {
-        $pieces = [
-            $this->getName(),
-            $this->getPrice()
-        ];
-
-        if ($this->getBrandRelation()) {
-            array_push($pieces, $this->getBrandRelation()->getBrandName());
-        }
-
-        if ($this->getCategoryRelation()->count()) {
-            array_push($pieces, implode(',', $this->getCategoriesNameArray()));
-        }
-
-        $search = implode(',', $pieces);
-        $replace = preg_replace('/[^a-zA-Z0-9 ,.éäöåÉÄÖÅ™]/', "", $search);
-
-        return $replace;
-    }
-
     public function getShop(): ?string
     {
         return $this->shop;
@@ -764,5 +740,29 @@ class Product implements EntityValidatorException
         $this->groupIdentity = $groupIdentity;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSearchDataForRelatedProductItems()
+    {
+        $pieces = [
+            $this->getName(),
+            $this->getPrice()
+        ];
+
+        if ($this->getBrandRelation()) {
+            array_push($pieces, $this->getBrandRelation()->getBrandName());
+        }
+
+        if ($this->getCategoryRelation()->count()) {
+            array_push($pieces, implode(',', $this->getCategoriesNameArray()));
+        }
+
+        $search = implode(',', $pieces);
+        $replace = preg_replace('/[^a-zA-Z0-9 ,.éäöåÉÄÖÅ™]/', "", $search);
+
+        return $replace;
     }
 }

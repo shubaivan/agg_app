@@ -18,6 +18,9 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 class CategoryService
 {
+    const MAIN_SEARCH = 'main_search';
+    const SUB_MAIN_SEARCH = 'sub_main_search';
+    const SUB_SUB_MAIN_SEARCH = 'sub_sub_main_search';
     /**
      * @var CategoryRepository
      */
@@ -48,6 +51,141 @@ class CategoryService
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
         $this->categoryRepository = $categoryRepository;
         $this->objecHandler = $objecHandler;
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @return CategoriesCollection
+     * @throws CacheException
+     */
+    public function getCustomCategories(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getCategoryRepository()->getCustomCategories($paramFetcher);
+        $count = 0;
+        return (new CategoriesCollection($collection, $count));
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @return array
+     * @throws CacheException
+     */
+    public function matchCategoryWithSubFetcher(ParamFetcher $paramFetcher)
+    {
+        $parameterBag = new ParameterBag($paramFetcher->all());
+
+        return  $this->matchCategoryWithSub($parameterBag, true);
+    }
+
+    /**
+     * @param Product $product
+     * @param Category $category
+     * @return mixed[]
+     * @throws CacheException
+     */
+    public function analysisProductByMainCategoryManual(
+        Product $product,
+        Category $category
+    )
+    {
+        return $this->analysisProductByMainCategory(
+            $product, $category, true
+        );
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param bool $explain
+     * @return mixed[]
+     * @throws CacheException
+     */
+    public function matchCategoryWithSub(ParameterBag $parameterBag, bool $explain = false) {
+        $depth[] = $parameterBag->get( self::MAIN_SEARCH );
+
+        if ($parameterBag->get( self::SUB_MAIN_SEARCH)) {
+            $depth[] = $parameterBag->get(self::SUB_MAIN_SEARCH);
+        }
+
+        if ($parameterBag->get(self::SUB_SUB_MAIN_SEARCH)) {
+            $depth[] = $parameterBag->get(self::SUB_SUB_MAIN_SEARCH);
+        }
+
+        return $this->getCategoryRepository()->matchCategoryWithSub(
+            $parameterBag, count($depth), $explain
+        );
+    }
+
+    /**
+     * @param Product $product
+     * @return mixed[]
+     * @throws CacheException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function analysisProductByMainBarnCategory(Product $product)
+    {
+        $analysisProductByMainCategory = $this->analysisProductByMainCategory(
+            $product, 'Barn'
+        );
+        $mainIds = [];
+        $subIds = [];
+        $subSubIds = [];
+        foreach ($analysisProductByMainCategory as $categoryIds) {
+            $mainIds[] = $categoryIds['id'];
+            $subIds[] = $categoryIds['sub_ctegory_id'];
+            $subSubIds[] = $categoryIds['sub_sub_category_id'];
+        }
+        $mainIds = array_unique($mainIds);
+        $subIds = array_unique($subIds);
+        $subSubIds = array_unique($subSubIds);
+        $mainArrayIds = array_merge($mainIds, $subIds, $subSubIds);
+        $this->addCategoryToProductByIds($mainArrayIds, $product);
+
+        return $analysisProductByMainCategory;
+    }
+
+    /**
+     * @param array $ids
+     * @param Product $product
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function addCategoryToProductByIds(array $ids, Product $product)
+    {
+        foreach ($ids as $id )
+        {
+            $category = $this->getCategoryRepository()->findOneBy(['id' => $id]);
+            if ($category) {
+                $product->addCategoryRelation($category);
+            }
+        }
+    }
+
+    /**
+     * @param Product $product
+     * @param string $mainCategoryKeyWord
+     * @param bool $explain
+     * @return mixed[]
+     * @throws CacheException
+     */
+    public function analysisProductByMainCategory(
+        Product $product,
+        string $mainCategoryKeyWord,
+        bool $explain = false
+    )
+    {
+        $parameterBag = new ParameterBag();
+        $parameterBag->set(CategoryRepository::STRICT, true);
+        $parameterBag->set(self::MAIN_SEARCH, $mainCategoryKeyWord);
+
+        $matchData = preg_replace('!\s+!', ',', $product->getName() . ', ' . $product->getDescription());
+
+        $parameterBag->set(self::SUB_MAIN_SEARCH, $matchData);
+        $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $matchData);
+
+        $matchCategoryWithSub = $this->matchCategoryWithSub($parameterBag, $explain);
+
+        return $matchCategoryWithSub;
     }
 
     /**

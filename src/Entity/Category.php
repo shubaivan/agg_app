@@ -26,6 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Category implements EntityValidatorException
 {
     const SERIALIZED_GROUP_LIST = 'category_group_list';
+    const SERIALIZED_GROUP_RELATIONS_LIST = 'category_group_relations_list';
     const SERIALIZED_GROUP_CREATE = 'category_group_crete';
 
     public function getIdentity()
@@ -39,13 +40,13 @@ class Category implements EntityValidatorException
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST, Product::SERIALIZED_GROUP_LIST, Category::SERIALIZED_GROUP_RELATIONS_LIST})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST, Category::SERIALIZED_GROUP_RELATIONS_LIST})
      * @Assert\NotBlank(groups={Category::SERIALIZED_GROUP_CREATE})
      */
     private $categoryName;
@@ -57,9 +58,37 @@ class Category implements EntityValidatorException
      */
     private $products;
 
+    /**
+     * @ORM\OneToMany(targetEntity="CategoryRelations", mappedBy="subCategory")
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     */
+    private $subCategoryRelations;
+
+    /**
+     * @ORM\OneToMany(targetEntity="CategoryRelations", mappedBy="mainCategory")
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     */
+    private $mainCategoryRelations;
+
+    /**
+     * @var CategoryConfigurations
+     * @ORM\OneToOne(targetEntity="CategoryConfigurations", mappedBy="categoryId", cascade={"persist"})
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     */
+    private $categoryConfigurations;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
+     */
+    private $customeCategory = false;
+    
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->subCategoryRelations = new ArrayCollection();
+        $this->mainCategoryRelations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -105,6 +134,98 @@ class Category implements EntityValidatorException
         if ($this->getProducts()->contains($product)) {
             $this->products->removeElement($product);
             $product->removeCategoryRelation($this);
+        }
+
+        return $this;
+    }
+
+    public function getCustomeCategory(): ?bool
+    {
+        return $this->customeCategory;
+    }
+
+    public function setCustomeCategory(?bool $customeCategory): self
+    {
+        $this->customeCategory = $customeCategory;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|CategoryRelations[]
+     */
+    public function getSubCategoryRelations(): Collection
+    {
+        return $this->subCategoryRelations;
+    }
+
+    public function addSubCategoryRelation(CategoryRelations $subCategoryRelation): self
+    {
+        if (!$this->subCategoryRelations->contains($subCategoryRelation)) {
+            $this->subCategoryRelations[] = $subCategoryRelation;
+            $subCategoryRelation->setSubCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubCategoryRelation(CategoryRelations $subCategoryRelation): self
+    {
+        if ($this->subCategoryRelations->contains($subCategoryRelation)) {
+            $this->subCategoryRelations->removeElement($subCategoryRelation);
+            // set the owning side to null (unless already changed)
+            if ($subCategoryRelation->getSubCategory() === $this) {
+                $subCategoryRelation->setSubCategory(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|CategoryRelations[]
+     */
+    public function getMainCategoryRelations(): Collection
+    {
+        return $this->mainCategoryRelations;
+    }
+
+    public function addMainCategoryRelation(CategoryRelations $mainCategoryRelation): self
+    {
+        if (!$this->mainCategoryRelations->contains($mainCategoryRelation)) {
+            $this->mainCategoryRelations[] = $mainCategoryRelation;
+            $mainCategoryRelation->setMainCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMainCategoryRelation(CategoryRelations $mainCategoryRelation): self
+    {
+        if ($this->mainCategoryRelations->contains($mainCategoryRelation)) {
+            $this->mainCategoryRelations->removeElement($mainCategoryRelation);
+            // set the owning side to null (unless already changed)
+            if ($mainCategoryRelation->getMainCategory() === $this) {
+                $mainCategoryRelation->setMainCategory(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCategoryConfigurations(): ?CategoryConfigurations
+    {
+        return $this->categoryConfigurations;
+    }
+
+    public function setCategoryConfigurations(?CategoryConfigurations $categoryConfigurations): self
+    {
+        $this->categoryConfigurations = $categoryConfigurations;
+
+        // set (or unset) the owning side of the relation if necessary
+        $newCategoryId = null === $categoryConfigurations ? null : $this;
+        if ($categoryConfigurations->getCategoryId() !== $newCategoryId) {
+            $categoryConfigurations->setCategoryId($newCategoryId);
         }
 
         return $this;

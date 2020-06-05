@@ -6,12 +6,15 @@ use App\Cache\TagAwareQueryResultCacheBrand;
 use App\Cache\TagAwareQueryResultCacheCategory;
 use App\Entity\Brand;
 use App\Entity\Category;
+use App\Entity\CategoryRelations;
 use App\Services\Helpers;
+use App\Services\Models\CategoryService;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Cache\Cache as ResultCacheDriver;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\DBAL\Cache\ResultCacheStatement;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -27,6 +30,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class CategoryRepository extends ServiceEntityRepository
 {
     use PaginationRepository;
+    const STRICT = 'strict';
     /**
      * @var Helpers
      */
@@ -73,6 +77,131 @@ class CategoryRepository extends ServiceEntityRepository
 
     /**
      * @param ParamFetcher $paramFetcher
+     * @return mixed
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function getCustomCategories(ParamFetcher $paramFetcher)
+    {
+//        $subYes = $this->getEntityManager()->createQueryBuilder();
+//        $subYes
+//            ->select("cr_y")
+//            ->from(CategoryRelations::class,"cr_y")
+//            ->innerJoin('cr_y.mainCategory', 'cr_ym')
+//            ->where($subYes->expr()->eq('cr_ym.id', 'c.id'));
+//
+//        $subNot = $this->getEntityManager()->createQueryBuilder();
+//        $subNot
+//            ->select("cr_n")
+//            ->from(CategoryRelations::class,"cr_n")
+//            ->innerJoin('cr_y.subCategory', 'cr_nm')
+//            ->where($subNot->expr()->eq('cr_nm.id', 'c.id'));
+//
+//        $qb = $this->createQueryBuilder('c');
+//        $qb
+//            ->select('c')
+//            ->where($qb->expr()->exists($subYes->getDQL()))
+//            ->andWhere($qb->expr()->not($subNot->getDQL()));
+//
+//
+//        $query = $qb->getQuery();
+//        $DQL = $query->getDQL();
+//        $SQL = $query->getSQL();
+//        $result = $query->getResult();
+        $mainCategoryIds = $this->getMainSubCategoryIds();
+        $parameterBag = new ParameterBag($paramFetcher->all());
+
+        $limit = (int)$parameterBag->get('count');
+        $offset = $limit * ((int)$parameterBag->get('page') - 1);
+        $sortBy = $parameterBag->get('sort_by');
+        $sortOrder = $parameterBag->get('sort_order');
+        $sortBy = $this->getHelpers()->white_list($sortBy,
+            ["id", "categoryName", "createdAt"], "Invalid field name " . $sortBy);
+
+        $dql = '
+                SELECT DISTINCT c
+                FROM App\Entity\Category c    
+                INNER JOIN c.mainCategoryRelations m                                       
+                WHERE c.customeCategory = :custom
+        ';
+
+        if (is_array($mainCategoryIds) && count($mainCategoryIds) > 0) {
+            $dql .= '
+                            AND c.id IN (:ids)               
+            ';
+        }
+
+        if ($parameterBag->get('search')) {
+            $dql .= '
+                AND ILIKE(c.categoryName, :search) = TRUE
+            ';
+        }
+        $dql .= ' 
+            ORDER BY c.' . $sortBy . ' ' . $sortOrder;
+
+        $query = $this->getEntityManager()
+            ->createQuery($dql)
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->enableResultCache()
+            ->useQueryCache(true);
+
+        if ($parameterBag->get('search')) {
+            $query->setParameter(':search', '%' . $parameterBag->get('search') . '%');
+        }
+        if (is_array($mainCategoryIds) && count($mainCategoryIds) > 0) {
+            $query->setParameter(':ids', $mainCategoryIds);
+        }
+        $query->setParameter(':custom', 't');
+
+        return $query->getResult();
+    }
+
+    /**
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function getMainSubCategoryIds()
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $query  = '
+            SELECT id FROM category
+            WHERE 
+            EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = category.id)
+            AND
+            NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = category.id)
+        ';
+        $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
+            $query,
+            [],
+            [],
+            ['main_category_ids'],
+            0,
+            "main_category_ids"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+
+        $mainCategoryIds = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        $statement->closeCursor();
+        $rs = [];
+        foreach ($mainCategoryIds as $id) {
+            $rs[] = $id['id'];
+        }
+        return $rs;
+    }
+
+    /**
+     * @param ParamFetcher $paramFetcher
      * @param bool $count
      * @return int|mixed[]
      * @throws \Doctrine\DBAL\Cache\CacheException
@@ -82,6 +211,167 @@ class CategoryRepository extends ServiceEntityRepository
         $parameterBag = new ParameterBag($paramFetcher->all());
 
         return $this->fullTextSearchByParameterBag($parameterBag, $count);
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param int $depth
+     * @param bool $explain
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function matchCategoryWithSub(
+        ParameterBag $parameterBag, int $depth = 3, $explain = false
+    )
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $mainSearch =
+            $this->getHelpers()
+                ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), $parameterBag->get(self::STRICT) === true);
+        if ($depth > 1) {
+            $subMainSearch =
+                $this->getHelpers()
+                    ->handleSearchValue($parameterBag->get(CategoryService::SUB_MAIN_SEARCH), $parameterBag->get(self::STRICT) === true);
+        }
+
+        if ($depth > 2) {
+            $subSubMainSearch =
+                $this->getHelpers()
+                    ->handleSearchValue($parameterBag->get(CategoryService::SUB_SUB_MAIN_SEARCH), $parameterBag->get(self::STRICT) === true);
+        }
+
+        $query = '
+            SELECT             
+            DISTINCT ca.id';
+
+        if ($explain === true) {
+            $query .= '
+                ,ca.category_name            
+                ,cc.key_words AS main_keywords
+                ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',cc.key_words),to_tsquery(\'pg_catalog.swedish\', :main_search)) AS  main_runk
+            ';
+        }
+
+        if ($depth > 1) {
+            $query .= '
+                ,cr_main.sub_category_id AS sub_ctegory_id';
+            if ($explain === true) {
+                $query .= '
+                    ,crsub.key_words AS sub_keywords
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',crsub.key_words),to_tsquery(\'pg_catalog.swedish\', :sub_main_search)) AS  sub_runk
+                ';
+            }
+        }
+
+        if ($depth > 2) {
+            $query .= '
+                ,cr_main_main.sub_category_id AS sub_sub_category_id';
+            if ($explain === true) {
+                $query .= '
+                    ,crsub_main.key_words AS sub_sub_keywords
+                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',crsub_main.key_words),to_tsquery(\'pg_catalog.swedish\', :sub_sub_main_search)) AS  sub_sub__runk
+                ';
+            }
+        }
+
+        $query .= '
+            FROM category as ca
+            INNER JOIN category_relations as cr_ca_main ON cr_ca_main.sub_category_id != ca.id
+            INNER JOIN category_configurations as cc ON cc.category_id_id = ca.id
+        ';
+        if ($depth > 1) {
+            $query .= '
+                INNER JOIN category_relations as cr_main ON cr_main.main_category_id = ca.id
+                INNER JOIN category_configurations as crsub ON crsub.category_id_id = cr_main.sub_category_id
+            ';
+        }
+
+        if ($depth > 2) {
+            $query .= '
+                INNER JOIN category_relations as cr_main_main ON cr_main_main.main_category_id = cr_main.sub_category_id
+                INNER JOIN category_configurations as crsub_main ON crsub_main.category_id_id = cr_main_main.sub_category_id
+            ';
+        }
+        $query .= '
+            WHERE to_tsvector(\'pg_catalog.swedish\',cc.key_words) @@ to_tsquery(\'pg_catalog.swedish\', :main_search)';
+        if ($depth > 1) {
+            $query .= '
+                AND to_tsvector(\'pg_catalog.swedish\',crsub.key_words) @@ to_tsquery(\'pg_catalog.swedish\', :sub_main_search)
+            ';
+        }
+
+        if ($depth > 2) {
+            $query .= '
+                AND to_tsvector(\'pg_catalog.swedish\',crsub_main.key_words) @@ to_tsquery(\'pg_catalog.swedish\', :sub_sub_main_search)
+            ';
+        }
+
+        $query .= ' 
+            ORDER BY
+                ca.id';
+        if ($explain === true) {
+            $query .= '
+                ,cc.key_words
+            ';
+        }
+
+        if ($depth > 1) {
+            $query .= '         
+                    ,cr_main.sub_category_id';
+            if ($explain === true) {
+                $query .= '
+                        ,crsub.key_words
+                ';
+            }
+        }
+
+        if ($depth > 2) {
+            $query .= '                 
+                    ,cr_main_main.sub_category_id';
+            if ($explain === true) {
+                $query .= '
+                        ,crsub_main.key_words
+                ';
+            }
+        }
+
+        $params[':main_search'] = $mainSearch;
+        $types[':main_search'] = \PDO::PARAM_STR;
+
+        if ($depth > 1) {
+            $params[':sub_main_search'] = $subMainSearch;
+            $types[':sub_main_search'] = \PDO::PARAM_STR;
+        }
+
+        if ($depth > 2) {
+            $params[':sub_sub_main_search'] = $subSubMainSearch;
+            $types[':sub_sub_main_search'] = \PDO::PARAM_STR;
+        }
+
+        $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
+            $query,
+            $params,
+            $types,
+            ['category_runk_search_collection'],
+            0,
+            "category_runk_search_collection"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+
+        $runkCategories = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        $statement->closeCursor();
+
+        return $runkCategories;
     }
 
     /**
@@ -111,7 +401,7 @@ class CategoryRepository extends ServiceEntityRepository
         $searchField = $parameterBag->get('search');
         if ($searchField) {
             $search = $this->getHelpers()
-                ->handleSearchValue($searchField, $parameterBag->get('strict') === true);
+                ->handleSearchValue($searchField, $parameterBag->get(self::STRICT) === true);
         } else {
             $search = $searchField;
         }
@@ -244,7 +534,7 @@ class CategoryRepository extends ServiceEntityRepository
         $searchField = $parameterBag->get('search');
         if ($searchField) {
             $search = $this->getHelpers()
-                ->handleSearchValue($searchField, $parameterBag->get('strict') === true);
+                ->handleSearchValue($searchField, $parameterBag->get(self::STRICT) === true);
         } else {
             $search = $searchField;
         }
