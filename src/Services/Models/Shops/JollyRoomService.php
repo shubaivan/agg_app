@@ -25,7 +25,10 @@ class JollyRoomService implements IdentityGroup
             $product->setGroupIdentity($groupIdentity);
             if (count($explodeName) > 0) {
                 $color = trim(array_shift($explodeName));
-                $product->setSeparateExtra('COLOUR', $color);
+                if (preg_match_all('/[a-zA-Z éäöåÉÄÖÅ]+/',$color,$matches)) {
+                    $color = array_shift($matches);
+                    $product->setSeparateExtra('COLOUR', $color);
+                }
                 if (count($explodeName) > 0) {
                     $ageGroup = trim(array_shift($explodeName));
                     $product->setSeparateExtra('AGE_GROUP', $ageGroup);
