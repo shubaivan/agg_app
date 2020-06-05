@@ -217,7 +217,7 @@ Dancesuit
                      Jumpsuit, Jumpsuit, Spark suit, Bodysuit
                 ',
                 'sub_key_word' => [
-                    'Jumpsuits' => 'Jumpsuit, Jumpsuits, overall, overalls',
+                    'subJumpsuits' => 'Jumpsuit, Jumpsuits, overall, overalls',
                     'Sparkdräkter' => 'Sparkdräkt, Sparkdräkter, Spark suit',
                     'Bodysuits' => 'Bodysuit, Bodysuits'
                 ]
