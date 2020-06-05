@@ -24,7 +24,7 @@ class CategoryBarnFixtures extends Fixture
                     t-shirt, short-sleeved, tee, shortsleve, piké, girl, long-sleeved t-shirt
                 ',
                 'sub_key_word' => [
-                    'shirts' => 'T-shirt, Kortärmad, Tee, Shortsleve',
+                    'subT-shirts' => 'T-shirt, Kortärmad, Tee, Shortsleve',
                     'Pikéer' => 'Piké, Rugbytröja, Rugby tröja',
                     'Långärmade t-shirts' => 'Långärmade t-shirts'
                 ]
@@ -73,7 +73,7 @@ class CategoryBarnFixtures extends Fixture
                     shirt, shirts, blouse, blouse
                 ',
                 'sub_key_word' => [
-                    'Skjortor' => 'Skjorta, Skjortor, Shirt, Shirts',
+                    'subSkjortor' => 'Skjorta, Skjortor, Shirt, Shirts',
                     'Blusar' => 'Blus, Blusar, Blouse, Blouses'
                 ]
             ],
