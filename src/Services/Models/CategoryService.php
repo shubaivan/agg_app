@@ -88,7 +88,7 @@ class CategoryService
         Category $category
     )
     {
-        return $this->analysisProductByMainCategory(
+        return $this->analysisProductBySubMainCategory(
             $product, $category->getCategoryName(), true
         );
     }
@@ -124,16 +124,26 @@ class CategoryService
      */
     public function analysisProductByMainBarnCategory(Product $product)
     {
+        $analysisProductBySubMainCategory = $this->analysisProductBySubMainCategory(
+            $product, 'Barn'
+        );
         $analysisProductByMainCategory = $this->analysisProductByMainCategory(
             $product, 'Barn'
         );
+        $resultAnalysis = array_merge($analysisProductByMainCategory, $analysisProductBySubMainCategory);
         $mainIds = [];
         $subIds = [];
         $subSubIds = [];
-        foreach ($analysisProductByMainCategory as $categoryIds) {
-            $mainIds[] = $categoryIds['id'];
-            $subIds[] = $categoryIds['sub_ctegory_id'];
-            $subSubIds[] = $categoryIds['sub_sub_category_id'];
+        foreach ($resultAnalysis as $categoryIds) {
+            if (isset($categoryIds['id'])) {
+                $mainIds[] = $categoryIds['id'];
+            }
+            if (isset($categoryIds['sub_ctegory_id'])) {
+                $subIds[] = $categoryIds['sub_ctegory_id'];
+            }
+            if (isset($categoryIds['sub_sub_category_id'])) {
+                $subSubIds[] = $categoryIds['sub_sub_category_id'];
+            }
         }
         $mainIds = array_unique($mainIds);
         $subIds = array_unique($subIds);
@@ -159,6 +169,32 @@ class CategoryService
                 $product->addCategoryRelation($category);
             }
         }
+    }
+
+    /**
+     * @param Product $product
+     * @param string $mainCategoryKeyWord
+     * @param bool $explain
+     * @return mixed[]
+     * @throws CacheException
+     */
+    public function analysisProductBySubMainCategory(
+        Product $product,
+        string $mainCategoryKeyWord,
+        bool $explain = false
+    )
+    {
+        $parameterBag = new ParameterBag();
+        $parameterBag->set(CategoryRepository::STRICT, true);
+        $parameterBag->set(self::MAIN_SEARCH, $mainCategoryKeyWord);
+
+        $matchData = preg_replace('!\s+!', ',', $product->getName() . ', ' . $product->getDescription());
+
+        $parameterBag->set(self::SUB_MAIN_SEARCH, $matchData);
+
+        $matchCategoryWithSub = $this->matchCategoryWithSub($parameterBag, $explain);
+
+        return $matchCategoryWithSub;
     }
 
     /**
