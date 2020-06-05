@@ -89,7 +89,7 @@ class CategoryService
     )
     {
         return $this->analysisProductByMainCategory(
-            $product, $category, true
+            $product, $category->getCategoryName(), true
         );
     }
 

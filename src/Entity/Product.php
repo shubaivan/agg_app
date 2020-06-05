@@ -688,6 +688,7 @@ class Product implements EntityValidatorException
 
     public function setSeparateExtra($key, $value): self
     {
+        $value = trim($value);
         $extras = $this->getExtras();
         if (is_array($extras) && !array_key_exists($key, $extras)) {
             $this->extras = array_merge($extras, [$key => $value]);
