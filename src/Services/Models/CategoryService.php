@@ -88,7 +88,7 @@ class CategoryService
         Category $category
     )
     {
-        return $this->analysisProductBySubMainCategory(
+        return $this->analysisProductByMainCategory(
             $product, $category->getCategoryName(), true
         );
     }
@@ -117,7 +117,7 @@ class CategoryService
 
     /**
      * @param Product $product
-     * @return mixed[]
+     * @return mixed[]|void
      * @throws CacheException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -127,7 +127,9 @@ class CategoryService
         $resultAnalysis = $this->analysisProductByMainCategory(
             $product, 'Barn'
         );
-
+        if (!count($resultAnalysis)) {
+            return;
+        }
         $mainIds = [];
         $subIds = [];
         $subSubIds = [];
@@ -186,13 +188,26 @@ class CategoryService
         $parameterBag->set(self::MAIN_SEARCH, $mainCategoryKeyWord);
 
         $matchData = preg_replace('!\s+!', ',', $product->getName() . ', ' . $product->getDescription());
+        $matchData = strip_tags($matchData);
+        if (preg_match_all('/[a-zA-Z éäöåÉÄÖÅ]+/',$matchData,$matches)) {
+            $matchData = array_shift($matches);
+            if (is_array($matchData) && count($matchData)) {
+                $arrayFilter = array_filter($matchData, function ($v) {
+                    if (strlen($v) > 1) {
+                        return true;
+                    }
+                });
+                $resultData = implode(',', $arrayFilter);
+                $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);
+                $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $resultData);
 
-        $parameterBag->set(self::SUB_MAIN_SEARCH, $matchData);
-        $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $matchData);
+                $matchCategoryWithSub = $this->matchCategoryWithSub($parameterBag, $explain);
 
-        $matchCategoryWithSub = $this->matchCategoryWithSub($parameterBag, $explain);
+                return $matchCategoryWithSub;
+            }
+        }
 
-        return $matchCategoryWithSub;
+        return [];
     }
 
     /**
