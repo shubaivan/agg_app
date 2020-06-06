@@ -13,6 +13,11 @@ class CategoryBarnFixtures extends Fixture
 {
     private $manager;
 
+    /**
+     * @var integer
+     */
+    private $minLen;
+
     public function load(ObjectManager $manager)
     {
         $this->manager = $manager;
@@ -312,6 +317,7 @@ Headband, Hairband, Keychain, Belt, Belts
             $manager->flush();
         }
 
+        echo $this->minLen;
     }
 
     /**
@@ -321,6 +327,15 @@ Headband, Hairband, Keychain, Belt, Belts
      */
     private function createCategoryWithConf(string $categoryName, string $keyWords): Category
     {
+        $this->minLen = 10;
+        $keyWords = preg_replace('/\s+/', '', $keyWords);
+        $words = explode(',', $keyWords);
+        foreach ($words as $word) {
+            $strlen = strlen($word);
+            if ($strlen < $this->minLen) {
+                $this->minLen = $strlen;
+            }
+        }
         $category = $this->checkExistCategory($categoryName);
 
         if (!$category instanceof Category) {

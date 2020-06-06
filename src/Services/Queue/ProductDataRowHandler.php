@@ -97,13 +97,12 @@ class ProductDataRowHandler
             $this->getBrandService()->createBrandFromProduct($product);
 
             $this->getCategoryService()->createCategoriesFromProduct($product);
-            $this->getCategoryService()->analysisProductByMainBarnCategory($product);
 
             $this->getShopService()->createShopFromProduct($product);
 
             $this->getEm()->persist($product);
 
-            $this->getLogger()->info('sku: ' . $product->getSku());
+//            $this->getLogger()->info('sku: ' . $product->getSku());
 
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
@@ -119,6 +118,12 @@ class ProductDataRowHandler
                         [$filePath => (new \DateTime())->getTimestamp()]
                     );
             }
+            if (!$product->isMatchForCategories()) {
+                $this->getCategoryService()->handleAnalysisProductByMainCategory($product);
+                $product->setMatchForCategories(true);
+                $this->getEm()->persist($product);
+            }
+
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
