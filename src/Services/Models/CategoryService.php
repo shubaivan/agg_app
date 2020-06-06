@@ -67,21 +67,21 @@ class CategoryService
 
     /**
      * @param ParamFetcher $paramFetcher
-     * @return array
-     * @throws CacheException
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function matchCategoryWithSubFetcher(ParamFetcher $paramFetcher)
     {
         $parameterBag = new ParameterBag($paramFetcher->all());
 
-        return  $this->matchCategoryWithSub($parameterBag, true);
+        return  $this->matchCategoryWithSub(0 , $parameterBag, true);
     }
 
     /**
      * @param Product $product
      * @param Category $category
-     * @return mixed[]
-     * @throws CacheException
+     * @return array|mixed[]
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function analysisProductByMainCategoryManual(
         Product $product,
@@ -94,12 +94,13 @@ class CategoryService
     }
 
     /**
+     * @param int $productId
      * @param ParameterBag $parameterBag
      * @param bool $explain
      * @return mixed[]
-     * @throws CacheException
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function matchCategoryWithSub(ParameterBag $parameterBag, bool $explain = false) {
+    public function matchCategoryWithSub(int $productId, ParameterBag $parameterBag, bool $explain = false) {
         $depth[] = $parameterBag->get( self::MAIN_SEARCH );
 
         if ($parameterBag->get( self::SUB_MAIN_SEARCH)) {
@@ -111,43 +112,52 @@ class CategoryService
         }
 
         return $this->getCategoryRepository()->matchCategoryWithSub(
-            $parameterBag, count($depth), $explain
+            $productId, $parameterBag, count($depth), $explain
         );
     }
 
     /**
      * @param Product $product
-     * @return mixed[]|void
-     * @throws CacheException
+     * @return array|mixed[]|void
+     * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function analysisProductByMainBarnCategory(Product $product)
+    public function handleAnalysisProductByMainCategory(Product $product)
     {
+        $mainSubCategoryIds = $this->getCategoryRepository()
+            ->getMainSubCategoryIds();
+        $mainCategoryWords = [];
+        foreach ($mainSubCategoryIds as $main) {
+            if (isset($main['category_name'])) {
+                $mainCategoryWords[] = $main['category_name'];
+            }
+        }
+        if (!count($mainCategoryWords)) {
+            return;
+        }
+        $mainCategoryWordsString = implode(',', $mainCategoryWords);
         $resultAnalysis = $this->analysisProductByMainCategory(
-            $product, 'Barn'
+            $product, $mainCategoryWordsString
         );
         if (!count($resultAnalysis)) {
             return;
         }
-        $mainIds = [];
-        $subIds = [];
-        $subSubIds = [];
+
+        $mainArrayIds = [];
         foreach ($resultAnalysis as $categoryIds) {
             if (isset($categoryIds['id'])) {
-                $mainIds[] = $categoryIds['id'];
+                $mainArrayIds[] = $categoryIds['id'];
             }
             if (isset($categoryIds['sub_ctegory_id'])) {
-                $subIds[] = $categoryIds['sub_ctegory_id'];
+                $mainArrayIds[] = $categoryIds['sub_ctegory_id'];
             }
             if (isset($categoryIds['sub_sub_category_id'])) {
-                $subSubIds[] = $categoryIds['sub_sub_category_id'];
+                $mainArrayIds[] = $categoryIds['sub_sub_category_id'];
             }
         }
-        $mainIds = array_unique($mainIds);
-        $subIds = array_unique($subIds);
-        $subSubIds = array_unique($subSubIds);
-        $mainArrayIds = array_merge($mainIds, $subIds, $subSubIds);
+
+        $mainArrayIds = array_unique($mainArrayIds);
         $this->addCategoryToProductByIds($mainArrayIds, $product);
 
         return $resultAnalysis;
@@ -174,8 +184,8 @@ class CategoryService
      * @param Product $product
      * @param string $mainCategoryKeyWord
      * @param bool $explain
-     * @return mixed[]
-     * @throws CacheException
+     * @return array|mixed[]
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function analysisProductByMainCategory(
         Product $product,
@@ -193,7 +203,7 @@ class CategoryService
             $matchData = array_shift($matches);
             if (is_array($matchData) && count($matchData)) {
                 $arrayFilter = array_filter($matchData, function ($v) {
-                    if (strlen($v) > 1) {
+                    if (strlen($v) > 3) {
                         return true;
                     }
                 });
@@ -201,7 +211,7 @@ class CategoryService
                 $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);
                 $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $resultData);
 
-                $matchCategoryWithSub = $this->matchCategoryWithSub($parameterBag, $explain);
+                $matchCategoryWithSub = $this->matchCategoryWithSub($product->getId(), $parameterBag, $explain);
 
                 return $matchCategoryWithSub;
             }

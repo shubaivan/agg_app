@@ -248,6 +248,12 @@ class Product implements EntityValidatorException
      */
     private $shopRelation;
 
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
+     */
+    private $matchForCategories = false;
+
     public function __construct()
     {
         $this->userIps = new ArrayCollection();
@@ -740,6 +746,24 @@ class Product implements EntityValidatorException
     {
         $this->groupIdentity = $groupIdentity;
 
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMatchForCategories(): bool
+    {
+        return $this->matchForCategories;
+    }
+
+    /**
+     * @param bool $matchForCategories
+     * @return Product
+     */
+    public function setMatchForCategories(bool $matchForCategories): Product
+    {
+        $this->matchForCategories = $matchForCategories;
         return $this;
     }
 

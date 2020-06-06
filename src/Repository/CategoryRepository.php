@@ -107,7 +107,13 @@ class CategoryRepository extends ServiceEntityRepository
 //        $DQL = $query->getDQL();
 //        $SQL = $query->getSQL();
 //        $result = $query->getResult();
-        $mainCategoryIds = $this->getMainSubCategoryIds();
+        $rs = $this->getMainSubCategoryIds();
+        $mainCategoryIds = [];
+        foreach ($rs as $id) {
+            if (isset($id['id'])) {
+                $mainCategoryIds[] = $id['id'];
+            }
+        }
         $parameterBag = new ParameterBag($paramFetcher->all());
 
         $limit = (int)$parameterBag->get('count');
@@ -165,7 +171,7 @@ class CategoryRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
 
         $query  = '
-            SELECT id FROM category
+            SELECT id, category_name FROM category
             WHERE 
             EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = category.id)
             AND
@@ -193,11 +199,8 @@ class CategoryRepository extends ServiceEntityRepository
         $mainCategoryIds = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
         $statement->closeCursor();
-        $rs = [];
-        foreach ($mainCategoryIds as $id) {
-            $rs[] = $id['id'];
-        }
-        return $rs;
+
+        return $mainCategoryIds;
     }
 
     /**
@@ -218,10 +221,10 @@ class CategoryRepository extends ServiceEntityRepository
      * @param int $depth
      * @param bool $explain
      * @return mixed[]
-     * @throws \Doctrine\DBAL\Cache\CacheException
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function matchCategoryWithSub(
-        ParameterBag $parameterBag, int $depth = 3, $explain = false
+        int $productId, ParameterBag $parameterBag, int $depth = 3, $explain = false
     )
     {
         $connection = $this->getEntityManager()->getConnection();
@@ -274,8 +277,19 @@ class CategoryRepository extends ServiceEntityRepository
             }
         }
 
+        if ($productId !== 0) {
+            $query .= '
+                FROM products pr
+                RIGHT JOIN product_category pc ON pc.product_id = pr.id
+                RIGHT JOIN category ca ON ca.id = pc.category_id
+            ';
+        } else {
+            $query .= '
+                FROM category as ca
+            ';
+        }
+
         $query .= '
-            FROM category as ca
             INNER JOIN category_relations as cr_ca_main ON cr_ca_main.sub_category_id != ca.id
             INNER JOIN category_configurations as cc ON cc.category_id_id = ca.id
         ';
@@ -292,8 +306,19 @@ class CategoryRepository extends ServiceEntityRepository
                 INNER JOIN category_configurations as crsub_main ON crsub_main.category_id_id = cr_main_main.sub_category_id
             ';
         }
-        $query .= '
-            WHERE to_tsvector(\'pg_catalog.swedish\',cc.key_words) @@ to_tsquery(\'pg_catalog.swedish\', :main_search)';
+
+        if ($productId !== 0) {
+            $query .= '
+                WHERE pr.id = :products_id
+                AND to_tsvector(\'pg_catalog.swedish\',pr.category) @@ to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)
+            ';
+        } else {
+            $query .= '
+                WHERE to_tsvector(\'pg_catalog.swedish\',cc.key_words) @@ to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)
+            ';
+        }
+
+
         if ($depth > 1) {
             $query .= '
                 AND to_tsvector(\'pg_catalog.swedish\',crsub.key_words) @@ to_tsquery(\'pg_catalog.swedish\', :sub_main_search)
@@ -335,8 +360,13 @@ class CategoryRepository extends ServiceEntityRepository
             }
         }
 
-        $params[':main_search'] = $mainSearch;
-        $types[':main_search'] = \PDO::PARAM_STR;
+        if ($productId !== 0) {
+            $params[':products_id'] = $productId;
+            $types[':products_id'] = \PDO::PARAM_INT;
+        }
+
+        $params[':main_search_parial_category'] = $mainSearch;
+        $types[':main_search_parial_category'] = \PDO::PARAM_STR;
 
         if ($depth > 1) {
             $params[':sub_main_search'] = $subMainSearch;
@@ -348,28 +378,14 @@ class CategoryRepository extends ServiceEntityRepository
             $types[':sub_sub_main_search'] = \PDO::PARAM_STR;
         }
 
-        $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
-            $query,
-            $params,
-            $types,
-            ['category_runk_search_collection'],
-            0,
-            "category_runk_search_collection"
-        );
-        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
-            ->prepareParamsForExecuteCacheQuery();
-
         /** @var ResultCacheStatement $statement */
-        $statement = $connection->executeCacheQuery(
+        $statement = $connection->executeQuery(
             $query,
             $params,
-            $types,
-            $queryCacheProfile
+            $types
         );
 
         $runkCategories = $statement->fetchAll(\PDO::FETCH_ASSOC);
-
-        $statement->closeCursor();
 
         return $runkCategories;
     }
