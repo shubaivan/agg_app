@@ -183,7 +183,9 @@ class ProductDataRowHandler
                         [$filePath => (new \DateTime())->getTimestamp()]
                     );
             }
-            if (!$product->isMatchForCategories()) {
+            if (!$product->isMatchForCategories()
+                && $this->getCategoryService()->checkAvailableAnalysisProduct($product->getId())
+            ) {
                 $this->getBus()->dispatch(new AnalysisProductByMainCategories(
                     $product->getId(),
                     $dataRow->getLastProduct(),

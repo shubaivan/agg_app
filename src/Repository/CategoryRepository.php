@@ -233,26 +233,9 @@ class CategoryRepository extends ServiceEntityRepository
                 ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), false);
 
         if ($productId !== 0) {
-            $checkMainCategories = '
-                SELECT pr.id
-                FROM products pr
-                WHERE to_tsvector(\'pg_catalog.swedish\',pr.category) @@ to_tsquery(\'pg_catalog.swedish\', :main_search)
-                AND pr.id = :product_id
-            ';
-            $mainParams[':product_id'] = $productId;
-            $mainType[':product_id'] = \PDO::PARAM_INT;
-
-            $mainParams[':main_search'] = $mainSearch;
-            $mainType[':main_search'] = \PDO::PARAM_STR;
-
-            /** @var ResultCacheStatement $statement */
-            $statement = $connection->executeQuery(
-                $checkMainCategories,
-                $mainParams,
-                $mainType
+            $checkMainCategoriesResult = $this->checkAvailableAnalysisProduct(
+                $productId, $mainSearch
             );
-
-            $checkMainCategoriesResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
             if (!$checkMainCategoriesResult) {
                 return [];
@@ -671,5 +654,45 @@ class CategoryRepository extends ServiceEntityRepository
     public function getTagAwareQueryResultCacheCategory(): TagAwareQueryResultCacheCategory
     {
         return $this->tagAwareQueryResultCacheCategory;
+    }
+
+    /**
+     * @param int $productId
+     * @param $mainParams
+     * @param $mainType
+     * @param string $mainSearch
+     * @param \Doctrine\DBAL\Connection $connection
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function checkAvailableAnalysisProduct(
+        int $productId,
+        string $mainSearch
+    ): array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $checkMainCategories = '
+                SELECT pr.id
+                FROM products pr
+                WHERE to_tsvector(\'pg_catalog.swedish\',pr.category) @@ to_tsquery(\'pg_catalog.swedish\', :main_search)
+                AND pr.id = :product_id
+            ';
+        $mainParams[':product_id'] = $productId;
+        $mainType[':product_id'] = \PDO::PARAM_INT;
+
+        $mainParams[':main_search'] = $mainSearch;
+        $mainType[':main_search'] = \PDO::PARAM_STR;
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeQuery(
+            $checkMainCategories,
+            $mainParams,
+            $mainType
+        );
+
+        $checkMainCategoriesResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $checkMainCategoriesResult;
     }
 }
