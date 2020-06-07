@@ -26,7 +26,7 @@ class AdtractionDataRowHandler implements MessageHandlerInterface
     /**
      * @param AdtractionDataRow $adtractionDataRow
      * @throws ValidatorException
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function __invoke(AdtractionDataRow $adtractionDataRow)
     {

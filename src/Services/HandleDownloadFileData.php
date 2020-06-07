@@ -71,7 +71,12 @@ class HandleDownloadFileData
     /**
      * @var TraceableMessageBus
      */
-    private $bus;
+    private $commandBus;
+
+    /**
+     * @var TraceableMessageBus
+     */
+    private $productsBus;
 
     /**
      * @var Logger
@@ -105,7 +110,8 @@ class HandleDownloadFileData
 
     /**
      * HandleDownloadFileData constructor.
-     * @param MessageBusInterface $bus
+     * @param MessageBusInterface $commandBus
+     * @param MessageBusInterface $productsBus
      * @param LoggerInterface $adtractionFileHandlerLogger
      * @param RedisHelper $redisHelper
      * @param CacheManager $cacheManager
@@ -114,7 +120,8 @@ class HandleDownloadFileData
      * @param string $csvHandleStep
      */
     public function __construct(
-        MessageBusInterface $bus,
+        MessageBusInterface $commandBus,
+        MessageBusInterface $productsBus,
         LoggerInterface $adtractionFileHandlerLogger,
         RedisHelper $redisHelper,
         CacheManager $cacheManager,
@@ -125,7 +132,8 @@ class HandleDownloadFileData
     {
         $this->adrecordDownloadUrls = $adrecordDownloadUrls;
         $this->adtractionDownloadUrls = $adtractionDownloadUrls;
-        $this->bus = $bus;
+        $this->commandBus = $commandBus;
+        $this->productsBus = $productsBus;
         $this->logger = $adtractionFileHandlerLogger;
         $this->redisHelper = $redisHelper;
         $this->cacheManager = $cacheManager;
@@ -233,7 +241,7 @@ class HandleDownloadFileData
         }
 
         for($i = 0; $i<=$count; $i = $i + $this->csvHandleStep) {
-            $this->getBus()->dispatch(
+            $this->getCommandBus()->dispatch(
                 new CarriageShop(
                     $i,
                     ($i + $this->csvHandleStep >= $count
@@ -259,38 +267,6 @@ class HandleDownloadFileData
         }
 
         return false;
-    }
-
-    /**
-     * @return TraceableMessageBus
-     */
-    protected function getBus()
-    {
-        return $this->bus;
-    }
-
-    /**
-     * @return Logger
-     */
-    protected function getLogger(): Logger
-    {
-        return $this->logger;
-    }
-
-    /**
-     * @return RedisHelper
-     */
-    protected function getRedisHelper(): RedisHelper
-    {
-        return $this->redisHelper;
-    }
-
-    /**
-     * @return CacheManager
-     */
-    protected function getCacheManager(): CacheManager
-    {
-        return $this->cacheManager;
     }
 
     /**
@@ -342,7 +318,7 @@ class HandleDownloadFileData
                 Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
 
         if (isset($this->adtractionDownloadUrls[$shop])) {
-            $this->getBus()->dispatch(new AdtractionDataRow(
+            $this->getProductsBus()->dispatch(new AdtractionDataRow(
                 $record,
                 $filePath,
                 $redisUniqKey,
@@ -358,7 +334,7 @@ class HandleDownloadFileData
                 ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey))
             );
             $adrecordDataRow->transform();
-            $this->getBus()->dispatch($adrecordDataRow);
+            $this->getProductsBus()->dispatch($adrecordDataRow);
         }
     }
 
@@ -376,5 +352,46 @@ class HandleDownloadFileData
             );
 
         return (int) $count;
+    }
+
+
+    /**
+     * @return TraceableMessageBus
+     */
+    protected function getCommandBus()
+    {
+        return $this->commandBus;
+    }
+
+    /**
+     * @return Logger
+     */
+    protected function getLogger(): Logger
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @return RedisHelper
+     */
+    protected function getRedisHelper(): RedisHelper
+    {
+        return $this->redisHelper;
+    }
+
+    /**
+     * @return CacheManager
+     */
+    protected function getCacheManager(): CacheManager
+    {
+        return $this->cacheManager;
+    }
+
+    /**
+     * @return TraceableMessageBus
+     */
+    public function getProductsBus(): TraceableMessageBus
+    {
+        return $this->productsBus;
     }
 }
