@@ -9,6 +9,7 @@ use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\CategoriesCollection;
 use App\Entity\Collection\Search\SearchCategoriesCollection;
 use App\Entity\Product;
+use App\Entity\Shop;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Services\ObjectsHandler;
@@ -134,14 +135,15 @@ class CategoryService
             }
         }
         if (!count($mainCategoryWords)) {
-            return;
+            return [];
         }
+
         $mainCategoryWordsString = implode(',', $mainCategoryWords);
         $resultAnalysis = $this->analysisProductByMainCategory(
             $product, $mainCategoryWordsString
         );
         if (!count($resultAnalysis)) {
-            return;
+            return [];
         }
 
         $mainArrayIds = [];

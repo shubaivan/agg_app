@@ -77,6 +77,18 @@ framework:
               carriage_shop:
                 binding_keys: [carriage_shop]
 
+        analysis_product_by_main_categories:
+          dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+          serializer: App\Messenger\ExternalJsonMessageSerializer
+          options:
+            exchange:
+              type: direct
+              name: analysis_product_by_main_categories
+              default_publish_routing_key: analysis_product_by_main_categories
+            queues:
+              analysis_product_by_main_categories:
+                binding_keys: [analysis_product_by_main_categories]
+
         failed: 'doctrine://default?queue_name=failed'
 
       routing:
@@ -84,4 +96,5 @@ framework:
         'App\QueueModel\AdtractionDataRow': andraction_parse_row
         'App\QueueModel\AdrecordDataRow': adrecord_parse_row
         'App\QueueModel\CarriageShop': carriage_shop
+        'App\QueueModel\AnalysisProductByMainCategories': analysis_product_by_main_categories
 
