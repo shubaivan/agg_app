@@ -5,23 +5,15 @@ framework:
         symfony_serializer:
           format: json
           context: { }
+      default_bus: command.bus
       buses:
-        messenger.bus.default:
+        command.bus:
           middleware:
-            # each time a message is handled, the Doctrine connection
-            # is "pinged" and reconnected if it's closed. Useful
-            # if your workers run for a long time and the database
-            # connection is sometimes lost
+            - reply_middleware
+        products.bus:
+          middleware:
             - doctrine_ping_connection
-
-            # After handling, the Doctrine connection is closed,
-            # which can free up database connections in a worker,
-            # instead of keeping them open forever
             - doctrine_close_connection
-
-            # wraps all handlers in a single Doctrine transaction
-            # handlers do not need to call flush() and an error
-            # in any handler will cause a rollback
             - doctrine_transaction
 
       failure_transport: failed
@@ -77,18 +69,6 @@ framework:
               carriage_shop:
                 binding_keys: [carriage_shop]
 
-        analysis_product_by_main_categories:
-          dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-          serializer: App\Messenger\ExternalJsonMessageSerializer
-          options:
-            exchange:
-              type: direct
-              name: analysis_product_by_main_categories
-              default_publish_routing_key: analysis_product_by_main_categories
-            queues:
-              analysis_product_by_main_categories:
-                binding_keys: [analysis_product_by_main_categories]
-
         failed: 'doctrine://default?queue_name=failed'
 
       routing:
@@ -96,5 +76,3 @@ framework:
         'App\QueueModel\AdtractionDataRow': andraction_parse_row
         'App\QueueModel\AdrecordDataRow': adrecord_parse_row
         'App\QueueModel\CarriageShop': carriage_shop
-        'App\QueueModel\AnalysisProductByMainCategories': analysis_product_by_main_categories
-

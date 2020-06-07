@@ -54,6 +54,9 @@ parameters:
 services:
     # default configuration for services in *this* file
     _defaults:
+        bind:
+          $commandBus: '@command.bus'
+          $productsBus: '@products.bus'
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
@@ -135,6 +138,13 @@ services:
     App\Services\HandleAdtractionData:
       lazy: true
 
+    App\EventListener\MessengerListener:
+      lazy: true
+
+    messenger.middleware.reply_middleware:
+      class: App\Middleware\ReplyMiddleware
+      lazy: true
+
     serializer.normalizer.flatten_exception:
       class: App\Symfony\Component\Serializer\Normalizer\FlattenExceptionNormalizer
       tags:
@@ -145,6 +155,8 @@ services:
         $adtractionDownloadUrls: '%adtraction_download_urls%'
         $adrecordDownloadUrls: '%adrecord_download_urls%'
         $csvHandleStep: '%csv_handle_step%'
+        $productsBus: '@products.bus'
+        $commandBus: '@command.bus'
       lazy: true
 
     App\Command\ResourceDownloadFile:
@@ -164,3 +176,28 @@ services:
       arguments: ['@fos_rest.decoder_provider', '%fos_rest.throw_exception_on_unsupported_content_type%']
       calls:
         - [setDefaultFormat, ['%fos_rest.body_default_format%']]
+
+    App\QueueModelHandlers\CarriageShopHandler:
+      tags: [{ name: messenger.message_handler, bus: command.bus }]
+      # prevent handlers from being registered twice (or you can remove
+      # the MessageHandlerInterface that autoconfigure uses to find handlers)
+      autoconfigure: false
+
+    App\QueueModelHandlers\FileReadyDownloadedHandler:
+      tags: [{ name: messenger.message_handler, bus: command.bus }]
+      # prevent handlers from being registered twice (or you can remove
+      # the MessageHandlerInterface that autoconfigure uses to find handlers)
+      autoconfigure: false
+
+
+    App\QueueModelHandlers\AdrecordDataRowHandler:
+      tags: [{ name: messenger.message_handler, bus: products.bus }]
+      # prevent handlers from being registered twice (or you can remove
+      # the MessageHandlerInterface that autoconfigure uses to find handlers)
+      autoconfigure: false
+
+    App\QueueModelHandlers\AdtractionDataRowHandler:
+      tags: [{ name: messenger.message_handler, bus: products.bus }]
+      # prevent handlers from being registered twice (or you can remove
+      # the MessageHandlerInterface that autoconfigure uses to find handlers)
+      autoconfigure: false

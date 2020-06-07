@@ -170,12 +170,12 @@ class ProductService
     }
 
     /**
-     * @param int $id
+     * @param string $sku
      * @return Product|object|null
      */
-    public function getEntityProductById(int $id) {
+    public function getEntityProductBySku(string $sku) {
         return $this->getProductRepository()
-            ->findOneBy(['id' => $id]);
+            ->findOneBy(['sku' => $sku]);
     }
 
     /**
