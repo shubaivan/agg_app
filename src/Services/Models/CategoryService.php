@@ -118,6 +118,32 @@ class CategoryService
     }
 
     /**
+     * @param int $productId
+     * @return array
+     * @throws CacheException
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function checkAvailableAnalysisProduct(int $productId)
+    {
+        $mainSubCategoryIds = $this->getCategoryRepository()
+            ->getMainSubCategoryIds();
+        $mainCategoryWords = [];
+        foreach ($mainSubCategoryIds as $main) {
+            if (isset($main['category_name'])) {
+                $mainCategoryWords[] = $main['category_name'];
+            }
+        }
+
+        if (!count($mainCategoryWords)) {
+            return [];
+        }
+        $mainCategoryWordsString = implode(',', $mainCategoryWords);
+
+        return $this->getCategoryRepository()
+            ->checkAvailableAnalysisProduct($productId, $mainCategoryWordsString);
+    }
+
+    /**
      * @param Product $product
      * @return array|mixed[]|void
      * @throws \Doctrine\DBAL\DBALException

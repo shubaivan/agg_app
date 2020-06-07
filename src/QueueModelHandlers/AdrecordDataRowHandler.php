@@ -26,7 +26,7 @@ class AdrecordDataRowHandler implements MessageHandlerInterface
     /**
      * @param AdrecordDataRow $adrecordDataRow
      * @throws ValidatorException
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function __invoke(AdrecordDataRow $adrecordDataRow)
     {
