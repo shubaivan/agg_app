@@ -251,7 +251,7 @@ class CategoryRepository extends ServiceEntityRepository
             $query .= '
                 ,ca.category_name            
                 ,cc.key_words AS main_keywords
-                ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',cc.key_words),to_tsquery(\'pg_catalog.swedish\', :main_search)) AS  main_runk
+                ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',cc.key_words),to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)) AS  main_runk
             ';
         }
 
