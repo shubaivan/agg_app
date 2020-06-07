@@ -103,18 +103,17 @@ class ProductDataRowHandler
     public function handleAnalysisProductByMainCategory(ResourceDataRow $resourceDataRow)
     {
         try {
-            $this->getEm()->getConnection()->beginTransaction();
             $filePath = $resourceDataRow->getFilePath();
             $shop = $resourceDataRow->getShop();
             $product = $this->getProductService()
                 ->getEntityProductBySku($resourceDataRow->getSku());
             if ($product) {
+
                 $handleAnalysisProductByMainCategory = $this->getCategoryService()
                     ->handleAnalysisProductByMainCategory($product);
                 if (count($handleAnalysisProductByMainCategory)) {
                     $product->setMatchForCategories(true);
                     $this->getEm()->flush();
-                    $this->getEm()->getConnection()->commit();
 
                     $this->getRedisHelper()
                         ->hIncrBy(Shop::PREFIX_HASH . $resourceDataRow->getRedisUniqKey(),
@@ -137,7 +136,6 @@ class ProductDataRowHandler
                         Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED . $shop);
             }
         } catch (\Throwable $exception) {
-            $this->getEm()->getConnection()->rollBack();
             $this->getLogger()->error($exception->getMessage());
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
@@ -170,6 +168,7 @@ class ProductDataRowHandler
             $this->getShopService()->createShopFromProduct($product);
 
             $this->getEm()->persist($product);
+            $this->getEm()->flush();
 
 //            $this->getLogger()->info('sku: ' . $product->getSku());
 
@@ -187,6 +186,7 @@ class ProductDataRowHandler
                         [$filePath => (new \DateTime())->getTimestamp()]
                     );
             }
+            $this->handleAnalysisProductByMainCategory($dataRow);
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
@@ -214,6 +214,15 @@ class ProductDataRowHandler
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
             throw $e;
+        } catch (\Throwable $exception) {
+            $this->getLogger()->error($exception->getMessage());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
+            throw $exception;
         }
 
         echo $dataRow->getSku() . PHP_EOL;

@@ -8,13 +8,11 @@ framework:
       default_bus: command.bus
       buses:
         command.bus:
-          middleware:
-            - reply_middleware
+          middleware: ~
         products.bus:
           middleware:
             - doctrine_ping_connection
             - doctrine_close_connection
-            - doctrine_transaction
 
       failure_transport: failed
 
