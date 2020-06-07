@@ -138,13 +138,6 @@ services:
     App\Services\HandleAdtractionData:
       lazy: true
 
-    App\EventListener\MessengerListener:
-      lazy: true
-
-    messenger.middleware.reply_middleware:
-      class: App\Middleware\ReplyMiddleware
-      lazy: true
-
     serializer.normalizer.flatten_exception:
       class: App\Symfony\Component\Serializer\Normalizer\FlattenExceptionNormalizer
       tags:
