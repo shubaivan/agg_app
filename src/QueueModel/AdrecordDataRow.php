@@ -2,7 +2,7 @@
 
 namespace App\QueueModel;
 
-class AdrecordDataRow extends Queues implements ResourceDataRow
+class AdrecordDataRow extends Queues implements ResourceDataRow, LastProductInterface
 {
     /**
      * @var array

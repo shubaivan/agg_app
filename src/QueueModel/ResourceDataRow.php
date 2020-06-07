@@ -31,17 +31,6 @@ interface ResourceDataRow
     public function getFilePath();
 
     /**
-     * @return bool
-     */
-    public function getLastProduct(): bool;
-
-    /**
-     * @param bool $isEndProduct
-     * @return $this
-     */
-    public function setLastProduct(bool $isEndProduct);
-
-    /**
      * @return string
      */
     public function getRedisUniqKey(): string;

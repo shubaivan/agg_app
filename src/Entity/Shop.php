@@ -26,6 +26,8 @@ class Shop
 {
     const PREFIX_HASH = 'statistic:';
 
+    const PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL = 'shop:handle:analysis:product:successful:';
+    const PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED = 'shop:handle:analysis:product:failed:';
     const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL = 'shop:processing:successful:';
     const PREFIX_PROCESSING_DATA_SHOP_FAILED = 'shop:processing:failed:';
 

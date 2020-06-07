@@ -230,7 +230,35 @@ class CategoryRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
         $mainSearch =
             $this->getHelpers()
-                ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), $parameterBag->get(self::STRICT) === true);
+                ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), false);
+
+        if ($productId !== 0) {
+            $checkMainCategories = '
+                SELECT pr.id
+                FROM products pr
+                WHERE to_tsvector(\'pg_catalog.swedish\',pr.category) @@ to_tsquery(\'pg_catalog.swedish\', :main_search)
+                AND pr.id = :product_id
+            ';
+            $mainParams[':product_id'] = $productId;
+            $mainType[':product_id'] = \PDO::PARAM_INT;
+
+            $mainParams[':main_search'] = $mainSearch;
+            $mainType[':main_search'] = \PDO::PARAM_STR;
+
+            /** @var ResultCacheStatement $statement */
+            $statement = $connection->executeQuery(
+                $checkMainCategories,
+                $mainParams,
+                $mainType
+            );
+
+            $checkMainCategoriesResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (!$checkMainCategoriesResult) {
+                return [];
+            }
+        }
+
         if ($depth > 1) {
             $subMainSearch =
                 $this->getHelpers()
@@ -277,17 +305,9 @@ class CategoryRepository extends ServiceEntityRepository
             }
         }
 
-        if ($productId !== 0) {
-            $query .= '
-                FROM products pr
-                RIGHT JOIN product_category pc ON pc.product_id = pr.id
-                RIGHT JOIN category ca ON ca.id = pc.category_id
-            ';
-        } else {
-            $query .= '
+        $query .= '
                 FROM category as ca
             ';
-        }
 
         $query .= '
             INNER JOIN category_relations as cr_ca_main ON cr_ca_main.sub_category_id != ca.id
@@ -307,16 +327,9 @@ class CategoryRepository extends ServiceEntityRepository
             ';
         }
 
-        if ($productId !== 0) {
-            $query .= '
-                WHERE pr.id = :products_id
-                AND to_tsvector(\'pg_catalog.swedish\',pr.category) @@ to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)
-            ';
-        } else {
-            $query .= '
+        $query .= '
                 WHERE to_tsvector(\'pg_catalog.swedish\',cc.key_words) @@ to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)
             ';
-        }
 
 
         if ($depth > 1) {
@@ -358,11 +371,6 @@ class CategoryRepository extends ServiceEntityRepository
                         ,crsub_main.key_words
                 ';
             }
-        }
-
-        if ($productId !== 0) {
-            $params[':products_id'] = $productId;
-            $types[':products_id'] = \PDO::PARAM_INT;
         }
 
         $params[':main_search_parial_category'] = $mainSearch;

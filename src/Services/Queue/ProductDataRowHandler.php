@@ -4,6 +4,8 @@ namespace App\Services\Queue;
 
 use App\Entity\Shop;
 use App\Exception\ValidatorException;
+use App\QueueModel\AdtractionDataRow;
+use App\QueueModel\AnalysisProductByMainCategories;
 use App\QueueModel\ResourceDataRow;
 use App\Services\HandleDownloadFileData;
 use App\Services\Models\BrandService;
@@ -16,9 +18,16 @@ use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\TraceableMessageBus;
 
 class ProductDataRowHandler
 {
+    /**
+     * @var TraceableMessageBus
+     */
+    private $bus;
+
     /**
      * @var Logger
      */
@@ -56,6 +65,7 @@ class ProductDataRowHandler
 
     /**
      * AdtractionDataRowHandler constructor.
+     * @param MessageBusInterface $bus
      * @param Logger $adtractionCsvRowHandlerLogger
      * @param ProductService $productService
      * @param BrandService $brandService
@@ -65,6 +75,7 @@ class ProductDataRowHandler
      * @param RedisHelper $redisHelper
      */
     public function __construct(
+        MessageBusInterface $bus,
         LoggerInterface $adtractionCsvRowHandlerLogger,
         ProductService $productService,
         BrandService $brandService,
@@ -74,6 +85,7 @@ class ProductDataRowHandler
         RedisHelper $redisHelper
     )
     {
+        $this->bus = $bus;
         $this->logger = $adtractionCsvRowHandlerLogger;
         $this->productService = $productService;
         $this->brandService = $brandService;
@@ -84,9 +96,62 @@ class ProductDataRowHandler
     }
 
     /**
+     * @param AnalysisProductByMainCategories $analysisProduct
+     * @throws \Exception
+     */
+    public function handleAnalysisProductByMainCategory(AnalysisProductByMainCategories $analysisProduct)
+    {
+        try {
+            $filePath = $analysisProduct->getFilePath();
+            $shop = $analysisProduct->getShop();
+            $product = $this->getProductService()
+                ->getEntityProductById($analysisProduct->getProductId());
+            if ($product) {
+                $handleAnalysisProductByMainCategory = $this->getCategoryService()
+                    ->handleAnalysisProductByMainCategory($product);
+                if (count($handleAnalysisProductByMainCategory)) {
+                    $product->setMatchForCategories(true);
+                    $this->getEm()->persist($product);
+
+                    $this->getRedisHelper()
+                        ->hIncrBy(Shop::PREFIX_HASH . $analysisProduct->getRedisUniqKey(),
+                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $filePath);
+                    $this->getRedisHelper()
+                        ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $shop);
+                } else {
+                    $fail = true;
+                }
+            } else {
+                $fail = true;
+            }
+            if (isset($fail)) {
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . $analysisProduct->getRedisUniqKey(),
+                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED . $filePath);
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED . $shop);
+            }
+        } catch (\Exception $e) {
+            $this->getLogger()->error($e->getMessage());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED . $analysisProduct->getShop());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $analysisProduct->getRedisUniqKey(),
+                    Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED . $analysisProduct->getFilePath());
+            throw $e;
+        }
+
+        echo $analysisProduct->getProductId() . PHP_EOL;
+    }
+
+
+    /**
      * @param ResourceDataRow $dataRow
      * @throws ValidatorException
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function handleCsvRow(ResourceDataRow $dataRow)
     {
@@ -119,9 +184,13 @@ class ProductDataRowHandler
                     );
             }
             if (!$product->isMatchForCategories()) {
-                $this->getCategoryService()->handleAnalysisProductByMainCategory($product);
-                $product->setMatchForCategories(true);
-                $this->getEm()->persist($product);
+                $this->getBus()->dispatch(new AnalysisProductByMainCategories(
+                    $product->getId(),
+                    $dataRow->getLastProduct(),
+                    $dataRow->getFilePath(),
+                    $dataRow->getRedisUniqKey(),
+                    $dataRow->getShop()
+                ));
             }
 
         } catch (ValidatorException $e) {
@@ -210,5 +279,13 @@ class ProductDataRowHandler
     protected function getRedisHelper(): RedisHelper
     {
         return $this->redisHelper;
+    }
+
+    /**
+     * @return TraceableMessageBus
+     */
+    public function getBus(): TraceableMessageBus
+    {
+        return $this->bus;
     }
 }
