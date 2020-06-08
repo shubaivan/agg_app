@@ -75,7 +75,7 @@ class CategoryService
     {
         $parameterBag = new ParameterBag($paramFetcher->all());
 
-        return  $this->matchCategoryWithSub(0 , $parameterBag, true);
+        return  $this->matchCategoryWithSub(null , $parameterBag, true);
     }
 
     /**
@@ -95,13 +95,13 @@ class CategoryService
     }
 
     /**
-     * @param int $productId
+     * @param Product|null $product
      * @param ParameterBag $parameterBag
      * @param bool $explain
-     * @return mixed[]
+     * @return array|mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function matchCategoryWithSub(int $productId, ParameterBag $parameterBag, bool $explain = false) {
+    public function matchCategoryWithSub(?Product $product = null, ParameterBag $parameterBag, bool $explain = false) {
         $depth[] = $parameterBag->get( self::MAIN_SEARCH );
 
         if ($parameterBag->get( self::SUB_MAIN_SEARCH)) {
@@ -113,7 +113,7 @@ class CategoryService
         }
 
         return $this->getCategoryRepository()->matchCategoryWithSub(
-            $productId, $parameterBag, count($depth), $explain
+            $product, $parameterBag, count($depth), $explain
         );
     }
 
@@ -239,7 +239,7 @@ class CategoryService
                 $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);
                 $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $resultData);
 
-                $matchCategoryWithSub = $this->matchCategoryWithSub($product->getId(), $parameterBag, $explain);
+                $matchCategoryWithSub = $this->matchCategoryWithSub($product, $parameterBag, $explain);
 
                 return $matchCategoryWithSub;
             }

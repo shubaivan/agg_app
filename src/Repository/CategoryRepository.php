@@ -7,6 +7,7 @@ use App\Cache\TagAwareQueryResultCacheCategory;
 use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\CategoryRelations;
+use App\Entity\Product;
 use App\Services\Helpers;
 use App\Services\Models\CategoryService;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -217,14 +218,15 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param Product|null $product
      * @param ParameterBag $parameterBag
      * @param int $depth
      * @param bool $explain
-     * @return mixed[]
+     * @return array|mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
     public function matchCategoryWithSub(
-        int $productId, ParameterBag $parameterBag, int $depth = 3, $explain = false
+        ?Product $product = null, ParameterBag $parameterBag, int $depth = 3, $explain = false
     )
     {
         $connection = $this->getEntityManager()->getConnection();
@@ -232,9 +234,9 @@ class CategoryRepository extends ServiceEntityRepository
             $this->getHelpers()
                 ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), false);
 
-        if ($productId !== 0) {
-            $checkMainCategoriesResult = $this->checkAvailableAnalysisProduct(
-                $productId, $mainSearch
+        if ($product) {
+            $checkMainCategoriesResult = $this->isMatchPlainCategoriesString(
+                $product->getCategory(), $mainSearch
             );
 
             if (!$checkMainCategoriesResult) {
@@ -654,6 +656,45 @@ class CategoryRepository extends ServiceEntityRepository
     public function getTagAwareQueryResultCacheCategory(): TagAwareQueryResultCacheCategory
     {
         return $this->tagAwareQueryResultCacheCategory;
+    }
+
+    /**
+     * @param string $productCategoriesData
+     * @param string $mainCategoriesData
+     * @return bool
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function isMatchPlainCategoriesString(
+        string $productCategoriesData,
+        string $mainCategoriesData
+    )
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $query = 'select
+        	to_tsvector(\'pg_catalog.swedish\',:product_categories_data) 
+        	@@ to_tsquery(\'pg_catalog.swedish\', :main_categories_data) as match';
+
+        $mainParams[':product_categories_data'] = $productCategoriesData;
+        $mainType[':product_categories_data'] = \PDO::PARAM_STR;
+
+        $mainParams[':main_categories_data'] = $mainCategoriesData;
+        $mainType[':main_categories_data'] = \PDO::PARAM_STR;
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeQuery(
+            $query,
+            $mainParams,
+            $mainType
+        );
+
+        $isMatchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        if (count($isMatchResult)) {
+            $result = array_shift($isMatchResult);
+            return $result['match'];
+        } else {
+            return false;
+        }
     }
 
     /**
