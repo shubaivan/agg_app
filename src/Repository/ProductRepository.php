@@ -278,7 +278,9 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @param ParameterBag $parameterBag
      * @param string $query
+     * @param bool $count
      * @return string
+     * @throws \Exception
      */
     private function prepareMainCondition(
         ParameterBag &$parameterBag,
@@ -302,21 +304,23 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         if ($parameterBag->get('category_word')) {
-            $parameterBag->set('category_word', $this->getHelpers()
-                ->handleSearchValue($parameterBag->get('category_word'), false));
-            $this->queryMainCondition .= '
-                INNER JOIN product_category cps on cps.product_id = products_alias.id                                   
-                INNER JOIN category cat on cps.category_id = cat.id         
-            ';
-            $this->queryMainCondition .= preg_match(
-                '/\b(WHERE)\b/',
-                $this->queryMainCondition,
-                $matches
-            ) > 0 ? ' AND ' : ' WHERE ';
-            $this->queryMainCondition .= '
-                    cat.category_name ~ :category_word
-            ';
+            throw new \Exception('deprecated key');
         }
+//            $parameterBag->set('category_word', $this->getHelpers()
+//                ->handleSearchValue($parameterBag->get('category_word'), false));
+//            $this->queryMainCondition .= '
+//                INNER JOIN product_category cps on cps.product_id = products_alias.id
+//                INNER JOIN category cat on cps.category_id = cat.id
+//            ';
+//            $this->queryMainCondition .= preg_match(
+//                '/\b(WHERE)\b/',
+//                $this->queryMainCondition,
+//                $matches
+//            ) > 0 ? ' AND ' : ' WHERE ';
+//            $this->queryMainCondition .= '
+//                    cat.category_name ~ :category_word
+//            ';
+//        }
 
         if (is_array($parameterBag->get('extra_array'))
             && array_search('0', $parameterBag->get('extra_array'), true) === false
@@ -451,10 +455,10 @@ class ProductRepository extends ServiceEntityRepository
             $this->types[':search'] = \PDO::PARAM_STR;
         }
 
-        if ($parameterBag->get('category_word')) {
-            $this->params[':category_word'] = $parameterBag->get('category_word');
-            $this->types[':category_word'] = \PDO::PARAM_STR;
-        }
+//        if ($parameterBag->get('category_word')) {
+//            $this->params[':category_word'] = $parameterBag->get('category_word');
+//            $this->types[':category_word'] = \PDO::PARAM_STR;
+//        }
 
         if (!$count) {
             $limit = (int)$parameterBag->get('count');
