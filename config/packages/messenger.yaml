@@ -13,6 +13,7 @@ framework:
           middleware:
             - doctrine_ping_connection
             - doctrine_close_connection
+            - doctrine_transaction
 
       failure_transport: failed
 

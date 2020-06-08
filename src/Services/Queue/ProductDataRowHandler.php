@@ -96,61 +96,6 @@ class ProductDataRowHandler
     }
 
     /**
-     * @param ResourceDataRow $resourceDataRow
-     * @throws \Doctrine\DBAL\ConnectionException
-     * @throws \Throwable
-     */
-    public function handleAnalysisProductByMainCategory(ResourceDataRow $resourceDataRow)
-    {
-        try {
-            $filePath = $resourceDataRow->getFilePath();
-            $shop = $resourceDataRow->getShop();
-            $product = $this->getProductService()
-                ->getEntityProductBySku($resourceDataRow->getSku());
-            if ($product) {
-
-                $handleAnalysisProductByMainCategory = $this->getCategoryService()
-                    ->handleAnalysisProductByMainCategory($product);
-                if (count($handleAnalysisProductByMainCategory)) {
-                    $product->setMatchForCategories(true);
-                    $this->getEm()->flush();
-
-                    $this->getRedisHelper()
-                        ->hIncrBy(Shop::PREFIX_HASH . $resourceDataRow->getRedisUniqKey(),
-                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $filePath);
-                    $this->getRedisHelper()
-                        ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $shop);
-                } else {
-                    $fail = true;
-                }
-            } else {
-                $fail = true;
-            }
-            if (isset($fail)) {
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $resourceDataRow->getRedisUniqKey(),
-                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED . $filePath);
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED . $shop);
-            }
-        } catch (\Throwable $exception) {
-            $this->getLogger()->error($exception->getMessage());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED . $resourceDataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $resourceDataRow->getRedisUniqKey(),
-                    Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED . $resourceDataRow->getFilePath());
-            throw $exception;
-        }
-
-        echo 'analysis - ' . $resourceDataRow->getSku() . PHP_EOL;
-    }
-
-
-    /**
      * @param ResourceDataRow $dataRow
      * @throws ValidatorException
      * @throws \Throwable
@@ -162,15 +107,24 @@ class ProductDataRowHandler
 
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
             $this->getBrandService()->createBrandFromProduct($product);
-
             $this->getCategoryService()->createCategoriesFromProduct($product);
-
             $this->getShopService()->createShopFromProduct($product);
 
-            $this->getEm()->persist($product);
-            $this->getEm()->flush();
+            $handleAnalysisProductByMainCategory = $this->getCategoryService()
+                ->handleAnalysisProductByMainCategory($product);
+            if (count($handleAnalysisProductByMainCategory)) {
+                $product->setMatchForCategories(true);
 
-//            $this->getLogger()->info('sku: ' . $product->getSku());
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $filePath);
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $dataRow->getShop());
+            }
+
+
+            $this->getEm()->persist($product);
 
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
@@ -186,7 +140,6 @@ class ProductDataRowHandler
                         [$filePath => (new \DateTime())->getTimestamp()]
                     );
             }
-            $this->handleAnalysisProductByMainCategory($dataRow);
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
