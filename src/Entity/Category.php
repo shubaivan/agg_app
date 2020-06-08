@@ -54,7 +54,11 @@ class Category implements EntityValidatorException
     /**
      * @var Collection|Product[]
      * @ORM\Cache("NONSTRICT_READ_WRITE")
-     * @ORM\ManyToMany(targetEntity="Product", mappedBy="categoryRelation", fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(
+     *     targetEntity="Product",
+     *      mappedBy="categoryRelation",
+     *      fetch="EXTRA_LAZY"
+     * )
      */
     private $products;
 

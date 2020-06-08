@@ -28,6 +28,11 @@ class UserIpProduct
     private $products;
 
     /**
+     * @ORM\Column(type="string", length=255, nullable=false)
+     */
+    private $groupIdentity;
+
+    /**
      * @var UserIp
      * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToOne(targetEntity="UserIp", inversedBy="userIpProducts", cascade={"persist"})
@@ -59,6 +64,18 @@ class UserIpProduct
     public function setIps(?UserIp $ips): self
     {
         $this->ips = $ips;
+
+        return $this;
+    }
+
+    public function getGroupIdentity(): ?string
+    {
+        return $this->groupIdentity;
+    }
+
+    public function setGroupIdentity(?string $groupIdentity): self
+    {
+        $this->groupIdentity = $groupIdentity;
 
         return $this;
     }
