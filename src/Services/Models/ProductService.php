@@ -273,6 +273,7 @@ class ProductService
 
         $userIpProduct = new UserIpProduct();
         $userIpProduct
+            ->setGroupIdentity($product->getGroupIdentity())
             ->setProducts($product)
             ->setIps($userIp);
 

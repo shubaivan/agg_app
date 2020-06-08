@@ -59,7 +59,7 @@ class Product implements EntityValidatorException
     private $sku;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=false)
      * @Assert\NotBlank(
      *     groups={Product::SERIALIZED_GROUP_CREATE_IDENTITY}
      * )
