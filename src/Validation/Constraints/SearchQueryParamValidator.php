@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 class SearchQueryParamValidator extends ConstraintValidator
 {
-    const pattern = '^[A-Za-z0-9 ,-éäöåÉÄÖÅ]*$';
+    const pattern = '^[A-Za-z0-9 ,-æøéäöåÉÄÖÅ]*$';
 
     /**
      * @param mixed $value
