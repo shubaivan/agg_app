@@ -10,6 +10,7 @@ use App\Entity\Collection\Search\SearchProductCollection;
 
 class GroupProductEntity
 {
+    const NULL = 'NULL';
     /**
      * @var array
      */
@@ -272,6 +273,7 @@ class GroupProductEntity
      */
     private function storePropertyAccessor(string $storeData)
     {
+        $storeData = str_replace(self::NULL, '"'.self::NULL.'"', $storeData);
         $storeContainOneProduct = explode('", "', $storeData);
         $newArray = [];
         array_walk($storeContainOneProduct, function ($v, $k) use (&$newArray) {
@@ -279,11 +281,14 @@ class GroupProductEntity
             if (isset($nums[0]) && isset($nums[1])) {
                 $newKey = str_replace('"', '', $nums[0]);
                 $newValue = str_replace('"', '', $nums[1]);
-                $newKey = (int)$newKey;
-                $newArray[$newKey] = $newValue;
+                if ($newValue != self::NULL)
+                {
+                    $newKey = (int)$newKey;
+                    $newArray[$newKey] = $newValue;
+                }
             }
         });
-        if (is_null($this->ids)) {
+        if (is_null($this->ids) && is_array($newArray) && count($newArray) > 0) {
             $this->ids = array_keys($newArray);
         }
         $storeContainOneProduct = $newArray;
@@ -455,12 +460,23 @@ class GroupProductEntity
      * @return array
      * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("extras")
-     * @Annotation\Type("array")
      * @Annotation\Groups({SearchProductCollection::GROUP_GET})
      */
     public function getExtrasValue()
     {
-        return $this->extras;
+        $ex = $this->extras ?? [];
+        return $this->emptyArrayAsObject($ex);
+    }
+
+    /**
+     * Forces to searialize empty array as json object (i.e. {} instead of []).
+     * @see https://stackoverflow.com/q/41588574/878514
+     */
+    private function emptyArrayAsObject(array $array) {
+        if (count($array) == 0) {
+            return new \stdClass();
+        }
+        return $array;
     }
 
     /**

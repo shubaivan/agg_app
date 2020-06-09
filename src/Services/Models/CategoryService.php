@@ -227,7 +227,7 @@ class CategoryService
 
         $matchData = preg_replace('!\s+!', ',', $product->getName() . ', ' . $product->getDescription());
         $matchData = strip_tags($matchData);
-        if (preg_match_all('/[a-zA-Z æøĂéäöåÉÄÖÅ]+/',$matchData,$matches)) {
+        if (preg_match_all('/[a-zA-Z ¤æøĂéëäöåÉÄÖÅ]+/',$matchData,$matches)) {
             $matchData = array_shift($matches);
             if (is_array($matchData) && count($matchData)) {
                 $arrayFilter = array_filter($matchData, function ($v) {
