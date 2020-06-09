@@ -109,20 +109,20 @@ class ProductDataRowHandler
             $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);
             $this->getShopService()->createShopFromProduct($product);
+            if (!$product->isMatchForCategories()) {
+                $handleAnalysisProductByMainCategory = $this->getCategoryService()
+                    ->handleAnalysisProductByMainCategory($product);
+                if (count($handleAnalysisProductByMainCategory)) {
+                    $product->setMatchForCategories(true);
 
-            $handleAnalysisProductByMainCategory = $this->getCategoryService()
-                ->handleAnalysisProductByMainCategory($product);
-            if (count($handleAnalysisProductByMainCategory)) {
-                $product->setMatchForCategories(true);
-
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $filePath);
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $dataRow->getShop());
+                    $this->getRedisHelper()
+                        ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $filePath);
+                    $this->getRedisHelper()
+                        ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $dataRow->getShop());
+                }
             }
-
 
             $this->getEm()->persist($product);
 

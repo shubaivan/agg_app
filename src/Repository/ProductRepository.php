@@ -130,14 +130,26 @@ class ProductRepository extends ServiceEntityRepository
         $fetchAll = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $statement->closeCursor();
 
+
         $result = [];
         foreach ($fetchAll as $key => $value) {
             if (isset($value['fields']) && isset($value['key'])) {
-                preg_match_all('/\["([^_]+)"\]/', $value['fields'], $matches);
-                if (isset($matches[1][0])) {
-                    $value['fields'] = explode('", "', $matches[1][0]);
+                if ($value['key'] == Product::SIZE) {
+                    $explodeSizes = explode(',', $value['fields']);
+                    $resultValues = [];
+                    foreach ($explodeSizes as $size) {
+                        $size = preg_replace('/\[|]| |"/','',$size);
+                        $size = substr($size, 1, -1);
+                        $resultValues[] = $size;
+                    }
+                    $resultValues =array_unique($resultValues);
+                } else {
+                    preg_match_all('/\["([^_]+)"\]/', $value['fields'], $matches);
+                    if (isset($matches[1][0])) {
+                        $resultValues = explode('", "', $matches[1][0]);
+                    }
                 }
-                $result[$value['key']] = $value['fields'];
+                $result[$value['key']] = $resultValues;
             }
         }
 
@@ -331,8 +343,9 @@ class ProductRepository extends ServiceEntityRepository
             foreach ($extraArray as $key => $extraFieldData) {
                 $commonExtraConditionArray = [];
                 foreach ($extraFieldData as $childKey => $extraData) {
+                    $array = [$key => Product::SIZE == $key ? [$extraData] : $extraData];
                     $preparedExtraArrayString = $this->getHelpers()
-                        ->executeSerializerArray([$key => $extraData]);
+                        ->executeSerializerArray($array);
                     $conditionExtraFields = 'products_alias.extras @> :var_extra_arrays_' . $key . '_' . $childKey;
                     $preparedExtraArray[':var_extra_arrays_' . $key . '_' . $childKey] = $preparedExtraArrayString;
                     array_push($commonExtraConditionArray, $conditionExtraFields);

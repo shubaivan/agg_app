@@ -40,6 +40,7 @@ class Product implements EntityValidatorException
     const SERIALIZED_GROUP_CREATE = 'product_group_create';
     const SERIALIZED_GROUP_LIST = 'product_group_list';
     const SERIALIZED_GROUP_CREATE_IDENTITY = 'product_group_create_identity';
+    const SIZE = 'SIZE';
 
     /**
      * @ORM\Id()
@@ -670,7 +671,17 @@ class Product implements EntityValidatorException
                     if (preg_match_all('/[#]/', $field, $matches) > 0) {
                         $explode = explode('#', $field);
                         if (isset($explode[0]) && isset($explode[1])) {
-                            $result[$explode[0]] = $explode[1];
+                            if ($explode[0] == self::SIZE) {
+                                if (preg_match_all('/[0-9]+/', $explode[1], $matchesD)) {
+                                    $sizes = array_shift($matchesD);
+                                    $result[$explode[0]] = $sizes;
+                                } else {
+                                    $result[$explode[0]] = [];
+                                }
+                                array_push($result[$explode[0]], $explode[1]);
+                            } else {
+                                $result[$explode[0]] = $explode[1];
+                            }
                         }
                     }
                 }
@@ -696,8 +707,17 @@ class Product implements EntityValidatorException
     {
         $value = trim($value);
         $extras = $this->getExtras();
-        if (is_array($extras) && !array_key_exists($key, $extras)) {
-            $this->extras = array_merge($extras, [$key => $value]);
+
+        if (is_array($extras)) {
+            if ($key === self::SIZE) {
+                if (isset($extras[$key]) && !is_array($extras[$key])) {
+                    unset($extras[$key]);
+                }
+                $extras[$key][] = $value;
+                $this->extras = $extras;
+            } elseif(!array_key_exists($key, $extras)) {
+                $this->extras = array_merge($extras, [$key => $value]);
+            }
         }
 
         return $this;
