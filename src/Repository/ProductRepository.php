@@ -884,19 +884,30 @@ class ProductRepository extends ServiceEntityRepository
             OFFSET :offset
         ';
 
-        $parameterBag->set(
-            'search',
-            $this->getHelpers()
-                ->handleSearchValue($parameterBag->get('search'), false)
-        );
+        $search = $parameterBag->get('search');
+        $resultData = '';
+        if (preg_match_all('/[a-zA-Z ¤æøĂéëäöåÉÄÖÅ]+/',$search,$matches)) {
+            $matchData = array_shift($matches);
+            if (is_array($matchData) && count($matchData)) {
+                $arrayFilter = array_filter($matchData, function ($v) {
+                    if (strlen($v) > 3) {
+                        return true;
+                    }
+                });
+                $resultData = implode(',', $arrayFilter);
+            }
+        }
+        $resultData = $this->getHelpers()
+            ->handleSearchValue($resultData, true);
 
         $limit = (int)$parameterBag->get('count');
         $offset = $limit * ((int)$parameterBag->get('page') - 1);
 
+
         $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
             $query,
             [
-                ':search' => $parameterBag->get('search'),
+                ':search' => $resultData,
                 ':exclude_id' => $parameterBag->get('exclude_id'),
                 ':limit' => $limit,
                 ':offset' => $offset,
@@ -914,7 +925,7 @@ class ProductRepository extends ServiceEntityRepository
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
             ->prepareParamsForExecuteCacheQuery();
 
-        /** @var ResultCacheStatement $statement */
+        /** @search ResultCacheStatement $statement */
         $statement = $connection->executeCacheQuery(
             $query,
             $params,
