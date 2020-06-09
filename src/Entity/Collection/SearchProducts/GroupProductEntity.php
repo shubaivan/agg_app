@@ -2,6 +2,7 @@
 
 namespace App\Entity\Collection\SearchProducts;
 
+use App\Entity\Product;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\ConversionException;
 use JMS\Serializer\Annotation;
@@ -225,26 +226,38 @@ class GroupProductEntity
     {
         $substr = substr($value, 1, -1);
         $substr = str_replace('\\', '', $substr);
-        $substr = str_replace('"', '', $substr);
-        $storeContainOneProduct = explode('}, ', $substr);
-
+//        $substr = str_replace('"', '', $substr);
+        $storeContainOneProduct = explode('}", "', $substr);
+//        {"SIZE": ["134"], "COLOUR": "Nightshade", "IS_BUNDLE": "no"}
         $newArray = [];
         array_walk($storeContainOneProduct, function ($v, $k) use (&$newArray) {
-            $v = str_replace('}', '', $v);
-            $v = str_replace('{', '', $v);
+//            $v = str_replace('}', '', $v);
+//            $v = str_replace('{', '', $v);
             $nums = explode('=>', $v);
             if (isset($nums[0]) && isset($nums[1])) {
-                $newExtraArray = [];
-                $setExtra = explode(', ', $nums[1]);
+                if (substr($nums[1], -1) !== '}') {
+                    $nums[1] .= '}';
+                }
+                $trimExtra = trim($nums[1], "\"");
+                $trimId = (int)trim($nums[0], "\"");
+                $decodeTrimExtra = json_decode($trimExtra, true);
 
-                array_walk($setExtra, function ($v, $k) use (&$newExtraArray) {
-                    $nums = explode(':', $v);
-                    if (isset($nums[0]) && isset($nums[1])) {
-                        $newExtraArray[$nums[0]] = trim($nums[1]);
-                    }
-                });
+//                $newExtraArray = [];
+//                $setExtra = explode(', "', $nums[1]);
+//
+//                array_walk($setExtra, function ($v, $k) use (&$newExtraArray) {
+//                    $nums = explode(':', $v);
+//                    if (isset($nums[0]) && isset($nums[1])) {
+//                        if ($nums[0] === Product::SIZE) {
+//                            $preg_match_all = preg_match_all('/\[([^\]]*)\]/', $nums[1], $aMatches);
+//                            $newExtraArray[$nums[0]] = trim($nums[1]);
+//                        } else {
+//                            $newExtraArray[$nums[0]] = trim($nums[1]);
+//                        }
+//                    }
+//                });
 
-                $newArray[$nums[0]] = $newExtraArray;
+                $newArray[$trimId] = $decodeTrimExtra;
             }
         });
         $storeContainOneProduct = $newArray;
@@ -252,20 +265,22 @@ class GroupProductEntity
         $this->storeExtras = $storeContainOneProduct;
     }
 
+
     /**
      * @param string $storeData
      * @return array
      */
     private function storePropertyAccessor(string $storeData)
     {
-        $storeData = str_replace('"', '', $storeData);
-        $storeContainOneProduct = explode(',', $storeData);
+        $storeContainOneProduct = explode('", "', $storeData);
         $newArray = [];
         array_walk($storeContainOneProduct, function ($v, $k) use (&$newArray) {
             $nums = explode('=>', $v);
             if (isset($nums[0]) && isset($nums[1])) {
-                $nums[0] = (int)$nums[0];
-                $newArray[$nums[0]] = $nums[1];
+                $newKey = str_replace('"', '', $nums[0]);
+                $newValue = str_replace('"', '', $nums[1]);
+                $newKey = (int)$newKey;
+                $newArray[$newKey] = $newValue;
             }
         });
         if (is_null($this->ids)) {
