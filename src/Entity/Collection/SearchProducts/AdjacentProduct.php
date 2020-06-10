@@ -5,7 +5,7 @@ namespace App\Entity\Collection\SearchProducts;
 use JMS\Serializer\Annotation;
 use App\Entity\Collection\Search\SearchProductCollection;
 
-class AdjacentProduct
+class AdjacentProduct extends CommonProduct
 {
     const GROUP_GENERATE_ADJACENT = 'generate_adjacent_product';
 
@@ -80,17 +80,7 @@ class AdjacentProduct
      */
     public function getExtrasValue()
     {
-        return $this->emptyArrayAsObject($this->extras);
-    }
-
-    /**
-     * Forces to searialize empty array as json object (i.e. {} instead of []).
-     * @see https://stackoverflow.com/q/41588574/878514
-     */
-    private function emptyArrayAsObject(array $array) {
-        if (count($array) == 0) {
-            return new \stdClass();
-        }
-        return $array;
+        $ex = $this->extras ?? [];
+        return $this->emptyArrayAsObject($ex);
     }
 }

@@ -8,7 +8,7 @@ use Doctrine\DBAL\Types\ConversionException;
 use JMS\Serializer\Annotation;
 use App\Entity\Collection\Search\SearchProductCollection;
 
-class GroupProductEntity
+class GroupProductEntity extends CommonProduct
 {
     const NULL = 'NULL';
     /**
@@ -225,40 +225,31 @@ class GroupProductEntity
      */
     public function setStoreExtrasAccessor(string $value)
     {
-        $substr = substr($value, 1, -1);
+        $substr = str_replace(self::NULL, '"{"'.self::NULL.'"}"', $value);
         $substr = str_replace('\\', '', $substr);
-//        $substr = str_replace('"', '', $substr);
+
         $storeContainOneProduct = explode('}", "', $substr);
-//        {"SIZE": ["134"], "COLOUR": "Nightshade", "IS_BUNDLE": "no"}
         $newArray = [];
         array_walk($storeContainOneProduct, function ($v, $k) use (&$newArray) {
-//            $v = str_replace('}', '', $v);
-//            $v = str_replace('{', '', $v);
+
             $nums = explode('=>', $v);
             if (isset($nums[0]) && isset($nums[1])) {
-                if (substr($nums[1], -1) !== '}') {
-                    $nums[1] .= '}';
+                $trimExtra = $nums[1];
+
+                if (mb_substr_count($trimExtra, self::NULL)) {
+                    return;
                 }
-                $trimExtra = trim($nums[1], "\"");
+                if (substr($trimExtra, -1) !== '}' && substr($trimExtra, -2) !== '}"') {
+                    $trimExtra .= '}';
+                }
+                $trimExtra = trim($trimExtra, "\"");
                 $trimId = (int)trim($nums[0], "\"");
+
                 $decodeTrimExtra = json_decode($trimExtra, true);
 
-//                $newExtraArray = [];
-//                $setExtra = explode(', "', $nums[1]);
-//
-//                array_walk($setExtra, function ($v, $k) use (&$newExtraArray) {
-//                    $nums = explode(':', $v);
-//                    if (isset($nums[0]) && isset($nums[1])) {
-//                        if ($nums[0] === Product::SIZE) {
-//                            $preg_match_all = preg_match_all('/\[([^\]]*)\]/', $nums[1], $aMatches);
-//                            $newExtraArray[$nums[0]] = trim($nums[1]);
-//                        } else {
-//                            $newExtraArray[$nums[0]] = trim($nums[1]);
-//                        }
-//                    }
-//                });
-
-                $newArray[$trimId] = $decodeTrimExtra;
+                if ($decodeTrimExtra) {
+                    $newArray[$trimId] = $decodeTrimExtra;
+                }
             }
         });
         $storeContainOneProduct = $newArray;
@@ -466,17 +457,6 @@ class GroupProductEntity
     {
         $ex = $this->extras ?? [];
         return $this->emptyArrayAsObject($ex);
-    }
-
-    /**
-     * Forces to searialize empty array as json object (i.e. {} instead of []).
-     * @see https://stackoverflow.com/q/41588574/878514
-     */
-    private function emptyArrayAsObject(array $array) {
-        if (count($array) == 0) {
-            return new \stdClass();
-        }
-        return $array;
     }
 
     /**
