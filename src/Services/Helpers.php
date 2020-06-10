@@ -88,6 +88,7 @@ class Helpers
         }
 
         $search = str_replace(':*|:*|', ':*|', $search);
+        $search = str_replace('", "', '|', $search);
 
         return $search;
     }
