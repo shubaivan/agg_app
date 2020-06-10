@@ -231,7 +231,7 @@ class CategoryService
             $matchData = array_shift($matches);
             if (is_array($matchData) && count($matchData)) {
                 $arrayFilter = array_filter($matchData, function ($v) {
-                    if (strlen($v) > 3) {
+                    if (strlen($v) > 3 && mb_check_encoding($v, "UTF-8")) {
                         return true;
                     }
                 });

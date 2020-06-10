@@ -19,7 +19,7 @@
 {% block body %}
     <h1>Statistics</h1>
 
-    <table style="width:100%">
+    <table>
         <tr>
             {% for iterRedisKey, iterRedisData in prepareDataTh  %}
                 <th colspan="{{ iterRedisData|length > 0 ? iterRedisData|length : ''}}" >{{iterRedisKey}}</th>
