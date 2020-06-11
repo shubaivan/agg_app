@@ -43,6 +43,11 @@ class CategoryRepository extends ServiceEntityRepository
     private $tagAwareQueryResultCacheCategory;
 
     /**
+     * @var bool
+     */
+    private $checkMainCategoriesResult = false;
+
+    /**
      * CategoryRepository constructor.
      * @param Helpers $helpers
      * @param TagAwareQueryResultCacheCategory $tagAwareQueryResultCacheCategory
@@ -234,14 +239,14 @@ class CategoryRepository extends ServiceEntityRepository
             $this->getHelpers()
                 ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), false);
 
-        if ($product && $product->getCategory()) {
+        if ($product && $product->getCategory() && !$this->checkMainCategoriesResult) {
             if (!$product->getCategory()) {
                 return [];
             }
             $checkMainCategoriesResult = $this->isMatchPlainCategoriesString(
                 $product->getCategory(), $mainSearch
             );
-
+            $this->checkMainCategoriesResult = $checkMainCategoriesResult;
             if (!$checkMainCategoriesResult) {
                 return [];
             }
@@ -301,6 +306,14 @@ class CategoryRepository extends ServiceEntityRepository
             INNER JOIN category_relations as cr_ca_main ON cr_ca_main.sub_category_id != ca.id
             INNER JOIN category_configurations as cc ON cc.category_id_id = ca.id
         ';
+        if ($depth == 1) {
+            $query .= '
+                INNER JOIN category_relations as cr_main ON cr_main.main_category_id = ca.id
+                INNER JOIN category_relations as cr_main_main ON cr_main_main.main_category_id = cr_main.sub_category_id
+            ';
+        }
+
+
         if ($depth > 1) {
             $query .= '
                 INNER JOIN category_relations as cr_main ON cr_main.main_category_id = ca.id

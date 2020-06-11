@@ -221,27 +221,45 @@ class CategoryService
         bool $explain = false
     )
     {
+        $result = [];
         $parameterBag = new ParameterBag();
         $parameterBag->set(CategoryRepository::STRICT, true);
         $parameterBag->set(self::MAIN_SEARCH, $mainCategoryKeyWord);
-
+        $matchCategoryMain = $this->matchCategoryWithSub($product, $parameterBag, $explain);
+        if (!$matchCategoryMain) {
+            return [];
+        }
+        $result = array_merge($result, $matchCategoryMain);
         $matchData = preg_replace('!\s+!', ',', $product->getName() . ', ' . $product->getDescription());
         $matchData = strip_tags($matchData);
         if (preg_match_all('/[a-zA-Z ¤æøĂéëäöåÉÄÖÅ]+/',$matchData,$matches)) {
             $matchData = array_shift($matches);
             if (is_array($matchData) && count($matchData)) {
+
                 $arrayFilter = array_filter($matchData, function ($v) {
                     if (strlen($v) > 3 && mb_check_encoding($v, "UTF-8")) {
                         return true;
                     }
                 });
-                $resultData = implode(',', $arrayFilter);
-                $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);
-                $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $resultData);
+                $arrayUniqueFilter = array_unique($arrayFilter);
+                $resultData = implode(',', $arrayUniqueFilter);
 
+                $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);
+                $matchCategoryWithoutSub = $this->matchCategoryWithSub($product, $parameterBag, $explain);
+
+                if (!$matchCategoryWithoutSub) {
+                    return  $result;
+                }
+                $result = array_merge($result, $matchCategoryWithoutSub);
+                $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $resultData);
                 $matchCategoryWithSub = $this->matchCategoryWithSub($product, $parameterBag, $explain);
 
-                return $matchCategoryWithSub;
+                if (!$matchCategoryWithSub) {
+                    return  $result;
+                }
+                $result = array_merge($result, $matchCategoryWithSub);
+
+                return $result;
             }
         }
 

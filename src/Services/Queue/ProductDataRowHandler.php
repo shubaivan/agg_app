@@ -4,8 +4,6 @@ namespace App\Services\Queue;
 
 use App\Entity\Shop;
 use App\Exception\ValidatorException;
-use App\QueueModel\AdtractionDataRow;
-use App\QueueModel\AnalysisProductByMainCategories;
 use App\QueueModel\ResourceDataRow;
 use App\Services\HandleDownloadFileData;
 use App\Services\Models\BrandService;
@@ -64,6 +62,11 @@ class ProductDataRowHandler
     private $redisHelper;
 
     /**
+     * @var string
+     */
+    private $forceAnalysis;
+
+    /**
      * AdtractionDataRowHandler constructor.
      * @param MessageBusInterface $bus
      * @param Logger $adtractionCsvRowHandlerLogger
@@ -82,7 +85,8 @@ class ProductDataRowHandler
         CategoryService $categoryService,
         ShopService $shopService,
         EntityManagerInterface $em,
-        RedisHelper $redisHelper
+        RedisHelper $redisHelper,
+        string $forceAnalysis
     )
     {
         $this->bus = $bus;
@@ -93,6 +97,7 @@ class ProductDataRowHandler
         $this->shopService = $shopService;
         $this->em = $em;
         $this->redisHelper = $redisHelper;
+        $this->forceAnalysis = $forceAnalysis;
     }
 
     /**
@@ -109,9 +114,9 @@ class ProductDataRowHandler
             $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);
             $this->getShopService()->createShopFromProduct($product);
-            if (!$product->isMatchForCategories()) {
+            if (!$product->isMatchForCategories() || $this->forceAnalysis == '1') {
                 $handleAnalysisProductByMainCategory = $this->getCategoryService()
-                    ->handleAnalysisProductByMainCategory($product);
+                        ->handleAnalysisProductByMainCategory($product);
                 if (count($handleAnalysisProductByMainCategory)) {
                     $product->setMatchForCategories(true);
 

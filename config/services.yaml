@@ -49,6 +49,7 @@ parameters:
     redis_port_cache: '%env(REDIS_PORT_CACHE)%'
     redis_access: '%redis_host_cache%:%redis_port_cache%'
     csv_handle_step: '%env(CSV_HANDLE_STEP)%'
+    force_analysis: '%env(FORCE_ANALYSIS)%'
 #    jms_serializer.camel_case_naming_strategy.class: JMS\Serializer\Naming\IdenticalPropertyNamingStrategy
 #    jms_serializer.serialized_name_annotation_strategy.class: JMS\Serializer\Naming\SerializedNameAnnotationStrategy
 services:
@@ -150,6 +151,11 @@ services:
         $csvHandleStep: '%csv_handle_step%'
         $productsBus: '@products.bus'
         $commandBus: '@command.bus'
+      lazy: true
+
+    App\Services\Queue\ProductDataRowHandler:
+      arguments:
+        $forceAnalysis: '%force_analysis%'
       lazy: true
 
     App\Command\ResourceDownloadFile:
