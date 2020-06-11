@@ -885,20 +885,8 @@ class ProductRepository extends ServiceEntityRepository
         ';
 
         $search = $parameterBag->get('search');
-        $resultData = '';
-        if (preg_match_all('/[a-zA-Z ¤æøĂéëäöåÉÄÖÅ]+/',$search,$matches)) {
-            $matchData = array_shift($matches);
-            if (is_array($matchData) && count($matchData)) {
-                $arrayFilter = array_filter($matchData, function ($v) {
-                    if (strlen($v) > 3) {
-                        return true;
-                    }
-                });
-                $resultData = implode(',', $arrayFilter);
-            }
-        }
         $resultData = $this->getHelpers()
-            ->handleSearchValue($resultData, true);
+            ->handleSearchValue($search, true);
 
         $limit = (int)$parameterBag->get('count');
         $offset = $limit * ((int)$parameterBag->get('page') - 1);

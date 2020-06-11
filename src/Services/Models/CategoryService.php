@@ -17,7 +17,7 @@ use Doctrine\DBAL\Cache\CacheException;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-class CategoryService
+class CategoryService extends AbstractModel
 {
     const MAIN_SEARCH = 'main_search';
     const SUB_MAIN_SEARCH = 'sub_main_search';
@@ -232,35 +232,27 @@ class CategoryService
         $result = array_merge($result, $matchCategoryMain);
         $matchData = preg_replace('!\s+!', ',', $product->getName() . ', ' . $product->getDescription());
         $matchData = strip_tags($matchData);
-        if (preg_match_all('/[a-zA-Z ¤æøĂéëäöåÉÄÖÅ]+/',$matchData,$matches)) {
-            $matchData = array_shift($matches);
-            if (is_array($matchData) && count($matchData)) {
 
-                $arrayFilter = array_filter($matchData, function ($v) {
-                    if (strlen($v) > 3 && mb_check_encoding($v, "UTF-8")) {
-                        return true;
-                    }
-                });
-                $arrayUniqueFilter = array_unique($arrayFilter);
-                $resultData = implode(',', $arrayUniqueFilter);
+        $prepareDataForGINSearch = $this->prepareDataForGINSearch($matchData);
 
-                $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);
-                $matchCategoryWithoutSub = $this->matchCategoryWithSub($product, $parameterBag, $explain);
+        if ($prepareDataForGINSearch) {
+            $resultData = $prepareDataForGINSearch;
+            $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);
+            $matchCategoryWithoutSub = $this->matchCategoryWithSub($product, $parameterBag, $explain);
 
-                if (!$matchCategoryWithoutSub) {
-                    return  $result;
-                }
-                $result = array_merge($result, $matchCategoryWithoutSub);
-                $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $resultData);
-                $matchCategoryWithSub = $this->matchCategoryWithSub($product, $parameterBag, $explain);
-
-                if (!$matchCategoryWithSub) {
-                    return  $result;
-                }
-                $result = array_merge($result, $matchCategoryWithSub);
-
-                return $result;
+            if (!$matchCategoryWithoutSub) {
+                return  $result;
             }
+            $result = array_merge($result, $matchCategoryWithoutSub);
+            $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $resultData);
+            $matchCategoryWithSub = $this->matchCategoryWithSub($product, $parameterBag, $explain);
+
+            if (!$matchCategoryWithSub) {
+                return  $result;
+            }
+            $result = array_merge($result, $matchCategoryWithSub);
+
+            return $result;
         }
 
         return [];
