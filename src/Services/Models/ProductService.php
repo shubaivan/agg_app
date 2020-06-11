@@ -35,7 +35,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class ProductService
+class ProductService extends AbstractModel
 {
     /**
      * @var Logger
@@ -158,11 +158,14 @@ class ProductService
      */
     public function getProductById(Product $product)
     {
+        $searchDataForRelated = $product->getSearchDataForRelatedProductItems();
+        $search = $this->prepareDataForGINSearch($searchDataForRelated);
+
         $parameterBag = new ParameterBag([
             'page' => 1,
             'count' => 4,
             'exclude_id' => $product->getId(),
-            'search' => $product->getSearchDataForRelatedProductItems()
+            'search' => $search ?? ''
         ]);
         $this->recordIpToProduct($product);
 
