@@ -200,6 +200,3 @@ services:
       # prevent handlers from being registered twice (or you can remove
       # the MessageHandlerInterface that autoconfigure uses to find handlers)
       autoconfigure: false
-
-    App\Services\Models\ManagerShopsService:
-      lazy: true
