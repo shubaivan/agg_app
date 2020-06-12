@@ -239,14 +239,14 @@ class CategoryRepository extends ServiceEntityRepository
             $this->getHelpers()
                 ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), false);
 
-        if ($product && $product->getCategory() && !$this->checkMainCategoriesResult) {
+        if ($product && $product->getCategory()) {
             if (!$product->getCategory()) {
                 return [];
             }
             $checkMainCategoriesResult = $this->isMatchPlainCategoriesString(
                 $product->getCategory(), $mainSearch
             );
-            $this->checkMainCategoriesResult = $checkMainCategoriesResult;
+
             if (!$checkMainCategoriesResult) {
                 return [];
             }

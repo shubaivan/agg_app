@@ -225,7 +225,9 @@ class CategoryService extends AbstractModel
         $parameterBag = new ParameterBag();
         $parameterBag->set(CategoryRepository::STRICT, true);
         $parameterBag->set(self::MAIN_SEARCH, $mainCategoryKeyWord);
-        $matchCategoryMain = $this->matchCategoryWithSub($product, $parameterBag, $explain);
+        $matchCategoryMain = $this->matchCategoryWithSub(
+            $product, $parameterBag, $explain
+        );
         if (!$matchCategoryMain) {
             return [];
         }
