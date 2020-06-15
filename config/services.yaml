@@ -127,6 +127,9 @@ services:
     App\Services\Models\BrandService:
       lazy: true
 
+    App\Services\Models\CategoryService:
+      lazy: true
+
     App\Services\Models\ShopService:
       lazy: true
 
