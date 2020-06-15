@@ -9,10 +9,13 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Doctrine\ORM\Mapping\UniqueConstraint;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  * @ORM\Table(name="products",
+ *     uniqueConstraints={@UniqueConstraint(name="uniq_sku_index", columns={"sku"})},
  *     indexes={
  *     @ORM\Index(name="sku_idx", columns={"sku"}),
  *     @ORM\Index(name="created_desc_index", columns={"created_at"}),
@@ -22,6 +25,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
  *     @ORM\Index(name="products_extras_idx", columns={"extras"})
  * }
  *     )
+ *
  * @Annotation\AccessorOrder("custom",
  *      custom = {
  *     "id", "sku", "name",
@@ -33,6 +37,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
  * )
  * @ORM\Cache("NONSTRICT_READ_WRITE")
  * @ORM\HasLifecycleCallbacks()
+ * @UniqueEntity(fields={"sku"}, groups={Product::SERIALIZED_GROUP_CREATE})
  */
 class Product implements EntityValidatorException
 {
@@ -52,7 +57,7 @@ class Product implements EntityValidatorException
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      * @Assert\NotBlank(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
