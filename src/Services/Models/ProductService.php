@@ -148,7 +148,6 @@ class ProductService extends AbstractModel
     }
 
 
-
     /**
      * @param Product $product
      * @return ProductCollection
@@ -176,7 +175,8 @@ class ProductService extends AbstractModel
      * @param string $sku
      * @return Product|object|null
      */
-    public function getEntityProductBySku(string $sku) {
+    public function getEntityProductBySku(string $sku)
+    {
         return $this->getProductRepository()
             ->findOneBy(['sku' => $sku]);
     }
@@ -293,11 +293,31 @@ class ProductService extends AbstractModel
     private function prepareDataForExistProduct(ResourceDataRow $adtractionDataRow)
     {
         $product = $this->matchExistProduct($adtractionDataRow->getSku());
+
         if ($product && $product->getId()) {
-            $adtractionDataRow->setExistProductId($product->getId());
+            if ($product->getShop() == $adtractionDataRow->getShop()) {
+                $adtractionDataRow->setExistProductId($product->getId());
+            } else {
+                $newSku = $this->modifyToUniqSku($adtractionDataRow->getSku());
+                $adtractionDataRow->setSku($newSku);
+            }
         }
 
         return $adtractionDataRow;
+    }
+
+    private function modifyToUniqSku(string $sku)
+    {
+        $modifySku = $sku . '_1';
+        $matchSku = $this->getProductRepository()
+            ->findOneBy(['sku' => $modifySku]);;
+        while ($matchSku) {
+            $modifySku = $modifySku . '1';
+            $matchSku = $this->getProductRepository()
+                ->findOneBy(['sku' => $modifySku]);
+        }
+
+        return $modifySku;
     }
 
     /**

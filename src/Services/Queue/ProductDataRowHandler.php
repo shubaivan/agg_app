@@ -2,6 +2,7 @@
 
 namespace App\Services\Queue;
 
+use App\Cache\CacheManager;
 use App\Entity\Shop;
 use App\Exception\ValidatorException;
 use App\QueueModel\ResourceDataRow;
@@ -67,6 +68,11 @@ class ProductDataRowHandler
     private $forceAnalysis;
 
     /**
+     * @var CacheManager
+     */
+    private $cacheManager;
+
+    /**
      * AdtractionDataRowHandler constructor.
      * @param MessageBusInterface $bus
      * @param Logger $adtractionCsvRowHandlerLogger
@@ -86,9 +92,11 @@ class ProductDataRowHandler
         ShopService $shopService,
         EntityManagerInterface $em,
         RedisHelper $redisHelper,
+        CacheManager $cacheManager,
         string $forceAnalysis
     )
     {
+        $this->cacheManager = $cacheManager;
         $this->bus = $bus;
         $this->logger = $adtractionCsvRowHandlerLogger;
         $this->productService = $productService;
@@ -140,6 +148,7 @@ class ProductDataRowHandler
                     Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL . $dataRow->getShop());
 
             if ($dataRow->getLastProduct()) {
+                $this->getCacheManager()->clearAllPoolsCache();
                 $this->getRedisHelper()
                     ->hMSet(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $dataRow->getRedisUniqKey(),
                         [$filePath => (new \DateTime())->getTimestamp()]
@@ -248,5 +257,13 @@ class ProductDataRowHandler
     public function getBus(): TraceableMessageBus
     {
         return $this->bus;
+    }
+
+    /**
+     * @return CacheManager
+     */
+    private function getCacheManager(): CacheManager
+    {
+        return $this->cacheManager;
     }
 }

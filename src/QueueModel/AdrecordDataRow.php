@@ -90,6 +90,14 @@ class AdrecordDataRow extends Queues implements ResourceDataRow, LastProductInte
     }
 
     /**
+     * @return string|null
+     */
+    public function setSku(string $sku)
+    {
+        return $this->row['SKU'] = $sku;
+    }
+
+    /**
      * @param int $id
      * @return $this
      */

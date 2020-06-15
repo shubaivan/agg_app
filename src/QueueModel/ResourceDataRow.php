@@ -20,6 +20,12 @@ interface ResourceDataRow
     public function getSku();
 
     /**
+     * @param string $sku
+     * @return mixed
+     */
+    public function setSku(string $sku);
+
+    /**
      * @param int $id
      * @return $this
      */

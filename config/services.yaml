@@ -127,13 +127,13 @@ services:
     App\Services\Models\BrandService:
       lazy: true
 
+    App\Services\Models\CategoryService:
+      lazy: true
+
     App\Services\Models\ShopService:
       lazy: true
 
     App\Services\ObjectsHandler:
-      lazy: true
-
-    App\Services\HandleAdtractionData:
       lazy: true
 
     serializer.normalizer.flatten_exception:
