@@ -32,6 +32,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
  *      }
  * )
  * @ORM\Cache("NONSTRICT_READ_WRITE")
+ * @ORM\HasLifecycleCallbacks()
  */
 class Product implements EntityValidatorException
 {
@@ -620,13 +621,6 @@ class Product implements EntityValidatorException
     {
         if (!$this->getCategoryRelation()->contains($categoryRelation)) {
             $this->getCategoryRelation()->add($categoryRelation);
-            $categoryNames = $this->getCategoryRelation()->map(function (Category $category) {
-                return $category->getCategoryName();
-            });
-            if ($categoryNames->count()) {
-                $implode = implode(' - ', $categoryNames->toArray());
-                $this->setCategory($implode);
-            }
         }
 
         return $this;
@@ -785,6 +779,35 @@ class Product implements EntityValidatorException
     {
         $this->matchForCategories = $matchForCategories;
         return $this;
+    }
+
+    /**
+     * @ORM\PreUpdate()
+     */
+    public function preUpdate()
+    {
+        $this->matchCategoriesNames();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function prePersist()
+    {
+        $this->matchCategoriesNames();
+    }
+
+    private function matchCategoriesNames()
+    {
+        $categoryNames = $this->getCategoryRelation()->map(function (Category $category) {
+            return $category->getCategoryName();
+        });
+        if ($categoryNames->count()) {
+            $arrayCategoryNames = $categoryNames->toArray();
+            $arrayCategoryNames = array_unique($arrayCategoryNames);
+            $implode = implode(' - ', $arrayCategoryNames);
+            $this->setCategory($implode);
+        }
     }
 
     /**
