@@ -120,6 +120,12 @@ class GroupProductEntity extends CommonProduct
     private $currentProduct;
 
     /**
+     * @var string
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     */
+    private $rangePrice;
+
+    /**
      * @var array
      */
     private $presentAdjacentProducts = [];
@@ -152,6 +158,11 @@ class GroupProductEntity extends CommonProduct
     public function setStorePriceAccessor(string $value)
     {
         $this->storePrice = $this->storePropertyAccessor($value);
+        if (is_array($this->storePrice)) {
+            $max = max($this->storePrice);
+            $min = min($this->storePrice);
+            $this->rangePrice = ((float)$max != (float)$min ? $min .' - ' .$max : $max);
+        }
     }
 
     /**
@@ -451,6 +462,7 @@ class GroupProductEntity extends CommonProduct
      * @return array
      * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("extras")
+     * @Annotation\Type("array<string, array<string>>")
      * @Annotation\Groups({SearchProductCollection::GROUP_GET})
      */
     public function getExtrasValue()

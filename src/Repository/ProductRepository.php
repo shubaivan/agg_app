@@ -542,7 +542,7 @@ class ProductRepository extends ServiceEntityRepository
 
         $mainQuery .= '
             ) AS main_products_alias
-            GROUP BY main_products_alias.group_identity, main_products_alias.price';
+            GROUP BY main_products_alias.group_identity';
 
 
         if (!$count) {
