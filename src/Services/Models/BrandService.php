@@ -4,11 +4,13 @@ namespace App\Services\Models;
 
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
+use App\Entity\Category;
 use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\Search\SearchBrandsCollection;
 use App\Entity\Product;
 use App\Repository\BrandRepository;
 use App\Repository\ProductRepository;
+use App\Services\ObjectsHandler;
 use Doctrine\DBAL\Cache\CacheException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,23 +32,31 @@ class BrandService
     private $tagAwareQueryResultCacheProduct;
 
     /**
+     * @var ObjectsHandler
+     */
+    private $objecHandler;
+
+    /**
      * BrandService constructor.
      * @param EntityManagerInterface $em
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
+     * @param ObjectsHandler $objecHandler
      */
     public function __construct(
         EntityManagerInterface $em,
-        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
+        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
+        ObjectsHandler $objecHandler
     )
     {
         $this->em = $em;
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
+        $this->objecHandler = $objecHandler;
     }
 
     /**
      * @param Product $product
-     * @return Brand|bool
-     * @throws \Doctrine\ORM\ORMException
+     * @return Brand|bool|object|null
+     * @throws \App\Exception\ValidatorException
      */
     public function createBrandFromProduct(Product $product)
     {
@@ -59,6 +69,8 @@ class BrandService
             $brand = new Brand();
             $brand
                 ->setBrandName($product->getBrand());
+            $this->getObjecHandler()
+                ->validateEntity($brand, [Brand::SERIALIZED_GROUP_LIST]);
         }
         $product->setBrandRelation($brand);
 
@@ -202,5 +214,13 @@ class BrandService
     private function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
     {
         return $this->tagAwareQueryResultCacheProduct;
+    }
+
+    /**
+     * @return ObjectsHandler
+     */
+    private function getObjecHandler(): ObjectsHandler
+    {
+        return $this->objecHandler;
     }
 }

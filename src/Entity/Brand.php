@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Exception\EntityValidatorException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -9,7 +10,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use JMS\Serializer\Annotation;
-use App\Entity\Product;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\BrandRepository")
@@ -19,14 +20,20 @@ use App\Entity\Product;
  *            columns={"brand_name"})
  *    }
  * )
- * @UniqueEntity(fields={"brandName"})
+ * @UniqueEntity(fields={"brandName"}, groups={Brand::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
  */
-class Brand
+class Brand implements EntityValidatorException
 {
     const SERIALIZED_GROUP_LIST = 'brand_group_list';
+    const SERIALIZED_GROUP_CREATE = 'brand_group_crete';
 
     use TimestampableEntity;
+
+    public function getIdentity()
+    {
+        return $this->getId();
+    }
 
     /**
      * @ORM\Id()
@@ -39,6 +46,7 @@ class Brand
     /**
      * @ORM\Column(type="string", length=255)
      * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
+     * @Assert\NotBlank(groups={Brand::SERIALIZED_GROUP_CREATE})
      */
     private $brandName;
 

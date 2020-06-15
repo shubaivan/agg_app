@@ -99,11 +99,6 @@ class HandleDownloadFileData
     private $adrecordDownloadUrls;
 
     /**
-     * @var CacheManager
-     */
-    private $cacheManager;
-
-    /**
      * @var int
      */
     private $csvHandleStep;
@@ -114,7 +109,6 @@ class HandleDownloadFileData
      * @param MessageBusInterface $productsBus
      * @param LoggerInterface $adtractionFileHandlerLogger
      * @param RedisHelper $redisHelper
-     * @param CacheManager $cacheManager
      * @param array $adtractionDownloadUrls
      * @param array $adrecordDownloadUrls
      * @param string $csvHandleStep
@@ -124,7 +118,6 @@ class HandleDownloadFileData
         MessageBusInterface $productsBus,
         LoggerInterface $adtractionFileHandlerLogger,
         RedisHelper $redisHelper,
-        CacheManager $cacheManager,
         array $adtractionDownloadUrls,
         array $adrecordDownloadUrls,
         string $csvHandleStep
@@ -136,7 +129,6 @@ class HandleDownloadFileData
         $this->productsBus = $productsBus;
         $this->logger = $adtractionFileHandlerLogger;
         $this->redisHelper = $redisHelper;
-        $this->cacheManager = $cacheManager;
         $this->csvHandleStep = (int)$csvHandleStep;
     }
 
@@ -189,8 +181,7 @@ class HandleDownloadFileData
             );
         }
         if ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)) {
-            unlink($filePath);
-            $this->getCacheManager()->clearAllPoolsCache();
+//            unlink($filePath);
             $this->getLogger()->info(
                 'file ' . $filePath . ' was removed'
             );
@@ -377,14 +368,6 @@ class HandleDownloadFileData
     protected function getRedisHelper(): RedisHelper
     {
         return $this->redisHelper;
-    }
-
-    /**
-     * @return CacheManager
-     */
-    protected function getCacheManager(): CacheManager
-    {
-        return $this->cacheManager;
     }
 
     /**
