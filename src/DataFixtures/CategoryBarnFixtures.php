@@ -26,7 +26,7 @@ class CategoryBarnFixtures extends Fixture
                 'name' => 'T-shirts',
                 'key_word' => '
                     t-shirt, kortärmad, tee, shortsleve, piké, pike, långärmad t-shirt,
-                    t-shirt, short-sleeved, tee, shortsleve, piké, girl, long-sleeved t-shirt
+                    t-shirt, short-sleeved, tee, shortsleve, piké, long-sleeved t-shirt
                 ',
                 'sub_key_word' => [
                     'subT-shirts' => 'T-shirt, Kortärmad, Tee, Shortsleve',

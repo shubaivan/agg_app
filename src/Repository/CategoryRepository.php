@@ -282,7 +282,7 @@ class CategoryRepository extends ServiceEntityRepository
             if ($explain === true) {
                 $query .= '
                     ,crsub.key_words AS sub_keywords
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',crsub.key_words),to_tsquery(\'pg_catalog.swedish\', :sub_main_search)) AS  sub_runk
+                    ,ts_rank_cd(to_tsvector(\'my_swedish\',crsub.key_words),to_tsquery(\'my_swedish\', :sub_main_search)) AS  sub_runk
                 ';
             }
         }
@@ -293,7 +293,7 @@ class CategoryRepository extends ServiceEntityRepository
             if ($explain === true) {
                 $query .= '
                     ,crsub_main.key_words AS sub_sub_keywords
-                    ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',crsub_main.key_words),to_tsquery(\'pg_catalog.swedish\', :sub_sub_main_search)) AS  sub_sub__runk
+                    ,ts_rank_cd(to_tsvector(\'my_swedish\',crsub_main.key_words),to_tsquery(\'my_swedish\', :sub_sub_main_search)) AS  sub_sub__runk
                 ';
             }
         }
@@ -335,13 +335,13 @@ class CategoryRepository extends ServiceEntityRepository
 
         if ($depth > 1) {
             $query .= '
-                AND to_tsvector(\'pg_catalog.swedish\',crsub.key_words) @@ to_tsquery(\'pg_catalog.swedish\', :sub_main_search)
+                AND to_tsvector(\'my_swedish\',crsub.key_words) @@ to_tsquery(\'my_swedish\', :sub_main_search)
             ';
         }
 
         if ($depth > 2) {
             $query .= '
-                AND to_tsvector(\'pg_catalog.swedish\',crsub_main.key_words) @@ to_tsquery(\'pg_catalog.swedish\', :sub_sub_main_search)
+                AND to_tsvector(\'my_swedish\',crsub_main.key_words) @@ to_tsquery(\'my_swedish\', :sub_sub_main_search)
             ';
         }
 
