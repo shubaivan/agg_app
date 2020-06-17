@@ -4,6 +4,7 @@ namespace App\Entity\Collection\SearchProducts;
 
 use JMS\Serializer\Annotation;
 use App\Entity\Collection\Search\SearchProductCollection;
+use App\Entity\Product;
 
 class AdjacentProduct extends CommonProduct
 {
@@ -12,63 +13,71 @@ class AdjacentProduct extends CommonProduct
     /**
      * @var int
      * @Annotation\Type("int")
-     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *      SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $id;
 
     /**
      * @var array
      * @Annotation\Type("array")
-     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT})
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, Product::SERIALIZED_GROUP_LIST})
      */
     private $extras;
 
     /**
      * @var string
      * @Annotation\Type("string")
-     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $imageUrl;
 
     /**
      * @var string
      * @Annotation\Type("string")
-     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $brand;
 
     /**
      * @var string
      * @Annotation\Type("string")
-     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $name;
 
     /**
      * @var string
      * @Annotation\Type("string")
-     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $price;
 
     /**
      * @var string
      * @Annotation\Type("string")
-     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $currency;
 
     /**
      * @var string
      * @Annotation\Type("string")
-     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $shop;
 
     /**
      * @var integer
      * @Annotation\Type("integer")
-     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $shopRelationId;
 
@@ -76,7 +85,7 @@ class AdjacentProduct extends CommonProduct
      * @return array
      * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("extras")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     public function getExtrasValue()
     {

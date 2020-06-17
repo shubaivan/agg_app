@@ -3,6 +3,7 @@
 namespace App\Services\Models;
 
 use App\Entity\Category;
+use App\Entity\Collection\ProductByIdCollection;
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
 use App\Entity\Collection\ProductsRawArrayCollection;
@@ -37,6 +38,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class ProductService extends AbstractModel
 {
+    const GROUP_IDENTITY = 'group_identity';
+    const EXCLUDE_GROUP_IDENTITY = 'exclude_group_identity';
     /**
      * @var Logger
      */
@@ -150,10 +153,11 @@ class ProductService extends AbstractModel
 
     /**
      * @param Product $product
-     * @return ProductCollection
+     * @return ProductByIdCollection
      * @throws DBALException
      * @throws ORMException
      * @throws OptimisticLockException
+     * @throws ValidatorException
      */
     public function getProductById(Product $product)
     {
@@ -163,7 +167,7 @@ class ProductService extends AbstractModel
         $parameterBag = new ParameterBag([
             'page' => 1,
             'count' => 4,
-            'exclude_id' => $product->getId(),
+            self::EXCLUDE_GROUP_IDENTITY => $product->getGroupIdentity(),
             'search' => $search ?? ''
         ]);
         $this->recordIpToProduct($product);
@@ -194,19 +198,7 @@ class ProductService extends AbstractModel
         $count = $this->getProductRepository()
             ->fullTextSearchByParameterFetcher($paramFetcher, true);
 
-        $searchProductCollection = $this->getObjectHandler()
-            ->handleObject(
-                [
-                    'count' => $count,
-                    'collection' => $collection,
-                    'uniqIdentificationQuery' => $this->getFacetQueryFilter()
-                ],
-                SearchProductCollection::class,
-                [SearchProductCollection::GROUP_CREATE]
-            );
-        $this->analysisSearchProductCollection($searchProductCollection);
-
-        return $searchProductCollection;
+        return $this->getSearchProductCollection($count, $collection);
     }
 
     /**
@@ -329,6 +321,122 @@ class ProductService extends AbstractModel
         return $this->getProductRepository()->findOneBy(['sku' => $sku]);
     }
 
+    private function setGroupIdentity(Product $product)
+    {
+        $shop = $product->getShop();
+        if ($shop) {
+            call_user_func_array([$this->getManagerShopsService(), $shop], [$product]);
+        }
+    }
+
+    /**
+     * @param SearchProductCollection $productCollection
+     * @throws ValidatorException
+     */
+    private function analysisSearchProductCollection(SearchProductCollection $productCollection)
+    {
+        foreach ($productCollection->getCollection()->getIterator() as $groupProductEntity) {
+            /** @var $groupProductEntity GroupProductEntity */
+            $presentAdjacentProducts = $groupProductEntity->getPresentAdjacentProducts();
+            if (count($presentAdjacentProducts) > 0) {
+                /** @var GroupAdjacent $handleObject */
+                $handleObject = $this->getObjectHandler()
+                    ->handleObject(
+                        ['adjacentProducts' => $presentAdjacentProducts],
+                        GroupAdjacent::class,
+                        [AdjacentProduct::GROUP_GENERATE_ADJACENT]
+                    );
+                $groupProductEntity->setAdjacentProducts(
+                    $handleObject->getAdjacentProducts()
+                );
+            }
+
+            $this->analysisSearchProductOnCurrentCollection($groupProductEntity);
+        }
+    }
+
+    /**
+     * @param GroupProductEntity $groupProductEntity
+     * @throws ValidatorException
+     */
+    private function analysisSearchProductOnCurrentCollection(GroupProductEntity $groupProductEntity)
+    {
+        $presentCurrentProduct = $groupProductEntity->getPresentCurrentProduct();
+        if (count($presentCurrentProduct) > 0) {
+            /** @var AdjacentProduct $handleObject */
+            $handleObject = $this->getObjectHandler()
+                ->handleObject(
+                    $presentCurrentProduct,
+                    AdjacentProduct::class,
+                    [AdjacentProduct::GROUP_GENERATE_ADJACENT]
+                );
+            $groupProductEntity->setCurrentProduct(
+                $handleObject
+            );
+        }
+    }
+
+    private function getFacetQueryFilter()
+    {
+        $encryptMainQuery = $this->getProductRepository()->getEncryptMainQuery();
+
+        return $encryptMainQuery;
+    }
+
+    /**
+     * @param Product $product
+     * @param ParameterBag $parameterBag
+     * @return ProductByIdCollection
+     * @throws DBALException
+     * @throws ValidatorException
+     */
+    private function getProductCollection(Product $product, ParameterBag $parameterBag)
+    {
+        $bagProduct = new ParameterBag([self::GROUP_IDENTITY => $product->getGroupIdentity()]);
+        $collection = $this->getProductRepository()
+            ->fullTextSearchByParameterBag($bagProduct);
+        if (count($collection)) {
+            $collection[0]['productById'] = $product->getId();
+        }
+        $currentProductCollection = $this->getSearchProductCollection(1, $collection);
+
+        $collection = $this->getProductRepository()
+            ->fullTextSearchByParameterBag($parameterBag);
+
+        $relatedItemProductCollection = $this->getSearchProductCollection(
+            $parameterBag->get('count'), $collection);
+
+        $productByIdCollection = new ProductByIdCollection(
+            $currentProductCollection,
+            $relatedItemProductCollection
+        );
+
+        return $productByIdCollection;
+    }
+
+    /**
+     * @param $count
+     * @param $collection
+     * @return SearchProductCollection
+     * @throws ValidatorException
+     */
+    private function getSearchProductCollection($count, $collection): SearchProductCollection
+    {
+        $searchProductCollection = $this->getObjectHandler()
+            ->handleObject(
+                [
+                    'count' => $count,
+                    'collection' => $collection,
+                    'uniqIdentificationQuery' => $this->getFacetQueryFilter()
+                ],
+                SearchProductCollection::class,
+                [SearchProductCollection::GROUP_CREATE]
+            );
+        $this->analysisSearchProductCollection($searchProductCollection);
+
+        return $searchProductCollection;
+    }
+
     /**
      * @return Logger
      */
@@ -400,82 +508,5 @@ class ProductService extends AbstractModel
     private function getManagerShopsService(): ManagerShopsService
     {
         return $this->managerShopsService;
-    }
-
-    private function setGroupIdentity(Product $product)
-    {
-        $shop = $product->getShop();
-        if ($shop) {
-            call_user_func_array([$this->getManagerShopsService(), $shop], [$product]);
-        }
-    }
-
-    /**
-     * @param SearchProductCollection $productCollection
-     * @throws ValidatorException
-     */
-    private function analysisSearchProductCollection(SearchProductCollection $productCollection)
-    {
-        foreach ($productCollection->getCollection()->getIterator() as $groupProductEntity) {
-            /** @var $groupProductEntity GroupProductEntity */
-            $presentAdjacentProducts = $groupProductEntity->getPresentAdjacentProducts();
-            if (count($presentAdjacentProducts) > 0) {
-                /** @var GroupAdjacent $handleObject */
-                $handleObject = $this->getObjectHandler()
-                    ->handleObject(
-                        ['adjacentProducts' => $presentAdjacentProducts],
-                        GroupAdjacent::class,
-                        [AdjacentProduct::GROUP_GENERATE_ADJACENT]
-                    );
-                $groupProductEntity->setAdjacentProducts(
-                    $handleObject->getAdjacentProducts()
-                );
-            }
-
-            $this->analysisSearchProductOnCurrentCollection($groupProductEntity);
-        }
-    }
-
-    /**
-     * @param GroupProductEntity $groupProductEntity
-     * @throws ValidatorException
-     */
-    private function analysisSearchProductOnCurrentCollection(GroupProductEntity $groupProductEntity)
-    {
-        $presentCurrentProduct = $groupProductEntity->getPresentCurrentProduct();
-        if (count($presentCurrentProduct) > 0) {
-            /** @var AdjacentProduct $handleObject */
-            $handleObject = $this->getObjectHandler()
-                ->handleObject(
-                    $presentCurrentProduct,
-                    AdjacentProduct::class,
-                    [AdjacentProduct::GROUP_GENERATE_ADJACENT]
-                );
-            $groupProductEntity->setCurrentProduct(
-                $handleObject
-            );
-        }
-    }
-
-    private function getFacetQueryFilter()
-    {
-        $encryptMainQuery = $this->getProductRepository()->getEncryptMainQuery();
-
-        return $encryptMainQuery;
-    }
-
-    /**
-     * @param Product $product
-     * @param ParameterBag $parameterBag
-     * @return ProductCollection
-     * @throws DBALException
-     */
-    private function getProductCollection(Product $product, ParameterBag $parameterBag)
-    {
-        return (new ProductCollection(
-            $this->getProductRepository()
-                ->getProductRelations($parameterBag),
-            $product
-        ));
     }
 }

@@ -109,21 +109,28 @@ class GroupProductEntity extends CommonProduct
 
     /**
      * @var ArrayCollection|AdjacentProduct[]
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $adjacentProducts = [];
 
     /**
      * @var AdjacentProduct
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $currentProduct;
 
     /**
      * @var string
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $rangePrice;
+
+    /**
+     * @var integer
+     * @Annotation\Type("integer")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     */
+    private $productById;
 
     /**
      * @var array
@@ -364,7 +371,12 @@ class GroupProductEntity extends CommonProduct
     public function postDeserializer()
     {
         if (is_array($this->ids) && count($this->ids) > 0) {
-            $currentId = array_shift($this->ids);
+            if ($this->productById) {
+                $currentId = $this->productById;
+            } else {
+                $currentId = array_shift($this->ids);
+            }
+
             if (!$this->presentCurrentProduct) {
                 $this->presentCurrentProduct = $this->transformIdToProductModel($currentId);
             }
@@ -415,7 +427,7 @@ class GroupProductEntity extends CommonProduct
      * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("storeNames")
      * @Annotation\Type("array")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     public function getStoreNamesValue()
     {
@@ -427,7 +439,7 @@ class GroupProductEntity extends CommonProduct
      * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("storeExtras")
      * @Annotation\Type("array")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     public function getStoreExtrasValue()
     {
@@ -439,7 +451,7 @@ class GroupProductEntity extends CommonProduct
      * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("storePrice")
      * @Annotation\Type("array")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     public function getStorePriceValue()
     {
@@ -451,7 +463,7 @@ class GroupProductEntity extends CommonProduct
      * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("storeImageUrl")
      * @Annotation\Type("array")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     public function getStoreImageUrlValue()
     {
@@ -463,7 +475,7 @@ class GroupProductEntity extends CommonProduct
      * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("extras")
      * @Annotation\Type("array<string, array<string>>")
-     * @Annotation\Groups({SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     public function getExtrasValue()
     {

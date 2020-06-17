@@ -6,6 +6,7 @@ use App\Cache\TagAwareQueryResultCacheCommon;
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Product;
 use App\Services\Helpers;
+use App\Services\Models\ProductService;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Cache\Cache as ResultCacheDriver;
 use Doctrine\Common\Collections\Criteria;
@@ -210,6 +211,8 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function fullTextSearchByParameterBag(ParameterBag $parameterBag, $count = false)
     {
+        $this->clearObjectPropertyData();
+
         $sort_by = isset($_REQUEST['sort_by']);
         $connection = $this->getEntityManager()->getConnection();
 
@@ -268,7 +271,9 @@ class ProductRepository extends ServiceEntityRepository
             $products = isset($products[0]['count']) ? (int)$products[0]['count'] : 0;
         } else {
             $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            $this->prepareFacetFilterQueries();
+            if (!$parameterBag->get(ProductService::GROUP_IDENTITY) && !$parameterBag->get(ProductService::EXCLUDE_GROUP_IDENTITY)) {
+                $this->prepareFacetFilterQueries();
+            }
         }
         $statement->closeCursor();
 
@@ -331,7 +336,25 @@ class ProductRepository extends ServiceEntityRepository
                 WHERE to_tsvector(\'pg_catalog.swedish\',
                  products_alias.name||products_alias.price||products_alias.description||products_alias.brand) 
                     @@ to_tsquery(\'pg_catalog.swedish\', :search)                      
-        ';
+            ';
+        }
+
+        if ($parameterBag->get(ProductService::GROUP_IDENTITY)) {
+            $conditionGroupIdentity = 'products_alias.group_identity = :group_identity';
+            array_push($this->conditions, $conditionGroupIdentity);
+            $this->variables = array_merge(
+                $this->variables,
+                [':group_identity' => $parameterBag->get(ProductService::GROUP_IDENTITY)]
+            );
+        }
+
+        if ($parameterBag->get(ProductService::EXCLUDE_GROUP_IDENTITY)) {
+            $conditionExcludeGroupIdentity = 'products_alias.group_identity != :exclude_group_identity';
+            array_push($this->conditions, $conditionExcludeGroupIdentity);
+            $this->variables = array_merge(
+                $this->variables,
+                [':exclude_group_identity' => $parameterBag->get(ProductService::EXCLUDE_GROUP_IDENTITY)]
+            );
         }
 
         if ($parameterBag->get('category_word')) {
@@ -495,10 +518,15 @@ class ProductRepository extends ServiceEntityRepository
         if (!$count) {
             $limit = (int)$parameterBag->get('count');
             $offset = $limit * ((int)$parameterBag->get('page') - 1);
-            $this->params[self::OFFSET] = $offset;
-            $this->params[self::LIMIT] = $limit;
-            $this->types[self::OFFSET] = \PDO::PARAM_INT;
-            $this->types[self::LIMIT] = \PDO::PARAM_INT;
+            if ($offset) {
+                $this->params[self::OFFSET] = $offset;
+                $this->types[self::OFFSET] = \PDO::PARAM_INT;
+            }
+
+            if ($limit) {
+                $this->params[self::LIMIT] = $limit;
+                $this->types[self::LIMIT] = \PDO::PARAM_INT;
+            }
         }
 
         return array($this->params, $this->types);
@@ -565,16 +593,26 @@ class ProductRepository extends ServiceEntityRepository
 
 
         if (!$count) {
-            $mainQuery .=
-                ($parameterBag->get('search') ?
-                    ($sort_by
-                        ? ' ORDER BY rank DESC, ' . '"' . $sortBy . '"' . ' ' . $sortOrder . ''
-                        : ' ORDER BY rank DESC')
-                    : ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '') . '
-                                          
+            if (!$parameterBag->get(ProductService::GROUP_IDENTITY)) {
+                $mainQuery .=
+                    ($parameterBag->get('search') ?
+                        ($sort_by
+                            ? ' ORDER BY rank DESC, ' . '"' . $sortBy . '"' . ' ' . $sortOrder . ''
+                            : ' ORDER BY rank DESC')
+                        : ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '');
+            }
+
+            if (isset($this->params[self::LIMIT])) {
+                $mainQuery .= '                                          
                     LIMIT :limit
-                    OFFSET :offset;
-            ';
+                ';
+            }
+
+            if (isset($this->params[self::OFFSET])) {
+                $mainQuery .= '                                          
+                    OFFSET :offset
+                ';
+            }
         } else {
             $mainQuery .= ') as count';
         }
@@ -999,5 +1037,15 @@ class ProductRepository extends ServiceEntityRepository
 //
 
 
+    }
+
+    private function clearObjectPropertyData()
+    {
+        $this->mainQuery = '';
+        $this->queryMainCondition = '';
+        $this->conditions = [];
+        $this->variables = [];
+        $this->params = [];
+        $this->types = [];
     }
 }

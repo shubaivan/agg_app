@@ -5,6 +5,7 @@ namespace App\Entity\Collection\Search;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation;
 use App\Entity\Collection\SearchProducts\GroupProductEntity;
+use App\Entity\Product;
 
 class SearchProductCollection
 {
@@ -14,14 +15,16 @@ class SearchProductCollection
     /**
      * @var ArrayCollection|GroupProductEntity[]
      * @Annotation\Type("ArrayCollection<App\Entity\Collection\SearchProducts\GroupProductEntity>")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE, SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $collection;
 
     /**
      * @var int
      * @Annotation\Type("int")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE, SearchProductCollection::GROUP_GET})
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
      */
     private $count;
 

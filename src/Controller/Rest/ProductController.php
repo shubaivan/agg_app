@@ -2,6 +2,7 @@
 
 namespace App\Controller\Rest;
 
+use App\Entity\Collection\ProductByIdCollection;
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
 use App\Entity\Collection\Search\SearchProductCollection;
@@ -276,13 +277,12 @@ class ProductController extends AbstractRestController
      * )
      *
      * @param Product $product
-     * @param ParamFetcher $paramFetcher
-     * @param Request $request
      *
-     * @return ProductCollection
+     * @return ProductByIdCollection
      * @throws DBALException
      * @throws ORMException
      * @throws OptimisticLockException
+     * @throws ValidatorException
      */
     public function getProductByIdAction(
         Product $product

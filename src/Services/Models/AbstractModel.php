@@ -11,7 +11,7 @@ abstract class AbstractModel
     public function prepareDataForGINSearch(string $matchData)
     {
         $resultData = '';
-        if (preg_match_all('/[a-zA-Z ¤æøĂéëäöåÉÄÖÅ]+/',$matchData,$matches)) {
+        if (preg_match_all('/[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™]+/',$matchData,$matches)) {
             $matchData = array_shift($matches);
             if (is_array($matchData) && count($matchData)) {
 
