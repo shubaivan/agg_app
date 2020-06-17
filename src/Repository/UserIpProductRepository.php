@@ -34,48 +34,27 @@ class UserIpProductRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('s');
         $qb
             ->select('
-                IDENTITY(s.products) as product_id,               
-                COUNT(DISTINCT s) as number_of_entries,
-                products_alias.id,
-                products_alias.sku,
-                products_alias.name,
-                products_alias.description,
-                products_alias.category,
-                products_alias.price,
-                products_alias.shipping,
-                products_alias.currency,
-                products_alias.instock,
-                products_alias.productUrl,
-                products_alias.imageUrl,
-                products_alias.trackingUrl,
-                products_alias.brand,
-                products_alias.shop,
-                products_alias.originalPrice,
-                products_alias.ean,
-                products_alias.manufacturerArticleNumber,
-                products_alias.extras,
-                products_alias.createdAt,
-                IDENTITY(products_alias.brandRelation) as brandRelationId,
-                IDENTITY(products_alias.shopRelation) as shopRelationId,
-                group_concat(categoryRelation.id) AS categoryIds
+                products_alias.groupIdentity
                 ')
-            ->innerJoin('s.products', 'products_alias')
-            ->leftJoin('products_alias.categoryRelation', 'categoryRelation');
-
+            ->innerJoin('s.products', 'products_alias');
         if ($userIp) {
             $qb
                 ->where('s.ips = :ip')
                 ->setParameter('ip', $userIp);
         }
 
-        $qb->groupBy('s.products')
-            ->addGroupBy('products_alias')
-            ->orderBy('number_of_entries', Criteria::DESC)
+        $qb->groupBy('products_alias.groupIdentity')
+
             ->setFirstResult($paramFetcher->get('count') * ($paramFetcher->get('page') - 1))
             ->setMaxResults($paramFetcher->get('count'));
 
         $query = $qb->getQuery();
-        return $query->getResult();
+        $identities = $query->getResult();
+        $result = [];
+        foreach ($identities as $identity) {
+            $result[] = $identity['groupIdentity'];
+        }
+        return $result;
     }
 
     /**

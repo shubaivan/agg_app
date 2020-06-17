@@ -295,11 +295,11 @@ class ProductController extends AbstractRestController
     /**
      * get Products by ids.
      *
-     * @Rest\Get("/api/products/by/ids")
+     * @Rest\Get("/api/products/by/groups_identity")
      *
      * @SWG\Tag(name="Products")
      *
-     * @Rest\QueryParam(map=true, name="ids", nullable=false, strict=true, requirements="\d+", default="0", description="List products by ids")
+     * @Rest\QueryParam(map=true, name="groups_identity", nullable=false, strict=true, default="0", description="groups identity")
      *
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
      * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
@@ -319,13 +319,14 @@ class ProductController extends AbstractRestController
      * @throws NonUniqueResultException
      * @throws \Exception
      */
-    public function getProductByIdsAction(ParamFetcher $paramFetcher)
+    public function getProductByGroupsIdentityAction(ParamFetcher $paramFetcher)
     {
-        $collection = $this->getProductRepository()->getProductByIds($paramFetcher);
-        $count = $this->getProductRepository()->getProductByIds($paramFetcher, true);
-        $productsCollection = new ProductsCollection($collection, $count);
-        $view = $this->createSuccessResponse($productsCollection, [Product::SERIALIZED_GROUP_LIST]);
-        $view->getResponse()->setExpires($this->getHelpers()->getExpiresHttpCache());
+        $searchProductCollection = $this->getProductService()
+            ->searchProductsByFilter($paramFetcher);
+        $view = $this->createSuccessResponse(
+            $searchProductCollection,
+            [Product::SERIALIZED_GROUP_LIST]
+        );
 
         return $view;
     }
@@ -388,16 +389,16 @@ class ProductController extends AbstractRestController
      * )
      *
      * @return \FOS\RestBundle\View\View
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @throws \Exception
      */
     public function getProductByIpAction(ParamFetcher $paramFetcher)
     {
         $searchProductCollection = $this->getProductService()
             ->getProductByIp($paramFetcher);
-        $view = $this->createSuccessResponse($searchProductCollection, [], false);
+        $view = $this->createSuccessResponse(
+            $searchProductCollection,
+            [Product::SERIALIZED_GROUP_LIST]
+        );
         $view->getResponse()->setMaxAge(180);
 
         return $view;

@@ -40,6 +40,7 @@ class ProductService extends AbstractModel
 {
     const GROUP_IDENTITY = 'group_identity';
     const EXCLUDE_GROUP_IDENTITY = 'exclude_group_identity';
+    const WITHOUT_FACET = 'without_facet';
     /**
      * @var Logger
      */
@@ -203,20 +204,29 @@ class ProductService extends AbstractModel
 
     /**
      * @param ParamFetcher $paramFetcher
-     * @return ProductsRawArrayCollection
+     * @return SearchProductCollection
+     * @throws CacheException
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws ORMException
      * @throws OptimisticLockException
+     * @throws ValidatorException
      */
     public function getProductByIp(ParamFetcher $paramFetcher)
     {
-        $collection = $this->getUserIpProductRepository()
+        $groupsIdentity = $this->getUserIpProductRepository()
             ->getTopProductByIp($paramFetcher, $this->getUserIp());
+        $parameterBag = new ParameterBag($paramFetcher->all());
+        $parameterBag->set('sort_by', 'numberOfEntries');
+        $parameterBag->set(self::WITHOUT_FACET, true);
+        $parameterBag->set(ProductRepository::GROUPS_IDENTITY, $groupsIdentity);
+        $collection = $this->getProductRepository()
+            ->fullTextSearchByParameterBag($parameterBag);
+
         $count = $this->getUserIpProductRepository()
             ->getCountTopProductByIp($this->getUserIp());
 
-        return (new ProductsRawArrayCollection($collection, $count));
+        return $this->getSearchProductCollection($count, $collection);
     }
 
     /**
@@ -231,6 +241,9 @@ class ProductService extends AbstractModel
     {
         $collection = $this->getUserIpProductRepository()
             ->getTopProductByIp($paramFetcher);
+
+
+
         $count = $this->getUserIpProductRepository()
             ->getCountTopProductByIp();
 
@@ -412,6 +425,11 @@ class ProductService extends AbstractModel
         );
 
         return $productByIdCollection;
+    }
+
+    public function getProductByGroupsIdentity()
+    {
+
     }
 
     /**

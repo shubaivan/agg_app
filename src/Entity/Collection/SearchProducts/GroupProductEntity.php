@@ -133,6 +133,16 @@ class GroupProductEntity extends CommonProduct
     private $productById;
 
     /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({
+     *     SearchProductCollection::GROUP_CREATE,
+     *     SearchProductCollection::GROUP_GET,
+     *     Product::SERIALIZED_GROUP_LIST})
+     */
+    private $groupIdentity;
+
+    /**
      * @var array
      */
     private $presentAdjacentProducts = [];

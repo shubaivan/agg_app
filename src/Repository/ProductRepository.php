@@ -37,6 +37,7 @@ class ProductRepository extends ServiceEntityRepository
     const FACET_FILTERS = 'facet_filters_';
     const OFFSET = ':offset';
     const LIMIT = ':limit';
+    const GROUPS_IDENTITY = 'groups_identity';
 
     private $mainQuery = '', $conditions = [], $variables = [], $params = [], $types = [], $queryMainCondition = '';
 
@@ -205,9 +206,9 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @param ParameterBag $parameterBag
      * @param bool $count
-     * @return false|int|mixed|mixed[]
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \InvalidArgumentException
+     * @return int|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     * @throws \Exception
      */
     public function fullTextSearchByParameterBag(ParameterBag $parameterBag, $count = false)
     {
@@ -271,7 +272,10 @@ class ProductRepository extends ServiceEntityRepository
             $products = isset($products[0]['count']) ? (int)$products[0]['count'] : 0;
         } else {
             $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
-            if (!$parameterBag->get(ProductService::GROUP_IDENTITY) && !$parameterBag->get(ProductService::EXCLUDE_GROUP_IDENTITY)) {
+            if (!$parameterBag->get(ProductService::GROUP_IDENTITY)
+                && !$parameterBag->get(ProductService::EXCLUDE_GROUP_IDENTITY)
+                && $parameterBag->get(ProductService::WITHOUT_FACET) == null
+            ) {
                 $this->prepareFacetFilterQueries();
             }
         }
@@ -401,22 +405,22 @@ class ProductRepository extends ServiceEntityRepository
             $this->variables = array_merge($this->variables, $preparedExtraArray);
         }
 
-        if (is_array($parameterBag->get('exclude_ids'))
-            && array_search('0', $parameterBag->get('exclude_ids'), true) === false
+        if (is_array($parameterBag->get(self::GROUPS_IDENTITY))
+            && array_search('0', $parameterBag->get(self::GROUPS_IDENTITY), true) === false
         ) {
-            $excludeIds = $parameterBag->get('exclude_ids');
-            $preparedInValuesIds = array_combine(
+            $groupsIdentity = $parameterBag->get(self::GROUPS_IDENTITY);
+            $preparedGroupsIdentity = array_combine(
                 array_map(function ($key) {
-                    return ':var_exclude_id' . $key;
-                }, array_keys($excludeIds)),
-                array_values($excludeIds)
+                    return ':var_groups_identity' . $key;
+                }, array_keys($groupsIdentity)),
+                array_values($groupsIdentity)
             );
-            $bindKeysIds = implode(',', array_keys($preparedInValuesIds));
+            $bindKeysGroups = implode(',', array_keys($preparedGroupsIdentity));
             $conditionIds = "                           
-                            products_alias.id NOT IN ($bindKeysIds)
+                            products_alias.group_identity IN ($bindKeysGroups)
                         ";
             array_push($this->conditions, $conditionIds);
-            $this->variables = array_merge($this->variables, $preparedInValuesIds);
+            $this->variables = array_merge($this->variables, $preparedGroupsIdentity);
         }
 
         if (is_array($parameterBag->get('shop_ids'))
@@ -531,7 +535,6 @@ class ProductRepository extends ServiceEntityRepository
 
         return array($this->params, $this->types);
     }
-//{"2020-05-28 16:02:32"}	{34613,34614}	{"K-Way Le Vrai 3.0 Claude Jacka Fuchsia 12 years","K-Way Le Vrai 3.0 Claude Jacka Fuchsia 14 years"}	"34613"=>"K-Way Le Vrai 3.0 Claude Jacka Fuchsia 12 years", "34614"=>"K-Way Le Vrai 3.0 Claude Jacka Fuchsia 14 years"	"34613"=>"{\"SIZE\": \"152 cm\", \"COLOUR\": \"Rosa\", \"DELIVERY_TIME\": \"1-3 vardagar\"}", "34614"=>"{\"SIZE\": \"164 cm\", \"COLOUR\": \"Rosa\", \"DELIVERY_TIME\": \"1-3 vardagar\"}"	{925.00,1049.00}	"34613"=>"925.00", "34614"=>"1049.00"	"34613"=>"https://www.babyshop.com/images/711562/external-large.jpg", "34614"=>"https://www.babyshop.com/images/711562/external-large.jpg"
 
     /**
      * @param ParameterBag $parameterBag
@@ -540,6 +543,7 @@ class ProductRepository extends ServiceEntityRepository
      * @param $sortBy
      * @param $sortOrder
      * @return string
+     * @throws \Exception
      */
     private function getMainSearchProductQuery(
         ParameterBag $parameterBag,
@@ -556,9 +560,10 @@ class ProductRepository extends ServiceEntityRepository
             ';
         } else {
             $mainQuery .= '
-            SELECT                         
-                (array_agg(DISTINCT main_products_alias.created_at))[1]::TIMESTAMP AS "createdAt",
-                (array_agg(DISTINCT main_products_alias.number_of_entries))[1]::INTEGER AS "numberOfEntries",
+            SELECT
+                main_products_alias.group_identity AS "groupIdentity",                         
+                (array_agg(DISTINCT main_products_alias.created_at))[1]::TIMESTAMP AS "createdAt",              
+                SUM(main_products_alias.number_of_entries) AS "numberOfEntries",
                 (array_agg(DISTINCT main_products_alias.price))[1]::INTEGER AS price
                 
                 ,(array_agg(DISTINCT main_products_alias.shop))[1]::TEXT AS shop
@@ -899,144 +904,6 @@ class ProductRepository extends ServiceEntityRepository
             '&&types=' . serialize($this->types) .
             '&&connectionParams=' . hash('sha256', serialize($connectionParams));
         return $realCacheKey;
-    }
-
-    /**
-     * @param ParameterBag $parameterBag
-     * @return mixed[]
-     * @throws \Doctrine\DBAL\Cache\CacheException
-     */
-    public function getProductRelations(ParameterBag $parameterBag)
-    {
-        $connection = $this->getEntityManager()->getConnection();
-        $query = '
-            SELECT
-                products_alias.id,
-                products_alias.sku,
-                products_alias.name AS "name",
-                products_alias.description,
-                products_alias.category,
-                products_alias.price,
-                products_alias.shipping,
-                products_alias.currency,
-                products_alias.instock,
-                products_alias.product_url AS "productUrl",
-                products_alias.image_url AS "imageUrl",
-                products_alias.tracking_url AS "trackingUrl",
-                products_alias.brand,
-                products_alias.shop,
-                products_alias.original_price AS "originalPrice",
-                products_alias.ean,
-                products_alias.manufacturer_article_number AS "manufacturerArticleNumber",
-                products_alias.extras,
-                products_alias.created_at AS "createdAt",
-                products_alias.brand_relation_id AS "brandRelationId",
-                products_alias.shop_relation_id AS "shopRelationId",
-                ts_rank_cd(to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand), to_tsquery(\'pg_catalog.swedish\', :search)) AS rank
-            FROM products products_alias
-        
-            WHERE to_tsvector(\'pg_catalog.swedish\', products_alias.name||products_alias.price||products_alias.description||products_alias.brand) @@ to_tsquery(\'pg_catalog.swedish\', :search)
-            AND products_alias.id != :exclude_id
-            ORDER BY rank DESC
-            LIMIT :limit
-            OFFSET :offset
-        ';
-
-        $search = $parameterBag->get('search');
-        $resultData = $this->getHelpers()
-            ->handleSearchValue($search, true);
-
-        $limit = (int)$parameterBag->get('count');
-        $offset = $limit * ((int)$parameterBag->get('page') - 1);
-
-
-        $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
-            $query,
-            [
-                ':search' => $resultData,
-                ':exclude_id' => $parameterBag->get('exclude_id'),
-                self::LIMIT => $limit,
-                self::OFFSET => $offset,
-            ],
-            [
-                ':search' => \PDO::PARAM_STR,
-                ':exclude_id' => \PDO::PARAM_INT,
-                self::LIMIT => \PDO::PARAM_INT,
-                self::OFFSET => \PDO::PARAM_INT,
-            ],
-            ['product_full_text_search_relations'],
-            0,
-            "product_full_text_search_relations_cont"
-        );
-        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
-            ->prepareParamsForExecuteCacheQuery();
-
-        /** @search ResultCacheStatement $statement */
-        $statement = $connection->executeCacheQuery(
-            $query,
-            $params,
-            $types,
-            $queryCacheProfile
-        );
-
-        $products = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $statement->closeCursor();
-
-        return $products;
-    }
-
-    public function groupProducts()
-    {
-//        SELECT
-//
-//array_agg(DISTINCT main_products_alias.sku) AS allsku,
-//array_agg(DISTINCT main_products_alias."createdAt") AS "createdAt",
-//array_agg(DISTINCT main_products_alias.id) AS ids,
-//array_agg(DISTINCT main_products_alias.name) AS names,
-//array_agg(DISTINCT main_products_alias.description) AS description,
-//array_agg(DISTINCT main_products_alias.extras) AS extras,
-//array_agg(DISTINCT main_products_alias.price) AS price,
-//array_agg(DISTINCT main_products_alias."numberOfEntries") AS "numberOfEntries",
-//array_agg(DISTINCT main_products_alias.shop) AS shop
-//
-//FROM (
-//    SELECT
-//products_alias.id,
-//products_alias.group_identity,
-//products_alias.sku,
-//products_alias.shop,
-//products_alias.name AS "name",
-//products_alias.description,
-//products_alias.category,
-//products_alias.price,
-//products_alias.extras,
-//products_alias.created_at AS "createdAt",
-//products_alias.brand_relation_id AS "brandRelationId",
-//products_alias.shop_relation_id AS "shopRelationId",
-//array_agg(DISTINCT cpt.category_id) AS categoryIds,
-//COUNT(DISTINCT uip.id) as "numberOfEntries"
-//
-//    --,ts_rank_cd(to_tsvector('pg_catalog.swedish',coalesce(name,'')||' '||coalesce(description,'')||' '||coalesce(sku,'')||' '||coalesce(price,0)||' '||coalesce(category,'')||' '||coalesce(brand,'')||' '||coalesce(shop,'')), query_search) AS rank
-//
-//FROM products products_alias
-//
-//    -- JOIN to_tsquery('pg_catalog.swedish', 'short:*') query_search
-//    -- ON to_tsvector('pg_catalog.swedish',coalesce(name,'')||' '||coalesce(description,'')||' '||coalesce(sku,'')||' '||coalesce(price,0)||' '||coalesce(category,'')||' '||coalesce(brand,'')||' '||coalesce(shop,'')) @@ query_search
-//
-//LEFT JOIN product_category cp on cp.product_id = products_alias.id
-//LEFT JOIN product_category cpt on cpt.product_id = products_alias.id
-//LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id
-//
-//GROUP BY products_alias.id
-//
-//) AS main_products_alias
-//
-//GROUP BY main_products_alias.group_identity
-//
-//ORDER BY "numberOfEntries" DESC
-//
-
-
     }
 
     private function clearObjectPropertyData()
