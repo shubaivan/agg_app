@@ -18,6 +18,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     uniqueConstraints={@UniqueConstraint(name="uniq_sku_index", columns={"sku"})},
  *     indexes={
  *     @ORM\Index(name="sku_idx", columns={"sku"}),
+ *     @ORM\Index(name="group_identity", columns={"group_identity"}),
  *     @ORM\Index(name="created_desc_index", columns={"created_at"}),
  *     @ORM\Index(name="created_asc_index", columns={"created_at"}),
  *     @ORM\Index(name="price_desc_index", columns={"price"}),

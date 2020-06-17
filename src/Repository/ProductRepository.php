@@ -57,6 +57,11 @@ class ProductRepository extends ServiceEntityRepository
     private $tagAwareQueryResultCacheProduct;
 
     /**
+     * @var string
+     */
+    private $facetUniqIdentity;
+
+    /**
      * ProductRepository constructor.
      * @param Helpers $helpers
      * @param TagAwareQueryResultCacheCommon $tagAwareQueryResultCacheCommon
@@ -291,6 +296,9 @@ class ProductRepository extends ServiceEntityRepository
     public function getEncryptMainQuery(): string
     {
 //        $encrypt_decrypt = $this->getHelpers()->encrypt_decrypt('encrypt', $this->mainQuery);
+        if ($this->facetUniqIdentity) {
+            return $this->facetUniqIdentity;
+        }
         $params = $this->params;
 
         if (isset($params[self::LIMIT])) {
@@ -311,8 +319,8 @@ class ProductRepository extends ServiceEntityRepository
         $resultIdentity = 'query=' . $this->mainQuery .
             '&params=' . serialize($params) .
             '&types=' . serialize($types);
-
-        return self::FACET_FILTERS . sha1($resultIdentity);
+        $this->facetUniqIdentity = self::FACET_FILTERS . sha1($resultIdentity);
+        return $this->facetUniqIdentity;
     }
 
     /**
@@ -914,5 +922,67 @@ class ProductRepository extends ServiceEntityRepository
         $this->variables = [];
         $this->params = [];
         $this->types = [];
+    }
+
+    private function ff()
+    {
+        $t = '--EXPLAIN ANALYZE
+            
+            SELECT                         
+                products_alias.group_identity,
+								                array_agg(products_alias.name)::TEXT AS tt
+                ,COUNT(DISTINCT uip.id) as "numberOfEntries"
+
+                --products_alias.name
+                --,products_alias.image_url									
+								,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.image_url)) AS "storeImageUrl"
+
+								,hstore(array_agg(products_alias.id::text), array_agg(products_alias.brand::text)) AS "storeBrand"
+                --,products_alias.brand
+								,(array_agg(DISTINCT products_alias.shop))[1]::TEXT AS shop
+							
+                --,products_alias.shop
+								,(array_agg(DISTINCT products_alias.shop_relation_id))[1]::INTEGER AS "shopRelationId"
+                --,products_alias.shop_relation_id
+                                        
+                ,products_alias.group_identity
+								
+								,hstore(array_agg(products_alias.id::text), array_agg(products_alias.price::text)) AS "storePrice"
+
+                --products_alias.price,
+								,hstore(array_agg(products_alias.id::text), array_agg(products_alias.currency::text)) AS "storeCurrency"
+                --,products_alias.currency
+								,hstore(array_agg(products_alias.id::text), array_agg(products_alias.extras::text)) AS "storeExtras"
+                --,products_alias.extras
+									,(array_agg(DISTINCT products_alias.created_at))[1]::TIMESTAMP AS "createdAt"
+
+                --,products_alias.created_at              
+        
+                ,COUNT(DISTINCT uip.id) as number_of_entries
+                                                  
+                    ,ts_rank_cd(
+                      to_tsvector(
+                        \'pg_catalog.swedish\',
+                         array_agg(products_alias.name)::TEXT||array_agg(products_alias.price)::TEXT||array_agg(products_alias.description)::TEXT||array_agg(products_alias.brand)::TEXT
+                         ),
+                      to_tsquery(\'pg_catalog.swedish\',
+                       \'Yard:*|subSkjortor:*|Skjortor:*|Barn:*|ebbe:*|ÖVERDELAR:*|till:*|barn:*\')) AS rank
+            
+                FROM products products_alias 
+        
+                LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id
+								LEFT JOIN product_category cp on cp.product_id = products_alias.id                              
+								
+                WHERE to_tsvector(\'pg_catalog.swedish\',
+                 products_alias.name||products_alias.price||products_alias.description||products_alias.brand) 
+                    @@ to_tsquery(\'pg_catalog.swedish\', \'Yard:*|subSkjortor:*|Skjortor:*|Barn:*|ebbe:*|ÖVERDELAR:*|till:*|barn:*\')                      
+            
+						             AND 
+                            cp.category_id IN (2)
+														
+                    GROUP BY products_alias.group_identity 
+										ORDER BY rank DESC
+										,"numberOfEntries" DESC  
+										LIMIT 20';
     }
 }
