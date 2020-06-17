@@ -190,7 +190,10 @@ class ResourceDownloadFile extends Command
                 ]
             )->getBody();
         } catch (ClientException $exception) {
-            if ($exception->getCode() === 403) {
+            if ($exception->getCode() === 403 || $exception->getCode() === 404) {
+                $this->getOutput()->writeln(
+                    '<fg=red>' . date('H:i:s') . 'shop: ' . $key .' error code: ' . $exception->getCode() . 'message: ' .$exception->getMessage() . '</>'
+                );
                 return;
             } else {
                 throw $exception;
