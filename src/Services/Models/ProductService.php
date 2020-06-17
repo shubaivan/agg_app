@@ -163,14 +163,23 @@ class ProductService extends AbstractModel
     public function getProductById(Product $product)
     {
         $searchDataForRelated = $product->getSearchDataForRelatedProductItems();
-        $search = $this->prepareDataForGINSearch($searchDataForRelated);
+        $search = $this->prepareDataForGINSearch($searchDataForRelated, 5);
 
         $parameterBag = new ParameterBag([
             'page' => 1,
             'count' => 4,
+            'strict' => true,
             self::EXCLUDE_GROUP_IDENTITY => $product->getGroupIdentity(),
             'search' => $search ?? ''
         ]);
+
+        if ($product->getCategoryRelation()->count()) {
+            $collection = $product->getCategoryRelation()->map(function (Category $category) {
+                return $category->getId();
+            });
+            $parameterBag
+                ->set(ProductRepository::CATEGORY_IDS, $collection->toArray());
+        }
         $this->recordIpToProduct($product);
 
         return $this->getProductCollection($product, $parameterBag);
@@ -425,11 +434,6 @@ class ProductService extends AbstractModel
         );
 
         return $productByIdCollection;
-    }
-
-    public function getProductByGroupsIdentity()
-    {
-
     }
 
     /**

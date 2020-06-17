@@ -38,6 +38,8 @@ class ProductRepository extends ServiceEntityRepository
     const OFFSET = ':offset';
     const LIMIT = ':limit';
     const GROUPS_IDENTITY = 'groups_identity';
+    const SHOP_IDS = 'shop_ids';
+    const CATEGORY_IDS = 'category_ids';
 
     private $mainQuery = '', $conditions = [], $variables = [], $params = [], $types = [], $queryMainCondition = '';
 
@@ -342,6 +344,12 @@ class ProductRepository extends ServiceEntityRepository
                 LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id               
             ';
         }
+        if (is_array($parameterBag->get(self::CATEGORY_IDS))
+            && array_search('0', $parameterBag->get(self::CATEGORY_IDS), true) === false) {
+            $this->queryMainCondition .= '
+                LEFT JOIN product_category cp on cp.product_id = products_alias.id               
+            ';
+        }
 
         if ($parameterBag->get('search')) {
             $this->queryMainCondition .= '               
@@ -431,9 +439,9 @@ class ProductRepository extends ServiceEntityRepository
             $this->variables = array_merge($this->variables, $preparedGroupsIdentity);
         }
 
-        if (is_array($parameterBag->get('shop_ids'))
-            && array_search('0', $parameterBag->get('shop_ids'), true) === false) {
-            $shopIds = $parameterBag->get('shop_ids');
+        if (is_array($parameterBag->get(self::SHOP_IDS))
+            && array_search('0', $parameterBag->get(self::SHOP_IDS), true) === false) {
+            $shopIds = $parameterBag->get(self::SHOP_IDS);
             $preparedInValuesShop = array_combine(
                 array_map(function ($key) {
                     return ':var_shop_id' . $key;
@@ -449,9 +457,9 @@ class ProductRepository extends ServiceEntityRepository
             $this->variables = array_merge($this->variables, $preparedInValuesShop);
         }
 
-        if (is_array($parameterBag->get('category_ids'))
-            && array_search('0', $parameterBag->get('category_ids'), true) === false) {
-            $categoryIds = $parameterBag->get('category_ids');
+        if (is_array($parameterBag->get(self::CATEGORY_IDS))
+            && array_search('0', $parameterBag->get(self::CATEGORY_IDS), true) === false) {
+            $categoryIds = $parameterBag->get(self::CATEGORY_IDS);
             $preparedInValuesCategory = array_combine(
                 array_map(function ($key) {
                     return ':var_category_id' . $key;
@@ -459,11 +467,6 @@ class ProductRepository extends ServiceEntityRepository
                 array_values($categoryIds)
             );
             $bindKeysCategory = implode(',', array_keys($preparedInValuesCategory));
-
-            $this->queryMainCondition .= '
-                LEFT JOIN product_category cp on cp.product_id = products_alias.id               
-            ';
-
             $conditionCategory = "
                             cp.category_id IN ($bindKeysCategory)
                         ";
@@ -926,63 +929,52 @@ class ProductRepository extends ServiceEntityRepository
 
     private function ff()
     {
-        $t = '--EXPLAIN ANALYZE
-            
-            SELECT                         
-                products_alias.group_identity,
-								                array_agg(products_alias.name)::TEXT AS tt
-                ,COUNT(DISTINCT uip.id) as "numberOfEntries"
+        $t = '
+        --EXPLAIN ANALYZE
 
-                --products_alias.name
-                --,products_alias.image_url									
-								,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.image_url)) AS "storeImageUrl"
+SELECT                         
+products_alias.group_identity
 
-								,hstore(array_agg(products_alias.id::text), array_agg(products_alias.brand::text)) AS "storeBrand"
-                --,products_alias.brand
-								,(array_agg(DISTINCT products_alias.shop))[1]::TEXT AS shop
-							
-                --,products_alias.shop
-								,(array_agg(DISTINCT products_alias.shop_relation_id))[1]::INTEGER AS "shopRelationId"
-                --,products_alias.shop_relation_id
-                                        
-                ,products_alias.group_identity
-								
-								,hstore(array_agg(products_alias.id::text), array_agg(products_alias.price::text)) AS "storePrice"
+,(array_agg(DISTINCT products_alias.shop))[1]::TEXT AS shop
+,(array_agg(DISTINCT products_alias.shop_relation_id))[1]::INTEGER AS "shopRelationId"
+,jsonb_agg(DISTINCT products_alias.extras) FILTER (WHERE products_alias.extras IS NOT NULL) AS extras
 
-                --products_alias.price,
-								,hstore(array_agg(products_alias.id::text), array_agg(products_alias.currency::text)) AS "storeCurrency"
-                --,products_alias.currency
-								,hstore(array_agg(products_alias.id::text), array_agg(products_alias.extras::text)) AS "storeExtras"
-                --,products_alias.extras
-									,(array_agg(DISTINCT products_alias.created_at))[1]::TIMESTAMP AS "createdAt"
+,hstore(array_agg(products_alias.id::text), array_agg(products_alias.brand::text)) AS "storeBrand"
+,hstore(array_agg(products_alias.id::text), array_agg(products_alias.currency::text)) AS "storeCurrency"
+,hstore(array_agg(products_alias.id::text), array_agg(products_alias.price::text)) AS "storePrice"
+,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.image_url)) AS "storeImageUrl"
+,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.name)) AS "storeNames"
+,hstore(array_agg(products_alias.id::text), array_agg(products_alias.extras::text)) AS "storeExtras"
 
-                --,products_alias.created_at              
-        
-                ,COUNT(DISTINCT uip.id) as number_of_entries
-                                                  
-                    ,ts_rank_cd(
-                      to_tsvector(
-                        \'pg_catalog.swedish\',
-                         array_agg(products_alias.name)::TEXT||array_agg(products_alias.price)::TEXT||array_agg(products_alias.description)::TEXT||array_agg(products_alias.brand)::TEXT
-                         ),
-                      to_tsquery(\'pg_catalog.swedish\',
-                       \'Yard:*|subSkjortor:*|Skjortor:*|Barn:*|ebbe:*|ÖVERDELAR:*|till:*|barn:*\')) AS rank
-            
-                FROM products products_alias 
-        
-                LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id
-								LEFT JOIN product_category cp on cp.product_id = products_alias.id                              
-								
-                WHERE to_tsvector(\'pg_catalog.swedish\',
-                 products_alias.name||products_alias.price||products_alias.description||products_alias.brand) 
-                    @@ to_tsquery(\'pg_catalog.swedish\', \'Yard:*|subSkjortor:*|Skjortor:*|Barn:*|ebbe:*|ÖVERDELAR:*|till:*|barn:*\')                      
-            
-						             AND 
-                            cp.category_id IN (2)
-														
-                    GROUP BY products_alias.group_identity 
-										ORDER BY rank DESC
-										,"numberOfEntries" DESC  
-										LIMIT 20';
+,COUNT(DISTINCT uip.id) as "numberOfEntries"
+,hstore(array_agg(products_alias.id::TEXT), array_agg(ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',products_alias.name||products_alias.price||products_alias.description||products_alias.brand),
+to_tsquery(\'pg_catalog.swedish\',
+\'Yard:*|subSkjortor:*|Skjortor:*|Barn:*|ebbe:*|ÖVERDELAR:*|till:*|barn:*\'))::text)) AS rank                                 
+--                     ,ts_rank_cd(
+--                       to_tsvector(
+--                         \'pg_catalog.swedish\',
+--                          array_agg(products_alias.name)::TEXT||array_agg(products_alias.price)::TEXT||array_agg(products_alias.description)::TEXT||array_agg(products_alias.brand)::TEXT
+--                         ),
+--                       to_tsquery(\'pg_catalog.swedish\',
+--                        \'Yard:*|subSkjortor:*|Skjortor:*|Barn:*|ebbe:*|ÖVERDELAR:*|till:*|barn:*\')) AS rank
+
+FROM products products_alias 
+
+LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id
+LEFT JOIN product_category cp on cp.product_id = products_alias.id                              
+
+WHERE to_tsvector(\'pg_catalog.swedish\',
+products_alias.name||products_alias.price||products_alias.description||products_alias.brand) 
+@@ to_tsquery(\'pg_catalog.swedish\', \'Yard:*|subSkjortor:*|Skjortor:*|Barn:*|ebbe:*|ÖVERDELAR:*|till:*|barn:*\')                      
+
+--AND 
+--cp.category_id IN (2)
+
+GROUP BY products_alias.group_identity 
+ORDER BY 
+--rank DESC,
+"numberOfEntries" DESC  
+LIMIT 20
+        ';
     }
 }

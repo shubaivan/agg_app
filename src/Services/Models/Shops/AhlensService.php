@@ -23,7 +23,9 @@ class AhlensService implements IdentityGroup
             $productUrl = substr($productUrl, 0, -1);
         }
         if (preg_match("/[^\/]+$/", $productUrl, $matches) > 0) {
-            $product->setGroupIdentity(array_shift($matches));
+            $sku = $product->getSku();
+            $skuId = mb_substr($sku, 0, 3);
+            $product->setGroupIdentity($skuId . array_shift($matches));
         }
     }
 }
