@@ -34,6 +34,8 @@ class ProductRepository extends ServiceEntityRepository
     const FACET_CATEGORY_QUERY_KEY = 'category_query';
     const FACET_SHOP_QUERY_KEY = 'shop_query';
     const FACET_FILTERS = 'facet_filters_';
+    const OFFSET = ':offset';
+    const LIMIT = ':limit';
 
     private $mainQuery = '', $conditions = [], $variables = [], $params = [], $types = [], $queryMainCondition = '';
 
@@ -280,9 +282,26 @@ class ProductRepository extends ServiceEntityRepository
     public function getEncryptMainQuery(): string
     {
 //        $encrypt_decrypt = $this->getHelpers()->encrypt_decrypt('encrypt', $this->mainQuery);
+        $params = $this->params;
+
+        if (isset($params[self::LIMIT])) {
+            unset($params[self::LIMIT]);
+        }
+        if (isset($params[self::OFFSET])) {
+            unset($params[self::OFFSET]);
+        }
+
+        $types = $this->types;
+
+        if (isset($types[self::LIMIT])) {
+            unset($types[self::LIMIT]);
+        }
+        if (isset($types[self::OFFSET])) {
+            unset($types[self::OFFSET]);
+        }
         $resultIdentity = 'query=' . $this->mainQuery .
-            '&params=' . serialize($this->params) .
-            '&types=' . serialize($this->types);
+            '&params=' . serialize($params) .
+            '&types=' . serialize($types);
 
         return self::FACET_FILTERS . sha1($resultIdentity);
     }
@@ -476,10 +495,10 @@ class ProductRepository extends ServiceEntityRepository
         if (!$count) {
             $limit = (int)$parameterBag->get('count');
             $offset = $limit * ((int)$parameterBag->get('page') - 1);
-            $this->params[':offset'] = $offset;
-            $this->params[':limit'] = $limit;
-            $this->types[':offset'] = \PDO::PARAM_INT;
-            $this->types[':limit'] = \PDO::PARAM_INT;
+            $this->params[self::OFFSET] = $offset;
+            $this->params[self::LIMIT] = $limit;
+            $this->types[self::OFFSET] = \PDO::PARAM_INT;
+            $this->types[self::LIMIT] = \PDO::PARAM_INT;
         }
 
         return array($this->params, $this->types);
@@ -567,6 +586,7 @@ class ProductRepository extends ServiceEntityRepository
      * @param ParameterBag $parameterBag
      * @param bool $count
      * @return string
+     * @throws \Exception
      */
     private function getSearchProductQuery(
         ParameterBag $parameterBag,
@@ -897,14 +917,14 @@ class ProductRepository extends ServiceEntityRepository
             [
                 ':search' => $resultData,
                 ':exclude_id' => $parameterBag->get('exclude_id'),
-                ':limit' => $limit,
-                ':offset' => $offset,
+                self::LIMIT => $limit,
+                self::OFFSET => $offset,
             ],
             [
                 ':search' => \PDO::PARAM_STR,
                 ':exclude_id' => \PDO::PARAM_INT,
-                ':limit' => \PDO::PARAM_INT,
-                ':offset' => \PDO::PARAM_INT,
+                self::LIMIT => \PDO::PARAM_INT,
+                self::OFFSET => \PDO::PARAM_INT,
             ],
             ['product_full_text_search_relations'],
             0,
