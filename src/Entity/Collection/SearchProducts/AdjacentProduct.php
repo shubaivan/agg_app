@@ -82,6 +82,30 @@ class AdjacentProduct extends CommonProduct
     private $shopRelationId;
 
     /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $productUrl;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $description;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $instock;
+
+    /**
      * @return array
      * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("extras")

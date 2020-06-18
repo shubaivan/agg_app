@@ -589,6 +589,14 @@ class ProductRepository extends ServiceEntityRepository
                 ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.extras::text)) AS "storeExtras"
             ';
 
+            if ($parameterBag->get(ProductService::SELF_PRODUCT)) {
+                $mainQuery .= '
+                    ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.product_url::text)) AS "storeProductUrl"
+                    ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.description::text)) AS "storeDescription"
+                    ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.instock::text)) AS "storeInstock"                                                            
+                ';
+            }
+
             if ($parameterBag->get('search')) {
                 $mainQuery .= ',CAST((array_agg(DISTINCT main_products_alias.rank))[1] AS double precision) AS rank';
             }
@@ -663,7 +671,15 @@ class ProductRepository extends ServiceEntityRepository
                 products_alias.extras,
                 products_alias.created_at              
         ';
-        if (!$count) {
+        if ($parameterBag->get(ProductService::SELF_PRODUCT)) {
+            $query .= '
+                ,products_alias.product_url
+                ,products_alias.description
+                ,products_alias.instock
+            ';
+        }
+
+            if (!$count) {
             $query .= '
                 ,COUNT(DISTINCT uip.id) as number_of_entries
             ';

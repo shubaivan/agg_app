@@ -20,6 +20,30 @@ class GroupProductEntity extends CommonProduct
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreDescriptionAccessor")
+     */
+    private $storeProductUrl;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreProductUrlAccessor")
+     */
+    private $storeDescription;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreInstockAccessor")
+     */
+    private $storeInstock;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
      * @Annotation\Accessor(setter="setStoreBrandAccessor")
      */
     private $storeBrand;
@@ -152,6 +176,30 @@ class GroupProductEntity extends CommonProduct
      */
     private $presentCurrentProduct = [];
 
+
+    /**
+     * @param string $value
+     */
+    public function setStoreProductUrlAccessor(string $value)
+    {
+        $this->storeProductUrl = $this->storePropertyAccessor($value);
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setStoreInstockAccessor(string $value)
+    {
+        $this->storeInstock = $this->storePropertyAccessor($value);
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setStoreDescriptionAccessor(string $value)
+    {
+        $this->storeDescription = $this->storePropertyAccessor($value);
+    }
 
     /**
      * @param string $value
@@ -370,6 +418,21 @@ class GroupProductEntity extends CommonProduct
         return isset($this->storeBrand[$key]) ? $this->storeBrand[$key] : null;
     }
 
+    public function getStoreProductUrlDataByKey($key)
+    {
+        return isset($this->storeProductUrl[$key]) ? $this->storeProductUrl[$key] : null;
+    }
+
+    public function getStoreDescriptionDataByKey($key)
+    {
+        return isset($this->storeDescription[$key]) ? $this->storeDescription[$key] : null;
+    }
+
+    public function getStoreInstockDataByKey($key)
+    {
+        return isset($this->storeInstock[$key]) ? $this->storeInstock[$key] : null;
+    }
+
     public function getStoreImageUrlDataByKey($key)
     {
         return isset($this->storeImageUrl[$key]) ? $this->storeImageUrl[$key] : null;
@@ -524,7 +587,10 @@ class GroupProductEntity extends CommonProduct
             'price' => $this->getStorePriceDataByKey($id),
             'currency' => $this->getStoreCurrencyDataByKey($id),
             'shop' => $this->shop,
-            'shopRelationId' => $this->shopRelationId
+            'shopRelationId' => $this->shopRelationId,
+            'productUrl' => $this->getStoreProductUrlDataByKey($id),
+            'description' => $this->getStoreDescriptionDataByKey($id),
+            'instock' => $this->getStoreInstockDataByKey($id)
         ];
         return  $arr;
     }

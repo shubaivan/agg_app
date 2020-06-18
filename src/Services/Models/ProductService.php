@@ -41,6 +41,7 @@ class ProductService extends AbstractModel
     const GROUP_IDENTITY = 'group_identity';
     const EXCLUDE_GROUP_IDENTITY = 'exclude_group_identity';
     const WITHOUT_FACET = 'without_facet';
+    const SELF_PRODUCT = 'self_product';
     /**
      * @var Logger
      */
@@ -414,7 +415,10 @@ class ProductService extends AbstractModel
      */
     private function getProductCollection(Product $product, ParameterBag $parameterBag)
     {
-        $bagProduct = new ParameterBag([self::GROUP_IDENTITY => $product->getGroupIdentity()]);
+        $bagProduct = new ParameterBag([
+            self::GROUP_IDENTITY => $product->getGroupIdentity(),
+            self::SELF_PRODUCT => true
+        ]);
         $collection = $this->getProductRepository()
             ->fullTextSearchByParameterBag($bagProduct);
         if (count($collection)) {
