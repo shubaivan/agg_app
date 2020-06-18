@@ -588,8 +588,8 @@ class GroupProductEntity extends CommonProduct
             'currency' => $this->getStoreCurrencyDataByKey($id),
             'shop' => $this->shop,
             'shopRelationId' => $this->shopRelationId,
-            'productUrl' => $this->getStoreProductUrlDataByKey($id),
-            'description' => $this->getStoreDescriptionDataByKey($id),
+            'productUrl' => $this->getStoreDescriptionDataByKey($id),
+            'description' => $this->getStoreProductUrlDataByKey($id),
             'instock' => $this->getStoreInstockDataByKey($id)
         ];
         return  $arr;
