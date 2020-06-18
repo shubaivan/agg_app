@@ -20,7 +20,7 @@ class GroupProductEntity extends CommonProduct
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setStoreDescriptionAccessor")
+     * @Annotation\Accessor(setter="setStoreProductUrlAccessor")
      */
     private $storeProductUrl;
 
@@ -28,7 +28,7 @@ class GroupProductEntity extends CommonProduct
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setStoreProductUrlAccessor")
+     * @Annotation\Accessor(setter="setStoreDescriptionAccessor")
      */
     private $storeDescription;
 
@@ -588,8 +588,8 @@ class GroupProductEntity extends CommonProduct
             'currency' => $this->getStoreCurrencyDataByKey($id),
             'shop' => $this->shop,
             'shopRelationId' => $this->shopRelationId,
-            'productUrl' => $this->getStoreDescriptionDataByKey($id),
-            'description' => $this->getStoreProductUrlDataByKey($id),
+            'productUrl' => $this->getStoreProductUrlDataByKey($id),
+            'description' => $this->getStoreDescriptionDataByKey($id),
             'instock' => $this->getStoreInstockDataByKey($id)
         ];
         return  $arr;
