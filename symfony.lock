@@ -729,6 +729,9 @@
     "twig/twig": {
         "version": "v3.0.3"
     },
+    "vertigolabs/doctrine-full-text-postgres": {
+        "version": "v1.0"
+    },
     "webmozart/assert": {
         "version": "1.7.0"
     },

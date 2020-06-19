@@ -155,10 +155,10 @@ class ProductController extends AbstractRestController
      *     strict=true,
      *     requirements=@SearchQueryParam,
      *     nullable=true,
-     *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by sku, name, description, category, brand, shop and price fields")
+     *     description="Search by each sentence/world separatly delimetery which eqaul ',', with `or` condition by name, description, price and brand fields")
      * @Rest\QueryParam(name="count", requirements="\d+", default="10", description="Count entity at one page")
      * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
-     * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="createdAt", description="Sort by", nullable=true)
+     * @Rest\QueryParam(name="sort_by", strict=true, requirements="^[a-zA-Z]+", default="created_at", description="Sort by enum - created_at, price, numberOfEntries", nullable=true)
      * @Rest\QueryParam(name="sort_order", strict=true, requirements="^[a-zA-Z]+", default="DESC", description="Sort order", nullable=true)
      *
      * @param ParamFetcher $paramFetcher

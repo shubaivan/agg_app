@@ -40,6 +40,9 @@ class ProductRepository extends ServiceEntityRepository
     const GROUPS_IDENTITY = 'groups_identity';
     const SHOP_IDS = 'shop_ids';
     const CATEGORY_IDS = 'category_ids';
+    const NUMBER_OF_ENTRIES = "numberOfEntries";
+    const CREATED_AT = "created_at";
+    const PRICE = "price";
 
     private $mainQuery = '', $conditions = [], $variables = [], $params = [], $types = [], $queryMainCondition = '';
 
@@ -228,7 +231,7 @@ class ProductRepository extends ServiceEntityRepository
         $sortOrder = $parameterBag->get('sort_order');
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["createdAt", "numberOfEntries", "price"],
+            [self::CREATED_AT, self::NUMBER_OF_ENTRIES, self::PRICE],
             "Invalid field name " . $sortBy
         );
 
@@ -245,7 +248,7 @@ class ProductRepository extends ServiceEntityRepository
                     ->handleSearchValue($parameterBag->get('search'), false)
             );
         }
-        $searchProductQuery = $this->getMainSearchProductQuery(
+        $searchProductQuery = $this->getRSearchProductQuery(
             $parameterBag,
             $count,
             $sort_by,
@@ -335,11 +338,12 @@ class ProductRepository extends ServiceEntityRepository
     private function prepareMainCondition(
         ParameterBag &$parameterBag,
         string &$query,
-        bool $count = false
+        bool $count = false,
+        ?string $sortBy = null
     ): string
     {
         $this->queryMainCondition = '';
-        if (!$count) {
+        if (!$count && $sortBy == self::NUMBER_OF_ENTRIES) {
             $this->queryMainCondition .= '
                 LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id               
             ';
@@ -353,9 +357,7 @@ class ProductRepository extends ServiceEntityRepository
 
         if ($parameterBag->get('search')) {
             $this->queryMainCondition .= '               
-                WHERE to_tsvector(\'pg_catalog.swedish\',
-                 products_alias.name||products_alias.price||products_alias.description||products_alias.brand) 
-                    @@ to_tsquery(\'pg_catalog.swedish\', :search)                      
+                WHERE products_alias.common_fts @@ to_tsquery(\'pg_catalog.swedish\', :search)                      
             ';
         }
 
@@ -549,99 +551,118 @@ class ProductRepository extends ServiceEntityRepository
 
     /**
      * @param ParameterBag $parameterBag
-     * @param $count
+     * @param bool $count
      * @param bool $sort_by
      * @param $sortBy
      * @param $sortOrder
      * @return string
      * @throws \Exception
      */
-    private function getMainSearchProductQuery(
+    private function getRSearchProductQuery(
         ParameterBag $parameterBag,
-        $count,
+        bool $count,
         bool $sort_by,
         $sortBy,
-        $sortOrder): string
+        $sortOrder
+    ): string
     {
-        $mainQuery = '';
+        $query = '';
+
         if ($count) {
-            $mainQuery .= '
+            $query .= '
                 SELECT COUNT(*) FROM (
-                    SELECT COUNT(DISTINCT main_products_alias.id)
+                    SELECT COUNT(DISTINCT products_alias.id)
             ';
         } else {
-            $mainQuery .= '
+            $query .= '
             SELECT
-                main_products_alias.group_identity AS "groupIdentity",                         
-                (array_agg(DISTINCT main_products_alias.created_at))[1]::TIMESTAMP AS "createdAt",              
-                SUM(main_products_alias.number_of_entries) AS "numberOfEntries",
-                (array_agg(DISTINCT main_products_alias.price))[1]::INTEGER AS price
+                products_alias.group_identity AS "groupIdentity"                                         
+                ,(array_agg(DISTINCT products_alias.shop))[1]::TEXT AS shop
+                ,(array_agg(DISTINCT products_alias.shop_relation_id))[1]::INTEGER AS "shopRelationId"
+                ,jsonb_agg(DISTINCT products_alias.extras) FILTER (WHERE products_alias.extras IS NOT NULL) AS extras
                 
-                ,(array_agg(DISTINCT main_products_alias.shop))[1]::TEXT AS shop
-                ,(array_agg(DISTINCT main_products_alias.shop_relation_id))[1]::INTEGER AS "shopRelationId"
-                ,jsonb_agg(DISTINCT main_products_alias.extras) FILTER (WHERE main_products_alias.extras IS NOT NULL) AS extras
-                
-                ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.brand::text)) AS "storeBrand"
-                ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.currency::text)) AS "storeCurrency"
-                ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.price::text)) AS "storePrice"
-                ,hstore(array_agg(main_products_alias.id::TEXT), array_agg(main_products_alias.image_url)) AS "storeImageUrl"
-                ,hstore(array_agg(main_products_alias.id::TEXT), array_agg(main_products_alias.name)) AS "storeNames"
-                ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.extras::text)) AS "storeExtras"
+                ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.brand::text)) AS "storeBrand"
+                ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.currency::text)) AS "storeCurrency"
+                ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.price::text)) AS "storePrice"
+                ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.image_url)) AS "storeImageUrl"
+                ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.name)) AS "storeNames"
+                ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.extras::text)) AS "storeExtras"
             ';
 
             if ($parameterBag->get(ProductService::SELF_PRODUCT)) {
-                $mainQuery .= '
-                    ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.product_url::text)) AS "storeProductUrl"
-                    ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.description::text)) AS "storeDescription"
-                    ,hstore(array_agg(main_products_alias.id::text), array_agg(main_products_alias.instock::text)) AS "storeInstock"                                                            
+                $query .= '
+                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.product_url::text)) AS "storeProductUrl"
+                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.description::text)) AS "storeDescription"
+                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.instock::text)) AS "storeInstock"                                                            
+                ';
+            }
+
+            if ($sortBy == self::NUMBER_OF_ENTRIES) {
+                $query .= '
+                    ,COUNT(DISTINCT uip.id) as "numberOfEntries"
                 ';
             }
 
             if ($parameterBag->get('search')) {
-                $mainQuery .= ',CAST((array_agg(DISTINCT main_products_alias.rank))[1] AS double precision) AS rank';
+                $query .= '                                      
+                    ,SUM(ts_rank_cd(products_alias.common_fts,to_tsquery(\'pg_catalog.swedish\', :search))) AS rank
+                ';
             }
         }
 
-        $mainQuery .= '
-                FROM (
+        $query .= '
+                FROM products products_alias 
+        ';
+
+        $this->prepareMainCondition($parameterBag, $query, $count, $sortBy);
+
+        $query .= '
+                    GROUP BY products_alias.group_identity';
+        if ($sortBy = self::CREATED_AT) {
+            $query .= '
+                ,products_alias.created_at
             ';
+        }
 
-        $mainQuery .= $this->getSearchProductQuery(
-            $parameterBag,
-            $count
-        );
+        if ($sortBy = self::PRICE) {
+            $query .= '
+                ,products_alias.price
+            ';
+        }
 
-        $mainQuery .= '
-            ) AS main_products_alias
-            GROUP BY main_products_alias.group_identity';
-
+        $this->prepareParamAndType($parameterBag, $count);
 
         if (!$count) {
             if (!$parameterBag->get(ProductService::GROUP_IDENTITY)) {
-                $mainQuery .=
+                $query .=
                     ($parameterBag->get('search') ?
                         ($sort_by
-                            ? ' ORDER BY rank DESC, ' . '"' . $sortBy . '"' . ' ' . $sortOrder . ''
+                            ? ' ORDER BY rank DESC, ' . ($sortBy == self::NUMBER_OF_ENTRIES
+                                ? ' ' . '"' . $sortBy . '"' . ' ' . $sortOrder . ''
+                                : ' ' . 'products_alias.' . $sortBy . ' ' . $sortOrder)
                             : ' ORDER BY rank DESC')
-                        : ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . '');
+                        : ($sortBy == self::NUMBER_OF_ENTRIES
+                            ? ' ORDER BY ' . '"' . $sortBy . '"' . ' ' . $sortOrder . ''
+                            : ' ORDER BY ' . 'products_alias.' . $sortBy . ' ' . $sortOrder)
+                    );
             }
 
             if (isset($this->params[self::LIMIT])) {
-                $mainQuery .= '                                          
+                $query .= '                                          
                     LIMIT :limit
                 ';
             }
 
             if (isset($this->params[self::OFFSET])) {
-                $mainQuery .= '                                          
+                $query .= '                                          
                     OFFSET :offset
                 ';
             }
         } else {
-            $mainQuery .= ') as count';
+            $query .= ') as count';
         }
 
-        return $mainQuery;
+        return $query;
     }
 
     /**
