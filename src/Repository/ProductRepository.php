@@ -582,7 +582,7 @@ class ProductRepository extends ServiceEntityRepository
                 ,jsonb_agg(DISTINCT products_alias.extras) FILTER (WHERE products_alias.extras IS NOT NULL) AS extras
                 
                 ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.brand::text)) AS "storeBrand"
-                ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.currency::text)) AS "storeCurrency"
+                
                 ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.price::text)) AS "storePrice"
                 ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.image_url)) AS "storeImageUrl"
                 ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.name)) AS "storeNames"

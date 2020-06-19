@@ -72,13 +72,13 @@ class GroupProductEntity extends CommonProduct
      */
     private $storePrice;
 
-    /**
-     * @var array
-     * @Annotation\Type("string")
-     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
-     * @Annotation\Accessor(setter="setStoreCurrencyAccessor")
-     */
-    private $storeCurrency;
+//    /**
+//     * @var array
+//     * @Annotation\Type("string")
+//     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+//     * @Annotation\Accessor(setter="setStoreCurrencyAccessor")
+//     */
+//    private $storeCurrency;
 
     /**
      * @var array
@@ -230,13 +230,13 @@ class GroupProductEntity extends CommonProduct
         }
     }
 
-    /**
-     * @param string $value
-     */
-    public function setStoreCurrencyAccessor(string $value)
-    {
-        $this->storeCurrency = $this->storePropertyAccessor($value);
-    }
+//    /**
+//     * @param string $value
+//     */
+//    public function setStoreCurrencyAccessor(string $value)
+//    {
+//        $this->storeCurrency = $this->storePropertyAccessor($value);
+//    }
 
     /**
      * @param string $value
@@ -408,10 +408,10 @@ class GroupProductEntity extends CommonProduct
         return isset($this->storePrice[$key]) ? $this->storePrice[$key] : null;
     }
 
-    public function getStoreCurrencyDataByKey($key)
-    {
-        return isset($this->storeCurrency[$key]) ? $this->storeCurrency[$key] : null;
-    }
+//    public function getStoreCurrencyDataByKey($key)
+//    {
+//        return isset($this->storeCurrency[$key]) ? $this->storeCurrency[$key] : null;
+//    }
 
     public function getStoreBrandDataByKey($key)
     {
@@ -585,7 +585,7 @@ class GroupProductEntity extends CommonProduct
             'brand' => $this->getStoreBrandDataByKey($id),
             'name' => $this->getStoreNamesDataByKey($id),
             'price' => $this->getStorePriceDataByKey($id),
-            'currency' => $this->getStoreCurrencyDataByKey($id),
+            'currency' => 'SEK',
             'shop' => $this->shop,
             'shopRelationId' => $this->shopRelationId,
             'productUrl' => $this->getStoreProductUrlDataByKey($id),
