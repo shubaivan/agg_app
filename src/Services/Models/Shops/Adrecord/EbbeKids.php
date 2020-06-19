@@ -22,7 +22,7 @@ class EbbeKids implements IdentityGroup
     public function identityGroupColumn(Product $product)
     {
         $sku = $product->getSku();
-        $identity = mb_substr($sku, 0, 8);
+        $identity = mb_substr($sku, 0, 7);
         $product->setGroupIdentity($identity);
     }
 }

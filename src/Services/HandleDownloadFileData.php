@@ -181,7 +181,8 @@ class HandleDownloadFileData
             );
         }
         if ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)) {
-//            unlink($filePath);
+            //ToDo don't forget rerun back
+            unlink($filePath);
             $this->getLogger()->info(
                 'file ' . $filePath . ' was removed'
             );
