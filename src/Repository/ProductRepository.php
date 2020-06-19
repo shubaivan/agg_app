@@ -43,6 +43,8 @@ class ProductRepository extends ServiceEntityRepository
     const NUMBER_OF_ENTRIES = "numberOfEntries";
     const CREATED_AT = "created_at";
     const PRICE = "price";
+    const SORT_BY = 'sort_by';
+    const SORT_ORDER = 'sort_order';
 
     private $mainQuery = '', $conditions = [], $variables = [], $params = [], $types = [], $queryMainCondition = '';
 
@@ -224,11 +226,11 @@ class ProductRepository extends ServiceEntityRepository
     {
         $this->clearObjectPropertyData();
 
-        $sort_by = isset($_REQUEST['sort_by']);
+        $sort_by = isset($_REQUEST[self::SORT_BY]);
         $connection = $this->getEntityManager()->getConnection();
 
-        $sortBy = $parameterBag->get('sort_by');
-        $sortOrder = $parameterBag->get('sort_order');
+        $sortBy = $parameterBag->get(self::SORT_BY);
+        $sortOrder = $parameterBag->get(self::SORT_ORDER);
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
             [self::CREATED_AT, self::NUMBER_OF_ENTRIES, self::PRICE],
@@ -344,9 +346,19 @@ class ProductRepository extends ServiceEntityRepository
     {
         $this->queryMainCondition = '';
         if (!$count && $sortBy == self::NUMBER_OF_ENTRIES) {
+            if ($parameterBag->get(ProductService::TOP_PRODUCTS)) {
+                $this->queryMainCondition .= '
+                    INNER JOIN user_ip_product uip on uip.products_id = products_alias.id               
+                ';
+            } else {
+                $this->queryMainCondition .= '
+                    LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id               
+                ';
+            }
+        } elseif ($count && $parameterBag->get(ProductService::TOP_PRODUCTS)) {
             $this->queryMainCondition .= '
-                LEFT JOIN user_ip_product uip on uip.products_id = products_alias.id               
-            ';
+                    INNER JOIN user_ip_product uip on uip.products_id = products_alias.id               
+                ';
         }
         if (is_array($parameterBag->get(self::CATEGORY_IDS))
             && array_search('0', $parameterBag->get(self::CATEGORY_IDS), true) === false) {
@@ -618,13 +630,13 @@ class ProductRepository extends ServiceEntityRepository
 
         $query .= '
                     GROUP BY products_alias.group_identity';
-        if ($sortBy = self::CREATED_AT) {
+        if ($sortBy == self::CREATED_AT) {
             $query .= '
                 ,products_alias.created_at
             ';
         }
 
-        if ($sortBy = self::PRICE) {
+        if ($sortBy == self::PRICE) {
             $query .= '
                 ,products_alias.price
             ';

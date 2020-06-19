@@ -462,16 +462,16 @@ class ProductController extends AbstractRestController
      * )
      *
      * @return \FOS\RestBundle\View\View
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @throws \Exception
      */
     public function getMostPopularProductAction(ParamFetcher $paramFetcher)
     {
         $searchProductCollection = $this->getProductService()
             ->getMostPopularProducts($paramFetcher);
-        $view = $this->createSuccessResponse($searchProductCollection, [], false);
+        $view = $this->createSuccessResponse(
+            $searchProductCollection,
+            [Product::SERIALIZED_GROUP_LIST]
+        );
         $view->getResponse()->setMaxAge(180);
 
         return $view;

@@ -20,6 +20,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserIpProductRepository;
 use App\Services\ObjectsHandler;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Cache\CacheException;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
@@ -42,6 +43,7 @@ class ProductService extends AbstractModel
     const EXCLUDE_GROUP_IDENTITY = 'exclude_group_identity';
     const WITHOUT_FACET = 'without_facet';
     const SELF_PRODUCT = 'self_product';
+    const TOP_PRODUCTS = 'top_products';
     /**
      * @var Logger
      */
@@ -241,23 +243,24 @@ class ProductService extends AbstractModel
 
     /**
      * @param ParamFetcher $paramFetcher
-     * @return ProductsRawArrayCollection
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @return SearchProductCollection
+     * @throws CacheException
+     * @throws ValidatorException
      */
     public function getMostPopularProducts(ParamFetcher $paramFetcher)
     {
-        $collection = $this->getUserIpProductRepository()
-            ->getTopProductByIp($paramFetcher);
+        $parameterBag = new ParameterBag($paramFetcher->all());
+        $parameterBag->set(self::TOP_PRODUCTS, true);
+        $parameterBag->set(ProductRepository::SORT_BY, ProductRepository::NUMBER_OF_ENTRIES);
+        $parameterBag->set(ProductRepository::SORT_ORDER, Criteria::DESC);
+        $parameterBag->set(self::WITHOUT_FACET, true);
 
+        $collection = $this->getProductRepository()
+            ->fullTextSearchByParameterBag($parameterBag);
+        $count = $this->getProductRepository()
+            ->fullTextSearchByParameterBag($parameterBag, true);
 
-
-        $count = $this->getUserIpProductRepository()
-            ->getCountTopProductByIp();
-
-        return (new ProductsRawArrayCollection($collection, $count));
+        return $this->getSearchProductCollection($count, $collection);
     }
 
     /**
