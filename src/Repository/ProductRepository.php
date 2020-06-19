@@ -605,7 +605,7 @@ class ProductRepository extends ServiceEntityRepository
 
             if ($parameterBag->get('search')) {
                 $query .= '                                      
-                    ,SUM(ts_rank_cd(products_alias.common_fts,to_tsquery(\'pg_catalog.swedish\', :search))) AS rank
+                    ,SUM(ts_rank(products_alias.common_fts,to_tsquery(\'pg_catalog.swedish\', :search))) AS rank
                 ';
             }
         }
