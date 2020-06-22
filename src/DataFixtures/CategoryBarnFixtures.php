@@ -63,12 +63,13 @@ class CategoryBarnFixtures extends Fixture
             [
                 'name' => 'Klänningar & kjolar',
                 'key_word' => '
-                    klänning, klänningar, kjol, kjolar,
-                    dress, dresses, skirt, skirts
+                    klänning, klänningar, kjol, kjolar, tunika, tunik,
+                    dress, dresses, skirt, skirts, tunic, tunics
                 ',
                 'sub_key_word' => [
                     'Klänningar' => 'Klänning, Klänningar, Dress, Dresses',
-                    'Kjolar' => 'Kjol, Kjolar, Skirt, Skirts'
+                    'Kjolar' => 'Kjol, Kjolar, Skirt, Skirts',
+                    'Tunikor' => 'Tunika, Tunikor, tunic, tunics',
                 ]
             ],
             [
