@@ -231,7 +231,6 @@ class ProductController extends AbstractRestController
      * get Product data by id.
      *
      * @Rest\Get("/api/product/{id}", requirements={"id"="\d+"})
-     * @View(serializerGroups={Product::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
      *
      * @SWG\Tag(name="Products")
      *
@@ -278,18 +277,26 @@ class ProductController extends AbstractRestController
      *
      * @param Product $product
      *
-     * @return ProductByIdCollection
+     * @return \FOS\RestBundle\View\View
      * @throws DBALException
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws ValidatorException
+     * @throws \Exception
      */
     public function getProductByIdAction(
         Product $product
     )
     {
-        return $this->getProductService()
+        $productByIdCollection = $this->getProductService()
             ->getProductById($product);
+
+        $view = $this->createSuccessResponse(
+            $productByIdCollection, [Product::SERIALIZED_GROUP_LIST]
+        );
+        $view->getResponse()->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
     }
 
     /**
@@ -327,6 +334,7 @@ class ProductController extends AbstractRestController
             $searchProductCollection,
             [Product::SERIALIZED_GROUP_LIST]
         );
+        $view->getResponse()->setExpires($this->getHelpers()->getExpiresHttpCache());
 
         return $view;
     }
