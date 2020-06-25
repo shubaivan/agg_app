@@ -83,15 +83,32 @@ class CategoryService extends AbstractModel
      * @param Category $category
      * @return array|mixed[]
      * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
      */
     public function analysisProductByMainCategoryManual(
         Product $product,
         Category $category
     )
     {
-        return $this->analysisProductByMainCategory(
-            $product, $category->getCategoryName(), true
+        if (!$category->getCategoryConfigurations()) {
+            throw new \Exception('category don\'t have configuration modle');
+        }
+
+        $isMatchPlainCategories = $this->getCategoryRepository()->isMatchPlainCategoriesString(
+            $product->getCategory(),
+            $category->getCategoryConfigurations()->getKeyWords(),
+            true
         );
+
+        $analysisProductByMainCategory = $this->analysisProductByMainCategory(
+            $product, $category->getCategoryConfigurations()->getKeyWords(), true
+        );
+
+        if (isset($isMatchPlainCategories['ts_headline_result'])) {
+            $analysisProductByMainCategory['category_ts_headline_result'] = $isMatchPlainCategories['ts_headline_result'];
+        }
+
+        return $analysisProductByMainCategory;
     }
 
     /**

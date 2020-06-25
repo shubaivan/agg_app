@@ -247,7 +247,7 @@ class CategoryRepository extends ServiceEntityRepository
                 $product->getCategory(), $mainSearch
             );
 
-            if (!$checkMainCategoriesResult) {
+            if (isset($checkMainCategoriesResult['match']) && !$checkMainCategoriesResult['match']) {
                 return [];
             }
         }
@@ -681,7 +681,8 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function isMatchPlainCategoriesString(
         string $productCategoriesData,
-        string $mainCategoriesData
+        string $mainCategoriesData,
+        bool $explain = false
     )
     {
         $connection = $this->getEntityManager()->getConnection();
@@ -689,6 +690,11 @@ class CategoryRepository extends ServiceEntityRepository
         $query = 'select
         	to_tsvector(\'pg_catalog.swedish\',:product_categories_data) 
         	@@ to_tsquery(\'pg_catalog.swedish\', :main_categories_data) as match';
+        if ($explain) {
+            $query .= '
+                ,ts_headline(\'pg_catalog.swedish\', :product_categories_data, to_tsquery(\'pg_catalog.swedish\', :main_categories_data)) AS ts_headline_result
+            ';
+        }
 
         $mainParams[':product_categories_data'] = $productCategoriesData;
         $mainType[':product_categories_data'] = \PDO::PARAM_STR;
@@ -706,7 +712,7 @@ class CategoryRepository extends ServiceEntityRepository
         $isMatchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
         if (count($isMatchResult)) {
             $result = array_shift($isMatchResult);
-            return $result['match'];
+            return $result;
         } else {
             return false;
         }
