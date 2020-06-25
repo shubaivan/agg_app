@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Category;
 use App\Entity\CategoryConfigurations;
 use App\Entity\CategoryRelations;
+use App\Repository\CategoryRelationsRepository;
 use App\Repository\CategoryRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -371,6 +372,13 @@ Headband, Hairband, Keychain, Belt, Belts
      */
     private function createCategoryRelations(Category $m, Category $s)
     {
+        /** @var CategoryRelationsRepository $objectRepository */
+        $objectRepository = $this->getManager()->getRepository(CategoryRelations::class);
+        $existCategoryRelations = $objectRepository
+            ->findOneBy(['mainCategory' => $m, 'subCategory' => $s]);
+        if ($existCategoryRelations instanceof CategoryRelations) {
+            return $existCategoryRelations;
+        }
         $categoryRelations = new CategoryRelations();
         $categoryRelations
             ->setMainCategory($m)
