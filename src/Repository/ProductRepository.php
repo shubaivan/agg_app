@@ -247,7 +247,7 @@ class ProductRepository extends ServiceEntityRepository
             $parameterBag->set(
                 'search',
                 $this->getHelpers()
-                    ->handleSearchValue($parameterBag->get('search'), false)
+                    ->handleSearchValue($parameterBag->get('search'), $parameterBag->get('strict') === true)
             );
         }
         $searchProductQuery = $this->getRSearchProductQuery(

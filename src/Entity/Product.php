@@ -830,9 +830,9 @@ class Product implements EntityValidatorException
             array_push($pieces, $this->getBrandRelation()->getBrandName());
         }
 
-        if ($this->getCategoryRelation()->count()) {
-            array_push($pieces, implode(',', $this->getCategoriesNameArray()));
-        }
+//        if ($this->getCategoryRelation()->count()) {
+//            array_push($pieces, implode(',', $this->getCategoriesNameArray()));
+//        }
 
         $search = implode(',', $pieces);
         $replace = preg_replace('/[^a-zA-Z0-9 ,.¤æøĂéëäöåÉÄÖÅ™]/', " ", $search);
