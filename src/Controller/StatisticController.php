@@ -84,7 +84,7 @@ EOF;
                 ->hGetAll(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_START . $redisUniqKey);
             $endTime = $this->getRedisHelper()
                 ->hGetAll(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $redisUniqKey);
-            if ($endTime && $startTime) {
+            if (is_array($endTime) && count($endTime) > 0 && is_array($startTime) && count($startTime) > 0) {
                 $resultData[$redisUniqKey]['timeSpent'] = (max($endTime) - min($startTime)) / 60 . ' minutes';
             }
 
