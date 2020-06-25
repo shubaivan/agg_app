@@ -5,9 +5,15 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CategoryRelationsRepository")
+ * @ORM\Table(
+ *     uniqueConstraints={@UniqueConstraint(name="uniq_sub_and_main_index", columns={"sub_category_id", "main_category_id"})}
+ *     )
+ * @UniqueEntity(fields={"subCategory", "mainCategory"})
  */
 class CategoryRelations
 {
