@@ -44,6 +44,7 @@ class ProductService extends AbstractModel
     const WITHOUT_FACET = 'without_facet';
     const SELF_PRODUCT = 'self_product';
     const TOP_PRODUCTS = 'top_products';
+    const PRODUCT_PRICE = 'product_price';
     /**
      * @var Logger
      */
@@ -172,6 +173,7 @@ class ProductService extends AbstractModel
             'page' => 1,
             'count' => 4,
             'strict' => true,
+            self::PRODUCT_PRICE => $product->getPrice(),
             self::EXCLUDE_GROUP_IDENTITY => $product->getGroupIdentity(),
             'search' => $search ?? ''
         ]);
