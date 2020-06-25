@@ -272,7 +272,7 @@ class CategoryRepository extends ServiceEntityRepository
             $query .= '
                 ,ca.category_name            
                 ,ts_headline(\'my_swedish\',cc.key_words, to_tsquery(\'my_swedish\', :main_search_parial_category))
-                ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',cc.key_words),to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)) AS  main_runk
+                ,ts_rank_cd(cc.common_fts, to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)) AS  main_runk
             ';
         }
 
@@ -282,7 +282,7 @@ class CategoryRepository extends ServiceEntityRepository
             if ($explain === true) {
                 $query .= '
                     ,ts_headline(\'my_swedish\',crsub.key_words, to_tsquery(\'my_swedish\', :sub_main_search))
-                    ,ts_rank_cd(to_tsvector(\'my_swedish\',crsub.key_words),to_tsquery(\'my_swedish\', :sub_main_search)) AS  sub_runk
+                    ,ts_rank_cd(crsub.common_fts, to_tsquery(\'my_swedish\', :sub_main_search)) AS  sub_runk
                 ';
             }
         }
@@ -294,7 +294,7 @@ class CategoryRepository extends ServiceEntityRepository
                 $query .= '
                     
                     ,ts_headline(\'my_swedish\',crsub_main.key_words, to_tsquery(\'my_swedish\', :sub_main_search))
-                    ,ts_rank_cd(to_tsvector(\'my_swedish\',crsub_main.key_words),to_tsquery(\'my_swedish\', :sub_sub_main_search)) AS  sub_sub_runk
+                    ,ts_rank_cd(crsub_main.common_fts ,to_tsquery(\'my_swedish\', :sub_sub_main_search)) AS  sub_sub_runk
                 ';
             }
         }
@@ -330,19 +330,19 @@ class CategoryRepository extends ServiceEntityRepository
         }
 
         $query .= '
-                WHERE to_tsvector(\'pg_catalog.swedish\',cc.key_words) @@ to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)
+                WHERE cc.common_fts @@ to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)
             ';
 
 
         if ($depth > 1) {
             $query .= '
-                AND to_tsvector(\'my_swedish\',crsub.key_words) @@ to_tsquery(\'my_swedish\', :sub_main_search)
+                AND crsub.common_fts @@ to_tsquery(\'my_swedish\', :sub_main_search)
             ';
         }
 
         if ($depth > 2) {
             $query .= '
-                AND to_tsvector(\'my_swedish\',crsub_main.key_words) @@ to_tsquery(\'my_swedish\', :sub_sub_main_search)
+                AND crsub_main.common_fts @@ to_tsquery(\'my_swedish\', :sub_sub_main_search)
             ';
         }
 
