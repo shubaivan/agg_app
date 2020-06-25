@@ -271,7 +271,7 @@ class CategoryRepository extends ServiceEntityRepository
         if ($explain === true) {
             $query .= '
                 ,ca.category_name            
-                ,cc.key_words AS main_keywords
+                ,ts_headline(\'my_swedish\',cc.key_words, to_tsquery(\'my_swedish\', :main_search_parial_category))
                 ,ts_rank_cd(to_tsvector(\'pg_catalog.swedish\',cc.key_words),to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)) AS  main_runk
             ';
         }
@@ -281,7 +281,7 @@ class CategoryRepository extends ServiceEntityRepository
                 ,cr_main.sub_category_id AS sub_ctegory_id';
             if ($explain === true) {
                 $query .= '
-                    ,crsub.key_words AS sub_keywords
+                    ,ts_headline(\'my_swedish\',crsub.key_words, to_tsquery(\'my_swedish\', :sub_main_search))
                     ,ts_rank_cd(to_tsvector(\'my_swedish\',crsub.key_words),to_tsquery(\'my_swedish\', :sub_main_search)) AS  sub_runk
                 ';
             }
@@ -292,8 +292,9 @@ class CategoryRepository extends ServiceEntityRepository
                 ,cr_main_main.sub_category_id AS sub_sub_category_id';
             if ($explain === true) {
                 $query .= '
-                    ,crsub_main.key_words AS sub_sub_keywords
-                    ,ts_rank_cd(to_tsvector(\'my_swedish\',crsub_main.key_words),to_tsquery(\'my_swedish\', :sub_sub_main_search)) AS  sub_sub__runk
+                    
+                    ,ts_headline(\'my_swedish\',crsub_main.key_words, to_tsquery(\'my_swedish\', :sub_main_search))
+                    ,ts_rank_cd(to_tsvector(\'my_swedish\',crsub_main.key_words),to_tsquery(\'my_swedish\', :sub_sub_main_search)) AS  sub_sub_runk
                 ';
             }
         }
@@ -345,31 +346,29 @@ class CategoryRepository extends ServiceEntityRepository
             ';
         }
 
-        $query .= ' 
-            ORDER BY
-                ca.id';
         if ($explain === true) {
             $query .= '
-                ,cc.key_words
+                ORDER BY
+                main_runk
             ';
         }
 
         if ($depth > 1) {
-            $query .= '         
-                    ,cr_main.sub_category_id';
+//            $query .= '
+//                    ,cr_main.sub_category_id';
             if ($explain === true) {
                 $query .= '
-                        ,crsub.key_words
+                        ,sub_runk
                 ';
             }
         }
 
         if ($depth > 2) {
-            $query .= '                 
-                    ,cr_main_main.sub_category_id';
+//            $query .= '
+//                    ,cr_main_main.sub_category_id';
             if ($explain === true) {
                 $query .= '
-                        ,crsub_main.key_words
+                        ,sub_sub_runk
                 ';
             }
         }
