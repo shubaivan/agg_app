@@ -24,15 +24,89 @@ class CategoryBarnFixtures extends Fixture
         $this->manager = $manager;
         $configurations = [
             [
-                'name' => 'T-shirts',
+                'name' => 'Ytterkläder',
                 'key_word' => '
-                    t-shirt, kortärmad, tee, shortsleve, piké, pike, långärmad t-shirt,
-                    t-shirt, short-sleeved, tee, shortsleve, piké, long-sleeved t-shirt
+                    jacka, jackor, fleece, flis, Balaclava, Bomberjackor, Capes, Duffelkappor, Dunjackor,
+                    Öronmuffar och vant set, Fleece set, Fleece tröjor, Fleecetröja, Fleece tröja, Fleecebyxa,
+                    Fleece byxa, Fleece byxor, Fleecetröja med huva, Fleecebyxor, Fleecejackor, Fleeceoveraller,
+                    Fleecetröjor, Fleecevanter, Fuskpäls och shearling, Gilet, Jeansjackor Kavajer och blazers,
+                    Leather gloves, Läderjackor, MC-jackor, Militärjackor, Mössa med öronlappar, Mössa,
+                    halsduk och vantar, Mössor, Parkas, Regnhandskar, Regnhatt, Regnjackor, Regnoveraller, Regnställ,
+                    Skaljackor, Regnjacka, Skaloveraller, Skid och thermobyxor, Skidhandskar och vantar, Skidjackor, 
+                    Skidjacka, Skidoveraller, Skidoverall, Solhatt, Vår och höst jackor, Stickade halsdukar, 
+                    Stickat halsduk, Trenchcoat, Träningsjackor, Ullvantar, Vadderade jackor, Vindjackor, Vinterjackor,
+                    Vinteroveraller, Västar, Jeansjacka, Jeansjackor, Längskidjacka, Löparjacka, Utomhus Jacka, 
+                    Seglarjacka, Streetjacka, Vardagsjacka, Softshell, Soft-Shell,
+                    
+                    jacket, jackets, fleece, fleece, balaclava, bomber jackets, capes, duffel jackets, 
+                    down jackets, earmuffs and gloves set, fleece set, fleece sweaters, fleece sweater, fleece sweater,
+                    fleece trousers, fleece pants, fleece pants, fleece sweatshirt with hood, Fleece overalls, 
+                    Fleece sweatshirts, Fleece vests, Faux fur and shearling, Gilet, Jeans jackets, Blazers and blazers, 
+                    Leather gloves, Leather jackets, MC jackets, Military jackets, Ear wrap cap, Hat, scarf and mittens, 
+                    Hats, Parkas, Rain gloves, Rain gloves, Rain gloves Raincoat, Ski jackets, Rain jacket, Overalls, 
+                    Ski and Thermo pants, Ski gloves and mittens, Ski jackets, Ski jacket, Ski overalls, Ski overall, 
+                    Sun hat, Spring and fall jackets, Knitted scarves, Knitted scarf, Trench coat, Training jackets, 
+                    Wadded jackets, Woolen jackets Winter overalls, Vests, Jeans jacket, Jeans jackets, 
+                    Cross-country ski jacket, Runner jacket, Outdoor jacket, Outdoor jacket, Sail jacket, Street jacket, 
+                    Everyday jacket, Down Jacket, Softsh ell, Soft-Shell, Raincoat,                     
                 ',
                 'sub_key_word' => [
-                    'subT-shirts' => 'T-shirt, Kortärmad, Tee, Shortsleve',
+                    'Balaclava' => 'Balaclava, Balaclavor',
+                    'Bomberjackor' => 'Bomberjacka, Bomberjackor, Bomberjacket, Bomber jacket',
+                    'Capes' => 'Cape, Capes',
+                    'Duffelkappor' => 'Duffeljacka, Duffeljackor, Duffel jacket',
+                    'Fleece set' => 'Fleece set',
+                    'Fleecetröjor' => 'Fleecetröja, Fleece tröja, Fleecetröjor, Fleece tröjor, Fleece sweaters, Fleece sweater, Fleece sweater',
+                    'Fleecebyxor' => 'Fleecebyxa, Fleece byxa, Fleece byxor, Fleecebyxor,  Fleece trousers, Fleece pant, Fleece pants',
+                    'Fleecejackor' => 'Fleecejackor, Fleecejacka, Fleece jacka, Fleece jackor',
+                    'Fleeceoveraller' => 'Fleeceoveraller, Fleece overalls',
+                    'Fleecevantar' => 'Fleecevantar, Fleece vantar',
+                    'Fuskpäls och shearling' => 'Fuskpäls, Shearling,  Faux fur and shearling',
+                    'Gilet' => 'Gilet',
+                    'Läderhandskar' => 'Läderhandskar, Leather gloves,
+                        Läderjackor, Läderjacka, Läder jacka, Läderjackor, Leather jacket, Leatherjacket, Leather jackets, Leatherjackets, MC-jacka, MC-jackor',
+                    'Militärjackor' => 'Militärjacka, Militärjackor, Militär jacka, Militär jackor, Military jacket, Military jackets',
+                    'Mössor' => 'Mössa med öronlappar, Mössa, Mössor, Ear wrap cap, Hat',
+                    'Halsdukar' => 'Halsduk, Halsduk och vantar, Neck scarf, Neckscarf, Stickade halsdukar, Stickad halsduk',
+                    'Vantar' => 'Vantar, Mitts, Mittens, Rain gloves, Handskar, Regnhandskar',
+                    'Parkas' => 'Parkas',
+                    'Regnhattar' => 'Regnhattar, Regnhatt, Rainhat, Rain hat',
+                    'Regnjackor' => 'Regnjacka, Regnjackor, Raincoat, Rain coat, Raincoats, Rain coats',
+                    'Regnoveraller' => 'Regnoveraller, Regnoverall, Regnställ, Rainoveralls, Rain overalls, Rain overall',
+                    'Skaljackor' => 'Skaljacka, Skaljackor, Shell-jacket, Shell-jacket, Shell jacket, Shelljacket',
+                    'Skaloveraller' => 'Skaloverall, Skaloveraller, Shell-overalls, Shell-overall, Shell overalls, Shelloveralls',
+                    'Skid & Thermobyxor' => 'Skid och thermobyxor, Skidbyxor, Skidbyxa, Thermobyxa, Thermobyxor, Ski and Thermopants,
+                    Ski and Thermo pants',
+                    'Skidjackor' => 'Skidjacka, Skid jacka, Skijacket, Ski jacket',
+                    'Skidoveraller' => 'Skidoveraller, Skid overaller, Ski overalls, Skioveralls, Ski overall, Ski overalls',
+                    'Solhattar' => 'Solhatt, Sunhat, Sun hat',
+                    'Trenchcoats' => 'Trenchcoat',
+                    'Vadderade jackor' => 'Vadderad jacka, Padded jacket, Wadded jacket, Woolen jacket',
+                    'Vindjackor' => 'Wind jacket, Windjacket, Vindjacka, Vind jacka',
+                    'Vinterjackor' => 'Vinterjacka, Vinter jacka, Winter jacket, Winterjacket',
+                    'Vinteroveraller' => 'Vinteroverall, Winter overall, Winteroverall',
+                    'Västar' => 'Väst, Vest',
+                    'Jeansjackor' => 'Jeansjacka, Jeans jacka, Jeans jacket',
+                    'Dunjackor' => 'Dunjacka, Downjacket, Down jacket',
+                    'Löparjackor' => 'Löparskor, Löpar skor, Running shoes, Running shoe, Joggingskor, Jogging skor, Joging shoes',
+                    'Outdoor Jackor' => 'Outdoor jacka, Outdoorjacka',
+                    'Seglarjacka' => 'Seglarjacka, Sail jacket, Sailjacket',
+                    'Streetjackor' => 'Streatjacka, Streat jacka, Streatjacket, Streat jacket',
+                    'Vardagsjackor' => 'Vardagsjacka, Everyday jacket',
+                    'Softshell jackor' => 'Softschelljacka, Softschell jacka, Soft-shell jacket, Soft-shelljacket, Soft shell jacket'
+                ]
+            ],
+            [
+                'name' => 'T-shirts',
+                'key_word' => '
+                    t-shirt, kortärmad, tee, shortsleve, piké, pike, långärmad t-shirt, Rugbytröja, Rugby tröja,
+                    t-shirt, short-sleeved, tee, shortsleeve, piké, long-sleeved t-shirt,
+                ',
+                'negative_key_words' => 'dress',
+                'sub_key_word' => [
+                    'subT-shirts' => 'T-shirt, Kortärmad, Tee, Shortsleeve, short sleeve, short sleeved',
                     'Pikéer' => 'Piké, Rugbytröja, Rugby tröja',
-                    'Långärmade t-shirts' => 'Långärmade t-shirts'
+                    'Långärmade t-shirts' => 'Långärmad t-shirt'
                 ]
             ],
             [
@@ -57,8 +131,7 @@ class CategoryBarnFixtures extends Fixture
                     'Koftor' => 'Kofta, Koftor',
                     'Cardigans' => 'Cardigan, Cardigans',
                     'Luvtröjor' => 'Luvtröja, Luvtröjor, Hoodie, Hoddies',
-                    'Zipjackor' => 'Zipjacka, Zipjackor, Zip jacka, Zip jackor, Zipjacket, Zip jacket, Zip-jacket, 
-                    Sweatshirtjacket'
+                    'Zipjackor' => 'Zipjacka, Zipjackor, Zip jacka, Zip jackor, Zipjacket, Zip jacket, Zip-jacket, Sweatshirtjacket'
                 ]
             ],
             [
@@ -85,64 +158,17 @@ class CategoryBarnFixtures extends Fixture
                 ]
             ],
             [
-                'name' => 'Ytterkläder',
-                'key_word' => '
-                    jacka, jackor, fleece, flis, Balaclava, Bomberjackor, Capes, Duffelkappor, Dunjackor, Öronmuffar och vant set, Fleece set, Fleece tröjor, Fleecetröja, Fleece tröja, Fleecebyxa, Fleece byxa, Fleece byxor, Fleecetröja med huva, Fleecebyxor, Fleecejackor, Fleeceoveraller, Fleecetröjor, Fleecevanter, Fuskpäls och shearling, Gilet, Jeansjackor Kavajer och blazers, Leather gloves, Läderjackor, MC-jackor, Militärjackor, Mössa med öronlappar, Mössa, halsduk och vantar, Mössor, Parkas, Regnhandskar, Regnhatt, Regnjackor, Regnoveraller, Regnställ, Skaljackor, Regnjacka, Skaloveraller, Skid och thermobyxor, Skidhandskar och vantar, Skidjackor, Skidjacka, Skidoveraller, Skidoverall, Solhatt, Vår och höst jackor, Stickade halsdukar, Stickat halsduk, Trenchcoat, Träningsjackor, Ullvantar, Vadderade jackor, Vindjackor, Vinterjackor, Vinteroveraller, Västar, Jeansjacka, Jeansjackor, Längskidjacka, Löparjacka, Utomhus Jacka, Seglarjacka, Streetjacka, Vardagsjacka, Softshell, Soft-Shell,
-                     jacket, jackets, fleece, fleece, balaclava, bomber jackets, capes, duffel jackets, down jackets, earmuffs and gloves set, fleece set, fleece sweaters, fleece sweater, fleece sweater, fleece trousers, fleece pants, fleece pants, fleece sweatshirt with hood, Fleece overalls, Fleece sweatshirts, Fleece vests, Faux fur and shearling, Gilet, Jeans jackets, Blazers and blazers, Leather gloves, Leather jackets, MC jackets, Military jackets, Ear wrap cap, Hat, scarf and mittens, Hats, Parkas, Rain gloves, Rain gloves, Rain gloves Raincoat, Ski jackets, Rain jacket, Overalls, Ski and Thermo pants, Ski gloves and mittens, Ski jackets, Ski jacket, Ski overalls, Ski overall, Sun hat, Spring and fall jackets, Knitted scarves, Knitted scarf, Trench coat, Training jackets, Wadded jackets, Woolen jackets Winter overalls, Vests, Jeans jacket, Jeans jackets, Cross-country ski jacket, Runner jacket, Outdoor jacket, Outdoor jacket, Sail jacket, Street jacket, Everyday jacket, Down Jacket, Softsh ell, Soft-Shell, Raincoat
-                ',
-                'sub_key_word' => [
-                    'Balaclava' => 'Balaclava, Balaclavor',
-                    'Bomberjackor' => 'Bomberjacka, Bomberjackor, Bomberjacket, Bomber jacket',
-                    'Capes' => 'Cape, Capes',
-                    'Duffelkappor' => 'Duffeljacka, Duffeljackor, Duffel jacket',
-                    'Fleece set' => 'Fleece set',
-                    'Fleecetröjor' => 'Fleecetröja, Fleece tröja, Fleecetröjor, Fleece tröjor, Fleece sweaters, Fleece sweater, Fleece sweater',
-                    'Fleecebyxor' => 'Fleecebyxa, Fleece byxa, Fleece byxor, Fleecebyxor,  Fleece trousers, Fleece pant, Fleece pants',
-                    'Fleecejackor' => 'Fleecejackor, Fleecejacka, Fleece jacka, Fleece jackor',
-                    'Fleeceoveraller' => 'Fleeceoveraller, Fleece overalls',
-                    'Fleecevantar' => 'Fleecevantar, Fleece vantar',
-                    'Fuskpäls och shearling' => 'Fuskpäls, Shearling,  Faux fur and shearling',
-                    'Gilet' => 'Gilet',
-                    'Läderhandskar' => 'Läderhandskar, Leather gloves
-                    Läderjackor, Läderjacka, Läder jacka, Läderjackor, Leather jacket, Leatherjacket, Leather jackets, Leatherjackets, MC-jacka, MC-jackor',
-                    'Militärjackor' => 'Militärjacka, Militärjackor, Militär jacka, Militär jackor, Military jacket, Military jackets',
-                    'Mössor' => 'Mössa med öronlappar, Mössa, Mössor, Ear wrap cap, Hat',
-                    'Halsdukar' => 'Halsduk, Halsduk och vantar, Neck scarf, Neckscarf, Stickade halsdukar, Stickad halsduk',
-                    'Vantar' => 'Vantar, Mitts, Mittens, Rain gloves, Handskar, Regnhandskar',
-                    'Parkas' => 'Parkas',
-                    'Regnhattar' => 'Regnhattar, Regnhatt, Rainhat, Rain hat',
-                    'Regnjackor' => 'Regnjacka, Regnjackor, Raincoat, Rain coat, Raincoats, Rain coats',
-                    'Regnoveraller' => 'Regnoveraller, Regnoverall, Regnställ, Rainoveralls, Rain overalls, Rain overall',
-                    'Skaljackor' => 'Skaljacka, Skaljackor, Shell-jacket, Shell-jacket, Shell jacket, Shelljacket',
-                    'Skaloveraller' => 'Skaloverall, Skaloveraller, Shell-overalls, Shell-overall, Shell overalls, Shelloveralls',
-                    'Skid & Thermobyxor' => 'Skid och thermobyxor, Skidbyxor, Skidbyxa, Thermobyxa, Thermobyxor, Ski and Thermopants, 
-                    Ski and Thermo pants',
-                    'Skidjackor' => 'Skidjacka, Skid jacka, Skijacket, Ski jacket',
-                    'Skidoveraller' => 'Skidoveraller, Skid overaller, Ski overalls, Skioveralls, Ski overall, Ski overalls',
-                    'Solhattar' => 'Solhatt, Sunhat, Sun hat',
-                    'Trenchcoats' => 'Trenchcoat',
-                    'Vadderade jackor' => 'Vadderad jacka, Padded jacket, Wadded jacket, Woolen jacket',
-                    'Vindjackor' => 'Wind jacket, Windjacket, Vindjacka, Vind jacka',
-                    'Vinterjackor' => 'Vinterjacka, Vinter jacka, Winter jacket, Winterjacket',
-                    'Vinteroveraller' => 'Vinteroverall, Winter overall, Winteroverall',
-                    'Västar' => 'Väst, Vest',
-                    'Jeansjackor' => 'Jeansjacka, Jeans jacka, Jeans jacket',
-                    'Dunjackor' => 'Dunjacka, Downjacket, Down jacket',
-                    'Löparjackor' => 'Löparskor, Löpar skor, Running shoes, Running shoe, Joggingskor, Jogging skor, Joging shoes',
-                    'Outdoor Jackor' => 'Outdoor jacka, Outdoorjacka',
-                    'Seglarjacka' => 'Seglarjacka, Sail jacket, Sailjacket',
-                    'Streetjackor' => 'Streatjacka, Streat jacka, Streatjacket, Streat jacket',
-                    'Vardagsjackor' => 'Vardagsjacka, Everyday jacket',
-                    'Softshell jackor' => 'Softschelljacka, Softschell jacka, Soft-shell jacket, Soft-shelljacket, Soft shell jacket'
-                ]
-            ],
-            [
                 'name' => 'Byxor & shorts',
                 'key_word' => '
-                    Byxor, Chinos, Jeans, Sweatpants, Leggings, Jeggings, jeansshorts, jeans shorts, byxor, byxa, Cargopants, Termobyxor, Termobyxa, Skalbyxor, Skalbyxa, Cargobyxor, 
-                    Cargobyxa, Haremsbyxor, Harembyxa, Mjukisbyxor, Mjukisbyxa, Regnbyxor, Regnbyxa, Shell pants, Trekvartsbyxor, Trekvartsbyxa, Capribyxor, Capribyxa,
-                    Trousers, Chinos, Jeans, Sweatpants, Leggings, Jeggings, jeans shorts, jeans shorts, trousers, trousers, Cargopants, Termobyxor, Termobyxa, Shorts, Skalbyxa, 
-                    Cargobyxor, Cargo Pants, Harem Pants, Harem Pants, Soft Pants, Soft Pants, Rain Pants, Rain Pants, Shell Pants, Three Quarter Pants, Three Quarter Pants, 
+                    Byxor, Chinos, Jeans, Sweatpants, Leggings, Jeggings, jeansshorts, jeans shorts, byxor, byxa, 
+                    Cargopants, Termobyxor, Termobyxa, Skalbyxor, Skalbyxa, Cargobyxor, 
+                    Cargobyxa, Haremsbyxor, Harembyxa, Mjukisbyxor, Mjukisbyxa, Regnbyxor, Regnbyxa, Shell pants, 
+                    Trekvartsbyxor, Trekvartsbyxa, Capribyxor, Capribyxa, 
+                    Träningsbyxor, Träningsbyxa,
+                    Trousers, Chinos, Jeans, Sweatpants, Leggings, Jeggings, jeans shorts, jeans shorts, trousers, 
+                    trousers, Cargopants, Termobyxor, Termobyxa, Shorts, Skalbyxa, 
+                    Cargobyxor, Cargo Pants, Harem Pants, Harem Pants, Soft Pants, Soft Pants, Rain Pants, Rain Pants, 
+                    Shell Pants, Three Quarter Pants, Three Quarter Pants, 
                     Capri Pants, Capri Pants, Sweatpants, Sweatshorts
                 ',
                 'sub_key_word' => [
@@ -297,7 +323,7 @@ Headband, Hairband, Keychain, Belt, Belts
 
         foreach ($configurations as $configuration) {
             $subMain = $this->createCategoryWithConf(
-                $configuration['name'], $configuration['key_word']
+                $configuration['name'], $configuration['key_word'], $configuration['negative_key_words'] ?? null
             );
 
             $this->createCategoryRelations($main, $subMain);
@@ -325,19 +351,25 @@ Headband, Hairband, Keychain, Belt, Belts
     /**
      * @param string $categoryName
      * @param string $keyWords
+     * @param string|null $negativeKeyWords
      * @return Category
      */
-    private function createCategoryWithConf(string $categoryName, string $keyWords): Category
+    private function createCategoryWithConf(string $categoryName, string $keyWords, ?string $negativeKeyWords = null): Category
     {
         $this->minLen = 10;
         $keyWords = preg_replace('/\s+/', '', $keyWords);
         $words = explode(',', $keyWords);
-        foreach ($words as $word) {
+        foreach ($words as $key=>$word) {
             $strlen = strlen($word);
             if ($strlen < $this->minLen) {
                 $this->minLen = $strlen;
             }
+            if (!strlen($word)) {
+                unset($words[$key]);
+            }
         }
+        $words = array_unique($words);
+        $keyWords = implode(',', $words);
         $category = $this->checkExistCategory($categoryName);
 
         if (!$category instanceof Category) {
@@ -357,7 +389,14 @@ Headband, Hairband, Keychain, Belt, Belts
 
         $categoryConfigurations
             ->setKeyWords($keyWords);
-
+        if ($negativeKeyWords) {
+            $negativeKeyWords = preg_replace('/\s+/', '', $negativeKeyWords);
+            $negativeKeyWords = explode(',', $negativeKeyWords);
+            $nWords = array_unique($negativeKeyWords);
+            $nWords = implode(',', $nWords);
+            $categoryConfigurations
+                ->setNegativeKeyWords($nWords);
+        }
         $category->setCategoryConfigurations($categoryConfigurations);
 
         $this->getManager()->persist($categoryConfigurations);

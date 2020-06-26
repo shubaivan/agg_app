@@ -281,7 +281,8 @@ class CategoryRepository extends ServiceEntityRepository
                 ,cr_main.sub_category_id AS sub_ctegory_id';
             if ($explain === true) {
                 $query .= '
-                    ,ts_headline(\'my_swedish\',crsub.key_words, to_tsquery(\'my_swedish\', :sub_main_search))
+                    ,ts_headline(\'my_swedish\',crsub.key_words, to_tsquery(\'my_swedish\', :sub_main_search)) AS crsub_ts_headline
+                    ,ts_headline(\'my_swedish\',crsub.negative_key_words, to_tsquery(\'my_swedish\', :sub_main_search)) AS crsub_ts_headline_negative_key_words
                     ,ts_rank_cd(crsub.common_fts, to_tsquery(\'my_swedish\', :sub_main_search)) AS  sub_runk
                 ';
             }
@@ -337,6 +338,7 @@ class CategoryRepository extends ServiceEntityRepository
         if ($depth > 1) {
             $query .= '
                 AND crsub.common_fts @@ to_tsquery(\'my_swedish\', :sub_main_search)
+                AND crsub.negative_key_words_fts @@ to_tsquery(\'my_swedish\', :sub_main_search) = FALSE
             ';
         }
 

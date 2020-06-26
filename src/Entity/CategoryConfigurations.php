@@ -29,6 +29,11 @@ class CategoryConfigurations
      */
     private $keyWords;
 
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $negativeKeyWords;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -54,6 +59,18 @@ class CategoryConfigurations
     public function setCategoryId(?Category $categoryId): self
     {
         $this->categoryId = $categoryId;
+
+        return $this;
+    }
+
+    public function getNegativeKeyWords(): ?string
+    {
+        return $this->negativeKeyWords;
+    }
+
+    public function setNegativeKeyWords(string $negativeKeyWords): self
+    {
+        $this->negativeKeyWords = preg_replace('/\s+/', '', $negativeKeyWords);;
 
         return $this;
     }
