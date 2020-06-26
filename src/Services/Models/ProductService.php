@@ -167,7 +167,12 @@ class ProductService extends AbstractModel
     public function getProductById(Product $product)
     {
         $searchDataForRelated = $product->getSearchDataForRelatedProductItems();
-        $search = $this->prepareDataForGINSearch($searchDataForRelated, 5);
+        $search = '';
+        $limitation = 5;
+        while (!strlen($search)) {
+            $search = $this->prepareDataForGINSearch($searchDataForRelated, $limitation);
+            --$limitation;
+        }
 
         $parameterBag = new ParameterBag([
             'page' => 1,
