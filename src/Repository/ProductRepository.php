@@ -234,7 +234,7 @@ class ProductRepository extends ServiceEntityRepository
 
         $sortBy = $this->getHelpers()->white_list($sortBy,
             [self::CREATED_AT, self::NUMBER_OF_ENTRIES, self::PRICE],
-            "Invalid field name " . $sortBy
+            "Invalid ORDER field name " . $sortBy
         );
 
         $sortOrder = $this->getHelpers()->white_list(
