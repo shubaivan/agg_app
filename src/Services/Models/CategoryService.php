@@ -12,6 +12,7 @@ use App\Entity\Product;
 use App\Entity\Shop;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
+use App\Services\Helpers;
 use App\Services\ObjectsHandler;
 use Doctrine\DBAL\Cache\CacheException;
 use FOS\RestBundle\Request\ParamFetcher;
@@ -38,21 +39,29 @@ class CategoryService extends AbstractModel
     private $tagAwareQueryResultCacheProduct;
 
     /**
+     * @var Helpers
+     */
+    private $helper;
+
+    /**
      * CategoryService constructor.
      * @param CategoryRepository $categoryRepository
      * @param ObjectsHandler $objecHandler
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
+     * @param Helpers $helper
      */
     public function __construct(
         CategoryRepository $categoryRepository,
         ObjectsHandler $objecHandler,
-        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
-    )
+        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
+        Helpers $helper)
     {
-        $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
         $this->categoryRepository = $categoryRepository;
         $this->objecHandler = $objecHandler;
+        $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
+        $this->helper = $helper;
     }
+
 
     /**
      * @param ParamFetcher $paramFetcher
@@ -249,11 +258,22 @@ class CategoryService extends AbstractModel
             return [];
         }
         $result = array_merge($result, $matchCategoryMain);
-        $matchData = preg_replace('!\s+!', ',', $product->getName() . ', ' . $product->getDescription());
+        $productData = $this->helper->pregWordsFromDictionary(
+            $product->getName() . ', ' . $product->getDescription()
+        );
+        $matchData = preg_replace('!\s+!', ',', $productData['result']);
         $matchData = strip_tags($matchData);
 
         $prepareDataForGINSearch = $this->prepareDataForGINSearch($matchData);
-
+        $prepareDataForGINSearch = $this->helper
+            ->handleSearchValue($prepareDataForGINSearch, true);
+        if (isset($productData['match']) && count($productData['match'])) {
+            $resultSpaceWord = array_shift($productData['match']);
+            $arrayMapSpaceWord = array_map(function ($v) {
+                return  str_replace(' ', '', $v);
+            }, $resultSpaceWord);
+            $prepareDataForGINSearch .= '|' . implode('|', $arrayMapSpaceWord);
+        }
         if ($prepareDataForGINSearch) {
             $resultData = $prepareDataForGINSearch;
             $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);

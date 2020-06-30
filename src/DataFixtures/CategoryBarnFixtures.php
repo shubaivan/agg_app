@@ -5,10 +5,12 @@ namespace App\DataFixtures;
 use App\Entity\Category;
 use App\Entity\CategoryConfigurations;
 use App\Entity\CategoryRelations;
+use App\Kernel;
 use App\Repository\CategoryRelationsRepository;
 use App\Repository\CategoryRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class CategoryBarnFixtures extends Fixture
 {
@@ -18,6 +20,153 @@ class CategoryBarnFixtures extends Fixture
      * @var integer
      */
     private $minLen;
+
+    /**
+     * @var array
+     */
+    private $wordWithSpace = [];
+
+    /**
+     * @var Kernel
+     */
+    private $kernel;
+
+    private $swStopWords = '
+        och
+        det
+        att
+        i
+        en
+        jag
+        hon
+        som
+        han
+        på
+        den
+        med
+        var
+        sig
+        för
+        så
+        till
+        är
+        men
+        ett
+        om
+        hade
+        de
+        av
+        icke
+        mig
+        du
+        henne
+        då
+        sin
+        nu
+        har
+        inte
+        hans
+        honom
+        skulle
+        hennes
+        där
+        min
+        man
+        ej
+        vid
+        kunde
+        något
+        från
+        ut
+        när
+        efter
+        upp
+        vi
+        dem
+        vara
+        vad
+        över
+        än
+        dig
+        kan
+        sina
+        här
+        ha
+        mot
+        alla
+        under
+        någon
+        eller
+        allt
+        mycket
+        sedan
+        ju
+        denna
+        själv
+        detta
+        åt
+        utan
+        varit
+        hur
+        ingen
+        mitt
+        ni
+        bli
+        blev
+        oss
+        din
+        dessa
+        några
+        deras
+        blir
+        mina
+        samma
+        vilken
+        er
+        sådan
+        vår
+        blivit
+        dess
+        inom
+        mellan
+        sådant
+        varför
+        varje
+        vilka
+        ditt
+        vem
+        vilket
+        sitta
+        sådana
+        vart
+        dina
+        vars
+        vårt
+        våra
+        ert
+        era
+        vilkas
+    ';
+
+    /**
+     * CategoryBarnFixtures constructor.
+     * @param KernelInterface $kernel
+     */
+    public function __construct(KernelInterface $kernel)
+    {
+        $this->kernel = $kernel;
+        if (!is_dir($this->kernel->getProjectDir() . '/pg')) {
+            mkdir($this->kernel->getProjectDir() . '/pg');
+        }
+
+        if (file_exists($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths')) {
+            unlink($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths');
+        }
+        if (file_exists($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths')) {
+            unlink($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths');
+        }
+    }
+
 
     public function load(ObjectManager $manager)
     {
@@ -39,13 +188,13 @@ class CategoryBarnFixtures extends Fixture
                     Seglarjacka, Streetjacka, Vardagsjacka, Softshell, Soft-Shell,
                     
                     jacket, jackets, fleece, fleece, balaclava, bomber jackets, capes, duffel jackets, 
-                    down jackets, earmuffs,gloves set, fleece set, fleece sweaters, fleece sweater, fleece sweater,
+                    down jackets, earmuffs, gloves set, fleece set, fleece sweaters, fleece sweater, fleece sweater,
                     fleece trousers, fleece pants, fleece pants, fleece sweatshirt with hood, Fleece overalls, 
-                    Fleece sweatshirts, Fleece vests, Faux fur,shearling, Gilet, Jeans jackets, Blazers,blazers, 
-                    Leather gloves, Leather jackets, MC jackets, Military jackets, Ear wrap cap, Hat, scarf,mittens, 
+                    Fleece sweatshirts, Fleece vests, Faux fur, shearling, Gilet, Jeans jackets, Blazers, blazers, 
+                    Leather gloves, Leather jackets, MC jackets, Military jackets, Ear wrap cap, Hat, scarf, mittens, 
                     Hats, Parkas, Rain gloves, Rain gloves, Rain gloves Raincoat, Ski jackets, Rain jacket, Overalls, 
-                    Ski,Thermo pants, Ski gloves,mittens, Ski jackets, Ski jacket, Ski overalls, Ski overall, 
-                    Sun hat, Spring,fall jackets, Knitted scarves, Knitted scarf, Trench coat, Training jackets, 
+                    Ski, Thermo pants, Ski gloves, mittens, Ski jackets, Ski jacket, Ski overalls, Ski overall, 
+                    Sun hat, Spring, fall jackets, Knitted scarves, Knitted scarf, Trench coat, Training jackets, 
                     Wadded jackets, Woolen jackets Winter overalls, Vests, Jeans jacket, Jeans jackets, 
                     Cross-country ski jacket, Runner jacket, Outdoor jacket, Outdoor jacket, Sail jacket, Street jacket, 
                     Everyday jacket, Down Jacket, Softsh ell, Soft-Shell, Raincoat,                     
@@ -61,7 +210,7 @@ class CategoryBarnFixtures extends Fixture
                     'Fleecejackor' => 'Fleecejackor, Fleecejacka, Fleece jacka, Fleece jackor',
                     'Fleeceoveraller' => 'Fleeceoveraller, Fleece overalls',
                     'Fleecevantar' => 'Fleecevantar, Fleece vantar',
-                    'Fuskpäls och shearling' => 'Fuskpäls, Shearling,  Faux fur,shearling',
+                    'Fuskpäls och shearling' => 'Fuskpäls, Shearling,  Faux fur, shearling',
                     'Gilet' => 'Gilet',
                     'Läderhandskar' => 'Läderhandskar, Leather gloves,
                         Läderjackor, Läderjacka, Läder jacka, Läderjackor, Leather jacket, Leatherjacket, Leather jackets, Leatherjackets, MC-jacka, MC-jackor',
@@ -75,8 +224,8 @@ class CategoryBarnFixtures extends Fixture
                     'Regnoveraller' => 'Regnoveraller, Regnoverall, Regnställ, Rainoveralls, Rain overalls, Rain overall',
                     'Skaljackor' => 'Skaljacka, Skaljackor, Shell-jacket, Shell-jacket, Shell jacket, Shelljacket',
                     'Skaloveraller' => 'Skaloverall, Skaloveraller, Shell-overalls, Shell-overall, Shell overalls, Shelloveralls',
-                    'Skid & Thermobyxor' => 'Skid och thermobyxor, Skidbyxor, Skidbyxa, Thermobyxa, Thermobyxor, Ski,Thermopants,
-                    Ski,Thermo pants',
+                    'Skid & Thermobyxor' => 'Skid och thermobyxor, Skidbyxor, Skidbyxa, Thermobyxa, Thermobyxor, Ski, Thermopants,
+                    Ski, Thermo pants',
                     'Skidjackor' => 'Skidjacka, Skid jacka, Skijacket, Ski jacket',
                     'Skidoveraller' => 'Skidoveraller, Skid overaller, Ski overalls, Skioveralls, Ski overall, Ski overalls',
                     'Solhattar' => 'Solhatt, Sunhat, Sun hat',
@@ -192,9 +341,9 @@ class CategoryBarnFixtures extends Fixture
                 'name' => 'Underkläder',
                 'key_word' => '
                     Kalsonger, trosor, strumpor, strumpbyxor, Benvärmare, Bloomers, Boxershorts, Long johns, Strumpbyxor, Strumpbyxa, Strumpor, Trosor, 
-Trosa, Underbyxor, Underbyxa Underklädsset, Underlinnen, Underlinne, Trunks,
-                     Underwear, panties, stockings, tights, leg warmers, bloomers, boxer shorts, long johns, sports tops, sports tops, tights, tights, stockings, panties, Socks
-Panty, Pantyhose, Pantyhose Underwear set, Underliners, Underliners, Trunks
+                    Trosa, Underbyxor, Underbyxa Underklädsset, Underlinnen, Underlinne, Trunks,
+                    Underwear, panties, stockings, tights, leg warmers, bloomers, boxer shorts, long johns, sports tops, sports tops, tights, tights, stockings, panties, Socks
+                    Panty, Pantyhose, Pantyhose Underwear set, Underliners, Underliners, Trunks
                 ',
                 'sub_key_word' => [
                     'Kalsonger' => 'Kalsonger, Kalsong, Underwear',
@@ -213,9 +362,9 @@ Panty, Pantyhose, Pantyhose Underwear set, Underliners, Underliners, Trunks
                 'name' => 'Träningskläder',
                 'key_word' => '
                     Träningsjacka, Träningsbyxa, Träningstopp, Joggingbyxa, Löparbyxor, Löparjacka, Löparkläder, Träningskläder, Sporttoppar, Sporttopp, Flytväst, Räddningsväst, 
-Dansdräkt, Byxkjol, Tennis T-shirt,
-                     Sweatpants, Sweatpants, Sweatpants, Jogging Pants, Running Pants, Running Jacket, Running Clothes, Sweatwear, Sports Bra, Sportsbra, Lifevest, Sportpants, 
-Dancesuit
+                    Dansdräkt, Byxkjol, Tennis T-shirt,
+                    Sweatpants, Sweatpants, Sweatpants, Jogging Pants, Running Pants, Running Jacket, Running Clothes, Sweatwear, Sports Bra, Sportsbra, Lifevest, Sportpants, 
+                    Dancesuit
                 ',
                 'sub_key_word' => [
                     'Träningsjackor' => 'Träningsjacka',
@@ -259,9 +408,9 @@ Dancesuit
                 'name' => 'UV & Bad',
                 'key_word' => '
                     UV-Dräkt, UV-byxor, UV-byxa, uvtröja, uv-tröja, uv-tröjor, uvtröjor, UV-set, Badbyxor, Badbyxa, Badshorts, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants, 
-Swim Diapers, Blöjbadbyxor, Blöjbadbyxa, UV-Baddräckt, UV Badshorts, UV-Badshorts, Sunsuits, Sunsuit, Badtröja, Bad tröja, Badrockar, Badrock,
-                     UV Apparel, UV Pants, UV Pants, Sweatshirt, UV Sweater, UV Sweatshirts, Sweatshirts, UV Sets, Swimsuit, Swimwear, Swimwear, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants,
-Swim Diapers, Diaper Tights, Diaper Tights, UV Bathing Suits, UV Bathing Shorts, UV Bathing Shorts, Sunsuits, Sunsuit, Sweater, Bathing Sweater, Bathing Suits, Bathrobe
+                    Swim Diapers, Blöjbadbyxor, Blöjbadbyxa, UV-Baddräckt, UV Badshorts, UV-Badshorts, Sunsuits, Sunsuit, Badtröja, Bad tröja, Badrockar, Badrock,
+                    UV Apparel, UV Pants, UV Pants, Sweatshirt, UV Sweater, UV Sweatshirts, Sweatshirts, UV Sets, Swimsuit, Swimwear, Swimwear, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants,
+                    Swim Diapers, Diaper Tights, Diaper Tights, UV Bathing Suits, UV Bathing Shorts, UV Bathing Shorts, Sunsuits, Sunsuit, Sweater, Bathing Sweater, Bathing Suits, Bathrobe
                 ',
                 'sub_key_word' => [
                     'Badshorts' => 'Badbyxor, Badbyxa, Badshorts, Swimpants, Swim Pants, UV Badshorts, UV-Badshorts',
@@ -290,11 +439,11 @@ Swim Diapers, Diaper Tights, Diaper Tights, UV Bathing Suits, UV Bathing Shorts,
                 'name' => 'Accessoarer',
                 'key_word' => '
                     Balaclavas, Baclava, Barnklockor, Barnklocka, Halsdukar, Halsduk, Handskar, Handske, Vantar, Vante, Hattar, Hatt, Kepsar, Keps, Mössor, Mössa, 
-Paraplyer, Paraply, Plånböcker, Plånbok, Scarfs, Scarf, Drybibs, Drybib, Smycken, Smycke, Solglasögon, Bandanas, Bandana, Diadem, Nyckelsingslampa, Pannband, 
-Hårband, Nyckelring, Skärp,
-                     Balaclavas, Baclava, Children\'s Watches, Children\'s Watch, Scarves, Scarf, Gloves, Glove, Mittens, Mitten, Hats, Hat, Caps, Cap,
-Umbrellas, Umbrella, Wallets, Wallet, Scarfs, Drybibs, Drybib, Jewelry, Sunglasses, Bandanas, Bandana, Diadem, Keychain Lamp,
-Headband, Hairband, Keychain, Belt, Belts
+                    Paraplyer, Paraply, Plånböcker, Plånbok, Scarfs, Scarf, Drybibs, Drybib, Smycken, Smycke, Solglasögon, Bandanas, Bandana, Diadem, Nyckelsingslampa, Pannband, 
+                    Hårband, Nyckelring, Skärp,
+                    Balaclavas, Baclava, Children\'s Watches, Children\'s Watch, Scarves, Scarf, Gloves, Glove, Mittens, Mitten, Hats, Hat, Caps, Cap,
+                    Umbrellas, Umbrella, Wallets, Wallet, Scarfs, Drybibs, Drybib, Jewelry, Sunglasses, Bandanas, Bandana, Diadem, Keychain Lamp, 
+                    Headband, Hairband, Keychain, Belt, Belts
                 ',
                 'sub_key_word' => [
                     'Balaclavas' => 'Balaclavas, Baclava',
@@ -357,9 +506,14 @@ Headband, Hairband, Keychain, Belt, Belts
     private function createCategoryWithConf(string $categoryName, string $keyWords, ?string $negativeKeyWords = null): Category
     {
         $this->minLen = 10;
-        $keyWords = preg_replace('/\s+/', '', $keyWords);
-        $words = explode(',', $keyWords);
+//        $keyWords = preg_replace('/\s+/', '', $keyWords);
+        $keyWords = preg_replace('/\n/', '', $keyWords);
+        $keyWords = preg_replace('!\s+!', ' ', $keyWords);
+
+        $words = explode(', ', $keyWords);
+
         foreach ($words as $key=>$word) {
+            $word = trim($word);
             $strlen = strlen($word);
             if ($strlen < $this->minLen) {
                 $this->minLen = $strlen;
@@ -367,8 +521,18 @@ Headband, Hairband, Keychain, Belt, Belts
             if (!strlen($word)) {
                 unset($words[$key]);
             }
+            if (preg_match_all('!\s+!', $word, $match)) {
+                $this->fillDictionary($word);
+            }
         }
         $words = array_unique($words);
+
+        $words = array_filter($words, function ($v) {
+            if (strlen(trim($v))) {
+                return true;
+            }
+        });
+
         $keyWords = implode(',', $words);
         $category = $this->checkExistCategory($categoryName);
 
@@ -390,8 +554,23 @@ Headband, Hairband, Keychain, Belt, Belts
         $categoryConfigurations
             ->setKeyWords($keyWords);
         if ($negativeKeyWords) {
-            $negativeKeyWords = preg_replace('/\s+/', '', $negativeKeyWords);
-            $negativeKeyWords = explode(',', $negativeKeyWords);
+//            $negativeKeyWords = preg_replace('/\s+/', '', $negativeKeyWords);
+
+            $negativeKeyWords = preg_replace('/\n/', '', $negativeKeyWords);
+            $negativeKeyWords = preg_replace('!\s+!', ' ', $negativeKeyWords);
+
+            $negativeKeyWords = explode(', ', $negativeKeyWords);
+
+            foreach ($negativeKeyWords as $key=>$nword) {
+                $nword = trim($nword);
+                if (!strlen($nword)) {
+                    unset($nword[$key]);
+                }
+                if (preg_match_all('!\s+!', $nword, $match)) {
+                    $this->fillDictionary($nword);
+                }
+            }
+
             $nWords = array_unique($negativeKeyWords);
             $nWords = implode(',', $nWords);
             $categoryConfigurations
@@ -452,5 +631,61 @@ Headband, Hairband, Keychain, Belt, Belts
     {
         return $this->getCategoryRepository()
             ->findOneBy(['categoryName' => $categoryName]);
+    }
+
+    /**
+     * @param string $word
+     */
+    private function fillDictionary(string $word)
+    {
+        $this->wordWithSpace[] = $word;
+
+        if (!is_array($this->swStopWords)) {
+            $explode = explode(PHP_EOL, $this->swStopWords);
+
+            $arrayFilter = array_filter($explode, function ($v) {
+                if (strlen(trim($v))) {
+                    return true;
+                }
+            });
+
+            $arrayMap = array_map(function ($v) {
+                return trim($v);
+            }, $arrayFilter);
+
+            $arrayUnique = array_unique($arrayMap);
+            $prepareStopArray = [];
+            foreach ($arrayUnique as $uniq) {
+                $prepareStopArray[] = ucfirst($uniq);
+                $prepareStopArray[] = lcfirst($uniq);
+            }
+
+            $prepareStopArray = array_map(function ($v) {
+                return '\b'.trim($v).'\b';
+            }, $prepareStopArray);
+
+            $this->swStopWords = $prepareStopArray;
+        }
+
+        $prepareRegex = implode('|', $this->swStopWords);
+
+        if (preg_match_all("/$prepareRegex/u", $word, $mt)) {
+            $result = preg_replace("/$prepareRegex/", '?', $word);
+        }
+
+        $modifyIndexWord = str_replace(' ', '', $word);
+
+        file_put_contents(
+            $this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths',
+            (count($this->wordWithSpace) == 1 ? '' : PHP_EOL) . (isset($result) ? $result : $word) . ' : ' . $modifyIndexWord,
+            FILE_APPEND
+        );
+
+
+        file_put_contents(
+            $this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths',
+            (count($this->wordWithSpace) == 1 ? '' : PHP_EOL) . $word . ' : ' . $modifyIndexWord,
+            FILE_APPEND
+        );
     }
 }

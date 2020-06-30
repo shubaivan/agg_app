@@ -46,7 +46,8 @@ class CategoryConfigurations
 
     public function setKeyWords(string $keyWords): self
     {
-        $this->keyWords = preg_replace('/\s+/', '', $keyWords);
+//        $this->keyWords = preg_replace('/\s+/', '', $keyWords);
+        $this->keyWords = $keyWords;
 
         return $this;
     }
@@ -70,7 +71,8 @@ class CategoryConfigurations
 
     public function setNegativeKeyWords(string $negativeKeyWords): self
     {
-        $this->negativeKeyWords = preg_replace('/\s+/', '', $negativeKeyWords);;
+//        $this->negativeKeyWords = preg_replace('/\s+/', '', $negativeKeyWords);;
+        $this->negativeKeyWords = $negativeKeyWords;
 
         return $this;
     }

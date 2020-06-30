@@ -4,10 +4,12 @@
 namespace App\Services;
 
 use App\Cache\CacheManager;
+use App\Kernel;
 use App\Util\RedisHelper;
 use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class Helpers
 {
@@ -22,17 +24,25 @@ class Helpers
     private $redisHelper;
 
     /**
+     * @var Kernel
+     */
+    private $kernel;
+
+    /**
      * Helpers constructor.
      * @param SerializerInterface $serilizer
      * @param RedisHelper $redisHelper
+     * @param KernelInterface $kernel
      */
     public function __construct(
         SerializerInterface $serilizer,
-        RedisHelper $redisHelper
+        RedisHelper $redisHelper,
+        KernelInterface $kernel
     )
     {
         $this->serilizer = $serilizer;
         $this->redisHelper = $redisHelper;
+        $this->kernel = $kernel;
     }
 
     /**
@@ -69,14 +79,20 @@ class Helpers
      * @param bool $strict
      * @return string
      */
-    public function handleSearchValue($searchField, bool $strict): string
+    public function handleSearchValue($searchField, bool $strict, bool $combineWordWithSpace = false): string
     {
         $result = str_replace('.', ',', $searchField);
         $result = strip_tags( $result);
+        if (!$combineWordWithSpace) {
+            $result = preg_replace('!\s+!', ' ', $result);
+        }
 
-        $result = preg_replace('!\s+!', ' ', $result);
         $result = preg_replace('/\s*,\s*/', ',', $result);
-        $result = preg_replace('!\s!', '&', $result);
+
+        if (!$combineWordWithSpace) {
+            $result = preg_replace('!\s!', '&', $result);
+        }
+
         $result = str_replace(',,', ',', $result);
 
         $delimiter = ($strict !== true ? ':*|' : '|');
@@ -153,5 +169,32 @@ class Helpers
         }
 
         return $output;
+    }
+
+    /**
+     * @param string $inputString
+     * @return array
+     */
+    public function pregWordsFromDictionary(string $inputString)
+    {
+        $fileGetContents = file_get_contents(
+            $this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths'
+        );
+        $explode = explode(PHP_EOL, $fileGetContents);
+        $arrayMap = array_map(function ($v) {
+            $explodeValue = explode(':', $v);
+            if (count($explodeValue)) {
+                return trim($explodeValue[0]);
+            }
+        }, $explode);
+
+        $implode = implode('|', $arrayMap);
+        preg_match_all("/$implode/", $inputString, $mt);
+        $result = preg_replace("/$implode/", '', $inputString);
+
+        return [
+            'match' => $mt,
+            'result' => $result
+        ];
     }
 }

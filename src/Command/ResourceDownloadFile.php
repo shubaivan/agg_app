@@ -105,6 +105,9 @@ class ResourceDownloadFile extends Command
      */
     private function postConstruct()
     {
+        if (!is_dir($this->getKernel()->getProjectDir() . '/download_files')) {
+            mkdir($this->getKernel()->getProjectDir() . '/download_files');
+        }
         if (!is_dir($this->getDirForFiles())) {
             // dir doesn't exist, make it
             mkdir($this->getDirForFiles());

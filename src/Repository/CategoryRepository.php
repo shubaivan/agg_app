@@ -253,15 +253,11 @@ class CategoryRepository extends ServiceEntityRepository
         }
 
         if ($depth > 1) {
-            $subMainSearch =
-                $this->getHelpers()
-                    ->handleSearchValue($parameterBag->get(CategoryService::SUB_MAIN_SEARCH), $parameterBag->get(self::STRICT) === true);
+            $subMainSearch = $parameterBag->get(CategoryService::SUB_MAIN_SEARCH);
         }
 
         if ($depth > 2) {
-            $subSubMainSearch =
-                $this->getHelpers()
-                    ->handleSearchValue($parameterBag->get(CategoryService::SUB_SUB_MAIN_SEARCH), $parameterBag->get(self::STRICT) === true);
+            $subSubMainSearch = $parameterBag->get(CategoryService::SUB_MAIN_SEARCH);
         }
 
         $query = '
