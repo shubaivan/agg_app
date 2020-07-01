@@ -158,7 +158,7 @@ class ProductRepository extends ServiceEntityRepository
                         $size = substr($size, 1, -1);
                         $resultValues[] = $size;
                     }
-                    $resultValues =array_unique($resultValues);
+                    $resultValues = array_values(array_unique($resultValues));
                 } else {
                     preg_match_all('/\["([^_]+)"\]/', $value['fields'], $matches);
                     if (isset($matches[1][0])) {
