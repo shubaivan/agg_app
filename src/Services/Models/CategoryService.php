@@ -269,10 +269,12 @@ class CategoryService extends AbstractModel
             ->handleSearchValue($prepareDataForGINSearch, true);
         if (isset($productData['match']) && count($productData['match'])) {
             $resultSpaceWord = array_shift($productData['match']);
-            $arrayMapSpaceWord = array_map(function ($v) {
-                return  str_replace(' ', '', $v);
-            }, $resultSpaceWord);
-            $prepareDataForGINSearch .= '|' . implode('|', $arrayMapSpaceWord);
+            if (is_array($resultSpaceWord) && count($resultSpaceWord)) {
+                $arrayMapSpaceWord = array_map(function ($v) {
+                    return  str_replace(' ', '', $v);
+                }, $resultSpaceWord);
+                $prepareDataForGINSearch .= '|' . implode('|', $arrayMapSpaceWord);
+            }
         }
         if ($prepareDataForGINSearch) {
             $resultData = $prepareDataForGINSearch;
