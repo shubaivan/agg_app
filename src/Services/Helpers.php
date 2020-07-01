@@ -188,9 +188,13 @@ class Helpers
             }
         }, $explode);
 
+        $arrayMap = array_map(function ($v) {
+            return '\b'.trim($v).'\b';
+        }, $arrayMap);
+
         $implode = implode('|', $arrayMap);
-        preg_match_all("/$implode/", $inputString, $mt);
-        $result = preg_replace("/$implode/", '', $inputString);
+        preg_match_all("/$implode/u", $inputString, $mt);
+        $result = preg_replace("/$implode/u", '', $inputString);
 
         return [
             'match' => $mt,

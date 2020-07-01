@@ -155,21 +155,12 @@ class CategoryBarnFixtures extends Fixture
     public function __construct(KernelInterface $kernel)
     {
         $this->kernel = $kernel;
-        if (!is_dir($this->kernel->getProjectDir() . '/pg')) {
-            mkdir($this->kernel->getProjectDir() . '/pg');
-        }
-
-        if (file_exists($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths')) {
-            unlink($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths');
-        }
-        if (file_exists($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths')) {
-            unlink($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths');
-        }
     }
 
 
     public function load(ObjectManager $manager)
     {
+        $this->reUpdateFiles();
         $this->manager = $manager;
         $configurations = [
             [
@@ -670,7 +661,7 @@ class CategoryBarnFixtures extends Fixture
         $prepareRegex = implode('|', $this->swStopWords);
 
         if (preg_match_all("/$prepareRegex/u", $word, $mt)) {
-            $result = preg_replace("/$prepareRegex/", '?', $word);
+            $result = preg_replace("/$prepareRegex/u", '?', $word);
         }
 
         $modifyIndexWord = str_replace(' ', '', $word);
@@ -687,5 +678,19 @@ class CategoryBarnFixtures extends Fixture
             (count($this->wordWithSpace) == 1 ? '' : PHP_EOL) . $word . ' : ' . $modifyIndexWord,
             FILE_APPEND
         );
+    }
+
+    private function reUpdateFiles()
+    {
+        if (!is_dir($this->kernel->getProjectDir() . '/pg')) {
+            mkdir($this->kernel->getProjectDir() . '/pg');
+        }
+
+        if (file_exists($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths')) {
+            unlink($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths');
+        }
+        if (file_exists($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths')) {
+            unlink($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths');
+        }
     }
 }
