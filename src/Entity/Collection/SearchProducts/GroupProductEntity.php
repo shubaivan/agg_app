@@ -10,12 +10,6 @@ use App\Entity\Collection\Search\SearchProductCollection;
 
 class GroupProductEntity extends CommonProduct
 {
-    const NULL = 'NULL';
-    /**
-     * @var array
-     */
-    private $ids;
-
     /**
      * @var string
      * @Annotation\Type("string")
@@ -23,6 +17,14 @@ class GroupProductEntity extends CommonProduct
      * @Annotation\Accessor(setter="setStoreProductUrlAccessor")
      */
     private $storeProductUrl;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreManufacturerArticleNumberAccessor")
+     */
+    private $storeManufacturerArticleNumber;
 
     /**
      * @var string
@@ -176,13 +178,20 @@ class GroupProductEntity extends CommonProduct
      */
     private $presentCurrentProduct = [];
 
-
     /**
      * @param string $value
      */
     public function setStoreProductUrlAccessor(string $value)
     {
         $this->storeProductUrl = $this->storePropertyAccessor($value);
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setStoreManufacturerArticleNumberAccessor(string $value)
+    {
+        $this->storeManufacturerArticleNumber = $this->storePropertyAccessor($value);
     }
 
     /**
@@ -331,36 +340,6 @@ class GroupProductEntity extends CommonProduct
         $storeContainOneProduct = $newArray;
 
         $this->storeExtras = $storeContainOneProduct;
-    }
-
-
-    /**
-     * @param string $storeData
-     * @return array
-     */
-    private function storePropertyAccessor(string $storeData)
-    {
-        $storeData = str_replace(self::NULL, '"'.self::NULL.'"', $storeData);
-        $storeContainOneProduct = explode('", "', $storeData);
-        $newArray = [];
-        array_walk($storeContainOneProduct, function ($v, $k) use (&$newArray) {
-            $nums = explode('=>', $v);
-            if (isset($nums[0]) && isset($nums[1])) {
-                $newKey = str_replace('"', '', $nums[0]);
-                $newValue = str_replace('"', '', $nums[1]);
-                if ($newValue != self::NULL)
-                {
-                    $newKey = (int)$newKey;
-                    $newArray[$newKey] = $newValue;
-                }
-            }
-        });
-        if (is_null($this->ids) && is_array($newArray) && count($newArray) > 0) {
-            $this->ids = array_keys($newArray);
-        }
-        $storeContainOneProduct = $newArray;
-
-        return $storeContainOneProduct;
     }
 
     /**
@@ -554,6 +533,14 @@ class GroupProductEntity extends CommonProduct
     {
         $ex = $this->extras ?? [];
         return $this->emptyArrayAsObject($ex);
+    }
+
+    /**
+     * @return array|string
+     */
+    public function getStoreManufacturerArticleNumber()
+    {
+        return $this->storeManufacturerArticleNumber;
     }
 
     /**

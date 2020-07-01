@@ -23,13 +23,22 @@ class ProductByIdCollection
     private $relatedItems;
 
     /**
+     * @var AvailableToCollection
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Type("App\Entity\Collection\AvailableToCollection")
+     */
+    private $availableTo;
+
+    /**
      * ProductByIdCollection constructor.
      * @param SearchProductCollection $currentProduct
      * @param SearchProductCollection $relatedItems
+     * @param AvailableToCollection $availableTo
      */
-    public function __construct(SearchProductCollection $currentProduct, SearchProductCollection $relatedItems)
+    public function __construct(SearchProductCollection $currentProduct, SearchProductCollection $relatedItems, AvailableToCollection $availableTo)
     {
         $this->currentProduct = $currentProduct;
         $this->relatedItems = $relatedItems;
+        $this->availableTo = $availableTo;
     }
 }

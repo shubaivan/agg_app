@@ -304,6 +304,66 @@ class ProductRepository extends ServiceEntityRepository
         return $products;
     }
 
+    /**
+     * @param array $mn
+     * @return array|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function getAvailableTo(array $mn)
+    {
+        if (!count($mn))
+        {
+            return [];
+        }
+        $connection = $this->getEntityManager()->getConnection();
+
+        $preparedManufacturerArticleNumber = array_combine(
+            array_map(function ($key) {
+                return ':var_manufacturer_article_number' . $key;
+            }, array_keys($mn)),
+            array_values($mn)
+        );
+        $bindKeysMN = implode(',', array_keys($preparedManufacturerArticleNumber));
+        $conditionMN = "                           
+            p.manufacturer_article_number IN ($bindKeysMN)
+        ";
+
+        $query = '
+            SELECT 
+                COUNT(DISTINCT p.id) as count
+                ,hstore(array_agg(p.id::text), array_agg(p.product_url)) as "storeProductUrls"
+                ,hstore(array_agg(p.id::text), array_agg(p.shop)) as "storeShops"
+                ,p.manufacturer_article_number as "manufacturerArticleNumber"        
+            FROM products AS p';
+
+        $query .= '
+            WHERE '.$conditionMN.'        
+            GROUP BY p.manufacturer_article_number
+        ';
+
+        $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
+            $query,
+            $preparedManufacturerArticleNumber,
+            [],
+            ['available_to'],
+            0,
+            'available_to'
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+        $availableTo = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $statement->closeCursor();
+
+        return $availableTo;
+    }
 
     /**
      * @return string
@@ -613,7 +673,8 @@ class ProductRepository extends ServiceEntityRepository
                 $query .= '
                     ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.product_url::text)) AS "storeProductUrl"
                     ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.description::text)) AS "storeDescription"
-                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.instock::text)) AS "storeInstock"                                                            
+                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.instock::text)) AS "storeInstock"
+                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.manufacturer_article_number::text)) AS "storeManufacturerArticleNumber"                                                             
                 ';
             }
 

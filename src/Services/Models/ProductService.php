@@ -3,6 +3,8 @@
 namespace App\Services\Models;
 
 use App\Entity\Category;
+use App\Entity\Collection\AvailableTo;
+use App\Entity\Collection\AvailableToCollection;
 use App\Entity\Collection\ProductByIdCollection;
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
@@ -441,13 +443,38 @@ class ProductService extends AbstractModel
 
         $relatedItemProductCollection = $this->getSearchProductCollection(
             $parameterBag->get('count'), $collection);
+        /** @var GroupProductEntity $currentProductCollectionModel */
+        $currentProductCollectionModel = $currentProductCollection->getCollection()->first();
+        $alsoAvailableToArrayMN = $currentProductCollectionModel->getStoreManufacturerArticleNumber();
+
+        $prepareAvailableToModel = $this->prepareAvailableToModel($alsoAvailableToArrayMN);
 
         $productByIdCollection = new ProductByIdCollection(
             $currentProductCollection,
-            $relatedItemProductCollection
+            $relatedItemProductCollection,
+            $prepareAvailableToModel
         );
 
         return $productByIdCollection;
+    }
+
+    /**
+     * @param array $alsoAvailableToArrayMN
+     * @return mixed
+     * @throws CacheException
+     * @throws ValidatorException
+     */
+    private function prepareAvailableToModel(array $alsoAvailableToArrayMN)
+    {
+        $availableTo = $this->getProductRepository()
+            ->getAvailableTo($alsoAvailableToArrayMN);
+
+        return $this->getObjectHandler()
+            ->handleObject(
+                ['collection' => $availableTo],
+                AvailableToCollection::class,
+                [AvailableTo::GROUP_CREATE]
+            );
     }
 
     /**
