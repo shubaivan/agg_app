@@ -137,6 +137,7 @@ class BrandRepository extends ServiceEntityRepository
                             DISTINCT brand_alias.id,
                             brand_alias.brand_name AS "brandName",
                             brand_alias.created_at AS "createdAt"
+                            ,brand_alias.top AS top
             ';
 
             if ($search) {

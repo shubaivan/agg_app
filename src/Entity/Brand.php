@@ -57,6 +57,12 @@ class Brand implements EntityValidatorException
      */
     private $products;
 
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
+     */
+    private $top = false;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();

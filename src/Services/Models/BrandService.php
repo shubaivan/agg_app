@@ -86,10 +86,13 @@ class BrandService
     public function getBrandsByFilter(ParamFetcher $paramFetcher, $count = false)
     {
         $parameterBag = new ParameterBag($paramFetcher->all());
+        $parameterBag->set('page', 1);
+
         $parameterBag->set('strict', true);
         $countStrict = $this->getBrandRepository()
             ->fullTextSearchByParameterBag($parameterBag, true);
         if ($countStrict > 0) {
+            $parameterBag->set('count', $countStrict);
             $strictCollection = $this->getBrandRepository()
                 ->fullTextSearchByParameterBag($parameterBag);
 
@@ -98,6 +101,7 @@ class BrandService
         $parameterBag->remove('strict');
         $count = $this->getBrandRepository()
             ->fullTextSearchByParameterBag($parameterBag, true);
+        $parameterBag->set('count', $count);
         $collection = $this->getBrandRepository()
             ->fullTextSearchByParameterBag($parameterBag);
 
