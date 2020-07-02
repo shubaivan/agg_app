@@ -300,6 +300,81 @@ class ProductController extends AbstractRestController
     }
 
     /**
+     * get related Products data by id.
+     *
+     * @Rest\Get("/api/related/products/{id}", requirements={"id"="\d+"})
+     *
+     * @SWG\Tag(name="Products")
+     *
+     * @Rest\QueryParam(name="count", requirements="\d+", default="4", description="Count entity at one page")
+     * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="Number of page to be shown")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json object Product with relation items",
+     *     @SWG\Schema(
+     *         type="object",
+     *         properties={
+     *             @SWG\Property(property="product",
+     *                  @Model(type=Product::class, groups={Product::SERIALIZED_GROUP_LIST})),
+     *             @SWG\Property(
+     *                  property="relatedItems",
+     *                  type="array",
+     *                  description="related products by price, band name and categories names",
+     *                  @SWG\Items(
+     *                        type="object",
+     *                      @SWG\Property(property="id", type="integer"),
+     *                      @SWG\Property(property="sku", type="string"),
+     *                      @SWG\Property(property="name", type="string"),
+     *                      @SWG\Property(property="description", type="string"),
+     *                      @SWG\Property(property="category", type="string"),
+     *                      @SWG\Property(property="price", type="string"),
+     *                      @SWG\Property(property="shipping", type="string"),
+     *                      @SWG\Property(property="currency", type="string"),
+     *                      @SWG\Property(property="instock", type="string"),
+     *                      @SWG\Property(property="productUrl", type="string"),
+     *                      @SWG\Property(property="imageUrl", type="string"),
+     *                      @SWG\Property(property="trackingUrl", type="string"),
+     *                      @SWG\Property(property="brand", type="string"),
+     *                      @SWG\Property(property="originalPrice", type="string"),
+     *                      @SWG\Property(property="ean", type="string"),
+     *                      @SWG\Property(property="manufacturerArticleNumber", type="string"),
+     *                      @SWG\Property(property="extras", type="string"),
+     *                      @SWG\Property(property="createdAt", type="string"),
+     *                      @SWG\Property(property="rank", type="string"),
+     *                      @SWG\Property(property="brandRelationId", type="integer"),
+     *                      @SWG\Property(property="categoryIds", type="string")
+     *                  )
+     *             )
+     *         }
+     *     )
+     * )
+     *
+     * @param Product $product
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws DBALException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws ValidatorException
+     * @throws \Exception
+     */
+    public function getRelatedProductByIdAction(
+        Product $product, ParamFetcher $paramFetcher
+    )
+    {
+        $relatedProductByIdCollection = $this->getProductService()
+            ->getRelatedProductById($product, $paramFetcher);
+
+        $view = $this->createSuccessResponse(
+            $relatedProductByIdCollection, [Product::SERIALIZED_GROUP_LIST]
+        );
+        $view->getResponse()->setExpires($this->getHelpers()->getExpiresHttpCache());
+
+        return $view;
+    }
+
+    /**
      * get Products by ids.
      *
      * @Rest\Get("/api/products/by/groups_identity")

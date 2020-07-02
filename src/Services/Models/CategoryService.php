@@ -14,6 +14,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Services\Helpers;
 use App\Services\ObjectsHandler;
+use App\Util\RedisHelper;
 use Doctrine\DBAL\Cache\CacheException;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -44,22 +45,31 @@ class CategoryService extends AbstractModel
     private $helper;
 
     /**
+     * @var RedisHelper
+     */
+    private $redisHelper;
+
+    /**
      * CategoryService constructor.
      * @param CategoryRepository $categoryRepository
      * @param ObjectsHandler $objecHandler
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
      * @param Helpers $helper
+     * @param RedisHelper $redisHelper
      */
     public function __construct(
         CategoryRepository $categoryRepository,
         ObjectsHandler $objecHandler,
         TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
-        Helpers $helper)
+        Helpers $helper,
+        RedisHelper $redisHelper
+    )
     {
         $this->categoryRepository = $categoryRepository;
         $this->objecHandler = $objecHandler;
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
         $this->helper = $helper;
+        $this->redisHelper = $redisHelper;
     }
 
 
@@ -270,6 +280,7 @@ class CategoryService extends AbstractModel
         if (isset($productData['match']) && count($productData['match'])) {
             $resultSpaceWord = array_shift($productData['match']);
             if (is_array($resultSpaceWord) && count($resultSpaceWord)) {
+                $this->redisHelper->incr('pregWordsFromDictionary');
                 $arrayMapSpaceWord = array_map(function ($v) {
                     return  str_replace(' ', '', $v);
                 }, $resultSpaceWord);

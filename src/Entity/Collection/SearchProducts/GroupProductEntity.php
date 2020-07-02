@@ -433,7 +433,11 @@ class GroupProductEntity extends CommonProduct
                 $this->presentCurrentProduct = $this->transformIdToProductModel($currentId);
             }
             if (count($this->ids) > 0) {
-                $this->presentAdjacentProducts = $this->transformIdsToProductModel($this->ids);
+                $ids = $this->ids;
+                if (($key = array_search($currentId, $ids)) !== false) {
+                    unset($ids[$key]);
+                }
+                $this->presentAdjacentProducts = $this->transformIdsToProductModel($ids);
             }
         }
     }

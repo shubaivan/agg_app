@@ -157,6 +157,38 @@ class ProductService extends AbstractModel
         return $handleObject;
     }
 
+    /**
+     * @param Product $product
+     * @param ParamFetcher $paramFetcher
+     * @return SearchProductCollection
+     * @throws CacheException
+     * @throws ValidatorException
+     */
+    public function getRelatedProductById(Product $product, ParamFetcher $paramFetcher)
+    {
+        $parameterBag = new ParameterBag($paramFetcher->all());
+        $searchDataForRelated = $product->getSearchDataForRelatedProductItems();
+        $search = '';
+        $limitation = 5;
+        while (!strlen($search)) {
+            $search = $this->prepareDataForGINSearch($searchDataForRelated, $limitation);
+            --$limitation;
+        }
+        $parameterBag->set('strict', true);
+        $parameterBag->set(self::PRODUCT_PRICE, $product->getPrice());
+        $parameterBag->set(self::EXCLUDE_GROUP_IDENTITY, $product->getGroupIdentity());
+        $parameterBag->set('search', $search ?? '');
+
+        if ($product->getCategoryRelation()->count()) {
+            $collection = $product->getCategoryRelation()->map(function (Category $category) {
+                return $category->getId();
+            });
+            $parameterBag
+                ->set(ProductRepository::CATEGORY_IDS, $collection->toArray());
+        }
+
+        return $this->getRelatedProductCollection($parameterBag);
+    }
 
     /**
      * @param Product $product
@@ -168,33 +200,9 @@ class ProductService extends AbstractModel
      */
     public function getProductById(Product $product)
     {
-        $searchDataForRelated = $product->getSearchDataForRelatedProductItems();
-        $search = '';
-        $limitation = 5;
-        while (!strlen($search)) {
-            $search = $this->prepareDataForGINSearch($searchDataForRelated, $limitation);
-            --$limitation;
-        }
-
-        $parameterBag = new ParameterBag([
-            'page' => 1,
-            'count' => 4,
-            'strict' => true,
-            self::PRODUCT_PRICE => $product->getPrice(),
-            self::EXCLUDE_GROUP_IDENTITY => $product->getGroupIdentity(),
-            'search' => $search ?? ''
-        ]);
-
-        if ($product->getCategoryRelation()->count()) {
-            $collection = $product->getCategoryRelation()->map(function (Category $category) {
-                return $category->getId();
-            });
-            $parameterBag
-                ->set(ProductRepository::CATEGORY_IDS, $collection->toArray());
-        }
         $this->recordIpToProduct($product);
 
-        return $this->getProductCollection($product, $parameterBag);
+        return $this->getProductCollection($product);
     }
 
     /**
@@ -419,13 +427,32 @@ class ProductService extends AbstractModel
     }
 
     /**
+     * @param ParameterBag $parameterBag
+     * @return SearchProductCollection
+     * @throws CacheException
+     * @throws ValidatorException
+     */
+    private function getRelatedProductCollection(
+        ParameterBag $parameterBag
+    )
+    {
+        $collection = $this->getProductRepository()
+            ->fullTextSearchByParameterBag($parameterBag);
+
+        $count = $this->getProductRepository()
+            ->fullTextSearchByParameterBag($parameterBag, true);
+
+        return $this->getSearchProductCollection($count, $collection);
+    }
+
+    /**
      * @param Product $product
      * @param ParameterBag $parameterBag
      * @return ProductByIdCollection
      * @throws DBALException
      * @throws ValidatorException
      */
-    private function getProductCollection(Product $product, ParameterBag $parameterBag)
+    private function getProductCollection(Product $product)
     {
         $bagProduct = new ParameterBag([
             self::GROUP_IDENTITY => $product->getGroupIdentity(),
@@ -436,23 +463,18 @@ class ProductService extends AbstractModel
         if (count($collection)) {
             $collection[0]['productById'] = $product->getId();
         }
-        $currentProductCollection = $this->getSearchProductCollection(1, $collection);
+        $currentProductCollection = $this->getSearchProductCollection(
+            1, $collection
+        );
 
-        $collection = $this->getProductRepository()
-            ->fullTextSearchByParameterBag($parameterBag);
-
-        $relatedItemProductCollection = $this->getSearchProductCollection(
-            $parameterBag->get('count'), $collection);
         /** @var GroupProductEntity $currentProductCollectionModel */
         $currentProductCollectionModel = $currentProductCollection->getCollection()->first();
-        $alsoAvailableToArrayMN = $currentProductCollectionModel->getStoreManufacturerArticleNumber();
-
-        $prepareAvailableToModel = $this->prepareAvailableToModel($alsoAvailableToArrayMN);
 
         $productByIdCollection = new ProductByIdCollection(
             $currentProductCollection,
-            $relatedItemProductCollection,
-            $prepareAvailableToModel
+            $this->prepareAvailableToModel(
+                $currentProductCollectionModel->getStoreManufacturerArticleNumber()
+            )
         );
 
         return $productByIdCollection;
