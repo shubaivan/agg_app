@@ -336,7 +336,8 @@ class ProductRepository extends ServiceEntityRepository
                 ,hstore(array_agg(p.id::text), array_agg(p.shop)) as "storeShops"
                 ,p.manufacturer_article_number as "manufacturerArticleNumber"
                 ,hstore(array_agg(p.id::text), array_agg(p.updated_at::text)) as "storeUpdatedAt"
-                ,hstore(array_agg(p.id::text), array_agg(p.price::text)) as "storePrice"        
+                ,hstore(array_agg(p.id::text), array_agg(p.price::text)) as "storePrice"
+                ,hstore(array_agg(p.id::text), array_agg(p.currency::text)) as "storeCurrency"        
             FROM products AS p';
 
         $query .= '

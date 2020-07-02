@@ -3,8 +3,9 @@
 namespace App\Services\Models;
 
 use App\Entity\Category;
-use App\Entity\Collection\AvailableTo;
+use App\Entity\Collection\AvailableToDTO;
 use App\Entity\Collection\AvailableToCollection;
+use App\Entity\Collection\AvailableToModel;
 use App\Entity\Collection\ProductByIdCollection;
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
@@ -22,6 +23,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserIpProductRepository;
 use App\Services\ObjectsHandler;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Cache\CacheException;
 use Doctrine\DBAL\DBALException;
@@ -493,13 +495,35 @@ class ProductService extends AbstractModel
         $shopId = $product->getShopRelation() ? $product->getShopRelation()->getId() : null;
         $availableTo = $this->getProductRepository()
             ->getAvailableTo($alsoAvailableToArrayMN, $shopId);
-
-        return $this->getObjectHandler()
+        /** @var AvailableToCollection $availableToCollection */
+        $availableToCollection = $this->getObjectHandler()
             ->handleObject(
                 ['collection' => $availableTo],
                 AvailableToCollection::class,
-                [AvailableTo::GROUP_CREATE]
+                [AvailableToDTO::GROUP_CREATE]
             );
+
+        if ($availableToCollection->getCollection()->count()) {
+            foreach ($availableToCollection->getCollection() as $dto) {
+                if ($dto->getPresentAvailableToModel()) {
+                    $arrayCollection = new ArrayCollection();
+                    foreach ($dto->getPresentAvailableToModel() as $dtoData) {
+                        /** @var AvailableToModel $availableToModel */
+                        $availableToModel = $this->getObjectHandler()
+                            ->handleObject(
+                                $dtoData,
+                                AvailableToModel::class,
+                                [AvailableToModel::GROUP_CREATE]
+                            );
+                        $arrayCollection->add($availableToModel);
+                    }
+
+                    $dto->setAvailableToModel($arrayCollection);
+                }
+            }
+        }
+
+        return $availableToCollection;
     }
 
     /**
