@@ -306,10 +306,11 @@ class ProductRepository extends ServiceEntityRepository
 
     /**
      * @param array $mn
+     * @param int|null $shopId
      * @return array|mixed[]
      * @throws \Doctrine\DBAL\Cache\CacheException
      */
-    public function getAvailableTo(array $mn)
+    public function getAvailableTo(array $mn, int $shopId = null)
     {
         if (!count($mn))
         {
@@ -317,13 +318,13 @@ class ProductRepository extends ServiceEntityRepository
         }
         $connection = $this->getEntityManager()->getConnection();
 
-        $preparedManufacturerArticleNumber = array_combine(
+        $preparedParams = array_combine(
             array_map(function ($key) {
                 return ':var_manufacturer_article_number' . $key;
             }, array_keys($mn)),
             array_values($mn)
         );
-        $bindKeysMN = implode(',', array_keys($preparedManufacturerArticleNumber));
+        $bindKeysMN = implode(',', array_keys($preparedParams));
         $conditionMN = "                           
             p.manufacturer_article_number IN ($bindKeysMN)
         ";
@@ -337,13 +338,22 @@ class ProductRepository extends ServiceEntityRepository
             FROM products AS p';
 
         $query .= '
-            WHERE '.$conditionMN.'        
+            WHERE '.$conditionMN;
+
+        if ($shopId) {
+            $query .= '            
+                AND p.shop_relation_id != :shop_id
+            ';
+            $preparedParams = array_merge([':shop_id' => $shopId], $preparedParams);
+        }
+
+        $query .= '            
             GROUP BY p.manufacturer_article_number
         ';
 
         $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
             $query,
-            $preparedManufacturerArticleNumber,
+            $preparedParams,
             [],
             ['available_to'],
             0,
