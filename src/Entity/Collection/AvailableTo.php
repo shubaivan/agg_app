@@ -24,6 +24,22 @@ class AvailableTo extends CommonProduct
      * @var array
      * @Annotation\Type("string")
      * @Annotation\Groups({AvailableTo::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStorePricesAccessor")
+     */
+    private $storePrice;
+
+    /**
+     * @var array
+     * @Annotation\Type("string")
+     * @Annotation\Groups({AvailableTo::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreUpdatedAtAccessor")
+     */
+    private $storeUpdatedAt;
+
+    /**
+     * @var array
+     * @Annotation\Type("string")
+     * @Annotation\Groups({AvailableTo::GROUP_CREATE})
      * @Annotation\Accessor(setter="setStoreShopsAccessor")
      */
     private $storeShops;
@@ -41,6 +57,22 @@ class AvailableTo extends CommonProduct
      * @Annotation\Groups({AvailableTo::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      */
     private $manufacturerArticleNumber;
+
+    /**
+     * @param string $value
+     */
+    public function setStoreUpdatedAtAccessor(string $value)
+    {
+        $this->storeUpdatedAt = $this->storePropertyAccessor($value);
+    }
+
+    /**
+     * @param string $value
+     */
+    public function setStorePricesAccessor(string $value)
+    {
+        $this->storePrice = $this->storePropertyAccessor($value);
+    }
 
     /**
      * @param string $value
@@ -80,5 +112,29 @@ class AvailableTo extends CommonProduct
     public function getStoreShopsValue()
     {
         return $this->storeShops;
+    }
+
+    /**
+     * @return array
+     * @Annotation\VirtualProperty()
+     * @Annotation\SerializedName("storePrices")
+     * @Annotation\Type("array")
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
+     */
+    public function getStorePricesValue()
+    {
+        return $this->storePrice;
+    }
+
+    /**
+     * @return array
+     * @Annotation\VirtualProperty()
+     * @Annotation\SerializedName("storeUpdatedAt")
+     * @Annotation\Type("array")
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
+     */
+    public function getStoreUpdatedAtValue()
+    {
+        return $this->storeUpdatedAt;
     }
 }
