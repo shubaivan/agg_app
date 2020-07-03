@@ -25,10 +25,16 @@ class BabyLandService implements IdentityGroup
         if ($m > 0) {
             $extras = array_shift($m);
             if (isset($extras[0])) {
-                $product->setSeparateExtra('COLOR', $extras[0]);
+                $color = $extras[0];
+                $color = str_replace('(', '', $color);
+                $color = str_replace(')', '', $color);
+                $product->setSeparateExtra('COLOR', $color);
             }
             if (isset($extras[1])) {
-                $product->setSeparateExtra('SIZE', $extras[1]);
+                $size = $extras[1];
+                $size = str_replace('(', '', $size);
+                $size = str_replace(')', '', $size);
+                $product->setSeparateExtra('SIZE', $size);
             }
         }
     }
