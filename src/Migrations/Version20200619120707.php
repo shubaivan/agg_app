@@ -45,11 +45,11 @@ final class Version20200619120707 extends AbstractMigration
                                     
                     END IF;
                             
-                            UPDATE products AS p
+                            UPDATE products
                             SET 
-                            p.created_at = delta_time_key
-                            WHERE p.group_identity = delta_group_identity
-                            AND p.created_at != delta_time_key;    
+                            created_at = delta_time_key
+                            WHERE group_identity = delta_group_identity
+                            AND created_at != delta_time_key;    
             
                     RETURN NULL;
             
