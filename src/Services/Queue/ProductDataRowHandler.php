@@ -149,6 +149,7 @@ class ProductDataRowHandler
 
             if ($dataRow->getLastProduct()) {
                 $this->getCacheManager()->clearAllPoolsCache();
+                $this->getProductService()->autoVACUUM();
                 $this->getRedisHelper()
                     ->hMSet(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $dataRow->getRedisUniqKey(),
                         [$filePath => (new \DateTime())->getTimestamp()]

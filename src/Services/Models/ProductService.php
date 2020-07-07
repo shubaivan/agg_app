@@ -97,6 +97,11 @@ class ProductService extends AbstractModel
         $this->managerShopsService = $managerShopsService;
     }
 
+    public function autoVACUUM()
+    {
+        $this->getProductRepository()->autoVACUUM();
+    }
+
     /**
      * @param $uniqIdentificationQuery
      * @return array

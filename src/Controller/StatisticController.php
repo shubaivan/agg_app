@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Cache\CacheManager;
+use App\Entity\Product;
 use App\Entity\Shop;
 use App\Services\HandleDownloadFileData;
 use App\Services\ObjectsHandler;
@@ -50,11 +51,14 @@ class StatisticController extends AbstractController
      */
     public function clearAllPoolsCacheAction()
     {
+        $this->getDoctrine()->getRepository(Product::class)
+            ->autoVACUUM();
+
         $this->getCacheManager()->clearAllPoolsCache();
         $articleContent = <<<EOF
 **successful** all keay was removed.
 EOF;
-        return new Response('<html><body>' . $articleContent . '</body></html>');
+        return new Response('<html><body>' . $articleContent .'</body></html>');
     }
 
     /**

@@ -412,6 +412,24 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function autoVACUUM()
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $query = 'VACUUM (VERBOSE) products;';
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeQuery(
+            $query
+        );
+
+        return $statement->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
      * @param ParameterBag $parameterBag
      * @param string $query
      * @param bool $count
