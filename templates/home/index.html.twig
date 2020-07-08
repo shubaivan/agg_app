@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello IndexController!{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    <div class="container">
+        <div class="col-sm-8 col-md-7 py-4">
+            <h4 class="text-white">You are</h4>
+            <p class="text-muted">
+                {% if is_granted('ROLE_USER') %}
+                    Hello, {{ app.user.email }}
+                {% elseif is_granted('ROLE_ADMIN') %}
+                    Hello, admin
+                {% else %}
+                    Hello, anonymous
+                {% endif %}
+            </p>
+        </div>
+        {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+            You are logged
+        {% else %}
+            <a href="{{ path('app_login') }}" class="float-lg-left">
+                Login <i class="fas fa-door-open"></i>
+            </a>
+        {% endif %}
+
+        <a href="{{ path('app_register') }}" class="float-lg-right">
+            Registration <i class="fas fa-registered"></i>
+        </a>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {{ encore_entry_script_tags('app') }}
+{% endblock %}

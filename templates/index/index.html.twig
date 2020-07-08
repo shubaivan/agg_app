@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile!{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    <main role="main" class="my-4">
+
+        <div class="container">
+
+            <div class="row">
+                <div class="col-md-6" id="shipping-address-form-block">
+
+                </div>
+                <div class="col-md-auto my-4" id="shipping-address-list">
+
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('build/index/js/index.min.js') }}"></script>
+{% endblock %}

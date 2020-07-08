@@ -97,6 +97,9 @@ class ProductService extends AbstractModel
         $this->managerShopsService = $managerShopsService;
     }
 
+    /**
+     * @throws DBALException
+     */
     public function autoVACUUM()
     {
         $this->getProductRepository()->autoVACUUM();
