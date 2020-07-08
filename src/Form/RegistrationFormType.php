@@ -4,8 +4,11 @@ namespace App\Form;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -16,14 +19,20 @@ class RegistrationFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('email')
-            ->add('firstName')
-            ->add('lastName')
+            ->add('email', TextType::class, [
+                'attr' => ['class' => 'form-control']
+            ])
+            ->add('firstName', TextType::class, [
+                'attr' => ['class' => 'form-control']
+            ])
+            ->add('lastName', TextType::class, [
+                'attr' => ['class' => 'form-control']
+            ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'mapped' => false,
-                'first_options' => array('label' => 'Password'),
-                'second_options' => array('label' => 'Repeat Password'),
+                'first_options' => array('label' => 'Password', 'attr' => ['class' => 'form-control']),
+                'second_options' => array('label' => 'Repeat Password', 'attr' => ['class' => 'form-control']),
                 'constraints' => [
                     new NotBlank([
                         'message' => 'Please enter a password',
@@ -36,6 +45,10 @@ class RegistrationFormType extends AbstractType
                     ]),
                 ],
             ]);
+
+        $builder->add('save', SubmitType::class, [
+            'attr' => ['class' => 'btn btn-primary btn-sm float-right'],
+        ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

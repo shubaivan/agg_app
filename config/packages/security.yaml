@@ -13,7 +13,7 @@ security:
         in_memory:
             memory:
                 users:
-                    admin@admin: { password: "111", roles: [ 'ROLE_ADMIN' ] }
+                    admin@admin: { password: "111", roles: [ 'ROLE_SUPER_ADMIN' ] }
 
         app_user_provider:
             entity:
@@ -35,5 +35,5 @@ security:
                     - App\Security\AppMyAuthAuthenticator
 
     access_control:
-        - { path: ^/index, roles: [ROLE_USER, ROLE_ADMIN] }
-        - { path: ^/doc, roles: [ROLE_USER, ROLE_ADMIN] }
+        - { path: ^/index, roles: [ROLE_USER, ROLE_ADMIN, ROLE_SUPER_ADMIN] }
+        - { path: ^/doc, roles: [ROLE_USER, ROLE_ADMIN, ROLE_SUPER_ADMIN] }

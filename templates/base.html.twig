@@ -17,9 +17,9 @@
                     <div class="col-sm-8 col-md-7 py-4">
                         <h4 class="text-white">You are</h4>
                         <p class="text-muted">
-                            {% if is_granted('ROLE_USER') %}
+                            {% if is_granted(constant('App\\Entity\\User::ROLE_USER')) %}
                                 Hello, {{ app.user.email }}
-                            {% elseif is_granted('ROLE_ADMIN') %}
+                            {% elseif is_granted(constant('App\\Entity\\User::ROLE_ADMIN')) %}
                                 Hello, admin
                             {% else %}
                                 Hello, anonymous
@@ -68,6 +68,27 @@
             </div>
         </div>
     </header>
+
+    {# read and display all flash messages #}
+    {#    {{ dump(app.flashes) }}#}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            {% if label == 'warning' %}
+                {% set class = 'alert-warning' %}
+            {% elseif label == 'notice' %}
+                {% set class = 'alert-success' %}
+            {% elseif label == 'error' %}
+                {% set class = 'alert-danger' %}
+            {% else %}
+                {% set class = 'alert-success' %}
+            {% endif %}
+
+            <div class="alert {{ class }}" role="alert">
+                <h4 class="alert-heading">{{label|capitalize}}</h4>
+                <p class="mb-0"><i class="fa fa-exclamation-circle"></i>{{message}}</p>
+            </div>
+        {% endfor %}
+    {% endfor %}
 
     <div class="alert alert-danger" role="alert" style="display: none">
         <h4 class="alert-heading">Error</h4>
