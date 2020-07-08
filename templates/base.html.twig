@@ -43,9 +43,11 @@
         </div>
         <div class="navbar navbar-dark bg-dark shadow-sm">
             <div class="container d-flex justify-content-between">
-                <a href="{{ path('index') }}" class="navbar-brand d-flex align-items-center">
-                    <i class="fas fa-home"></i>
-                </a>
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED')%}
+                    <a href="{{ path('index') }}" class="navbar-brand d-flex align-items-center">
+                        <i class="fas fa-home"></i>
+                    </a>
+                {% endif %}#}
 
                 {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
                     You are logged
