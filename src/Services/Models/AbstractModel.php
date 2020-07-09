@@ -9,7 +9,7 @@ abstract class AbstractModel
      * @param int $limitations
      * @return string
      */
-    public function prepareDataForGINSearch(string $matchData, int $limitations = 4)
+    public function prepareDataForGINSearch(string $matchData, int $limitations = 3)
     {
         $resultData = '';
         if (preg_match_all('/[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™]+/',$matchData,$matches)) {
