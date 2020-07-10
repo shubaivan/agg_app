@@ -244,11 +244,16 @@ class CategoryRepository extends ServiceEntityRepository
                 return [];
             }
             $checkMainCategoriesResult = $this->isMatchPlainCategoriesString(
-                $product->getCategory(), $mainSearch
+                $product->getCategory(), $mainSearch, true
             );
 
             if (isset($checkMainCategoriesResult['match']) && !$checkMainCategoriesResult['match']) {
                 return [];
+            }
+            if (isset($checkMainCategoriesResult[CategoryService::MAIN_SEARCH])) {
+                $mainSearch =
+                    $this->getHelpers()
+                        ->handleSearchValue($checkMainCategoriesResult[CategoryService::MAIN_SEARCH], false);
             }
         }
 
@@ -710,6 +715,25 @@ class CategoryRepository extends ServiceEntityRepository
         $isMatchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
         if (count($isMatchResult)) {
             $result = array_shift($isMatchResult);
+
+
+            if (preg_match_all("/<b>.*?<\/b>/", $result['ts_headline_result'], $m)) {
+                $resultMainCategoryWords = [];
+                $regTsHeadLightResult = array_shift($m);
+                $explodeMainCategoriesData = explode(':*|', $mainCategoriesData);
+                foreach ($explodeMainCategoriesData as $mainCategoryWord) {
+                    foreach ($regTsHeadLightResult as $matchingWord) {
+                        if (mb_stripos($matchingWord, $mainCategoryWord)) {
+                            $resultMainCategoryWords[] = str_replace(':*', '', $mainCategoryWord);
+                            break;
+                        }
+                    }
+                }
+                if (count($resultMainCategoryWords)) {
+                    $result[CategoryService::MAIN_SEARCH] = implode(', ', $resultMainCategoryWords);
+                }
+            }
+
             return $result;
         } else {
             return false;
