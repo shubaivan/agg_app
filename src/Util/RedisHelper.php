@@ -7,7 +7,7 @@ use Redis;
 class RedisHelper
 {
     const MIN_TTL = 1;
-    const MAX_TTL = 3600;
+    const MAX_TTL = 31536000;
 
     /** @var Redis $redis */
     private $redis;
