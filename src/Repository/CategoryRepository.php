@@ -723,8 +723,9 @@ class CategoryRepository extends ServiceEntityRepository
                 $explodeMainCategoriesData = explode(':*|', $mainCategoriesData);
                 foreach ($explodeMainCategoriesData as $mainCategoryWord) {
                     foreach ($regTsHeadLightResult as $matchingWord) {
-                        if (mb_stripos($matchingWord, $mainCategoryWord)) {
-                            $resultMainCategoryWords[] = str_replace(':*', '', $mainCategoryWord);
+                        $mainCategoryWord = str_replace(':*', '', $mainCategoryWord);
+                        if (mb_stripos($matchingWord, $mainCategoryWord) !== false) {
+                            $resultMainCategoryWords[] = $mainCategoryWord;
                             break;
                         }
                     }

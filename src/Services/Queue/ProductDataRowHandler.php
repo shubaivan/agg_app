@@ -6,6 +6,7 @@ use App\Cache\CacheManager;
 use App\Entity\Shop;
 use App\Exception\ValidatorException;
 use App\QueueModel\ResourceDataRow;
+use App\QueueModel\VacuumJob;
 use App\Services\HandleDownloadFileData;
 use App\Services\Models\BrandService;
 use App\Services\Models\CategoryService;
@@ -25,7 +26,7 @@ class ProductDataRowHandler
     /**
      * @var TraceableMessageBus
      */
-    private $bus;
+    private $vacuumBus;
 
     /**
      * @var Logger
@@ -74,7 +75,7 @@ class ProductDataRowHandler
 
     /**
      * AdtractionDataRowHandler constructor.
-     * @param MessageBusInterface $bus
+     * @param MessageBusInterface $vacuumBus
      * @param Logger $adtractionCsvRowHandlerLogger
      * @param ProductService $productService
      * @param BrandService $brandService
@@ -84,7 +85,7 @@ class ProductDataRowHandler
      * @param RedisHelper $redisHelper
      */
     public function __construct(
-        MessageBusInterface $bus,
+        MessageBusInterface $vacuumBus,
         LoggerInterface $adtractionCsvRowHandlerLogger,
         ProductService $productService,
         BrandService $brandService,
@@ -97,7 +98,7 @@ class ProductDataRowHandler
     )
     {
         $this->cacheManager = $cacheManager;
-        $this->bus = $bus;
+        $this->vacuumBus = $vacuumBus;
         $this->logger = $adtractionCsvRowHandlerLogger;
         $this->productService = $productService;
         $this->brandService = $brandService;
@@ -149,7 +150,8 @@ class ProductDataRowHandler
 
             if ($dataRow->getLastProduct()) {
                 $this->getCacheManager()->clearAllPoolsCache();
-                $this->getProductService()->autoVACUUM();
+//                $this->getProductService()->autoVACUUM();
+                $this->vacuumBus->dispatch(new VacuumJob(true));
                 $this->getRedisHelper()
                     ->hMSet(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $dataRow->getRedisUniqKey(),
                         [$filePath => (new \DateTime())->getTimestamp()]
@@ -250,14 +252,6 @@ class ProductDataRowHandler
     protected function getRedisHelper(): RedisHelper
     {
         return $this->redisHelper;
-    }
-
-    /**
-     * @return TraceableMessageBus
-     */
-    public function getBus(): TraceableMessageBus
-    {
-        return $this->bus;
     }
 
     /**
