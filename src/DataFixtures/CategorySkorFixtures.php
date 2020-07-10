@@ -2,16 +2,8 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Category;
-use App\Entity\CategoryConfigurations;
-use App\Entity\CategoryRelations;
-use App\Kernel;
-use App\Repository\CategoryRelationsRepository;
-use App\Repository\CategoryRepository;
-use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureInterface
 {

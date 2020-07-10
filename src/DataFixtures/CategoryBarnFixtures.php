@@ -122,15 +122,16 @@ class CategoryBarnFixtures extends AbstractFixtures
             ]
         ],
         [
-            'name' => 'Klänningar & kjolar',
+            'name' => 'Klänningar & Kjolar',
             'key_word' => '
-                    klänning, klänningar, kjol, kjolar, tunika, tunik,
-                    dress, dresses, skirt, skirts, tunic, tunics
+                    Klänning, Klänningar, Tunik, Tunikor, Tröjklänning, kjol, kjolar, tunika,
+                    dress, dresses, skirt, skirts, tunic, tunics, Sweater dress, Sweaterdress                     
                 ',
             'sub_key_word' => [
-                'Klänningar' => 'Klänning, Klänningar, Dress, Dresses',
-                'Kjolar' => 'Kjol, Kjolar, Skirt, Skirts',
-                'Tunikor' => 'Tunika, Tunikor, tunic, tunics',
+                'Klänningar' => 'Klänning, Klänningar, Dress, Dresses, Tyllklänningar, Tulle dresses, vardagsklänning, vardagsklänningar, Casual dresses, casualdress',
+                'Tunikor' => 'Tunik, Tunikor, Tunic, Tunics',
+                'Tröjklänningar' => 'Tröjklänning, Sweater dress, Sweaterdress',
+                'Kjolar' => 'kjol, kjolar, skirt, skirts, jeanskjol, denimskirt, jeans skirt, korta kjolar, miniskirt, mini skirt, short skirt, maxikjolar, maxikjol maxidresses, maxidress, midikjolar, midikjol, midiskirts, midiskirt, tyllkjol, tyllkjolar, tulle skirts, tulleskirt, veckade kjolar, veckad kjol, pleated skirts, pleated skirt'
             ]
         ],
         [
@@ -176,7 +177,7 @@ class CategoryBarnFixtures extends AbstractFixtures
             ]
         ],
         [
-            'name' => 'Underkläder',
+            'name' => 'Barn Underkläder',
             'key_word' => '
                     Kalsonger, trosor, strumpor, strumpbyxor, Benvärmare, Bloomers, Boxershorts, Long johns, Strumpbyxor, Strumpbyxa, Strumpor, Trosor, 
                     Trosa, Underbyxor, Underbyxa Underklädsset, Underlinnen, Underlinne, Trunks,
@@ -243,13 +244,11 @@ class CategoryBarnFixtures extends AbstractFixtures
             ]
         ],
         [
-            'name' => 'UV & Bad',
+            'name' => 'Barn UV & Bad',
             'key_word' => '
-                    UV-Dräkt, UV-byxor, UV-byxa, uvtröja, uv-tröja, uv-tröjor, uvtröjor, UV-set, Badbyxor, Badbyxa, Badshorts, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants, 
-                    Swim Diapers, Blöjbadbyxor, Blöjbadbyxa, UV-Baddräckt, UV Badshorts, UV-Badshorts, Sunsuits, Sunsuit, Badtröja, Bad tröja, Badrockar, Badrock,
-                    UV Apparel, UV Pants, UV Pants, Sweatshirt, UV Sweater, UV Sweatshirts, Sweatshirts, UV Sets, Swimsuit, Swimwear, Swimwear, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants,
-                    Swim Diapers, Diaper Tights, Diaper Tights, UV Bathing Suits, UV Bathing Shorts, UV Bathing Shorts, Sunsuits, Sunsuit, Sweater, Bathing Sweater, Bathing Suits, Bathrobe
-                ',
+                Baddräkt, Baddräkter, UV-Dräkt, UV-byxor, UV-byxa, uvtröja, uv-tröja, uv-tröjor, uvtröjor, UV-set, Badbyxor, Badbyxa, Badshorts, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants, Swim Diapers, Blöjbadbyxor, Blöjbadbyxa, UV-Baddräkt, UV Badshorts, UV-Badshorts, Sunsuits, Sunsuit, Badtröja, Bad tröja, Badrockar, Badrock, Morgonrock,
+                UV Apparel, UV Pants, UV Pants, Sweatshirt, UV Sweater, UV Sweatshirts, Sweatshirts, UV Sets, Swimsuit, Swimwear, Swimwear, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants, Swim Diapers, Diaper Tights, Diaper Tights, UV Bathing Suits, UV Bathing Shorts, UV Bathing Shorts, Sunsuits, Sunsuit, Sweater, Bathing Sweater, Bathing Suits, Bathrobe
+            ',
             'sub_key_word' => [
                 'Badshorts' => 'Badbyxor, Badbyxa, Badshorts, Swimpants, Swim Pants, UV Badshorts, UV-Badshorts',
                 'Baddräkt' => 'UV-Baddräkt, Sunsuits, Sunsuit, Baddräkt, Baddräkter, swimsuit, swimsuites, swim suit, swim suites',
@@ -274,7 +273,7 @@ class CategoryBarnFixtures extends AbstractFixtures
             ]
         ],
         [
-            'name' => 'Accessoarer',
+            'name' => 'Barn Accessoarer',
             'key_word' => '
                     Balaclavas, Baclava, Barnklockor, Barnklocka, Halsdukar, Halsduk, Handskar, Handske, Vantar, Vante, Hattar, Hatt, Kepsar, Keps, Mössor, Mössa, 
                     Paraplyer, Paraply, Plånböcker, Plånbok, Scarfs, Scarf, Drybibs, Drybib, Smycken, Smycke, Solglasögon, Bandanas, Bandana, Diadem, Nyckelsingslampa, Pannband, 
