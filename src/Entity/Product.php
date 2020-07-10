@@ -262,6 +262,11 @@ class Product implements EntityValidatorException
      */
     private $matchForCategories = false;
 
+    /**
+     * @var string
+     */
+    private $matchMainCategoryData;
+
     public function __construct()
     {
         $this->userIps = new ArrayCollection();
@@ -814,6 +819,24 @@ class Product implements EntityValidatorException
             $implode = implode(' - ', $arrayCategoryNames);
             $this->setCategory($implode);
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getMatchMainCategoryData(): string
+    {
+        return $this->matchMainCategoryData;
+    }
+
+    /**
+     * @param string $matchMainCategoryData
+     * @return Product
+     */
+    public function setMatchMainCategoryData(string $matchMainCategoryData): Product
+    {
+        $this->matchMainCategoryData = $matchMainCategoryData;
+        return $this;
     }
 
     /**

@@ -235,11 +235,15 @@ class CategoryRepository extends ServiceEntityRepository
     )
     {
         $connection = $this->getEntityManager()->getConnection();
-        $mainSearch =
-            $this->getHelpers()
-                ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), false);
+        if ($product->getMatchMainCategoryData()) {
+            $mainSearch = $product->getMatchMainCategoryData();
+        } else {
+            $mainSearch =
+                $this->getHelpers()
+                    ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), false);
+        }
 
-        if ($product && $product->getCategory()) {
+        if ($product && !$product->getMatchMainCategoryData()) {
             if (!$product->getCategory()) {
                 return [];
             }
@@ -254,6 +258,8 @@ class CategoryRepository extends ServiceEntityRepository
                 $mainSearch =
                     $this->getHelpers()
                         ->handleSearchValue($checkMainCategoriesResult[CategoryService::MAIN_SEARCH], false);
+
+                $product->setMatchMainCategoryData($mainSearch);
             }
         }
 
@@ -715,7 +721,6 @@ class CategoryRepository extends ServiceEntityRepository
         $isMatchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
         if (count($isMatchResult)) {
             $result = array_shift($isMatchResult);
-
 
             if (preg_match_all("/<b>.*?<\/b>/", $result['ts_headline_result'], $m)) {
                 $resultMainCategoryWords = [];
