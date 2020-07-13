@@ -87,6 +87,14 @@ class Category implements EntityValidatorException
      * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
      */
     private $customeCategory = false;
+
+
+    /**
+     * @var CategorySection
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\ManyToOne(targetEntity="CategorySection", inversedBy="categories", cascade={"persist"})
+     */
+    private $sectionRelation;
     
     public function __construct()
     {
@@ -231,6 +239,18 @@ class Category implements EntityValidatorException
         if ($categoryConfigurations->getCategoryId() !== $newCategoryId) {
             $categoryConfigurations->setCategoryId($newCategoryId);
         }
+
+        return $this;
+    }
+
+    public function getSectionRelation(): ?CategorySection
+    {
+        return $this->sectionRelation;
+    }
+
+    public function setSectionRelation(?CategorySection $sectionRelation): self
+    {
+        $this->sectionRelation = $sectionRelation;
 
         return $this;
     }

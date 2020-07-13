@@ -6,6 +6,7 @@ namespace App\DataFixtures;
 use App\Entity\Category;
 use App\Entity\CategoryConfigurations;
 use App\Entity\CategoryRelations;
+use App\Entity\CategorySection;
 use App\Kernel;
 use App\Repository\CategoryRelationsRepository;
 use App\Repository\CategoryRepository;
@@ -170,45 +171,79 @@ abstract class AbstractFixtures extends Fixture
      */
     protected function processConfiguration(array $configurations, Category $main): void
     {
-        foreach ($configurations as $configuration) {
-            $subMain = $this->createCategoryWithConf(
-                $configuration['name'], $configuration['key_word'], $configuration['negative_key_words'] ?? null
-            );
+        foreach ($configurations as $sectionName=>$section) {
+            foreach ($section as $configuration) {
+                $subMain = $this->createCategoryWithConf(
+                    $configuration['name'],
+                    $configuration['key_word'],
+                    $sectionName,
+                    $configuration['negative_key_words'] ?? null,
 
-            $this->createCategoryRelations($main, $subMain);
+                );
 
-            if (isset($configuration['sub_key_word'])
-                && is_array($configuration['sub_key_word'])
-                && count($configuration['sub_key_word']) > 0) {
+                $this->createCategoryRelations($main, $subMain);
 
-                $subKeyWords = $configuration['sub_key_word'];
+                if (isset($configuration['sub_key_word'])
+                    && is_array($configuration['sub_key_word'])
+                    && count($configuration['sub_key_word']) > 0) {
 
-                $subKeyWordsArray = array_unique($subKeyWords);
-                foreach ($subKeyWordsArray as $key => $words) {
-                    $words = preg_replace('/\s+/', '', $words);
+                    $subKeyWords = $configuration['sub_key_word'];
 
-                    $wordCategory = $this->createCategoryWithConf(
-                        $key, $words
-                    );
+                    $subKeyWordsArray = array_unique($subKeyWords);
+                    foreach ($subKeyWordsArray as $key => $words) {
+                        $words = preg_replace('/\s+/', '', $words);
 
-                    $this->createCategoryRelations($subMain, $wordCategory);
+                        $wordCategory = $this->createCategoryWithConf(
+                            $key, $words
+                        );
+
+                        $this->createCategoryRelations($subMain, $wordCategory);
+                    }
                 }
-            }
 
-            $this->getManager()->flush();
+                $this->getManager()->flush();
+            }
         }
+
+
 
         $this->setDataInFile($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths', PHP_EOL);
         $this->setDataInFile($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths', PHP_EOL);
     }
 
     /**
+     * @param string $sectionName
+     * @return CategorySection
+     */
+    private function createdCategorySection(string $sectionName)
+    {
+        $categorySection = $this->getManager()
+            ->getRepository(CategorySection::class)
+            ->findOneBy(['sectionName' => $sectionName]);
+
+        if(!$categorySection) {
+            $categorySection = new CategorySection();
+            $categorySection
+                ->setSectionName($sectionName);
+        }
+        $this->getManager()->persist($categorySection);
+
+        return $categorySection;
+    }
+
+    /**
      * @param string $categoryName
      * @param string $keyWords
      * @param string|null $negativeKeyWords
+     * @param string|null $sectionName
      * @return Category
      */
-    protected function createCategoryWithConf(string $categoryName, string $keyWords, ?string $negativeKeyWords = null): Category
+    protected function createCategoryWithConf(
+        string $categoryName,
+        string $keyWords,
+        ?string $sectionName = null,
+        ?string $negativeKeyWords = null
+    ): Category
     {
 //        $keyWords = preg_replace('/\s+/', '', $keyWords);
         $keyWords = preg_replace('/\n/', '', $keyWords);
@@ -249,6 +284,10 @@ abstract class AbstractFixtures extends Fixture
 
         $category
             ->setCustomeCategory(true);
+        if ($sectionName) {
+            $section = $this->createdCategorySection($sectionName);
+            $category->setSectionRelation($section);
+        }
 
         $this->getManager()->persist($category);
 

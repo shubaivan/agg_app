@@ -120,7 +120,10 @@ class CategoryService extends AbstractModel
         );
 
         $analysisProductByMainCategory = $this->analysisProductByMainCategory(
-            $product, $category->getCategoryConfigurations()->getKeyWords(), true
+            $product,
+            $category->getCategoryConfigurations()
+                ->getKeyWords(),
+            true
         );
 
         if (isset($isMatchPlainCategories['ts_headline_result'])) {
@@ -193,14 +196,14 @@ class CategoryService extends AbstractModel
         $mainCategoryWords = [];
         foreach ($mainSubCategoryIds as $main) {
             if (isset($main['category_name'])) {
-                $mainCategoryWords[] = $main['category_name'];
+                $mainCategoryWords['categories'][$main['category_name']] = $main['key_words'];
             }
         }
         if (!count($mainCategoryWords)) {
             return [];
         }
 
-        $mainCategoryWordsString = implode(',', $mainCategoryWords);
+        $mainCategoryWordsString = implode(',', $mainCategoryWords['categories']);
         $resultAnalysis = $this->analysisProductByMainCategory(
             $product, $mainCategoryWordsString
         );

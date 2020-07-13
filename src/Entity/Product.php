@@ -265,7 +265,7 @@ class Product implements EntityValidatorException
     /**
      * @var string
      */
-    private $matchMainCategoryData;
+    private $matchMainCategoryData = '';
 
     public function __construct()
     {

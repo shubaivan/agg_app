@@ -177,11 +177,12 @@ class CategoryRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
 
         $query  = '
-            SELECT id, category_name FROM category
+            SELECT c.id, c.category_name, conf.key_words FROM category AS c
+            INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
             WHERE 
-            EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = category.id)
+            EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
             AND
-            NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = category.id)
+            NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
         ';
         $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
             $query,
