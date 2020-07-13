@@ -48,6 +48,7 @@ class Category implements EntityValidatorException
      * @ORM\Column(type="string", length=255)
      * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST, Category::SERIALIZED_GROUP_RELATIONS_LIST})
      * @Assert\NotBlank(groups={Category::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Accessor(getter="getCategoryNameAccessor")
      */
     private $categoryName;
 
@@ -254,5 +255,10 @@ class Category implements EntityValidatorException
         $this->sectionRelation = $sectionRelation;
 
         return $this;
+    }
+
+    public function getCategoryNameAccessor()
+    {
+        return preg_replace('/sub/', '', $this->categoryName);
     }
 }
