@@ -81,7 +81,7 @@ class CategoryService extends AbstractModel
     public function getCustomCategories(ParamFetcher $paramFetcher)
     {
         $collection = $this->getCategoryRepository()->getCustomCategories($paramFetcher);
-        $count = 0;
+        $count = count($collection);
         return (new CategoriesCollection($collection, $count));
     }
 

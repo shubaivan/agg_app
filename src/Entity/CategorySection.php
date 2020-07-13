@@ -6,7 +6,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CategorySectionRepository")
@@ -23,6 +22,7 @@ class CategorySection
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
      */
     private $sectionName;
 

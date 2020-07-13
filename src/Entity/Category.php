@@ -93,6 +93,7 @@ class Category implements EntityValidatorException
      * @var CategorySection
      * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToOne(targetEntity="CategorySection", inversedBy="categories", cascade={"persist"})
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
      */
     private $sectionRelation;
     
