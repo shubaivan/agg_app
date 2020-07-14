@@ -34,8 +34,6 @@ framework:
                 binding_keys: [normal]
         andraction_parse_row:
           dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-          retry_strategy:
-            max_retries: 2
           serializer: App\Messenger\ExternalJsonMessageSerializer
           options:
             exchange:
@@ -48,8 +46,6 @@ framework:
 
         adrecord_parse_row:
           dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-          retry_strategy:
-            max_retries: 2
           serializer: App\Messenger\ExternalJsonMessageSerializer
           options:
             exchange:

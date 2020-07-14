@@ -271,25 +271,9 @@ class CategoryService extends AbstractModel
             return [];
         }
         $result = array_merge($result, $matchCategoryMain);
-        $productData = $this->helper->pregWordsFromDictionary(
+        $prepareDataForGINSearch = $this->prepareProductDataForMatching(
             $product->getName() . ', ' . $product->getDescription()
         );
-        $matchData = preg_replace('!\s+!', ',', $productData['result']);
-        $matchData = strip_tags($matchData);
-
-        $prepareDataForGINSearch = $this->prepareDataForGINSearch($matchData);
-        $prepareDataForGINSearch = $this->helper
-            ->handleSearchValue($prepareDataForGINSearch, true);
-        if (isset($productData['match']) && count($productData['match'])) {
-            $resultSpaceWord = array_shift($productData['match']);
-            if (is_array($resultSpaceWord) && count($resultSpaceWord)) {
-                $this->redisHelper->incr('pregWordsFromDictionary');
-                $arrayMapSpaceWord = array_map(function ($v) {
-                    return  str_replace(' ', '', $v);
-                }, $resultSpaceWord);
-                $prepareDataForGINSearch .= '|' . implode('|', $arrayMapSpaceWord);
-            }
-        }
         if ($prepareDataForGINSearch) {
             $resultData = $prepareDataForGINSearch;
             $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);
@@ -496,5 +480,33 @@ class CategoryService extends AbstractModel
     private function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
     {
         return $this->tagAwareQueryResultCacheProduct;
+    }
+
+    /**
+     * @param string $sentence
+     * @return string
+     */
+    public function prepareProductDataForMatching(string $sentence): string
+    {
+        $productData = $this->helper->pregWordsFromDictionary(
+            $sentence
+        );
+        $matchData = preg_replace('!\s+!', ',', $productData['result']);
+        $matchData = strip_tags($matchData);
+
+        $prepareDataForGINSearch = $this->prepareDataForGINSearch($matchData);
+        $prepareDataForGINSearch = $this->helper
+            ->handleSearchValue($prepareDataForGINSearch, true);
+        if (isset($productData['match']) && count($productData['match'])) {
+            $resultSpaceWord = array_shift($productData['match']);
+            if (is_array($resultSpaceWord) && count($resultSpaceWord)) {
+                $this->redisHelper->incr('pregWordsFromDictionary');
+                $arrayMapSpaceWord = array_map(function ($v) {
+                    return str_replace(' ', '', $v);
+                }, $resultSpaceWord);
+                $prepareDataForGINSearch .= '|' . implode('|', $arrayMapSpaceWord);
+            }
+        }
+        return $prepareDataForGINSearch;
     }
 }

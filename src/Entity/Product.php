@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use App\Validation\Constraints\CustomUrl;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
@@ -155,7 +156,7 @@ class Product implements EntityValidatorException
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Url(
+     * @CustomUrl(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
      */
@@ -164,7 +165,7 @@ class Product implements EntityValidatorException
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Url(
+     * @CustomUrl(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
      */
@@ -173,7 +174,7 @@ class Product implements EntityValidatorException
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Url(
+     * @CustomUrl(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
      */
