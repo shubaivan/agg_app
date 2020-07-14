@@ -120,6 +120,10 @@ class ProductDataRowHandler
             $filePath = $dataRow->getFilePath();
 
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
+
+            $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
+            $this->getCategoryService()->matchGlobalNegativeBrandWords($product);
+
             $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);
             $this->getShopService()->createShopFromProduct($product);

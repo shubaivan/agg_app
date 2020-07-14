@@ -106,6 +106,14 @@ class Helpers
 
         $search = str_replace(':*|:*|', ':*|', $search);
         $search = str_replace('", "', '|', $search);
+        if (preg_match_all("/\(.*?\):\*/", $search, $m)) {
+            $matchResults = array_shift($m);
+            foreach ($matchResults as $matchResult) {
+                $matchResultTransform = preg_replace("/\|/", '&', $matchResult);
+                $matchResultTransform = trim($matchResultTransform, ':*');
+                $search = str_replace($matchResult, $matchResultTransform, $search);
+            }
+        }
 
         return $search;
     }

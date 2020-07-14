@@ -5,6 +5,7 @@ namespace App\Services\Models;
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
 use App\Entity\Category;
+use App\Entity\CategoryRelations;
 use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\CategoriesCollection;
 use App\Entity\Collection\Search\SearchCategoriesCollection;
@@ -113,16 +114,31 @@ class CategoryService extends AbstractModel
             throw new \Exception('category don\'t have configuration modle');
         }
 
+        $mainCategoryWords = [];
+        $mainCategoryWords['categories'][$category->getCategoryName()]['positive'] = $category->getCategoryConfigurations()->getKeyWords();
+        $negativeKeyWords = $category->getCategoryConfigurations()->getNegativeKeyWords();
+        if (strlen($negativeKeyWords)) {
+            $negativeKeyWords = implode(',', array_map(function ($v) {return '!' . $v;}, explode(', ', $negativeKeyWords)));
+        } else {
+            $negativeKeyWords = null;
+        }
+
+        $mainCategoryWords['categories'][$category->getCategoryName()]['negative'] = $negativeKeyWords;
+        if ($negativeKeyWords) {
+            $mainCategoryWords['common'][] = '(' . $category->getCategoryConfigurations()->getKeyWords() . ', ' . $negativeKeyWords . ')';
+        } else {
+            $mainCategoryWords['common'][] = $category->getCategoryConfigurations()->getKeyWords();
+        }
+
         $isMatchPlainCategories = $this->getCategoryRepository()->isMatchPlainCategoriesString(
             $product->getCategory(),
-            $category->getCategoryConfigurations()->getKeyWords(),
+            $mainCategoryWords,
             true
         );
 
         $analysisProductByMainCategory = $this->analysisProductByMainCategory(
             $product,
-            $category->getCategoryConfigurations()
-                ->getKeyWords(),
+            $mainCategoryWords,
             true
         );
 
@@ -196,16 +212,28 @@ class CategoryService extends AbstractModel
         $mainCategoryWords = [];
         foreach ($mainSubCategoryIds as $main) {
             if (isset($main['category_name'])) {
-                $mainCategoryWords['categories'][$main['category_name']] = $main['key_words'];
+                $mainCategoryWords['categories'][$main['category_name']]['positive'] = $main['key_words'];
+                $negative_key_words = null;
+                if (strlen($main['negative_key_words'])) {
+                    $negative_key_words = implode(', ', array_map(function ($v) {return '!' . $v;}, explode(', ', $main['negative_key_words'])));
+                }
+
+                $mainCategoryWords['categories'][$main['category_name']]['negative'] = $negative_key_words;
+                if ($negative_key_words) {
+                    $mainCategoryWords['common'][] = '(' . $main['key_words'] . ', ' . $negative_key_words . ')';
+                } else {
+                    $mainCategoryWords['common'][] = $main['key_words'];
+                }
+
             }
         }
         if (!count($mainCategoryWords)) {
             return [];
         }
 
-        $mainCategoryWordsString = implode(',', $mainCategoryWords['categories']);
+//        $mainCategoryWordsString = implode(',', $mainCategoryWordsForQuery);
         $resultAnalysis = $this->analysisProductByMainCategory(
-            $product, $mainCategoryWordsString
+            $product, $mainCategoryWords
         );
         if (!count($resultAnalysis)) {
             return [];
@@ -249,14 +277,14 @@ class CategoryService extends AbstractModel
 
     /**
      * @param Product $product
-     * @param string $mainCategoryKeyWord
+     * @param array $mainCategoryKeyWord
      * @param bool $explain
      * @return array|mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
     public function analysisProductByMainCategory(
         Product $product,
-        string $mainCategoryKeyWord,
+        array $mainCategoryKeyWord,
         bool $explain = false
     )
     {
@@ -424,6 +452,14 @@ class CategoryService extends AbstractModel
                 $this->getObjecHandler()
                     ->validateEntity($categoryModel, [Category::SERIALIZED_GROUP_CREATE]);
             }
+            if ($categoryModel->getSubCategoryRelations()->count()) {
+                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
+                    /** @var $categoryRelation CategoryRelations */
+                    if ($categoryRelation->getMainCategory()) {
+                        $product->addCategoryRelation($categoryRelation->getMainCategory());
+                    }
+                }
+            }
             $product->addCategoryRelation($categoryModel);
             array_push($arrayModelsCategory, $categoryModel);
         }
@@ -431,6 +467,71 @@ class CategoryService extends AbstractModel
         return $arrayModelsCategory;
     }
 
+    /**
+     * @param Product $product
+     * @return bool
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
+     */
+    public function matchGlobalNegativeKeyWords(Product $product)
+    {
+        $nw = 'perfumery, perfume, parfym, parfymer, manlig, mannen, man, men,  adult, vuxen, rakning, 
+        shaving, razor, shaver, rakapparat, Bluetooth-högtalare, högtalare, Spiralvisp, Rivjärn, Raklödder,
+        Hårspray , Scrub, Face Cream, Eye Pencil, Lip Pencil, toning, Tonings-Shampoo, Lipstick, Powder,
+        Makeup Remover, nagellack, nagellackremoverpads, Stop mot nagelbitning, Doften, Hydro-pigment-tekniken,
+        puderfoundation, läppstift, Parfum, doft, Eau Dynamisante, Lip Stick, Blush, Honungssked 
+        ';
+
+        $matchData = preg_replace(
+            '!\s+!',
+            ',',
+            $product->getName() . ', ' . $product->getDescription()
+        );
+        $matchData = strip_tags($matchData);
+
+        $prepareDataForGINSearch = $this->prepareDataForGINSearch(
+            $matchData
+        );
+        $prepareDataForGINSearch = $this->helper
+            ->handleSearchValue($prepareDataForGINSearch, false);
+        $matchGlobalNegativeKeyWords = $this->getCategoryRepository()->matchGlobalNegativeKeyWords(
+            $prepareDataForGINSearch,
+            $nw
+        );
+        if (isset($matchGlobalNegativeKeyWords['match']) && $matchGlobalNegativeKeyWords['match']) {
+            throw new \Exception('match negative key words');
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Product $product
+     * @return bool
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
+     */
+    public function matchGlobalNegativeBrandWords(Product $product)
+    {
+        $nw = 'Rosewall, Mavala, Something Borrowed, Woodbird, Ahlvar Gallery, Scampi, Jascha Stockholm, Milook, BareMinerals, Yves Saint Laurent, Mcdodo, Cavaliere, Max Factor, Sir Of Sweden, Dior, Oakwood, Cavaliere, Anastasia Beverly Hills, IsaDora, Clarins For Men, CHPO, Clinique For Men, Lexington, Ronneby Bruk, Jumperfabriken, Woodbird, ARTDECO, Jim Rickey, Elvine, WeSC, Nikolaj Étoiles';
+        $matchData = preg_replace('!\s+!', ',', $product->getBrand());
+        $matchData = strip_tags($matchData);
+
+        $prepareDataForGINSearch = $this->prepareDataForGINSearch(
+            $matchData
+        );
+        $prepareDataForGINSearch = $this->helper
+            ->handleSearchValue($prepareDataForGINSearch, false);
+        $matchGlobalNegativeKeyWords = $this->getCategoryRepository()->matchGlobalNegativeKeyWords(
+            $prepareDataForGINSearch,
+            $nw
+        );
+        if (isset($matchGlobalNegativeKeyWords['match']) && $matchGlobalNegativeKeyWords['match']) {
+            throw new \Exception('match negative key words');
+        }
+
+        return true;
+    }
     /**
      * @param ParamFetcher $paramFetcher
      * @return Category[]|CategoriesCollection|int
@@ -486,7 +587,7 @@ class CategoryService extends AbstractModel
      * @param string $sentence
      * @return string
      */
-    public function prepareProductDataForMatching(string $sentence): string
+    private function prepareProductDataForMatching(string $sentence): string
     {
         $productData = $this->helper->pregWordsFromDictionary(
             $sentence

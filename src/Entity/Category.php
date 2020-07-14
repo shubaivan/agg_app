@@ -201,13 +201,17 @@ class Category implements EntityValidatorException
      */
     public function getMainCategoryRelations(): Collection
     {
+        if (!$this->mainCategoryRelations) {
+            $this->mainCategoryRelations = new ArrayCollection();
+        }
+
         return $this->mainCategoryRelations;
     }
 
     public function addMainCategoryRelation(CategoryRelations $mainCategoryRelation): self
     {
-        if (!$this->mainCategoryRelations->contains($mainCategoryRelation)) {
-            $this->mainCategoryRelations[] = $mainCategoryRelation;
+        if (!$this->getMainCategoryRelations()->contains($mainCategoryRelation)) {
+            $this->getMainCategoryRelations()->add($mainCategoryRelation);
             $mainCategoryRelation->setMainCategory($this);
         }
 
@@ -216,8 +220,8 @@ class Category implements EntityValidatorException
 
     public function removeMainCategoryRelation(CategoryRelations $mainCategoryRelation): self
     {
-        if ($this->mainCategoryRelations->contains($mainCategoryRelation)) {
-            $this->mainCategoryRelations->removeElement($mainCategoryRelation);
+        if ($this->getMainCategoryRelations()->contains($mainCategoryRelation)) {
+            $this->getMainCategoryRelations()->removeElement($mainCategoryRelation);
             // set the owning side to null (unless already changed)
             if ($mainCategoryRelation->getMainCategory() === $this) {
                 $mainCategoryRelation->setMainCategory(null);

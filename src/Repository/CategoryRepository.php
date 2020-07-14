@@ -177,7 +177,7 @@ class CategoryRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
 
         $query  = '
-            SELECT c.id, c.category_name, conf.key_words FROM category AS c
+            SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words FROM category AS c
             INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
             WHERE 
             EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
@@ -238,18 +238,16 @@ class CategoryRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
         if ($product->getMatchMainCategoryData()) {
             $mainSearch = $product->getMatchMainCategoryData();
-        } else {
-            $mainSearch =
-                $this->getHelpers()
-                    ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), false);
         }
 
-        if ($product && !$product->getMatchMainCategoryData()) {
+        if (!isset($mainSearch) && $product && !$product->getMatchMainCategoryData()) {
             if (!$product->getCategory()) {
                 return [];
             }
             $checkMainCategoriesResult = $this->isMatchPlainCategoriesString(
-                $product->getCategory(), $mainSearch, true
+                $product->getCategory(),
+                $parameterBag->get(CategoryService::MAIN_SEARCH),
+                true
             );
 
             if (isset($checkMainCategoriesResult['match']) && !$checkMainCategoriesResult['match']) {
@@ -684,14 +682,47 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param string $productData
+     * @param string $nw
+     * @return bool|mixed
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function matchGlobalNegativeKeyWords(string $productData, string $nw)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $query = 'select
+        	to_tsvector(\'pg_catalog.swedish\',:negative_key_words_data) 
+        	@@ to_tsquery(\'pg_catalog.swedish\', :product_data) as match';
+
+        $mainParams[':product_data'] = $productData;
+        $mainType[':product_data'] = \PDO::PARAM_STR;
+
+        $mainParams[':negative_key_words_data'] = $nw;
+        $mainType[':negative_key_words_data'] = \PDO::PARAM_STR;
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeQuery(
+            $query,
+            $mainParams,
+            $mainType
+        );
+        $isMatchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        if (count($isMatchResult)) {
+            return array_shift($isMatchResult);
+        }
+        return false;
+    }
+
+    /**
      * @param string $productCategoriesData
-     * @param string $mainCategoriesData
+     * @param array $mainCategoriesData
      * @return bool
      * @throws \Doctrine\DBAL\DBALException
      */
     public function isMatchPlainCategoriesString(
         string $productCategoriesData,
-        string $mainCategoriesData,
+        array $mainCategoriesData,
         bool $explain = false
     )
     {
@@ -705,11 +736,17 @@ class CategoryRepository extends ServiceEntityRepository
                 ,ts_headline(\'pg_catalog.swedish\', :product_categories_data, to_tsquery(\'pg_catalog.swedish\', :main_categories_data)) AS ts_headline_result
             ';
         }
+        $mainCategoryWordsArray = [];
+        foreach ($mainCategoriesData['categories'] as $keyCategoryData=>$categoryData) {
+            $mainCategoryWordsArray[$keyCategoryData] = $categoryData['positive'];
+        }
+        $mainCategoryWordsString = $this->getHelpers()
+            ->handleSearchValue(implode(',', $mainCategoryWordsArray), false);
 
         $mainParams[':product_categories_data'] = $productCategoriesData;
         $mainType[':product_categories_data'] = \PDO::PARAM_STR;
 
-        $mainParams[':main_categories_data'] = $mainCategoriesData;
+        $mainParams[':main_categories_data'] = $mainCategoryWordsString;
         $mainType[':main_categories_data'] = \PDO::PARAM_STR;
 
         /** @var ResultCacheStatement $statement */
@@ -726,13 +763,21 @@ class CategoryRepository extends ServiceEntityRepository
             if (preg_match_all("/<b>.*?<\/b>/", $result['ts_headline_result'], $m)) {
                 $resultMainCategoryWords = [];
                 $regTsHeadLightResult = array_shift($m);
-                $explodeMainCategoriesData = explode(':*|', $mainCategoriesData);
+                $explodeMainCategoriesData = explode('|', $mainCategoryWordsString);
                 foreach ($explodeMainCategoriesData as $mainCategoryWord) {
                     foreach ($regTsHeadLightResult as $matchingWord) {
-                        $mainCategoryWord = str_replace(':*', '', $mainCategoryWord);
+
+                        $mainCategoryWord = preg_replace('/:\*/', '', $mainCategoryWord);
+
                         if (mb_stripos($matchingWord, $mainCategoryWord) !== false) {
-                            $resultMainCategoryWords[] = $mainCategoryWord;
-                            break;
+                            $resultMatchArray = preg_grep("/\b$mainCategoryWord\b/", $mainCategoryWordsArray);
+                            foreach ($resultMatchArray as $nameMainCategory=>$matchPool) {
+                                if (isset($mainCategoriesData['categories'][$nameMainCategory]['negative'])) {
+                                    $resultMainCategoryWords[] = '(' . $mainCategoryWord . ', ' . $mainCategoriesData['categories'][$nameMainCategory]['negative'] . ')';
+                                } else {
+                                    $resultMainCategoryWords[] = $mainCategoryWord;
+                                }
+                            }
                         }
                     }
                 }
