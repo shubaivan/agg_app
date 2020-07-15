@@ -59,7 +59,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
             [
                 'name' => 'Nederdelar',
                 'key_word' => '
-                    Byxor, Chinos, Jeans, Sweatpants, Leggings, Jeggings, jeansshorts, jeans shorts, byxor, byxa, Cargopants, 
+                    Byxor, Chinos, Jeans, Sweatpants, Leggings, Jeggings, jeansshorts, jeans shorts, byxor, Cargopants, 
                     Termobyxor, Termobyxa, Skalbyxor, Skalbyxa, Cargobyxor, Regnbyxa, Shell pants, Trekvartsbyxor,
                     Cargobyxa, Haremsbyxor, Harembyxa, Mjukisbyxor, Mjukisbyxa, Regnbyxor, Trekvartsbyxa, Pull up chinos,
                     Capribyxor, Capribyxa, Träningsbyxor, Träningsbyxa, Manchesterbyxor, Linne chinos, Linnechinos, Sjhorts Chinos,                               
@@ -92,7 +92,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
             [
                 'name' => 'Baby Underkläder',
                 'key_word' => '
-                    strumpor, strumpbyxor, Benvärmare, Bloomers, Boxershorts, Long johns, Strumpbyxor, , Strumpor, 
+                    strumpor, strumpbyxor, Benvärmare, Bloomers, Boxershorts, Long johns, Strumpbyxor, Strumpor, 
                     Underbyxor, Underbyxa, Underklädsset, Underlinnen, Underlinne, Strumpbyxa,
                     Underwear, stockings, tights, leg warmers, bloomers, long johns, tights, 
                     tights, stockings, Socks, Pantyhose, Pantyhose Underwear set, Underliners, Underliners                     

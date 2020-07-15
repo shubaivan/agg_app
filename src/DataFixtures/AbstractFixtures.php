@@ -38,6 +38,11 @@ abstract class AbstractFixtures extends Fixture
      */
     private $reUpdateFiles = false;
 
+    /**
+     * @var array
+     */
+    private $bufferPositiveKeyWords = [];
+
     private $swStopWords = '
         och
         det
@@ -278,9 +283,11 @@ abstract class AbstractFixtures extends Fixture
 
             foreach ($negativeKeyWords as $key => $nword) {
                 $nword = trim($nword);
-                if (!strlen($nword)) {
-                    unset($nword[$key]);
+                if (!strlen($nword) || array_search($nword, $this->bufferPositiveKeyWords)) {
+                    unset($negativeKeyWords[$key]);
+                    continue;
                 }
+
                 if (preg_match_all('!\s+!', $nword, $match)) {
                     $this->fillDictionary($nword);
                 }
@@ -339,6 +346,7 @@ abstract class AbstractFixtures extends Fixture
      */
     protected function processingKeyWords(string $keyWords, bool $withNewLine = false): string
     {
+        $this->bufferPositiveKeyWords = [];
         //        $keyWords = preg_replace('/\s+/', '', $keyWords);
         $keyWords = trim($keyWords);
         $keyWords = trim($keyWords, ',');
@@ -353,6 +361,7 @@ abstract class AbstractFixtures extends Fixture
 
             if (!strlen($word)) {
                 unset($words[$key]);
+                continue;
             }
             if (preg_match_all('!\s+!', $word, $match)) {
                 $this->fillDictionary($word);
@@ -363,13 +372,12 @@ abstract class AbstractFixtures extends Fixture
             }
         }
         $words = array_unique($words);
-
         $words = array_filter($words, function ($v) {
             if (strlen(trim($v))) {
                 return true;
             }
         });
-
+        $this->bufferPositiveKeyWords = $words;
         $keyWords = implode(',', $words);
         if ($withNewLine) {
             $this->setDataInFile($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths', PHP_EOL);
