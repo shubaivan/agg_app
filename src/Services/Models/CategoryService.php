@@ -490,7 +490,7 @@ class CategoryService extends AbstractModel
             $prepareDataForGINSearch,
             AdminConfiguration::GLOBAL_NEGATIVE_KEY_WORDS
         );
-        if (isset($matchGlobalNegativeKeyWords['match']) && $matchGlobalNegativeKeyWords['match']) {
+        if ($matchGlobalNegativeKeyWords) {
             throw new GlobalMatchException('match negative key words');
         }
 
@@ -516,8 +516,8 @@ class CategoryService extends AbstractModel
             $prepareDataForGINSearch,
             AdminConfiguration::GLOBAL_NEGATIVE_BRAND_KEY_WORDS
         );
-        if (isset($matchGlobalNegativeKeyWords['match']) && $matchGlobalNegativeKeyWords['match']) {
-            throw new GlobalMatchExceptionBrand('match negative key words');
+        if ($matchGlobalNegativeKeyWords) {
+            throw new GlobalMatchExceptionBrand('match negative key words brand');
         }
 
         return true;

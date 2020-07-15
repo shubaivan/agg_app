@@ -691,11 +691,11 @@ class CategoryRepository extends ServiceEntityRepository
     {
         $connection = $this->getEntityManager()->getConnection();
 
-        $query = 'select
-        	to_tsvector(\'pg_catalog.swedish\', aconf.data_fts) 
-        	@@ to_tsquery(\'pg_catalog.swedish\', :product_data) as match
+        $query = '
+            select *
         	from admin_configuration as aconf
         	where aconf.property_name = :property_name
+        	and aconf.data_fts @@ to_tsquery(\'my_swedish\', :product_data)
         ';
 
         $mainParams[':product_data'] = $productData;
@@ -710,11 +710,9 @@ class CategoryRepository extends ServiceEntityRepository
             $mainParams,
             $mainType
         );
-        $isMatchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        if (count($isMatchResult)) {
-            return array_shift($isMatchResult);
-        }
-        return false;
+        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        return count($result);
     }
 
     /**
