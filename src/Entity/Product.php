@@ -841,13 +841,15 @@ class Product implements EntityValidatorException
         return $this;
     }
 
-    public function setBrandAccessor(string $brand)
+    public function setBrandAccessor($brand)
     {
-        if ($brand == 'Esprit'){
-            $brand = 'ESPRIT';
-        }
+        if ($brand && strlen($brand)) {
+            if ($brand == 'Esprit'){
+                $brand = 'ESPRIT';
+            }
 
-        $this->setBrand(ucfirst($brand));
+            $this->setBrand(ucfirst($brand));
+        }
     }
 
     /**
