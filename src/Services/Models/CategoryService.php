@@ -11,6 +11,7 @@ use App\Entity\Collection\CategoriesCollection;
 use App\Entity\Collection\Search\SearchCategoriesCollection;
 use App\Entity\Product;
 use App\Entity\Shop;
+use App\Exception\GlobalMatchException;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Services\Helpers;
@@ -470,11 +471,17 @@ class CategoryService extends AbstractModel
     /**
      * @param Product $product
      * @return bool
+     * @throws GlobalMatchException
      * @throws \Doctrine\DBAL\DBALException
-     * @throws \Exception
      */
     public function matchGlobalNegativeKeyWords(Product $product)
     {
+        $productComparingData = $product->getName() . ', ' . $product->getDescription();
+
+        if (!strlen($productComparingData)) {
+            return false;
+        }
+
         $nw = 'perfumery, perfume, parfym, parfymer, manlig, mannen, man, men,  adult, vuxen, rakning, 
         shaving, razor, shaver, rakapparat, Bluetooth-högtalare, högtalare, Spiralvisp, Rivjärn, Raklödder,
         Hårspray , Scrub, Face Cream, Eye Pencil, Lip Pencil, toning, Tonings-Shampoo, Lipstick, Powder,
@@ -485,7 +492,7 @@ class CategoryService extends AbstractModel
         $matchData = preg_replace(
             '!\s+!',
             ',',
-            $product->getName() . ', ' . $product->getDescription()
+            $productComparingData
         );
         $matchData = strip_tags($matchData);
 
@@ -499,7 +506,7 @@ class CategoryService extends AbstractModel
             $nw
         );
         if (isset($matchGlobalNegativeKeyWords['match']) && $matchGlobalNegativeKeyWords['match']) {
-            throw new \Exception('match negative key words');
+            throw new GlobalMatchException('match negative key words');
         }
 
         return true;
@@ -508,11 +515,14 @@ class CategoryService extends AbstractModel
     /**
      * @param Product $product
      * @return bool
+     * @throws GlobalMatchException
      * @throws \Doctrine\DBAL\DBALException
-     * @throws \Exception
      */
     public function matchGlobalNegativeBrandWords(Product $product)
     {
+        if (!strlen($product->getBrand())) {
+            return false;
+        }
         $nw = 'Rosewall, Mavala, Something Borrowed, Woodbird, Ahlvar Gallery, Scampi, Jascha Stockholm, Milook, BareMinerals, Yves Saint Laurent, Mcdodo, Cavaliere, Max Factor, Sir Of Sweden, Dior, Oakwood, Cavaliere, Anastasia Beverly Hills, IsaDora, Clarins For Men, CHPO, Clinique For Men, Lexington, Ronneby Bruk, Jumperfabriken, Woodbird, ARTDECO, Jim Rickey, Elvine, WeSC, Nikolaj Étoiles';
         $matchData = preg_replace('!\s+!', ',', $product->getBrand());
         $matchData = strip_tags($matchData);
@@ -527,7 +537,7 @@ class CategoryService extends AbstractModel
             $nw
         );
         if (isset($matchGlobalNegativeKeyWords['match']) && $matchGlobalNegativeKeyWords['match']) {
-            throw new \Exception('match negative key words');
+            throw new GlobalMatchException('match negative key words');
         }
 
         return true;

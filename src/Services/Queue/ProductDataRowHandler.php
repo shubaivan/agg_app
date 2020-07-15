@@ -3,7 +3,9 @@
 namespace App\Services\Queue;
 
 use App\Cache\CacheManager;
+use App\Entity\Product;
 use App\Entity\Shop;
+use App\Exception\GlobalMatchException;
 use App\Exception\ValidatorException;
 use App\QueueModel\ResourceDataRow;
 use App\QueueModel\VacuumJob;
@@ -129,7 +131,7 @@ class ProductDataRowHandler
             $this->getShopService()->createShopFromProduct($product);
             if (!$product->isMatchForCategories() || $this->forceAnalysis == '1') {
                 $handleAnalysisProductByMainCategory = $this->getCategoryService()
-                        ->handleAnalysisProductByMainCategory($product);
+                    ->handleAnalysisProductByMainCategory($product);
                 if (count($handleAnalysisProductByMainCategory)) {
                     $product->setMatchForCategories(true);
 
@@ -161,6 +163,10 @@ class ProductDataRowHandler
                         [$filePath => (new \DateTime())->getTimestamp()]
                     );
             }
+        } catch (GlobalMatchException $globalMatchException) {
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                    Product::GLOBAL_MATCH_EXCEPTION . $filePath);
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()

@@ -50,6 +50,8 @@ class Product implements EntityValidatorException
     const SERIALIZED_GROUP_CREATE_IDENTITY = 'product_group_create_identity';
     const SIZE = 'SIZE';
 
+    const GLOBAL_MATCH_EXCEPTION = 'global_nacth_exception';
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
