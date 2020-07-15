@@ -23,7 +23,7 @@ abstract class AbstractModel
             if (is_array($matchData) && count($matchData)) {
 
                 $arrayFilter = array_filter($matchData, function ($v) use ($limitations) {
-                    if (strlen($v) > $limitations && mb_check_encoding($v, "UTF-8")) {
+                    if (strlen($v) >= $limitations && mb_check_encoding($v, "UTF-8")) {
                         return true;
                     }
                 });

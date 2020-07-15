@@ -294,6 +294,7 @@ class HandleDownloadFileData
         if (isset($this->adtractionDownloadUrls[$shop])) {
             $csv->setHeaderOffset(0);
             $csv->setDelimiter(',');
+            $csv->setEscape('"');
             $csv->setEnclosure('\'');
         } elseif (isset($this->adrecordDownloadUrls[$shop])) {
             $csv->setHeaderOffset(0);
