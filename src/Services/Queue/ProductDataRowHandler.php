@@ -166,9 +166,15 @@ class ProductDataRowHandler
             }
         } catch (GlobalMatchExceptionBrand $globalMatchException) {
             $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $filePath);
+            $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $filePath);
         } catch (GlobalMatchException $globalMatchException) {
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $filePath);
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $filePath);
