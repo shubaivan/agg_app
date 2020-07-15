@@ -167,14 +167,14 @@ class ProductDataRowHandler
         } catch (GlobalMatchExceptionBrand $globalMatchException) {
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $filePath);
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $dataRow->getShop());
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $filePath);
         } catch (GlobalMatchException $globalMatchException) {
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $filePath);
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $dataRow->getShop());
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $filePath);
