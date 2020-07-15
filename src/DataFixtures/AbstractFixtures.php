@@ -177,8 +177,7 @@ abstract class AbstractFixtures extends Fixture
                     $configuration['name'],
                     $configuration['key_word'],
                     $sectionName,
-                    $configuration['negative_key_words'] ?? null,
-
+                    $configuration['negative_key_words'] ?? null
                 );
 
                 $this->createCategoryRelations($main, $subMain);
@@ -245,36 +244,7 @@ abstract class AbstractFixtures extends Fixture
         ?string $negativeKeyWords = null
     ): Category
     {
-//        $keyWords = preg_replace('/\s+/', '', $keyWords);
-        $keyWords = preg_replace('/\n/', '', $keyWords);
-        $keyWords = preg_replace('!\s+!', ' ', $keyWords);
-
-        $words = explode(', ', $keyWords);
-
-        foreach ($words as $key => $word) {
-            $word = trim($word);
-            $strlen = strlen($word);
-
-            if (!strlen($word)) {
-                unset($words[$key]);
-            }
-            if (preg_match_all('!\s+!', $word, $match)) {
-                $this->fillDictionary($word);
-            } else {
-                if (!$this->minLen || $strlen < $this->minLen) {
-                    $this->minLen = $strlen;
-                }
-            }
-        }
-        $words = array_unique($words);
-
-        $words = array_filter($words, function ($v) {
-            if (strlen(trim($v))) {
-                return true;
-            }
-        });
-
-        $keyWords = implode(',', $words);
+        $keyWords = $this->processingKeyWords($keyWords);
         $category = $this->checkExistCategory($categoryName);
 
         if (!$category instanceof Category) {
@@ -363,9 +333,55 @@ abstract class AbstractFixtures extends Fixture
     }
 
     /**
+     * @param string $keyWords
+     * @param bool $withNewLine
+     * @return string
+     */
+    protected function processingKeyWords(string $keyWords, bool $withNewLine = false): string
+    {
+        //        $keyWords = preg_replace('/\s+/', '', $keyWords);
+        $keyWords = trim($keyWords);
+        $keyWords = trim($keyWords, ',');
+        $keyWords = preg_replace('/\n/', '', $keyWords);
+        $keyWords = preg_replace('!\s+!', ' ', $keyWords);
+
+        $words = explode(', ', $keyWords);
+
+        foreach ($words as $key => $word) {
+            $word = trim($word);
+            $strlen = strlen($word);
+
+            if (!strlen($word)) {
+                unset($words[$key]);
+            }
+            if (preg_match_all('!\s+!', $word, $match)) {
+                $this->fillDictionary($word);
+            } else {
+                if (!$this->minLen || $strlen < $this->minLen) {
+                    $this->minLen = $strlen;
+                }
+            }
+        }
+        $words = array_unique($words);
+
+        $words = array_filter($words, function ($v) {
+            if (strlen(trim($v))) {
+                return true;
+            }
+        });
+
+        $keyWords = implode(',', $words);
+        if ($withNewLine) {
+            $this->setDataInFile($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths', PHP_EOL);
+            $this->setDataInFile($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths', PHP_EOL);
+        }
+        return $keyWords;
+    }
+
+    /**
      * @param string $word
      */
-    protected function fillDictionary(string $word)
+    private function fillDictionary(string $word)
     {
         $this->wordWithSpace[] = $word;
 

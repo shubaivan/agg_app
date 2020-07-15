@@ -27,27 +27,15 @@ class Shop
     const PREFIX_HASH = 'statistic:';
 
     const PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL = 'shop:handle:analysis:product:successful:';
-    const PREFIX_HANDLE_ANALYSIS_PRODUCT_FAILED = 'shop:handle:analysis:product:failed:';
     const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL = 'shop:processing:successful:';
     const PREFIX_PROCESSING_DATA_SHOP_FAILED = 'shop:processing:failed:';
+    const PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND = 'shop:processing:globalmacthexceptionbrand:';
+    const PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION = 'shop:processing:globalmacthexception:';
 
     const PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL = 'shop:handle:successful:';
     const PREFIX_HANDLE_DATA_SHOP_FAILED = 'shop:handle:failed:';
 
     const SERIALIZED_GROUP_LIST = 'shop_group_list';
-
-    public static function getPrefixes() {
-        return [
-            'handle' => [
-                'FAILED' => self::PREFIX_HANDLE_DATA_SHOP_FAILED,
-                'SUCCESSFUL' => self::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL,
-            ],
-            'processing' => [
-                'FAILED' => self::PREFIX_PROCESSING_DATA_SHOP_FAILED,
-                'SUCCESSFUL' => self::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL,
-            ]
-        ];
-    }
 
     use TimestampableEntity;
 

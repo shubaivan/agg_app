@@ -50,8 +50,6 @@ class Product implements EntityValidatorException
     const SERIALIZED_GROUP_CREATE_IDENTITY = 'product_group_create_identity';
     const SIZE = 'SIZE';
 
-    const GLOBAL_MATCH_EXCEPTION = 'global_nacth_exception';
-
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -190,6 +188,7 @@ class Product implements EntityValidatorException
      *      max = 255,
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
+     * @Annotation\Accessor(setter="setBrandAccessor")
      */
     private $brand;
 
@@ -840,6 +839,15 @@ class Product implements EntityValidatorException
     {
         $this->matchMainCategoryData = $matchMainCategoryData;
         return $this;
+    }
+
+    public function setBrandAccessor(string $brand)
+    {
+        if ($brand == 'Esprit'){
+            $brand = 'ESPRIT';
+        }
+
+        $this->setBrand(ucfirst($brand));
     }
 
     /**

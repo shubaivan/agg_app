@@ -9,10 +9,16 @@ abstract class AbstractModel
      * @param int $limitations
      * @return string
      */
-    public function prepareDataForGINSearch(string $matchData, int $limitations = 4)
+    public function prepareDataForGINSearch(string $matchData, int $limitations = 4, bool $relation = false)
     {
+        if ($relation) {
+            $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®]+';
+        } else {
+            $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®\-]+';
+        }
+
         $resultData = '';
-        if (preg_match_all('/[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®]+/',$matchData,$matches)) {
+        if (preg_match_all("/$pattern/",$matchData,$matches)) {
             $matchData = array_shift($matches);
             if (is_array($matchData) && count($matchData)) {
 

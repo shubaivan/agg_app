@@ -6,6 +6,7 @@ use App\Cache\CacheManager;
 use App\Entity\Product;
 use App\Entity\Shop;
 use App\Exception\GlobalMatchException;
+use App\Exception\GlobalMatchExceptionBrand;
 use App\Exception\ValidatorException;
 use App\QueueModel\ResourceDataRow;
 use App\QueueModel\VacuumJob;
@@ -163,10 +164,14 @@ class ProductDataRowHandler
                         [$filePath => (new \DateTime())->getTimestamp()]
                     );
             }
+        } catch (GlobalMatchExceptionBrand $globalMatchException) {
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $filePath);
         } catch (GlobalMatchException $globalMatchException) {
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Product::GLOBAL_MATCH_EXCEPTION . $filePath);
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $filePath);
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()

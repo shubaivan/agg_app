@@ -683,23 +683,26 @@ class CategoryRepository extends ServiceEntityRepository
 
     /**
      * @param string $productData
-     * @param string $nw
+     * @param string $propertyName
      * @return bool|mixed
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function matchGlobalNegativeKeyWords(string $productData, string $nw)
+    public function matchGlobalNegativeKeyWords(string $productData, string $propertyName)
     {
         $connection = $this->getEntityManager()->getConnection();
 
         $query = 'select
-        	to_tsvector(\'pg_catalog.swedish\',:negative_key_words_data) 
-        	@@ to_tsquery(\'pg_catalog.swedish\', :product_data) as match';
+        	to_tsvector(\'pg_catalog.swedish\', aconf.data_fts) 
+        	@@ to_tsquery(\'pg_catalog.swedish\', :product_data) as match
+        	from admin_configuration as aconf
+        	where aconf.property_name = :property_name
+        ';
 
         $mainParams[':product_data'] = $productData;
         $mainType[':product_data'] = \PDO::PARAM_STR;
 
-        $mainParams[':negative_key_words_data'] = $nw;
-        $mainType[':negative_key_words_data'] = \PDO::PARAM_STR;
+        $mainParams[':property_name'] = $propertyName;
+        $mainType[':property_name'] = \PDO::PARAM_STR;
 
         /** @var ResultCacheStatement $statement */
         $statement = $connection->executeQuery(
