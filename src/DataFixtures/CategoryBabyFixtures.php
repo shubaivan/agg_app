@@ -23,7 +23,8 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                     'Tunikor' => 'Tunik, Tunikor, Tunic, Tunics',
                     'Tröjklänningar' => 'Tröjklänning, Sweater dress, Sweaterdress',
                     'Kjolar' => 'kjol, kjolar, skirt, skirts, jeanskjol, denimskirt, jeans skirt, korta kjolar, miniskirt, mini skirt, short skirt, maxikjolar, maxikjol maxidresses, maxidress, midikjolar, midikjol, midiskirts, midiskirt, tyllkjol, tyllkjolar, tulle skirts, tulleskirt, veckade kjolar, veckad kjol, pleated skirts, pleated skirt'
-                ]
+                ],
+                'negative_key_words' => 'skor, byxa',
             ],
             [
                 'name' => 'Bodys & Bodysuits',
@@ -71,7 +72,8 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                 'sub_key_word' => [
                     'Stövlar' => 'Stövlar',
                     'Kängor' => 'Kängor',
-                ]
+                ],
+                'negative_key_words' => 'skor, byxa, snutte, tossor',
             ],
             [
                 'name' => 'Sovkläder',
@@ -95,6 +97,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                     Underwear, stockings, tights, leg warmers, bloomers, long johns, tights, 
                     tights, stockings, Socks, Pantyhose, Pantyhose Underwear set, Underliners, Underliners                     
                 ',
+                'negative_key_words' => 'skor, byxa, snutte, tossor,  babyskor',
             ],
             [
                 'name' => 'Baby Ytterkläder',
@@ -106,6 +109,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                         Stickade halsdukar, Stickad halsduk, Ullvantar, Vadderade jackor, Vindjackor, Vinterjackor, Vinteroveraller, 
                         Västar, Jeansjacka, Jeansjackor, Utomhus Jacka, Streetjacka, Vardagsjacka, Softshell, Soft-Shell                     
                 ',
+                'negative_key_words' => 'skor, vinterstövel',
             ],
             [
                 'name' => 'Baby UV & Bad',
@@ -141,9 +145,10 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
             [
                 'name' => 'Nappar',
                 'key_word' => '
-                    Nappar, tröstnapp, sugnapp, nippel,
+                    Nappar, tröstnapp, sugnapp, nippel, napper,
                     Pacifiers, dummy, pacifier, comforter, nipple        
                 ',
+                'negative_key_words' => 'cykelsits, comfort',
             ],
             [
                 'name' => 'Haklappar',
@@ -155,37 +160,37 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
             [
                 'name' => 'Halsdukar',
                 'key_word' => '
-                    Halsdukar, kragar, halsdukar,
-                    Neckwear        
+                    Halsdukar, halsdukar,
+                    Neckwear
                 ',
             ],
             [
                 'name' => 'Handskar & Vantar',
                 'key_word' => '
                     Handskar, Vantar, vante, handske,
-                    gloves, glove, gantlet, gauntlet, mitten,  tumvante        
+                    gloves, glove, gantlet, gauntlet, tumvante        
                 ',
             ],
             [
                 'name' => 'Huvudbonad',
                 'key_word' => '
-                    Huvudbonad, hatt, Panama, keps, mössa,
-                    headdress, hat, napper, lid, muff, dupe, pigeon, cap, top, curfew        
+                    Huvudbonad, hatt, Panama, keps, mössa, 
+                    headdress, hat, lid, muff, dupe, pigeon, cap        
                 ',
             ],
             [
                 'name' => 'Slipsar & flugor',
                 'key_word' => '
-                    Slipsar, flugor, slips,knyte, fluga,
-                    tie, necktie, bow-tie        
+                    Slipsar, flugor, slips, fluga,
+                    tie, necktie, bow-tie   
                 ',
             ],
             [
                 'name' => 'Skärp & Hängslen',
                 'key_word' => '
-                    Skärp, Hängslen, bälte, band, rem,
-                    Belt, strap, Braces, suspenders, galluses        
+                    Skärp, Hängslen, bälte, rem        
                 ',
+                'negative_key_words' => 'hängselbyxor',
             ],
             [
                 'name' => 'Baby Väskor',
