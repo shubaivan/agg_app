@@ -28,7 +28,10 @@ abstract class AbstractModel
                     }
                 });
                 $arrayUniqueFilter = array_unique($arrayFilter);
-                $resultData = implode(',', $arrayUniqueFilter);
+                $arrayUniqueMap = array_map(function ($v) {
+                    return trim($v, '-');
+                }, $arrayUniqueFilter);
+                $resultData = implode(',', $arrayUniqueMap);
             }
         }
 

@@ -595,7 +595,11 @@ class CategoryService extends AbstractModel
                 $arrayMapSpaceWord = array_map(function ($v) {
                     return str_replace(' ', '', $v);
                 }, $resultSpaceWord);
-                $prepareDataForGINSearch .= '|' . implode('|', $arrayMapSpaceWord);
+                if (strlen($prepareDataForGINSearch)) {
+                    $prepareDataForGINSearch .= '|' . implode('|', $arrayMapSpaceWord);
+                } else {
+                    $prepareDataForGINSearch .= implode('|', $arrayMapSpaceWord);
+                }
             }
         }
         return $prepareDataForGINSearch;

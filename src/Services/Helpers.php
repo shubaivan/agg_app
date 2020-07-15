@@ -208,7 +208,7 @@ class Helpers
             $arrayMap = array_map(function ($v) {
                 return '\b'.trim($v).'\b';
             }, $arrayMap);
-
+            $arrayMap = array_unique($arrayMap);
             $implode = implode('|', $arrayMap);
 
             $this->redisHelper

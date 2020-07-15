@@ -17,8 +17,11 @@ class ElodiService implements IdentityGroup
         $name = $product->getName();
         $explodeName = explode(' - ', $name);
         if (count($explodeName) > 1) {
-            $groupIdentity = str_replace(' ', '_', mb_strtolower(array_shift($explodeName)));
-            $product->setGroupIdentity($groupIdentity);
+            $getMatchPartName = array_shift($explodeName);
+        } else {
+            $getMatchPartName = $name;
         }
+        $groupIdentity = str_replace(' ', '_', mb_strtolower($getMatchPartName));
+        $product->setGroupIdentity($groupIdentity);
     }
 }
