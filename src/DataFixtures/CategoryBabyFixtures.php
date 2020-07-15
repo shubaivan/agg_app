@@ -188,7 +188,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                 ',
             ],
             [
-                'name' => 'Väskor',
+                'name' => 'Baby Väskor',
                 'key_word' => '
                     Väskor, påse, väska, säck,
                     Bags, Bag, bagful, sack        
