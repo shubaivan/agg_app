@@ -13,16 +13,6 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
     private $configurations = [
         'KATEGORI' => [
             [
-                'name' => 'Boots',
-                'key_word' => '
-                    Boots, Känga, Kängor                     
-                ',
-                'sub_key_word' => [
-                    'subBoots' => 'Boots',
-                    'Kängor' => 'Kängor'
-                ]
-            ],
-            [
                 'name' => 'Sneakers',
                 'key_word' => '
                     Sneaker, Sneakers, Basketball Sneakers, Basketball Sneaker, Slipp-on sneaker, Gympaskor, Gympasko                     
@@ -56,13 +46,14 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
             [
                 'name' => 'Boots, stövlar & kängor',
                 'key_word' => '
-                Vinter Kängor, Vinterkängor, Vinterkänga, Vinter Känga, Vinterboots, Vinterboot, Vinter Boots, Vinter Boot, Vinterskor, Vinter Skor, Vinter Sko, Vinter Skor, 
-                Vinterstövlar, Vinterstövel, Vinter Stövlar, Vinter Stövel, Kängor, Känga, Boots, Boot, BTS stövlar                     
-            ',
+                    Vinter Kängor, Vinterkängor, Vinterkänga, Vinter Känga, Vinterboots, Vinterboot, Vinter Boots, Vinter Boot, Vinterskor, Vinter Skor, Vinter Sko, Vinter Skor, 
+                    Vinterstövlar, Vinterstövel, Vinter Stövlar, Vinter Stövel, Kängor, Känga, Boots, Boot, BTS stövlar                     
+                ',
                 'sub_key_word' => [
                     'Stövlar' => 'Stövlar',
                     'Kängor' => 'Kängor',
-                ]
+                ],
+                'negative_key_words' => 'Robeez, Shoes, Babyskor, gå-skorna, Sneakers'
             ],
             [
                 'name' => 'Finskor',

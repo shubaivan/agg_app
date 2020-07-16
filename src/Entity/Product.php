@@ -49,6 +49,7 @@ class Product implements EntityValidatorException
     const SERIALIZED_GROUP_LIST = 'product_group_list';
     const SERIALIZED_GROUP_CREATE_IDENTITY = 'product_group_create_identity';
     const SIZE = 'SIZE';
+    const COLOUR = 'COLOUR';
 
     /**
      * @ORM\Id()
@@ -713,6 +714,7 @@ class Product implements EntityValidatorException
     public function setSeparateExtra($key, $value): self
     {
         $value = trim($value);
+        $value = trim($value, '-');
         $extras = $this->getExtras();
 
         if (is_array($extras)) {

@@ -14,30 +14,20 @@ class CategoryBarnFixtures extends AbstractFixtures
             [
                 'name' => 'Ytterkläder',
                 'key_word' => '
-                    jacka, jackor, fleece, flis, Balaclava, Bomberjackor, Capes, Duffelkappor, Dunjackor,
-                    Öronmuffar och vant set, Fleece set, Fleece tröjor, Fleecetröja, Fleece tröja, Fleecebyxa,
-                    Fleece byxa, Fleece byxor, Fleecetröja med huva, Fleecebyxor, Fleecejackor, Fleeceoveraller,
-                    Fleecetröjor, Fleecevanter, Fuskpäls och shearling, Gilet, Jeansjackor Kavajer och blazers,
-                    Leather gloves, Läderjackor, MC-jackor, Militärjackor, Mössa med öronlappar, Mössa,
-                    halsduk och vantar, Mössor, Parkas, Regnhandskar, Regnhatt, Regnjackor, Regnoveraller, Regnställ,
-                    Skaljackor, Regnjacka, Skaloveraller, Skid och thermobyxor, Skidhandskar och vantar, Skidjackor, 
-                    Skidjacka, Skidoveraller, Skidoverall, Solhatt, Vår och höst jackor, Stickade halsdukar, 
-                    Stickat halsduk, Trenchcoat, Träningsjackor, Ullvantar, Vadderade jackor, Vindjackor, Vinterjackor,
-                    Vinteroveraller, Västar, Jeansjacka, Jeansjackor, Längskidjacka, Löparjacka, Utomhus Jacka, 
-                    Seglarjacka, Streetjacka, Vardagsjacka, Softshell, Soft-Shell,
+                    jacka, jackor, fleece, flis, Balaclava, Bomberjackor, Capes, Duffelkappor, Dunjackor, 
+                    Öronmuffar,  Fleecetröja, Fleecebyxa, Fleecetröja med huva, Fleecebyxor, Fleecejackor, 
+                    Fleeceoveraller, Fleecetröjor, Fleecevanter, Gilet, Kavajer, blazers, gloves, Läderjackor, 
+                    MC-jackor, Militärjackor,  Mössa, halsduk, vantar, Mössor, Parkas, Regnhandskar, Regnhatt, 
+                    Regnjackor, Regnoveraller, Regnställ, Skaljackor, Regnjacka, Skaloveraller, Skid, thermobyxor, 
+                    Skidhandskar, Skidjackor, Skidjacka, Skidoveraller, Skidoverall, Solhatt, höst jackor, Stickade, 
+                    Stickat, Trenchcoat, Träningsjackor, Ullvantar, Vindjackor, Vinterjackor, Vinteroveraller, 
+                    Västar, Jeansjacka, Jeansjackor, Längskidjacka, Löparjacka,  Seglarjacka, Streetjacka, 
+                    Vardagsjacka, Softshell, Soft-Shell,
                     
-                    jacket, jackets, fleece, fleece, balaclava, bomber jackets, capes, duffel jackets, 
-                    down jackets, earmuffs, gloves set, fleece set, fleece sweaters, fleece sweater, fleece sweater,
-                    fleece trousers, fleece pants, fleece pants, fleece sweatshirt with hood, Fleece overalls, 
-                    Fleece sweatshirts, Fleece vests, Faux fur, shearling, Gilet, Jeans jackets, Blazers, blazers, 
-                    Leather gloves, Leather jackets, MC jackets, Military jackets, Ear wrap cap, Hat, scarf, mittens, 
-                    Hats, Parkas, Rain gloves, Rain gloves, Rain gloves Raincoat, Ski jackets, Rain jacket, Overalls, 
-                    Ski, Thermo pants, Ski gloves, mittens, Ski jackets, Ski jacket, Ski overalls, Ski overall, 
-                    Sun hat, Spring, fall jackets, Knitted scarves, Knitted scarf, Trench coat, Training jackets, 
-                    Wadded jackets, Woolen jackets Winter overalls, Vests, Jeans jacket, Jeans jackets, 
-                    Cross-country ski jacket, Runner jacket, Outdoor jacket, Outdoor jacket, Sail jacket, Street jacket, 
-                    Everyday jacket, Down Jacket, Softsh ell, Soft-Shell, Raincoat,                     
+                    jacket, jackets, fleece, fleece, balaclava, bomber jackets, capes,  gloves, Blazers, cap, 
+                    Hat, scarf, mittens, Hats, Parkas, Raincoat, Overalls, Thermo, coat, Vests, Raincoat                     
                 ',
+                'negative_key_words' => 'mugghållare, transportväska, chassi, Thule, solhatt, sandal, pärlsammetfilt',
                 'sub_key_word' => [
                     'Balaclava' => 'Balaclava, Balaclavor',
                     'Bomberjackor' => 'Bomberjacka, Bomberjackor, Bomberjacket, Bomber jacket',
@@ -100,13 +90,18 @@ class CategoryBarnFixtures extends AbstractFixtures
             [
                 'name' => 'Toppar & linnen',
                 'key_word' => '
-                    topp, toppar, top, topar, linne, linnen, tanktop, tanktopp,
-                    top, tops, top, tops, linen, linen, tank top, tank top
+                    topp, toppar, topar, linne, linnen, tanktop, tanktopp,
+                    top, tops, linen, linen
                 ',
                 'sub_key_word' => [
                     'Toppar' => 'Topp, Top, Toppar',
                     'Linnen' => 'Linne, Linnen, Tanktop, Tank tops'
                 ],
+                'negative_key_words' => '
+                    Britax, Silver Cross,  Dockorna, Garderob, Ullmössa, mössa, vinterstövlar, 
+                    jacka, gosedjur, dockhusmöbler, outfiten, Safari, Barnsängen, träningar, dockhus, bordslampa, 
+                    Solglasögonen, Barnbok, vinterstöveln, korten
+                ',
             ],
             [
                 'name' => 'Tröjor & koftor',
@@ -120,7 +115,10 @@ class CategoryBarnFixtures extends AbstractFixtures
                     'Cardigans' => 'Cardigan, Cardigans',
                     'Luvtröjor' => 'Luvtröja, Luvtröjor, Hoodie, Hoddies',
                     'Zipjackor' => 'Zipjacka, Zipjackor, Zip jacka, Zip jackor, Zipjacket, Zip jacket, Zip-jacket, Sweatshirtjacket'
-                ]
+                ],
+                'negative_key_words' => '
+                    väggkrok, Byxa, shorts, pants, skirt,  loftsäng
+                ',
             ],
             [
                 'name' => 'Klänningar & Kjolar',
@@ -136,29 +134,33 @@ class CategoryBarnFixtures extends AbstractFixtures
                 ]
             ],
             [
-                'name' => 'Skjortor',
+                'name' => 'Skjortor & Blusar',
                 'key_word' => '
                     skjorta, skjortor, blus, blusar,
                     shirt, shirts, blouse, blouse
                 ',
                 'sub_key_word' => [
-                    'subSkjortor' => 'Skjorta, Skjortor, Shirt, Shirts',
+                    'Skjortor' => 'Skjorta, Skjortor, Shirt, Shirts',
                     'Blusar' => 'Blus, Blusar, Blouse, Blouses'
-                ]
+                ],
+                'negative_key_words' => '
+                    Dress, pant, pants, shorts, Skirt, tee, väggkrok, tröja, Tunika, Topp
+                ',
             ],
             [
                 'name' => 'Byxor & shorts',
                 'key_word' => '
-                    Byxor, Chinos, Jeans, Sweatpants, Leggings, Jeggings, jeansshorts, jeans shorts, byxor, byxa, 
-                    Cargopants, Termobyxor, Termobyxa, Skalbyxor, Skalbyxa, Cargobyxor, 
-                    Cargobyxa, Haremsbyxor, Harembyxa, Mjukisbyxor, Mjukisbyxa, Regnbyxor, Regnbyxa, Shell pants, 
-                    Trekvartsbyxor, Trekvartsbyxa, Capribyxor, Capribyxa, 
+                    Byxor, Chinos, Jeans, Sweatpants, Leggings, Jeggings, shorts, byxa, Cargopants, Termobyxor, 
+                    Termobyxa, Skalbyxor, Skalbyxa, Cargobyxor, Cargobyxa, Haremsbyxor, Harembyxa, Mjukisbyxor, 
+                    Mjukisbyxa, Regnbyxor, Regnbyxa, Trekvartsbyxor, Trekvartsbyxa, Capribyxor, Capribyxa, 
                     Träningsbyxor, Träningsbyxa,
-                    Trousers, Chinos, Jeans, Sweatpants, Leggings, Jeggings, jeans shorts, jeans shorts, trousers, 
-                    trousers, Cargopants, Termobyxor, Termobyxa, Shorts, Skalbyxa, 
-                    Cargobyxor, Cargo Pants, Harem Pants, Harem Pants, Soft Pants, Soft Pants, Rain Pants, Rain Pants, 
-                    Shell Pants, Three Quarter Pants, Three Quarter Pants, 
-                    Capri Pants, Capri Pants, Sweatpants, Sweatshorts
+                    
+                    Trousers, Sweatpants, Cargopants, Shorts, Skalbyxa, 
+                    Cargobyxor, Pants, Sweatpants, Sweatshorts                          
+                ',
+                'negative_key_words' => '
+                    Emmaljunga, babysitter, muslin, Linne, Linnes, strumpor, Jackan, kofta, t-shirt, 
+                    tröja, väggkrok, barnvagnar
                 ',
                 'sub_key_word' => [
                     'Chinos' => 'Chinos',
@@ -201,10 +203,10 @@ class CategoryBarnFixtures extends AbstractFixtures
             [
                 'name' => 'Träningskläder',
                 'key_word' => '
-                    Träningsjacka, Träningsbyxa, Träningstopp, Joggingbyxa, Löparbyxor, Löparjacka, Löparkläder, Träningskläder, Sporttoppar, Sporttopp, Flytväst, Räddningsväst, 
+                    Träningsjacka, Träningsbyxa, Träningstopp, Joggingbyxa, Löparbyxor, Löparjacka, Löparkläder, 
+                    Träningskläder, Sporttoppar, Sporttopp, Flytväst, Räddningsväst, 
                     Dansdräkt, Byxkjol, Tennis T-shirt,
-                    Sweatpants, Sweatpants, Sweatpants, Jogging Pants, Running Pants, Running Jacket, Running Clothes, Sweatwear, Sports Bra, Sportsbra, Lifevest, Sportpants, 
-                    Dancesuit
+                    Sweatpants, Running, Sweatwear, Sports, Sportsbra, Lifevest, Sportpants, Dancesuit
                 ',
                 'sub_key_word' => [
                     'Träningsjackor' => 'Träningsjacka',
@@ -230,7 +232,8 @@ class CategoryBarnFixtures extends AbstractFixtures
                 'sub_key_word' => [
                     'Kavajer' => 'Blazers, Blazer, Kavaj, Kavajer',
                     'Västar' => 'Vest, Vests, Väst'
-                ]
+                ],
+                'negative_key_words' => 'träpussel, Bok, bilderbok'
             ],
             [
                 'name' => 'Jumpsuits',

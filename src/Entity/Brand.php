@@ -80,6 +80,15 @@ class Brand implements EntityValidatorException
 
     public function setBrandName(string $brandName): self
     {
+        if ($brandName == 'Mini Rodini'
+            || $brandName == 'Adidas'
+            || $brandName == 'Lindex'
+            || $brandName == 'Reima'
+            || $brandName == 'Jack & Jones'
+            || $brandName == 'Polarn O. Pyret'
+        ) {
+            $this->top = true;
+        }
         $this->brandName = $brandName;
 
         return $this;

@@ -6,7 +6,7 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class JollyRoomService implements IdentityGroup
+class JollyRoomService extends AbstractShop implements IdentityGroup
 {
     /**
      * name: "Paw Patrol Baddräkt, Lila, 6 År"
@@ -31,13 +31,7 @@ class JollyRoomService implements IdentityGroup
                         $separateColor = array_shift($separateColor);
                     }
                     if (mb_check_encoding($separateColor, "UTF-8")) {
-                        $product->setSeparateExtra('COLOUR', $separateColor);
-                    }
-                }
-                if (preg_match_all('/[0-9]+/', $color, $matchesD)) {
-                    $sizes = array_shift($matchesD);
-                    foreach ($sizes as $size) {
-                        $product->setSeparateExtra(Product::SIZE, $size);
+                        $this->analysisColorValue($separateColor, $product);
                     }
                 }
                 if (count($explodeName) > 0) {
