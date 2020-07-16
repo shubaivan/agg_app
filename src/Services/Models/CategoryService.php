@@ -508,7 +508,7 @@ class CategoryService extends AbstractModel
         if (!strlen($product->getBrand())) {
             return false;
         }
-        $prepareDataForGINSearch = $this->prepareProductDataForMatching($product->getBrand(), true, 2);
+        $prepareDataForGINSearch = $this->prepareProductBrandForMatching($product->getBrand());
         if (!strlen($prepareDataForGINSearch)) {
             return false;
         }
@@ -571,6 +571,11 @@ class CategoryService extends AbstractModel
     private function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
     {
         return $this->tagAwareQueryResultCacheProduct;
+    }
+
+    private function prepareProductBrandForMatching(string $brand)
+    {
+        return preg_replace('/-+/', '-', preg_replace('/ |"|\'|&/', '-', $brand));
     }
 
     /**

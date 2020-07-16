@@ -53,20 +53,21 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     'Stövlar' => 'Stövlar',
                     'Kängor' => 'Kängor',
                 ],
-                'negative_key_words' => 'Robeez, Shoes, Babyskor, gå-skorna, Sneakers'
+                'negative_key_words' => 'Robeez, Shoes, Sneakers, Adidas, Dolce, Gabbana, Easy Peasy, Sandaler, Raspberry, Lacoste, Absorba'
             ],
             [
                 'name' => 'Finskor',
                 'key_word' => '
-                Finskor, Finsko, Festsko, Festskor, Fest sko, Fest skor, Fin sko, Fin skor, Brogue skor, Brogueskor, Bobby skor, Bobbyskor, Lackade skor, Lackade T-skor, Wouf skor, 
-                School skor, Asther skor, Asher skor, Rufus Edge Skor, Blake Street Skor, Rock Verve Läder Skor, Tiny Dusk Skor, Tiny Mist Skor, Etch Spark Skor, 
-                Oxford BTS Brogues Skor, Scape Sky Läder Skor, Etch Strap Lackade Skor, Mendip Root Skor, Street Shine Skor, Drew Star Skor, Groove Skor, Desert Trek, 
-                Hula Thrill Skor, Drew Wow Skor, Venture Walk Skor, Crown Blaze Skor, Junior Riddock Velcro Skor, Junior Arzach Velcro School Skor, Läder Jiri School Skor, 
-                Kick Lo Velcro School Skor                     
-            ',
+                    Finskor, Finsko, Festsko, Festskor, Fest sko, Fest skor, Fin sko, Fin skor, Brogue skor, Brogueskor, Bobby skor, Bobbyskor, Lackade skor, Lackade T-skor, Wouf skor, 
+                    School skor, Asther skor, Asher skor, Rufus Edge Skor, Blake Street Skor, Rock Verve Läder Skor, Tiny Dusk Skor, Tiny Mist Skor, Etch Spark Skor, 
+                    Oxford BTS Brogues Skor, Scape Sky Läder Skor, Etch Strap Lackade Skor, Mendip Root Skor, Street Shine Skor, Drew Star Skor, Groove Skor, Desert Trek, 
+                    Hula Thrill Skor, Drew Wow Skor, Venture Walk Skor, Crown Blaze Skor, Junior Riddock Velcro Skor, Junior Arzach Velcro School Skor, Läder Jiri School Skor, 
+                    Kick Lo Velcro School Skor                     
+                ',
                 'sub_key_word' => [
                     'subFinskor' => 'Finskor, fin sko, fin-sko, festsko, fest sko, fest-sko, festskor, fest skor, fest-skor',
-                ]
+                ],
+                'negative_key_words' => 'midjan'
             ],
             [
                 'name' => 'Espadrillos',
@@ -105,7 +106,8 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     'subTräningsskor' => 'Träningsskor, trainers, trainingshoes',
                     'Fotbollsskor' => 'Fotbollsskor, soccershoes, soccer shoes, fotballshoes',
                     'Ballerinaskor' => 'Ballerinaskor, ballerinas, ballerinashoes',
-                ]
+                ],
+                'negative_key_words' => 'ballerinasko'
             ],
             [
                 'name' => 'Babyskor',

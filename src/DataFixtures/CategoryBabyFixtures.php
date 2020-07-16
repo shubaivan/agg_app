@@ -198,6 +198,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                     Väskor, påse, väska, säck,
                     Bags, Bag, bagful, sack        
                 ',
+                'negative_key_words' => 'skallerljud, resestol, Badkar, Skedar, diskborste, portionspåsar, Korbell, byggklossar, UBBI, bok',
             ],
         ]
     ];

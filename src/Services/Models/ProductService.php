@@ -178,7 +178,7 @@ class ProductService extends AbstractModel
         $search = '';
         $limitation = 5;
         while (!strlen($search)) {
-            $search = $this->prepareDataForGINSearch($searchDataForRelated, $limitation);
+            $search = $this->prepareDataForGINSearch($searchDataForRelated, $limitation, true);
             --$limitation;
         }
         $parameterBag->set('strict', true);

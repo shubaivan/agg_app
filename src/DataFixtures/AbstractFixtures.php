@@ -342,9 +342,14 @@ abstract class AbstractFixtures extends Fixture
     /**
      * @param string $keyWords
      * @param bool $withNewLine
+     * @param bool $setInDictionary
      * @return string
      */
-    protected function processingKeyWords(string $keyWords, bool $withNewLine = false): string
+    protected function processingKeyWords(
+        string $keyWords,
+        bool $withNewLine = false,
+        bool $setInDictionary = true
+    ): string
     {
         $this->bufferPositiveKeyWords = [];
         //        $keyWords = preg_replace('/\s+/', '', $keyWords);
@@ -364,7 +369,9 @@ abstract class AbstractFixtures extends Fixture
                 continue;
             }
             if (preg_match_all('!\s+!', $word, $match)) {
-                $this->fillDictionary($word);
+                if ($setInDictionary) {
+                    $this->fillDictionary($word);
+                }
             } else {
                 if (!$this->minLen || $strlen < $this->minLen) {
                     $this->minLen = $strlen;

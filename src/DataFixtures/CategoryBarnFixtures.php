@@ -14,16 +14,10 @@ class CategoryBarnFixtures extends AbstractFixtures
             [
                 'name' => 'Ytterkläder',
                 'key_word' => '
-                    jacka, jackor, fleece, flis, Balaclava, Bomberjackor, Capes, Duffelkappor, Dunjackor, 
-                    Öronmuffar,  Fleecetröja, Fleecebyxa, Fleecetröja med huva, Fleecebyxor, Fleecejackor, 
-                    Fleeceoveraller, Fleecetröjor, Fleecevanter, Gilet, Kavajer, blazers, gloves, Läderjackor, 
-                    MC-jackor, Militärjackor,  Mössa, halsduk, vantar, Mössor, Parkas, Regnhandskar, Regnhatt, 
-                    Regnjackor, Regnoveraller, Regnställ, Skaljackor, Regnjacka, Skaloveraller, Skid, thermobyxor, 
-                    Skidhandskar, Skidjackor, Skidjacka, Skidoveraller, Skidoverall, Solhatt, höst jackor, Stickade, 
-                    Stickat, Trenchcoat, Träningsjackor, Ullvantar, Vindjackor, Vinterjackor, Vinteroveraller, 
-                    Västar, Jeansjacka, Jeansjackor, Längskidjacka, Löparjacka,  Seglarjacka, Streetjacka, 
-                    Vardagsjacka, Softshell, Soft-Shell,
-                    
+                    jacka, jackor, fleece, flis, Balaclava, Bomberjackor, Capes,Duffelkappor, Dunjackor, Gilet, 
+                    Kavajer, gloves, Läderjackor, MC-jackor,  Mössa, halsduk, vantar, Parkas, Regnhandskar, 
+                    Regnhatt, thermobyxor, Skidhandska, kidjackor, Skidoveraller, Skidoverall, Solhatt, Trenchcoat,  
+                    Vinterjackor, Vardagsjacka,  Streetjacka, Löparjacka,                    
                     jacket, jackets, fleece, fleece, balaclava, bomber jackets, capes,  gloves, Blazers, cap, 
                     Hat, scarf, mittens, Hats, Parkas, Raincoat, Overalls, Thermo, coat, Vests, Raincoat                     
                 ',
@@ -187,6 +181,7 @@ class CategoryBarnFixtures extends AbstractFixtures
                     Underwear, panties, stockings, tights, leg warmers, bloomers, boxer shorts, long johns, sports tops, sports tops, tights, tights, stockings, panties, Socks
                     Panty, Pantyhose, Pantyhose Underwear set, Underliners, Underliners, Trunks
                 ',
+                'negative_key_words' => 'Kompressionsstrumpor',
                 'sub_key_word' => [
                     'Kalsonger' => 'Kalsonger, Kalsong, Underwear',
                     'Trosor' => 'Trosor, Trosa, Panties',

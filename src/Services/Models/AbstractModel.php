@@ -14,6 +14,12 @@ abstract class AbstractModel
         if ($relation) {
             $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®]+';
         } else {
+            if (preg_match_all('/\b\w*\&+\w*\b/', $matchData, $m)) {
+                $resultMatchAmpersand = array_shift($m);
+                foreach ($resultMatchAmpersand as $ampersand) {
+                    $matchData = preg_replace("/$ampersand/", str_replace('&', '-', $ampersand), $matchData);
+                }
+            }
             $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®\-]+';
         }
 

@@ -56,15 +56,18 @@
                                                         <li>
                                                             {{ blockNameKey }}
                                                         </li>
+                                                        {% set total_block_value = 0 %}
                                                         {% if blockNameValue is iterable %}
                                                             <ul>
                                                                 {% for shopKey, shopValue in blockNameValue %}
                                                                     <li>
+                                                                        {% set total_block_value = total_block_value + shopValue %}
                                                                         {{ shopKey|capitalize }} - {{ shopValue }}
                                                                     </li>
                                                                 {% endfor %}
                                                             </ul>
                                                         {% endif %}
+                                                        <b>Total: {{ total_block_value }}</b>
                                                     {% endfor %}
                                                 {% endif %}
                                             {% endfor %}
