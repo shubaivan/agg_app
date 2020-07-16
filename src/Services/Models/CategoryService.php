@@ -575,7 +575,7 @@ class CategoryService extends AbstractModel
 
     private function prepareProductBrandForMatching(string $brand)
     {
-        return preg_replace('/-+/', '-', preg_replace('/ |"|\'|&/', '-', $brand));
+        return preg_replace('/-+/', '-', preg_replace('/ |\.|\!|\:|"|\'|&/', '-', $brand));
     }
 
     /**
