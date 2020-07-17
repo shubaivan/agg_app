@@ -573,9 +573,20 @@ class CategoryService extends AbstractModel
         return $this->tagAwareQueryResultCacheProduct;
     }
 
-    private function prepareProductBrandForMatching(string $brand)
+    /**
+     * @param string|null $brand
+     * @return string|string[]|null
+     */
+    private function prepareProductBrandForMatching(?string $brand)
     {
-        return preg_replace('/-+/', '-', preg_replace('/ |\.|\!|\:|"|\'|&/', '-', $brand));
+        if (!$brand) {
+            return null;
+        }
+        return preg_replace(
+            '/-+/',
+            '-',
+            preg_replace('/ |\(|\)|\.|\!|\:|"|\'|&/','-', $brand)
+        );
     }
 
     /**

@@ -27,7 +27,7 @@ final class Version20200715074432 extends AbstractMigration
 begin
     IF (new.property_name = \'GLOBAL_NEGATIVE_BRAND_KEY_WORDS\') THEN
         new.data_fts :=
-         setweight(to_tsvector(\'my_swedish\', coalesce(regexp_replace(regexp_replace(new.property_data, \' |\.|!|:|"|\'\'|&\', \'-\', \'g\'), \'-+\', \'-\', \'g\'),\'\')), \'A\');           	
+         setweight(to_tsvector(\'my_swedish\', coalesce(regexp_replace(regexp_replace(new.property_data, \' |\(|\)|\.|!|:|"|\'\'|&\', \'-\', \'g\'), \'-+\', \'-\', \'g\'),\'\')), \'A\');           	
         return new;
     
     ELSE
