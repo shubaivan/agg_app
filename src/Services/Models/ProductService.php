@@ -280,9 +280,9 @@ class ProductService extends AbstractModel
         $parameterBag->set(self::WITHOUT_FACET, true);
 
         $collection = $this->getProductRepository()
-            ->fullTextSearchByParameterBag($parameterBag);
+            ->fullTextSearchByParameterBag($parameterBag, false, 180);
         $count = $this->getProductRepository()
-            ->fullTextSearchByParameterBag($parameterBag, true);
+            ->fullTextSearchByParameterBag($parameterBag, true, 180);
 
         return $this->getSearchProductCollection($count, $collection);
     }

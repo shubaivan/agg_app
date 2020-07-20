@@ -73,9 +73,13 @@ class CategoryRepository extends ServiceEntityRepository
         ParamFetcher $paramFetcher,
         $count = false)
     {
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder
+            ->where('s.hotCategory = :hotCategory')
+            ->setParameter('hotCategory', true);
         return $this->getList(
             $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
-            $this->createQueryBuilder('s'),
+            $queryBuilder,
             $paramFetcher,
             $count
         );
@@ -88,31 +92,6 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function getCustomCategories(ParamFetcher $paramFetcher)
     {
-//        $subYes = $this->getEntityManager()->createQueryBuilder();
-//        $subYes
-//            ->select("cr_y")
-//            ->from(CategoryRelations::class,"cr_y")
-//            ->innerJoin('cr_y.mainCategory', 'cr_ym')
-//            ->where($subYes->expr()->eq('cr_ym.id', 'c.id'));
-//
-//        $subNot = $this->getEntityManager()->createQueryBuilder();
-//        $subNot
-//            ->select("cr_n")
-//            ->from(CategoryRelations::class,"cr_n")
-//            ->innerJoin('cr_y.subCategory', 'cr_nm')
-//            ->where($subNot->expr()->eq('cr_nm.id', 'c.id'));
-//
-//        $qb = $this->createQueryBuilder('c');
-//        $qb
-//            ->select('c')
-//            ->where($qb->expr()->exists($subYes->getDQL()))
-//            ->andWhere($qb->expr()->not($subNot->getDQL()));
-//
-//
-//        $query = $qb->getQuery();
-//        $DQL = $query->getDQL();
-//        $SQL = $query->getSQL();
-//        $result = $query->getResult();
         $rs = $this->getMainSubCategoryIds();
         $mainCategoryIds = [];
         foreach ($rs as $id) {

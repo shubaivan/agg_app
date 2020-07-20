@@ -48,7 +48,7 @@ class Category implements EntityValidatorException
      * @ORM\Column(type="string", length=255)
      * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST, Category::SERIALIZED_GROUP_RELATIONS_LIST})
      * @Assert\NotBlank(groups={Category::SERIALIZED_GROUP_CREATE})
-     * @Annotation\Accessor(getter="getCategoryNameAccessor")
+     * @Annotation\Accessor(getter="getCategoryNameAccessor", setter="setCategoryNameAccessor")
      */
     private $categoryName;
 
@@ -89,6 +89,11 @@ class Category implements EntityValidatorException
      */
     private $customeCategory = false;
 
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
+     */
+    private $hotCategory = false;
 
     /**
      * @var CategorySection
@@ -264,5 +269,18 @@ class Category implements EntityValidatorException
     public function getCategoryNameAccessor()
     {
         return preg_replace('/sub/', '', $this->categoryName);
+    }
+
+    public function setCategoryNameAccessor(?string $categoryName = null)
+    {
+        if ($categoryName) {
+            if ($categoryName == 'Sneakers'
+                || $categoryName == 'Gummistövlar'
+                || $categoryName == 'Tofflor & Sandaler'
+            ) {
+                $this->hotCategory = true;
+            }
+            $this->categoryName = $categoryName;
+        }
     }
 }

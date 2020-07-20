@@ -76,6 +76,17 @@ class CategoryService extends AbstractModel
         $this->redisHelper = $redisHelper;
     }
 
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @return CategoriesCollection
+     * @throws CacheException
+     */
+    public function getHotCategories(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getCategoryRepository()->getEntityList($paramFetcher);
+        $count = $this->getCategoryRepository()->getEntityList($paramFetcher, true);
+        return (new CategoriesCollection($collection, $count));
+    }
 
     /**
      * @param ParamFetcher $paramFetcher
