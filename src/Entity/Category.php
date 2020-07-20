@@ -277,6 +277,9 @@ class Category implements EntityValidatorException
             if ($categoryName == 'Sneakers'
                 || $categoryName == 'Gummistövlar'
                 || $categoryName == 'Tofflor & Sandaler'
+                || $categoryName == 'Babylek'
+                || $categoryName == 'T-shirts'
+                || $categoryName == 'Regnjackor'
             ) {
                 $this->hotCategory = true;
             }
