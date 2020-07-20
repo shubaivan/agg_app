@@ -122,7 +122,18 @@ class Category implements EntityValidatorException
 
     public function setCategoryName(string $categoryName): self
     {
-        $this->categoryName = $categoryName;
+        if ($categoryName) {
+            if ($categoryName == 'Sneakers'
+                || $categoryName == 'Gummistövlar'
+                || $categoryName == 'Tofflor & Sandaler'
+                || $categoryName == 'Babylek'
+                || $categoryName == 'T-shirts'
+                || $categoryName == 'Regnjackor'
+            ) {
+                $this->hotCategory = true;
+            }
+            $this->categoryName = $categoryName;
+        }
 
         return $this;
     }
@@ -273,17 +284,6 @@ class Category implements EntityValidatorException
 
     public function setCategoryNameAccessor(?string $categoryName = null)
     {
-        if ($categoryName) {
-            if ($categoryName == 'Sneakers'
-                || $categoryName == 'Gummistövlar'
-                || $categoryName == 'Tofflor & Sandaler'
-                || $categoryName == 'Babylek'
-                || $categoryName == 'T-shirts'
-                || $categoryName == 'Regnjackor'
-            ) {
-                $this->hotCategory = true;
-            }
-            $this->categoryName = $categoryName;
-        }
+        $this->setCategoryName($categoryName);
     }
 }
