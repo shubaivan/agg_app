@@ -51,6 +51,11 @@ class Product implements EntityValidatorException
     const SIZE = 'SIZE';
     const COLOUR = 'COLOUR';
 
+    public static $enumInStock = [
+        'yes' => '1',
+        'no' => '0'
+    ];
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -144,13 +149,9 @@ class Product implements EntityValidatorException
     private $currency;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="integer", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Length(
-     *      min = 1,
-     *      max = 255,
-     *     groups={Product::SERIALIZED_GROUP_CREATE}
-     * )
+     * @Annotation\Accessor(setter="setInStockAccessor", getter="getInStockAccessor")
      */
     private $instock;
 
@@ -851,6 +852,29 @@ class Product implements EntityValidatorException
             }
 
             $this->setBrand(ucfirst($brand));
+        }
+    }
+
+    public function getInStockAccessor()
+    {
+        $inStockValue = array_search($this->instock, self::$enumInStock);
+        if ($inStockValue) {
+            return $inStockValue;
+        }
+    }
+
+    public function setInStockAccessor(?string $value = null)
+    {
+        if (!$value) {
+            return false;
+        }
+
+        if (in_array($value, self::$enumInStock)) {
+            $this->instock = (int)$value;
+        }
+
+        if (array_key_exists($value, self::$enumInStock)) {
+            $this->instock = (int)self::$enumInStock[$value];
         }
     }
 
