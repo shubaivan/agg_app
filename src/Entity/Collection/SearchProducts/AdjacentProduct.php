@@ -102,6 +102,7 @@ class AdjacentProduct extends CommonProduct
      * @Annotation\Type("string")
      * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
      *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Accessor(getter="getInStockAccessor")
      */
     private $instock;
 
@@ -115,5 +116,13 @@ class AdjacentProduct extends CommonProduct
     {
         $ex = $this->extras ?? [];
         return $this->emptyArrayAsObject($ex);
+    }
+
+    public function getInStockAccessor()
+    {
+        $inStockValue = array_search($this->instock, Product::$enumInStock);
+        if ($inStockValue) {
+            return $inStockValue;
+        }
     }
 }

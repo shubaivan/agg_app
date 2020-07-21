@@ -24,10 +24,25 @@ abstract class AbstractShop
         }
 
         if (preg_match_all('/[0-9]+/', $color, $matchesD)
-            || preg_match("/$one/", $color, $foundOne)
-            || preg_match("/$two/", $color, $foundTwo)
         ) {
             $product->setSeparateExtra(Product::SIZE, $color);
+        }
+
+        if (preg_match_all("/$one/", $color, $foundOne)) {
+            $value = array_shift($foundOne);
+            if (is_array($value)) {
+                $value = array_shift($value);
+                $product->setSeparateExtra(Product::SIZE, $value);
+            }
+        }
+
+        if (preg_match_all("/$two/", $color, $foundTwo)
+        ) {
+            $value = array_shift($foundTwo);
+            if (is_array($value)) {
+                $value = array_shift($value);
+                $product->setSeparateExtra(Product::SIZE, $value);
+            }
         }
     }
 }
