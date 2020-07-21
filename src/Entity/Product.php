@@ -684,7 +684,6 @@ class Product implements EntityValidatorException
                             if ($explode[0] == self::SIZE) {
                                 if (preg_match_all('/[0-9]+/', $explode[1], $matchesD)) {
                                     $sizes = array_shift($matchesD);
-                                    $sizes = array_unique($sizes);
                                     $arrayMapSizes = array_map(function ($v) {
                                         if (mb_substr($v, 0, 1) == '0') {
                                             return mb_substr($v, 1);
@@ -695,8 +694,9 @@ class Product implements EntityValidatorException
                                     $result[$explode[0]] = $arrayMapSizes;
                                 } else {
                                     $result[$explode[0]] = [];
-                                    array_push($result[$explode[0]], $explode[1]);
                                 }
+                                array_push($result[$explode[0]], $explode[1]);
+                                $result[$explode[0]] = array_unique($result[$explode[0]]);
                             } else {
                                 $result[$explode[0]] = $explode[1];
                             }
@@ -867,8 +867,14 @@ class Product implements EntityValidatorException
         }
     }
 
+    /**
+     * @return false|int|string|null
+     */
     public function getInStockAccessor()
     {
+        if ($this->instock === null) {
+            return $this->instock;
+        }
         $inStockValue = array_search($this->instock, self::$enumInStock);
         if ($inStockValue) {
             return $inStockValue;
