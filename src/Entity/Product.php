@@ -684,11 +684,19 @@ class Product implements EntityValidatorException
                             if ($explode[0] == self::SIZE) {
                                 if (preg_match_all('/[0-9]+/', $explode[1], $matchesD)) {
                                     $sizes = array_shift($matchesD);
-                                    $result[$explode[0]] = $sizes;
+                                    $sizes = array_unique($sizes);
+                                    $arrayMapSizes = array_map(function ($v) {
+                                        if (mb_substr($v, 0, 1) == '0') {
+                                            return mb_substr($v, 1);
+                                        }
+
+                                        return $v;
+                                    }, $sizes);
+                                    $result[$explode[0]] = $arrayMapSizes;
                                 } else {
                                     $result[$explode[0]] = [];
+                                    array_push($result[$explode[0]], $explode[1]);
                                 }
-                                array_push($result[$explode[0]], $explode[1]);
                             } else {
                                 $result[$explode[0]] = $explode[1];
                             }
@@ -723,6 +731,9 @@ class Product implements EntityValidatorException
             if ($key === self::SIZE) {
                 if (isset($extras[$key]) && !is_array($extras[$key])) {
                     unset($extras[$key]);
+                }
+                if (mb_substr($value, 0, 1) == '0') {
+                    $value = mb_substr($value, 1);
                 }
                 $extras[$key][] = $value;
                 $this->extras = $extras;
