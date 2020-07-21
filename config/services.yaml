@@ -153,6 +153,7 @@ services:
 
     App\Services\Queue\ProductDataRowHandler:
       arguments:
+        $vacuumBus: '@vacuum.bus'
         $forceAnalysis: '%force_analysis%'
       lazy: true
 
@@ -195,6 +196,12 @@ services:
 
     App\QueueModelHandlers\AdtractionDataRowHandler:
       tags: [{ name: messenger.message_handler, bus: products.bus }]
+      # prevent handlers from being registered twice (or you can remove
+      # the MessageHandlerInterface that autoconfigure uses to find handlers)
+      autoconfigure: false
+
+    App\QueueModelHandlers\VacuumJobHandler:
+      tags: [{ name: messenger.message_handler, bus: vacuum.bus }]
       # prevent handlers from being registered twice (or you can remove
       # the MessageHandlerInterface that autoconfigure uses to find handlers)
       autoconfigure: false

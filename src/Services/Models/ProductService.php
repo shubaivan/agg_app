@@ -181,7 +181,7 @@ class ProductService extends AbstractModel
         $search = '';
         $limitation = 5;
         while (!strlen($search)) {
-            $search = $this->prepareDataForGINSearch($searchDataForRelated, $limitation);
+            $search = $this->prepareDataForGINSearch($searchDataForRelated, $limitation, true);
             --$limitation;
         }
         $parameterBag->set('strict', true);
@@ -283,9 +283,9 @@ class ProductService extends AbstractModel
         $parameterBag->set(self::WITHOUT_FACET, true);
 
         $collection = $this->getProductRepository()
-            ->fullTextSearchByParameterBag($parameterBag);
+            ->fullTextSearchByParameterBag($parameterBag, false, 180);
         $count = $this->getProductRepository()
-            ->fullTextSearchByParameterBag($parameterBag, true);
+            ->fullTextSearchByParameterBag($parameterBag, true, 180);
 
         return $this->getSearchProductCollection($count, $collection);
     }

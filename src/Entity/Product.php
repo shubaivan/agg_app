@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use App\Validation\Constraints\CustomUrl;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
@@ -48,6 +49,7 @@ class Product implements EntityValidatorException
     const SERIALIZED_GROUP_LIST = 'product_group_list';
     const SERIALIZED_GROUP_CREATE_IDENTITY = 'product_group_create_identity';
     const SIZE = 'SIZE';
+    const COLOUR = 'COLOUR';
 
     /**
      * @ORM\Id()
@@ -155,7 +157,7 @@ class Product implements EntityValidatorException
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Url(
+     * @CustomUrl(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
      */
@@ -164,7 +166,7 @@ class Product implements EntityValidatorException
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Url(
+     * @CustomUrl(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
      */
@@ -173,7 +175,7 @@ class Product implements EntityValidatorException
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Url(
+     * @CustomUrl(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
      */
@@ -187,6 +189,7 @@ class Product implements EntityValidatorException
      *      max = 255,
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
+     * @Annotation\Accessor(setter="setBrandAccessor")
      */
     private $brand;
 
@@ -261,6 +264,11 @@ class Product implements EntityValidatorException
      * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
      */
     private $matchForCategories = false;
+
+    /**
+     * @var string
+     */
+    private $matchMainCategoryData = '';
 
     public function __construct()
     {
@@ -706,6 +714,7 @@ class Product implements EntityValidatorException
     public function setSeparateExtra($key, $value): self
     {
         $value = trim($value);
+        $value = trim($value, '-');
         $extras = $this->getExtras();
 
         if (is_array($extras)) {
@@ -813,6 +822,35 @@ class Product implements EntityValidatorException
             $arrayCategoryNames = array_unique($arrayCategoryNames);
             $implode = implode(' - ', $arrayCategoryNames);
             $this->setCategory($implode);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getMatchMainCategoryData(): string
+    {
+        return $this->matchMainCategoryData;
+    }
+
+    /**
+     * @param string $matchMainCategoryData
+     * @return Product
+     */
+    public function setMatchMainCategoryData(string $matchMainCategoryData): Product
+    {
+        $this->matchMainCategoryData = $matchMainCategoryData;
+        return $this;
+    }
+
+    public function setBrandAccessor($brand)
+    {
+        if ($brand && strlen($brand)) {
+            if ($brand == 'Esprit'){
+                $brand = 'ESPRIT';
+            }
+
+            $this->setBrand(ucfirst($brand));
         }
     }
 

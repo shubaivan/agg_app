@@ -9,20 +9,35 @@ abstract class AbstractModel
      * @param int $limitations
      * @return string
      */
-    public function prepareDataForGINSearch(string $matchData, int $limitations = 4)
+    public function prepareDataForGINSearch(string $matchData, int $limitations = 4, bool $relation = false)
     {
+        if ($relation) {
+            $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®]+';
+        } else {
+            if (preg_match_all('/\b\w*\&+\w*\b/', $matchData, $m)) {
+                $resultMatchAmpersand = array_shift($m);
+                foreach ($resultMatchAmpersand as $ampersand) {
+                    $matchData = preg_replace("/$ampersand/", str_replace('&', '-', $ampersand), $matchData);
+                }
+            }
+            $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®\-]+';
+        }
+
         $resultData = '';
-        if (preg_match_all('/[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™]+/',$matchData,$matches)) {
+        if (preg_match_all("/$pattern/",$matchData,$matches)) {
             $matchData = array_shift($matches);
             if (is_array($matchData) && count($matchData)) {
 
                 $arrayFilter = array_filter($matchData, function ($v) use ($limitations) {
-                    if (strlen($v) > $limitations && mb_check_encoding($v, "UTF-8")) {
+                    if (strlen($v) >= $limitations && mb_check_encoding($v, "UTF-8")) {
                         return true;
                     }
                 });
                 $arrayUniqueFilter = array_unique($arrayFilter);
-                $resultData = implode(',', $arrayUniqueFilter);
+                $arrayUniqueMap = array_map(function ($v) {
+                    return trim($v, '-');
+                }, $arrayUniqueFilter);
+                $resultData = implode(',', $arrayUniqueMap);
             }
         }
 

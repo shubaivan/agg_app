@@ -19,9 +19,11 @@ class AhlensService implements IdentityGroup
         }
         $productUrl = preg_replace("/[^\/]+$/", '', $productUrl);
         $lastChar = substr($productUrl, -1);
-        if ($lastChar == '/') {
+        while ($lastChar == '/') {
             $productUrl = substr($productUrl, 0, -1);
+            $lastChar = substr($productUrl, -1);
         }
+
         if (preg_match("/[^\/]+$/", $productUrl, $matches) > 0) {
             $sku = $product->getSku();
             $skuId = mb_substr($sku, 0, 3);

@@ -218,11 +218,15 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @param ParameterBag $parameterBag
      * @param bool $count
+     * @param int|null $lifeTime
      * @return int|mixed[]
      * @throws \Doctrine\DBAL\Cache\CacheException
-     * @throws \Exception
      */
-    public function fullTextSearchByParameterBag(ParameterBag $parameterBag, $count = false)
+    public function fullTextSearchByParameterBag(
+        ParameterBag $parameterBag,
+        $count = false,
+        ?int $lifeTime = 0
+    )
     {
         $this->clearObjectPropertyData();
 
@@ -274,7 +278,7 @@ class ProductRepository extends ServiceEntityRepository
             $this->params,
             $this->types,
             ['product_full_text_search'],
-            0, $count ? "product_search_cont" : "product_search_collection"
+            $lifeTime, $count ? "product_search_cont" : "product_search_collection"
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
             ->prepareParamsForExecuteCacheQuery();

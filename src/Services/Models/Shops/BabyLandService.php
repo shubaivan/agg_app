@@ -4,7 +4,7 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class BabyLandService implements IdentityGroup
+class BabyLandService extends AbstractShop implements IdentityGroup
 {
     /**
      * name: "Color Kids Mössa & Vantar (Candy pink) (48)"
@@ -25,16 +25,13 @@ class BabyLandService implements IdentityGroup
         if ($m > 0) {
             $extras = array_shift($m);
             if (isset($extras[0])) {
-                $color = $extras[0];
-                $color = str_replace('(', '', $color);
-                $color = str_replace(')', '', $color);
-                $product->setSeparateExtra('COLOR', $color);
+                $this->analysisColorValue($extras[0], $product);
             }
             if (isset($extras[1])) {
                 $size = $extras[1];
                 $size = str_replace('(', '', $size);
                 $size = str_replace(')', '', $size);
-                $product->setSeparateExtra('SIZE', $size);
+                $product->setSeparateExtra(Product::SIZE, $size);
             }
         }
     }

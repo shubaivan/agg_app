@@ -13,6 +13,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class Helpers
 {
+    const THESAURUS_MY_SWEDISH_REGULARS = 'thesaurus_my_swedish_regulars';
     /**
      * @var Serializer
      */
@@ -105,6 +106,14 @@ class Helpers
 
         $search = str_replace(':*|:*|', ':*|', $search);
         $search = str_replace('", "', '|', $search);
+        if (preg_match_all("/\(.*?\):\*/", $search, $m)) {
+            $matchResults = array_shift($m);
+            foreach ($matchResults as $matchResult) {
+                $matchResultTransform = preg_replace("/\|/", '&', $matchResult);
+                $matchResultTransform = trim($matchResultTransform, ':*');
+                $search = str_replace($matchResult, $matchResultTransform, $search);
+            }
+        }
 
         return $search;
     }
@@ -177,22 +186,35 @@ class Helpers
      */
     public function pregWordsFromDictionary(string $inputString)
     {
-        $fileGetContents = file_get_contents(
-            $this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths'
-        );
-        $explode = explode(PHP_EOL, $fileGetContents);
-        $arrayMap = array_map(function ($v) {
-            $explodeValue = explode(':', $v);
-            if (count($explodeValue)) {
-                return trim($explodeValue[0]);
-            }
-        }, $explode);
+        $implode = $this->redisHelper->get(self::THESAURUS_MY_SWEDISH_REGULARS);
+        if (!$implode) {
+            $fileGetContents = file_get_contents(
+                $this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths'
+            );
+            $explode = explode(PHP_EOL, $fileGetContents);
+            $arrayMap = array_map(function ($v) {
+                $explodeValue = explode(':', $v);
+                if (count($explodeValue)) {
+                    $currentWord = trim($explodeValue[0]);
+                    if (strlen($currentWord) > 0) {
+                        return $currentWord;
+                    }
+                }
+            }, $explode);
+            $arrayMap = array_filter($arrayMap, function($value) {
+                return !is_null($value) && $value !== '';
+                }
+            );
+            $arrayMap = array_map(function ($v) {
+                return '\b'.trim($v).'\b';
+            }, $arrayMap);
+            $arrayMap = array_unique($arrayMap);
+            $implode = implode('|', $arrayMap);
 
-        $arrayMap = array_map(function ($v) {
-            return '\b'.trim($v).'\b';
-        }, $arrayMap);
+            $this->redisHelper
+                ->set(self::THESAURUS_MY_SWEDISH_REGULARS, $implode, 31536000);
+        }
 
-        $implode = implode('|', $arrayMap);
         preg_match_all("/$implode/u", $inputString, $mt);
         $result = preg_replace("/$implode/u", '', $inputString);
 

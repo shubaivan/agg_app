@@ -2,194 +2,26 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Category;
-use App\Entity\CategoryConfigurations;
-use App\Entity\CategoryRelations;
-use App\Kernel;
-use App\Repository\CategoryRelationsRepository;
-use App\Repository\CategoryRepository;
-use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\HttpKernel\KernelInterface;
 
-class CategoryBarnFixtures extends Fixture
+class CategoryBarnFixtures extends AbstractFixtures
 {
-    private $manager;
-
-    /**
-     * @var integer
-     */
-    private $minLen;
-
     /**
      * @var array
      */
-    private $wordWithSpace = [];
-
-    /**
-     * @var Kernel
-     */
-    private $kernel;
-
-    private $swStopWords = '
-        och
-        det
-        att
-        i
-        en
-        jag
-        hon
-        som
-        han
-        på
-        den
-        med
-        var
-        sig
-        för
-        så
-        till
-        är
-        men
-        ett
-        om
-        hade
-        de
-        av
-        icke
-        mig
-        du
-        henne
-        då
-        sin
-        nu
-        har
-        inte
-        hans
-        honom
-        skulle
-        hennes
-        där
-        min
-        man
-        ej
-        vid
-        kunde
-        något
-        från
-        ut
-        när
-        efter
-        upp
-        vi
-        dem
-        vara
-        vad
-        över
-        än
-        dig
-        kan
-        sina
-        här
-        ha
-        mot
-        alla
-        under
-        någon
-        eller
-        allt
-        mycket
-        sedan
-        ju
-        denna
-        själv
-        detta
-        åt
-        utan
-        varit
-        hur
-        ingen
-        mitt
-        ni
-        bli
-        blev
-        oss
-        din
-        dessa
-        några
-        deras
-        blir
-        mina
-        samma
-        vilken
-        er
-        sådan
-        vår
-        blivit
-        dess
-        inom
-        mellan
-        sådant
-        varför
-        varje
-        vilka
-        ditt
-        vem
-        vilket
-        sitta
-        sådana
-        vart
-        dina
-        vars
-        vårt
-        våra
-        ert
-        era
-        vilkas
-    ';
-
-    /**
-     * CategoryBarnFixtures constructor.
-     * @param KernelInterface $kernel
-     */
-    public function __construct(KernelInterface $kernel)
-    {
-        $this->kernel = $kernel;
-    }
-
-
-    public function load(ObjectManager $manager)
-    {
-        $this->reUpdateFiles();
-        $this->manager = $manager;
-        $configurations = [
+    private $configurations = [
+        'KATEGORI' => [
             [
                 'name' => 'Ytterkläder',
                 'key_word' => '
-                    jacka, jackor, fleece, flis, Balaclava, Bomberjackor, Capes, Duffelkappor, Dunjackor,
-                    Öronmuffar och vant set, Fleece set, Fleece tröjor, Fleecetröja, Fleece tröja, Fleecebyxa,
-                    Fleece byxa, Fleece byxor, Fleecetröja med huva, Fleecebyxor, Fleecejackor, Fleeceoveraller,
-                    Fleecetröjor, Fleecevanter, Fuskpäls och shearling, Gilet, Jeansjackor Kavajer och blazers,
-                    Leather gloves, Läderjackor, MC-jackor, Militärjackor, Mössa med öronlappar, Mössa,
-                    halsduk och vantar, Mössor, Parkas, Regnhandskar, Regnhatt, Regnjackor, Regnoveraller, Regnställ,
-                    Skaljackor, Regnjacka, Skaloveraller, Skid och thermobyxor, Skidhandskar och vantar, Skidjackor, 
-                    Skidjacka, Skidoveraller, Skidoverall, Solhatt, Vår och höst jackor, Stickade halsdukar, 
-                    Stickat halsduk, Trenchcoat, Träningsjackor, Ullvantar, Vadderade jackor, Vindjackor, Vinterjackor,
-                    Vinteroveraller, Västar, Jeansjacka, Jeansjackor, Längskidjacka, Löparjacka, Utomhus Jacka, 
-                    Seglarjacka, Streetjacka, Vardagsjacka, Softshell, Soft-Shell,
-                    
-                    jacket, jackets, fleece, fleece, balaclava, bomber jackets, capes, duffel jackets, 
-                    down jackets, earmuffs, gloves set, fleece set, fleece sweaters, fleece sweater, fleece sweater,
-                    fleece trousers, fleece pants, fleece pants, fleece sweatshirt with hood, Fleece overalls, 
-                    Fleece sweatshirts, Fleece vests, Faux fur, shearling, Gilet, Jeans jackets, Blazers, blazers, 
-                    Leather gloves, Leather jackets, MC jackets, Military jackets, Ear wrap cap, Hat, scarf, mittens, 
-                    Hats, Parkas, Rain gloves, Rain gloves, Rain gloves Raincoat, Ski jackets, Rain jacket, Overalls, 
-                    Ski, Thermo pants, Ski gloves, mittens, Ski jackets, Ski jacket, Ski overalls, Ski overall, 
-                    Sun hat, Spring, fall jackets, Knitted scarves, Knitted scarf, Trench coat, Training jackets, 
-                    Wadded jackets, Woolen jackets Winter overalls, Vests, Jeans jacket, Jeans jackets, 
-                    Cross-country ski jacket, Runner jacket, Outdoor jacket, Outdoor jacket, Sail jacket, Street jacket, 
-                    Everyday jacket, Down Jacket, Softsh ell, Soft-Shell, Raincoat,                     
+                    jacka, jackor, fleece, flis, Balaclava, Bomberjackor, Capes,Duffelkappor, Dunjackor, Gilet, 
+                    Kavajer, gloves, Läderjackor, MC-jackor,  Mössa, halsduk, vantar, Parkas, Regnhandskar, 
+                    Regnhatt, thermobyxor, Skidhandska, kidjackor, Skidoveraller, Skidoverall, Solhatt, Trenchcoat,  
+                    Vinterjackor, Vardagsjacka,  Streetjacka, Löparjacka,                    
+                    jacket, jackets, fleece, fleece, balaclava, bomber jackets, capes,  gloves, Blazers, cap, 
+                    Hat, scarf, mittens, Hats, Parkas, Raincoat, Overalls, Thermo, coat, Vests, Raincoat                     
                 ',
+                'negative_key_words' => 'mugghållare, transportväska, chassi, Thule, solhatt, sandal, pärlsammetfilt',
                 'sub_key_word' => [
                     'Balaclava' => 'Balaclava, Balaclavor',
                     'Bomberjackor' => 'Bomberjacka, Bomberjackor, Bomberjacket, Bomber jacket',
@@ -240,7 +72,7 @@ class CategoryBarnFixtures extends Fixture
                 'name' => 'T-shirts',
                 'key_word' => '
                     t-shirt, kortärmad, tee, shortsleve, piké, pike, långärmad t-shirt, Rugbytröja, Rugby tröja,
-                    t-shirt, short-sleeved, tee, shortsleeve, piké, long-sleeved t-shirt,
+                    t-shirt, short-sleeved, tee, shortsleeve, piké, long-sleeved t-shirt
                 ',
                 'negative_key_words' => 'dress',
                 'sub_key_word' => [
@@ -252,13 +84,18 @@ class CategoryBarnFixtures extends Fixture
             [
                 'name' => 'Toppar & linnen',
                 'key_word' => '
-                    topp, toppar, top, topar, linne, linnen, tanktop, tanktopp,
-                    top, tops, top, tops, linen, linen, tank top, tank top
+                    topp, toppar, topar, linne, linnen, tanktop, tanktopp,
+                    top, tops, linen, linen
                 ',
                 'sub_key_word' => [
                     'Toppar' => 'Topp, Top, Toppar',
                     'Linnen' => 'Linne, Linnen, Tanktop, Tank tops'
                 ],
+                'negative_key_words' => '
+                    Britax, Silver Cross,  Dockorna, Garderob, Ullmössa, mössa, vinterstövlar, 
+                    jacka, gosedjur, dockhusmöbler, outfiten, Safari, Barnsängen, träningar, dockhus, bordslampa, 
+                    Solglasögonen, Barnbok, vinterstöveln, korten
+                ',
             ],
             [
                 'name' => 'Tröjor & koftor',
@@ -272,44 +109,52 @@ class CategoryBarnFixtures extends Fixture
                     'Cardigans' => 'Cardigan, Cardigans',
                     'Luvtröjor' => 'Luvtröja, Luvtröjor, Hoodie, Hoddies',
                     'Zipjackor' => 'Zipjacka, Zipjackor, Zip jacka, Zip jackor, Zipjacket, Zip jacket, Zip-jacket, Sweatshirtjacket'
-                ]
+                ],
+                'negative_key_words' => '
+                    väggkrok, Byxa, shorts, pants, skirt,  loftsäng
+                ',
             ],
             [
-                'name' => 'Klänningar & kjolar',
+                'name' => 'Klänningar & Kjolar',
                 'key_word' => '
-                    klänning, klänningar, kjol, kjolar, tunika, tunik,
-                    dress, dresses, skirt, skirts, tunic, tunics
+                    Klänning, Klänningar, Tunik, Tunikor, Tröjklänning, kjol, kjolar, tunika,
+                    dress, dresses, skirt, skirts, tunic, tunics, Sweater dress, Sweaterdress                     
                 ',
                 'sub_key_word' => [
-                    'Klänningar' => 'Klänning, Klänningar, Dress, Dresses',
-                    'Kjolar' => 'Kjol, Kjolar, Skirt, Skirts',
-                    'Tunikor' => 'Tunika, Tunikor, tunic, tunics',
+                    'Klänningar' => 'Klänning, Klänningar, Dress, Dresses, Tyllklänningar, Tulle dresses, vardagsklänning, vardagsklänningar, Casual dresses, casualdress',
+                    'Tunikor' => 'Tunik, Tunikor, Tunic, Tunics',
+                    'Tröjklänningar' => 'Tröjklänning, Sweater dress, Sweaterdress',
+                    'Kjolar' => 'kjol, kjolar, skirt, skirts, jeanskjol, denimskirt, jeans skirt, korta kjolar, miniskirt, mini skirt, short skirt, maxikjolar, maxikjol maxidresses, maxidress, midikjolar, midikjol, midiskirts, midiskirt, tyllkjol, tyllkjolar, tulle skirts, tulleskirt, veckade kjolar, veckad kjol, pleated skirts, pleated skirt'
                 ]
             ],
             [
-                'name' => 'Skjortor',
+                'name' => 'Skjortor & Blusar',
                 'key_word' => '
                     skjorta, skjortor, blus, blusar,
                     shirt, shirts, blouse, blouse
                 ',
                 'sub_key_word' => [
-                    'subSkjortor' => 'Skjorta, Skjortor, Shirt, Shirts',
+                    'Skjortor' => 'Skjorta, Skjortor, Shirt, Shirts',
                     'Blusar' => 'Blus, Blusar, Blouse, Blouses'
-                ]
+                ],
+                'negative_key_words' => '
+                    Dress, pant, pants, shorts, Skirt, tee, väggkrok, tröja, Tunika, Topp
+                ',
             ],
             [
                 'name' => 'Byxor & shorts',
                 'key_word' => '
-                    Byxor, Chinos, Jeans, Sweatpants, Leggings, Jeggings, jeansshorts, jeans shorts, byxor, byxa, 
-                    Cargopants, Termobyxor, Termobyxa, Skalbyxor, Skalbyxa, Cargobyxor, 
-                    Cargobyxa, Haremsbyxor, Harembyxa, Mjukisbyxor, Mjukisbyxa, Regnbyxor, Regnbyxa, Shell pants, 
-                    Trekvartsbyxor, Trekvartsbyxa, Capribyxor, Capribyxa, 
+                    Byxor, Chinos, Jeans, Sweatpants, Leggings, Jeggings, shorts, byxa, Cargopants, Termobyxor, 
+                    Termobyxa, Skalbyxor, Skalbyxa, Cargobyxor, Cargobyxa, Haremsbyxor, Harembyxa, Mjukisbyxor, 
+                    Mjukisbyxa, Regnbyxor, Regnbyxa, Trekvartsbyxor, Trekvartsbyxa, Capribyxor, Capribyxa, 
                     Träningsbyxor, Träningsbyxa,
-                    Trousers, Chinos, Jeans, Sweatpants, Leggings, Jeggings, jeans shorts, jeans shorts, trousers, 
-                    trousers, Cargopants, Termobyxor, Termobyxa, Shorts, Skalbyxa, 
-                    Cargobyxor, Cargo Pants, Harem Pants, Harem Pants, Soft Pants, Soft Pants, Rain Pants, Rain Pants, 
-                    Shell Pants, Three Quarter Pants, Three Quarter Pants, 
-                    Capri Pants, Capri Pants, Sweatpants, Sweatshorts
+                    
+                    Trousers, Sweatpants, Cargopants, Shorts, Skalbyxa, 
+                    Cargobyxor, Pants, Sweatpants, Sweatshorts                          
+                ',
+                'negative_key_words' => '
+                    Emmaljunga, babysitter, muslin, Linne, Linnes, strumpor, Jackan, kofta, t-shirt, 
+                    tröja, väggkrok, barnvagnar
                 ',
                 'sub_key_word' => [
                     'Chinos' => 'Chinos',
@@ -329,13 +174,14 @@ class CategoryBarnFixtures extends Fixture
                 ]
             ],
             [
-                'name' => 'Underkläder',
+                'name' => 'Barn Underkläder',
                 'key_word' => '
                     Kalsonger, trosor, strumpor, strumpbyxor, Benvärmare, Bloomers, Boxershorts, Long johns, Strumpbyxor, Strumpbyxa, Strumpor, Trosor, 
                     Trosa, Underbyxor, Underbyxa Underklädsset, Underlinnen, Underlinne, Trunks,
                     Underwear, panties, stockings, tights, leg warmers, bloomers, boxer shorts, long johns, sports tops, sports tops, tights, tights, stockings, panties, Socks
                     Panty, Pantyhose, Pantyhose Underwear set, Underliners, Underliners, Trunks
                 ',
+                'negative_key_words' => 'Kompressionsstrumpor',
                 'sub_key_word' => [
                     'Kalsonger' => 'Kalsonger, Kalsong, Underwear',
                     'Trosor' => 'Trosor, Trosa, Panties',
@@ -352,10 +198,10 @@ class CategoryBarnFixtures extends Fixture
             [
                 'name' => 'Träningskläder',
                 'key_word' => '
-                    Träningsjacka, Träningsbyxa, Träningstopp, Joggingbyxa, Löparbyxor, Löparjacka, Löparkläder, Träningskläder, Sporttoppar, Sporttopp, Flytväst, Räddningsväst, 
+                    Träningsjacka, Träningsbyxa, Träningstopp, Joggingbyxa, Löparbyxor, Löparjacka, Löparkläder, 
+                    Träningskläder, Sporttoppar, Sporttopp, Flytväst, Räddningsväst, 
                     Dansdräkt, Byxkjol, Tennis T-shirt,
-                    Sweatpants, Sweatpants, Sweatpants, Jogging Pants, Running Pants, Running Jacket, Running Clothes, Sweatwear, Sports Bra, Sportsbra, Lifevest, Sportpants, 
-                    Dancesuit
+                    Sweatpants, Running, Sweatwear, Sports, Sportsbra, Lifevest, Sportpants, Dancesuit
                 ',
                 'sub_key_word' => [
                     'Träningsjackor' => 'Träningsjacka',
@@ -381,7 +227,8 @@ class CategoryBarnFixtures extends Fixture
                 'sub_key_word' => [
                     'Kavajer' => 'Blazers, Blazer, Kavaj, Kavajer',
                     'Västar' => 'Vest, Vests, Väst'
-                ]
+                ],
+                'negative_key_words' => 'träpussel, Bok, bilderbok'
             ],
             [
                 'name' => 'Jumpsuits',
@@ -396,13 +243,11 @@ class CategoryBarnFixtures extends Fixture
                 ]
             ],
             [
-                'name' => 'UV & Bad',
+                'name' => 'Barn UV & Bad',
                 'key_word' => '
-                    UV-Dräkt, UV-byxor, UV-byxa, uvtröja, uv-tröja, uv-tröjor, uvtröjor, UV-set, Badbyxor, Badbyxa, Badshorts, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants, 
-                    Swim Diapers, Blöjbadbyxor, Blöjbadbyxa, UV-Baddräckt, UV Badshorts, UV-Badshorts, Sunsuits, Sunsuit, Badtröja, Bad tröja, Badrockar, Badrock,
-                    UV Apparel, UV Pants, UV Pants, Sweatshirt, UV Sweater, UV Sweatshirts, Sweatshirts, UV Sets, Swimsuit, Swimwear, Swimwear, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants,
-                    Swim Diapers, Diaper Tights, Diaper Tights, UV Bathing Suits, UV Bathing Shorts, UV Bathing Shorts, Sunsuits, Sunsuit, Sweater, Bathing Sweater, Bathing Suits, Bathrobe
-                ',
+                Baddräkt, Baddräkter, UV-Dräkt, UV-byxor, UV-byxa, uvtröja, uv-tröja, uv-tröjor, uvtröjor, UV-set, Badbyxor, Badbyxa, Badshorts, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants, Swim Diapers, Blöjbadbyxor, Blöjbadbyxa, UV-Baddräkt, UV Badshorts, UV-Badshorts, Sunsuits, Sunsuit, Badtröja, Bad tröja, Badrockar, Badrock, Morgonrock,
+                UV Apparel, UV Pants, UV Pants, Sweatshirt, UV Sweater, UV Sweatshirts, Sweatshirts, UV Sets, Swimsuit, Swimwear, Swimwear, Bikini, Swimsuit, Swim Suit, Swimpants, Swim Pants, Swim Diapers, Diaper Tights, Diaper Tights, UV Bathing Suits, UV Bathing Shorts, UV Bathing Shorts, Sunsuits, Sunsuit, Sweater, Bathing Sweater, Bathing Suits, Bathrobe
+            ',
                 'sub_key_word' => [
                     'Badshorts' => 'Badbyxor, Badbyxa, Badshorts, Swimpants, Swim Pants, UV Badshorts, UV-Badshorts',
                     'Baddräkt' => 'UV-Baddräkt, Sunsuits, Sunsuit, Baddräkt, Baddräkter, swimsuit, swimsuites, swim suit, swim suites',
@@ -427,7 +272,7 @@ class CategoryBarnFixtures extends Fixture
                 ]
             ],
             [
-                'name' => 'Accessoarer',
+                'name' => 'Barn Accessoarer',
                 'key_word' => '
                     Balaclavas, Baclava, Barnklockor, Barnklocka, Halsdukar, Halsduk, Handskar, Handske, Vantar, Vante, Hattar, Hatt, Kepsar, Keps, Mössor, Mössa, 
                     Paraplyer, Paraply, Plånböcker, Plånbok, Scarfs, Scarf, Drybibs, Drybib, Smycken, Smycke, Solglasögon, Bandanas, Bandana, Diadem, Nyckelsingslampa, Pannband, 
@@ -458,239 +303,17 @@ class CategoryBarnFixtures extends Fixture
                     'Skärp' => 'Skärp, Belt, Belts'
                 ]
             ],
-        ];
-        $main = $this->createCategoryWithConf('Barn', 'Barn,barn');
+        ]
+    ];
 
-        foreach ($configurations as $configuration) {
-            $subMain = $this->createCategoryWithConf(
-                $configuration['name'], $configuration['key_word'], $configuration['negative_key_words'] ?? null
-            );
-
-            $this->createCategoryRelations($main, $subMain);
-
-            $subKeyWords = $configuration['sub_key_word'];
-            if (is_array($subKeyWords) && count($subKeyWords) > 0) {
-                $subKeyWordsArray = array_unique($subKeyWords);
-                foreach ($subKeyWordsArray as $key => $words) {
-                    $words = preg_replace('/\s+/', '', $words);
-
-                    $wordCategory = $this->createCategoryWithConf(
-                        $key, $words
-                    );
-
-                    $this->createCategoryRelations($subMain, $wordCategory);
-                }
-            }
-
-            $manager->flush();
-        }
-
-        echo $this->minLen;
-    }
-
-    /**
-     * @param string $categoryName
-     * @param string $keyWords
-     * @param string|null $negativeKeyWords
-     * @return Category
-     */
-    private function createCategoryWithConf(string $categoryName, string $keyWords, ?string $negativeKeyWords = null): Category
+    public function load(ObjectManager $manager)
     {
-        $this->minLen = 10;
-//        $keyWords = preg_replace('/\s+/', '', $keyWords);
-        $keyWords = preg_replace('/\n/', '', $keyWords);
-        $keyWords = preg_replace('!\s+!', ' ', $keyWords);
+        $this->reUpdateFiles();
+        $this->setManager($manager);
 
-        $words = explode(', ', $keyWords);
-
-        foreach ($words as $key=>$word) {
-            $word = trim($word);
-            $strlen = strlen($word);
-            if ($strlen < $this->minLen) {
-                $this->minLen = $strlen;
-            }
-            if (!strlen($word)) {
-                unset($words[$key]);
-            }
-            if (preg_match_all('!\s+!', $word, $match)) {
-                $this->fillDictionary($word);
-            }
-        }
-        $words = array_unique($words);
-
-        $words = array_filter($words, function ($v) {
-            if (strlen(trim($v))) {
-                return true;
-            }
-        });
-
-        $keyWords = implode(',', $words);
-        $category = $this->checkExistCategory($categoryName);
-
-        if (!$category instanceof Category) {
-            $category = new Category();
-            $category->setCategoryName($categoryName);
-        }
-
-        $category
-            ->setCustomeCategory(true);
-
-        $this->getManager()->persist($category);
-
-        $categoryConfigurations = $category->getCategoryConfigurations();
-        if (!$categoryConfigurations) {
-            $categoryConfigurations = new CategoryConfigurations();
-        }
-
-        $categoryConfigurations
-            ->setKeyWords($keyWords);
-        if ($negativeKeyWords) {
-//            $negativeKeyWords = preg_replace('/\s+/', '', $negativeKeyWords);
-
-            $negativeKeyWords = preg_replace('/\n/', '', $negativeKeyWords);
-            $negativeKeyWords = preg_replace('!\s+!', ' ', $negativeKeyWords);
-
-            $negativeKeyWords = explode(', ', $negativeKeyWords);
-
-            foreach ($negativeKeyWords as $key=>$nword) {
-                $nword = trim($nword);
-                if (!strlen($nword)) {
-                    unset($nword[$key]);
-                }
-                if (preg_match_all('!\s+!', $nword, $match)) {
-                    $this->fillDictionary($nword);
-                }
-            }
-
-            $nWords = array_unique($negativeKeyWords);
-            $nWords = implode(',', $nWords);
-            $categoryConfigurations
-                ->setNegativeKeyWords($nWords);
-        }
-        $category->setCategoryConfigurations($categoryConfigurations);
-
-        $this->getManager()->persist($categoryConfigurations);
-
-        return $category;
-    }
-
-    /**
-     * @param Category $m
-     * @param Category $s
-     * @return CategoryRelations
-     */
-    private function createCategoryRelations(Category $m, Category $s)
-    {
-        /** @var CategoryRelationsRepository $objectRepository */
-        $objectRepository = $this->getManager()->getRepository(CategoryRelations::class);
-        $existCategoryRelations = $objectRepository
-            ->findOneBy(['mainCategory' => $m, 'subCategory' => $s]);
-        if ($existCategoryRelations instanceof CategoryRelations) {
-            return $existCategoryRelations;
-        }
-        $categoryRelations = new CategoryRelations();
-        $categoryRelations
-            ->setMainCategory($m)
-            ->setSubCategory($s);
-
-        $this->getManager()->persist($categoryRelations);
-
-        return $categoryRelations;
-    }
-
-    /**
-     * @return ObjectManager
-     */
-    private function getManager()
-    {
-        return $this->manager;
-    }
-
-    /**
-     * @return \Doctrine\Persistence\ObjectRepository|CategoryRepository
-     */
-    private function getCategoryRepository()
-    {
-        return $this->getManager()->getRepository(Category::class);
-    }
-
-    /**
-     * @param string $categoryName
-     * @return Category|object|null
-     */
-    private function checkExistCategory(string $categoryName)
-    {
-        return $this->getCategoryRepository()
-            ->findOneBy(['categoryName' => $categoryName]);
-    }
-
-    /**
-     * @param string $word
-     */
-    private function fillDictionary(string $word)
-    {
-        $this->wordWithSpace[] = $word;
-
-        if (!is_array($this->swStopWords)) {
-            $explode = explode(PHP_EOL, $this->swStopWords);
-
-            $arrayFilter = array_filter($explode, function ($v) {
-                if (strlen(trim($v))) {
-                    return true;
-                }
-            });
-
-            $arrayMap = array_map(function ($v) {
-                return trim($v);
-            }, $arrayFilter);
-
-            $arrayUnique = array_unique($arrayMap);
-            $prepareStopArray = [];
-            foreach ($arrayUnique as $uniq) {
-                $prepareStopArray[] = ucfirst($uniq);
-                $prepareStopArray[] = lcfirst($uniq);
-            }
-
-            $prepareStopArray = array_map(function ($v) {
-                return '\b'.trim($v).'\b';
-            }, $prepareStopArray);
-
-            $this->swStopWords = $prepareStopArray;
-        }
-
-        $prepareRegex = implode('|', $this->swStopWords);
-
-        if (preg_match_all("/$prepareRegex/u", $word, $mt)) {
-            $result = preg_replace("/$prepareRegex/u", '?', $word);
-        }
-
-        $modifyIndexWord = str_replace(' ', '', $word);
-
-        file_put_contents(
-            $this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths',
-            (count($this->wordWithSpace) == 1 ? '' : PHP_EOL) . (isset($result) ? $result : $word) . ' : ' . $modifyIndexWord,
-            FILE_APPEND
-        );
-
-
-        file_put_contents(
-            $this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths',
-            (count($this->wordWithSpace) == 1 ? '' : PHP_EOL) . $word . ' : ' . $modifyIndexWord,
-            FILE_APPEND
-        );
-    }
-
-    private function reUpdateFiles()
-    {
-        if (!is_dir($this->kernel->getProjectDir() . '/pg')) {
-            mkdir($this->kernel->getProjectDir() . '/pg');
-        }
-
-        if (file_exists($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths')) {
-            unlink($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths');
-        }
-        if (file_exists($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths')) {
-            unlink($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths');
-        }
+        $main = $this->createCategoryWithConf('Barn', 'barn', 'main', 'barnvagnar');
+        $configurations = $this->configurations;
+        $this->processConfiguration($configurations, $main);
+        $this->afterLoad();
     }
 }

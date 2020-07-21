@@ -48,6 +48,7 @@ class Category implements EntityValidatorException
      * @ORM\Column(type="string", length=255)
      * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST, Category::SERIALIZED_GROUP_RELATIONS_LIST})
      * @Assert\NotBlank(groups={Category::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Accessor(getter="getCategoryNameAccessor", setter="setCategoryNameAccessor")
      */
     private $categoryName;
 
@@ -87,6 +88,20 @@ class Category implements EntityValidatorException
      * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
      */
     private $customeCategory = false;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
+     */
+    private $hotCategory = false;
+
+    /**
+     * @var CategorySection
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\ManyToOne(targetEntity="CategorySection", inversedBy="categories", cascade={"persist"})
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
+     */
+    private $sectionRelation;
     
     public function __construct()
     {
@@ -107,7 +122,18 @@ class Category implements EntityValidatorException
 
     public function setCategoryName(string $categoryName): self
     {
-        $this->categoryName = $categoryName;
+        if ($categoryName) {
+            if ($categoryName == 'Sneakers'
+                || $categoryName == 'Gummistövlar'
+                || $categoryName == 'Tofflor & Sandaler'
+                || $categoryName == 'Babylek'
+                || $categoryName == 'T-shirts'
+                || $categoryName == 'Regnjackor'
+            ) {
+                $this->hotCategory = true;
+            }
+            $this->categoryName = $categoryName;
+        }
 
         return $this;
     }
@@ -191,13 +217,17 @@ class Category implements EntityValidatorException
      */
     public function getMainCategoryRelations(): Collection
     {
+        if (!$this->mainCategoryRelations) {
+            $this->mainCategoryRelations = new ArrayCollection();
+        }
+
         return $this->mainCategoryRelations;
     }
 
     public function addMainCategoryRelation(CategoryRelations $mainCategoryRelation): self
     {
-        if (!$this->mainCategoryRelations->contains($mainCategoryRelation)) {
-            $this->mainCategoryRelations[] = $mainCategoryRelation;
+        if (!$this->getMainCategoryRelations()->contains($mainCategoryRelation)) {
+            $this->getMainCategoryRelations()->add($mainCategoryRelation);
             $mainCategoryRelation->setMainCategory($this);
         }
 
@@ -206,8 +236,8 @@ class Category implements EntityValidatorException
 
     public function removeMainCategoryRelation(CategoryRelations $mainCategoryRelation): self
     {
-        if ($this->mainCategoryRelations->contains($mainCategoryRelation)) {
-            $this->mainCategoryRelations->removeElement($mainCategoryRelation);
+        if ($this->getMainCategoryRelations()->contains($mainCategoryRelation)) {
+            $this->getMainCategoryRelations()->removeElement($mainCategoryRelation);
             // set the owning side to null (unless already changed)
             if ($mainCategoryRelation->getMainCategory() === $this) {
                 $mainCategoryRelation->setMainCategory(null);
@@ -233,5 +263,27 @@ class Category implements EntityValidatorException
         }
 
         return $this;
+    }
+
+    public function getSectionRelation(): ?CategorySection
+    {
+        return $this->sectionRelation;
+    }
+
+    public function setSectionRelation(?CategorySection $sectionRelation): self
+    {
+        $this->sectionRelation = $sectionRelation;
+
+        return $this;
+    }
+
+    public function getCategoryNameAccessor()
+    {
+        return preg_replace('/sub/', '', $this->categoryName);
+    }
+
+    public function setCategoryNameAccessor(?string $categoryName = null)
+    {
+        $this->setCategoryName($categoryName);
     }
 }

@@ -73,9 +73,13 @@ class CategoryRepository extends ServiceEntityRepository
         ParamFetcher $paramFetcher,
         $count = false)
     {
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder
+            ->where('s.hotCategory = :hotCategory')
+            ->setParameter('hotCategory', true);
         return $this->getList(
             $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
-            $this->createQueryBuilder('s'),
+            $queryBuilder,
             $paramFetcher,
             $count
         );
@@ -88,31 +92,6 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function getCustomCategories(ParamFetcher $paramFetcher)
     {
-//        $subYes = $this->getEntityManager()->createQueryBuilder();
-//        $subYes
-//            ->select("cr_y")
-//            ->from(CategoryRelations::class,"cr_y")
-//            ->innerJoin('cr_y.mainCategory', 'cr_ym')
-//            ->where($subYes->expr()->eq('cr_ym.id', 'c.id'));
-//
-//        $subNot = $this->getEntityManager()->createQueryBuilder();
-//        $subNot
-//            ->select("cr_n")
-//            ->from(CategoryRelations::class,"cr_n")
-//            ->innerJoin('cr_y.subCategory', 'cr_nm')
-//            ->where($subNot->expr()->eq('cr_nm.id', 'c.id'));
-//
-//        $qb = $this->createQueryBuilder('c');
-//        $qb
-//            ->select('c')
-//            ->where($qb->expr()->exists($subYes->getDQL()))
-//            ->andWhere($qb->expr()->not($subNot->getDQL()));
-//
-//
-//        $query = $qb->getQuery();
-//        $DQL = $query->getDQL();
-//        $SQL = $query->getSQL();
-//        $result = $query->getResult();
         $rs = $this->getMainSubCategoryIds();
         $mainCategoryIds = [];
         foreach ($rs as $id) {
@@ -177,11 +156,12 @@ class CategoryRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
 
         $query  = '
-            SELECT id, category_name FROM category
+            SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words FROM category AS c
+            INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
             WHERE 
-            EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = category.id)
+            EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
             AND
-            NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = category.id)
+            NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
         ';
         $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
             $query,
@@ -235,20 +215,29 @@ class CategoryRepository extends ServiceEntityRepository
     )
     {
         $connection = $this->getEntityManager()->getConnection();
-        $mainSearch =
-            $this->getHelpers()
-                ->handleSearchValue($parameterBag->get(CategoryService::MAIN_SEARCH), false);
+        if ($product->getMatchMainCategoryData()) {
+            $mainSearch = $product->getMatchMainCategoryData();
+        }
 
-        if ($product && $product->getCategory()) {
+        if (!isset($mainSearch) && $product && !$product->getMatchMainCategoryData()) {
             if (!$product->getCategory()) {
                 return [];
             }
             $checkMainCategoriesResult = $this->isMatchPlainCategoriesString(
-                $product->getCategory(), $mainSearch
+                $product->getCategory(),
+                $parameterBag->get(CategoryService::MAIN_SEARCH),
+                true
             );
 
             if (isset($checkMainCategoriesResult['match']) && !$checkMainCategoriesResult['match']) {
                 return [];
+            }
+            if (isset($checkMainCategoriesResult[CategoryService::MAIN_SEARCH])) {
+                $mainSearch =
+                    $this->getHelpers()
+                        ->handleSearchValue($checkMainCategoriesResult[CategoryService::MAIN_SEARCH], false);
+
+                $product->setMatchMainCategoryData($mainSearch);
             }
         }
 
@@ -672,14 +661,48 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param string $productData
+     * @param string $propertyName
+     * @return bool|mixed
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function matchGlobalNegativeKeyWords(string $productData, string $propertyName)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $query = '
+            select *
+        	from admin_configuration as aconf
+        	where aconf.property_name = :property_name
+        	and aconf.data_fts @@ to_tsquery(\'my_swedish\', :product_data)
+        ';
+
+        $mainParams[':product_data'] = $productData;
+        $mainType[':product_data'] = \PDO::PARAM_STR;
+
+        $mainParams[':property_name'] = $propertyName;
+        $mainType[':property_name'] = \PDO::PARAM_STR;
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeQuery(
+            $query,
+            $mainParams,
+            $mainType
+        );
+        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        return count($result);
+    }
+
+    /**
      * @param string $productCategoriesData
-     * @param string $mainCategoriesData
+     * @param array $mainCategoriesData
      * @return bool
      * @throws \Doctrine\DBAL\DBALException
      */
     public function isMatchPlainCategoriesString(
         string $productCategoriesData,
-        string $mainCategoriesData,
+        array $mainCategoriesData,
         bool $explain = false
     )
     {
@@ -693,11 +716,17 @@ class CategoryRepository extends ServiceEntityRepository
                 ,ts_headline(\'pg_catalog.swedish\', :product_categories_data, to_tsquery(\'pg_catalog.swedish\', :main_categories_data)) AS ts_headline_result
             ';
         }
+        $mainCategoryWordsArray = [];
+        foreach ($mainCategoriesData['categories'] as $keyCategoryData=>$categoryData) {
+            $mainCategoryWordsArray[$keyCategoryData] = $categoryData['positive'];
+        }
+        $mainCategoryWordsString = $this->getHelpers()
+            ->handleSearchValue(implode(',', $mainCategoryWordsArray), false);
 
         $mainParams[':product_categories_data'] = $productCategoriesData;
         $mainType[':product_categories_data'] = \PDO::PARAM_STR;
 
-        $mainParams[':main_categories_data'] = $mainCategoriesData;
+        $mainParams[':main_categories_data'] = $mainCategoryWordsString;
         $mainType[':main_categories_data'] = \PDO::PARAM_STR;
 
         /** @var ResultCacheStatement $statement */
@@ -710,6 +739,33 @@ class CategoryRepository extends ServiceEntityRepository
         $isMatchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
         if (count($isMatchResult)) {
             $result = array_shift($isMatchResult);
+
+            if (preg_match_all("/<b>.*?<\/b>/", $result['ts_headline_result'], $m)) {
+                $resultMainCategoryWords = [];
+                $regTsHeadLightResult = array_shift($m);
+                $explodeMainCategoriesData = explode('|', $mainCategoryWordsString);
+                foreach ($explodeMainCategoriesData as $mainCategoryWord) {
+                    foreach ($regTsHeadLightResult as $matchingWord) {
+
+                        $mainCategoryWord = preg_replace('/:\*/', '', $mainCategoryWord);
+
+                        if (mb_stripos($matchingWord, $mainCategoryWord) !== false) {
+                            $resultMatchArray = preg_grep("/\b$mainCategoryWord\b/", $mainCategoryWordsArray);
+                            foreach ($resultMatchArray as $nameMainCategory=>$matchPool) {
+                                if (isset($mainCategoriesData['categories'][$nameMainCategory]['negative'])) {
+                                    $resultMainCategoryWords[] = '(' . $mainCategoryWord . ', ' . $mainCategoriesData['categories'][$nameMainCategory]['negative'] . ')';
+                                } else {
+                                    $resultMainCategoryWords[] = $mainCategoryWord;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (count($resultMainCategoryWords)) {
+                    $result[CategoryService::MAIN_SEARCH] = implode(', ', $resultMainCategoryWords);
+                }
+            }
+
             return $result;
         } else {
             return false;

@@ -3,13 +3,17 @@
 namespace App\Services\Models;
 
 use App\Cache\TagAwareQueryResultCacheProduct;
+use App\Entity\AdminConfiguration;
 use App\Entity\Brand;
 use App\Entity\Category;
+use App\Entity\CategoryRelations;
 use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\CategoriesCollection;
 use App\Entity\Collection\Search\SearchCategoriesCollection;
 use App\Entity\Product;
 use App\Entity\Shop;
+use App\Exception\GlobalMatchException;
+use App\Exception\GlobalMatchExceptionBrand;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Services\Helpers;
@@ -72,6 +76,17 @@ class CategoryService extends AbstractModel
         $this->redisHelper = $redisHelper;
     }
 
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @return CategoriesCollection
+     * @throws CacheException
+     */
+    public function getHotCategories(ParamFetcher $paramFetcher)
+    {
+        $collection = $this->getCategoryRepository()->getEntityList($paramFetcher);
+        $count = $this->getCategoryRepository()->getEntityList($paramFetcher, true);
+        return (new CategoriesCollection($collection, $count));
+    }
 
     /**
      * @param ParamFetcher $paramFetcher
@@ -81,7 +96,7 @@ class CategoryService extends AbstractModel
     public function getCustomCategories(ParamFetcher $paramFetcher)
     {
         $collection = $this->getCategoryRepository()->getCustomCategories($paramFetcher);
-        $count = 0;
+        $count = count($collection);
         return (new CategoriesCollection($collection, $count));
     }
 
@@ -113,14 +128,32 @@ class CategoryService extends AbstractModel
             throw new \Exception('category don\'t have configuration modle');
         }
 
+        $mainCategoryWords = [];
+        $mainCategoryWords['categories'][$category->getCategoryName()]['positive'] = $category->getCategoryConfigurations()->getKeyWords();
+        $negativeKeyWords = $category->getCategoryConfigurations()->getNegativeKeyWords();
+        if (strlen($negativeKeyWords)) {
+            $negativeKeyWords = implode(',', array_map(function ($v) {return '!' . $v;}, explode(', ', $negativeKeyWords)));
+        } else {
+            $negativeKeyWords = null;
+        }
+
+        $mainCategoryWords['categories'][$category->getCategoryName()]['negative'] = $negativeKeyWords;
+        if ($negativeKeyWords) {
+            $mainCategoryWords['common'][] = '(' . $category->getCategoryConfigurations()->getKeyWords() . ', ' . $negativeKeyWords . ')';
+        } else {
+            $mainCategoryWords['common'][] = $category->getCategoryConfigurations()->getKeyWords();
+        }
+
         $isMatchPlainCategories = $this->getCategoryRepository()->isMatchPlainCategoriesString(
             $product->getCategory(),
-            $category->getCategoryConfigurations()->getKeyWords(),
+            $mainCategoryWords,
             true
         );
 
         $analysisProductByMainCategory = $this->analysisProductByMainCategory(
-            $product, $category->getCategoryConfigurations()->getKeyWords(), true
+            $product,
+            $mainCategoryWords,
+            true
         );
 
         if (isset($isMatchPlainCategories['ts_headline_result'])) {
@@ -193,16 +226,28 @@ class CategoryService extends AbstractModel
         $mainCategoryWords = [];
         foreach ($mainSubCategoryIds as $main) {
             if (isset($main['category_name'])) {
-                $mainCategoryWords[] = $main['category_name'];
+                $mainCategoryWords['categories'][$main['category_name']]['positive'] = $main['key_words'];
+                $negative_key_words = null;
+                if (strlen($main['negative_key_words'])) {
+                    $negative_key_words = implode(', ', array_map(function ($v) {return '!' . $v;}, explode(', ', $main['negative_key_words'])));
+                }
+
+                $mainCategoryWords['categories'][$main['category_name']]['negative'] = $negative_key_words;
+                if ($negative_key_words) {
+                    $mainCategoryWords['common'][] = '(' . $main['key_words'] . ', ' . $negative_key_words . ')';
+                } else {
+                    $mainCategoryWords['common'][] = $main['key_words'];
+                }
+
             }
         }
         if (!count($mainCategoryWords)) {
             return [];
         }
 
-        $mainCategoryWordsString = implode(',', $mainCategoryWords);
+//        $mainCategoryWordsString = implode(',', $mainCategoryWordsForQuery);
         $resultAnalysis = $this->analysisProductByMainCategory(
-            $product, $mainCategoryWordsString
+            $product, $mainCategoryWords
         );
         if (!count($resultAnalysis)) {
             return [];
@@ -246,14 +291,14 @@ class CategoryService extends AbstractModel
 
     /**
      * @param Product $product
-     * @param string $mainCategoryKeyWord
+     * @param array $mainCategoryKeyWord
      * @param bool $explain
      * @return array|mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
     public function analysisProductByMainCategory(
         Product $product,
-        string $mainCategoryKeyWord,
+        array $mainCategoryKeyWord,
         bool $explain = false
     )
     {
@@ -268,25 +313,9 @@ class CategoryService extends AbstractModel
             return [];
         }
         $result = array_merge($result, $matchCategoryMain);
-        $productData = $this->helper->pregWordsFromDictionary(
+        $prepareDataForGINSearch = $this->prepareProductDataForMatching(
             $product->getName() . ', ' . $product->getDescription()
         );
-        $matchData = preg_replace('!\s+!', ',', $productData['result']);
-        $matchData = strip_tags($matchData);
-
-        $prepareDataForGINSearch = $this->prepareDataForGINSearch($matchData);
-        $prepareDataForGINSearch = $this->helper
-            ->handleSearchValue($prepareDataForGINSearch, true);
-        if (isset($productData['match']) && count($productData['match'])) {
-            $resultSpaceWord = array_shift($productData['match']);
-            if (is_array($resultSpaceWord) && count($resultSpaceWord)) {
-                $this->redisHelper->incr('pregWordsFromDictionary');
-                $arrayMapSpaceWord = array_map(function ($v) {
-                    return  str_replace(' ', '', $v);
-                }, $resultSpaceWord);
-                $prepareDataForGINSearch .= '|' . implode('|', $arrayMapSpaceWord);
-            }
-        }
         if ($prepareDataForGINSearch) {
             $resultData = $prepareDataForGINSearch;
             $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);
@@ -437,6 +466,14 @@ class CategoryService extends AbstractModel
                 $this->getObjecHandler()
                     ->validateEntity($categoryModel, [Category::SERIALIZED_GROUP_CREATE]);
             }
+            if ($categoryModel->getSubCategoryRelations()->count()) {
+                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
+                    /** @var $categoryRelation CategoryRelations */
+                    if ($categoryRelation->getMainCategory()) {
+                        $product->addCategoryRelation($categoryRelation->getMainCategory());
+                    }
+                }
+            }
             $product->addCategoryRelation($categoryModel);
             array_push($arrayModelsCategory, $categoryModel);
         }
@@ -444,6 +481,58 @@ class CategoryService extends AbstractModel
         return $arrayModelsCategory;
     }
 
+    /**
+     * @param Product $product
+     * @return bool
+     * @throws GlobalMatchException
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function matchGlobalNegativeKeyWords(Product $product)
+    {
+        $productComparingData = $product->getName() . ', ' . $product->getDescription();
+        if (!strlen($productComparingData)) {
+            return false;
+        }
+        $prepareDataForGINSearch = $this->prepareProductDataForMatching($productComparingData, false, 3);
+        if (!strlen($prepareDataForGINSearch)) {
+            return false;
+        }
+        $matchGlobalNegativeKeyWords = $this->getCategoryRepository()->matchGlobalNegativeKeyWords(
+            $prepareDataForGINSearch,
+            AdminConfiguration::GLOBAL_NEGATIVE_KEY_WORDS
+        );
+        if ($matchGlobalNegativeKeyWords) {
+            throw new GlobalMatchException('match negative key words');
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Product $product
+     * @return bool
+     * @throws GlobalMatchExceptionBrand
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function matchGlobalNegativeBrandWords(Product $product)
+    {
+        if (!strlen($product->getBrand())) {
+            return false;
+        }
+        $prepareDataForGINSearch = $this->prepareProductBrandForMatching($product->getBrand());
+        if (!strlen($prepareDataForGINSearch)) {
+            return false;
+        }
+        $matchGlobalNegativeKeyWords = $this->getCategoryRepository()->matchGlobalNegativeKeyWords(
+            $prepareDataForGINSearch,
+            AdminConfiguration::GLOBAL_NEGATIVE_BRAND_KEY_WORDS
+        );
+        if ($matchGlobalNegativeKeyWords) {
+            throw new GlobalMatchExceptionBrand('match negative key words brand');
+        }
+
+        return true;
+    }
     /**
      * @param ParamFetcher $paramFetcher
      * @return Category[]|CategoriesCollection|int
@@ -493,5 +582,53 @@ class CategoryService extends AbstractModel
     private function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
     {
         return $this->tagAwareQueryResultCacheProduct;
+    }
+
+    /**
+     * @param string|null $brand
+     * @return string|string[]|null
+     */
+    private function prepareProductBrandForMatching(?string $brand)
+    {
+        if (!$brand) {
+            return null;
+        }
+        return preg_replace(
+            '/-+/',
+            '-',
+            preg_replace('/ |\(|\)|\.|\!|\:|"|\'|&/','-', $brand)
+        );
+    }
+
+    /**
+     * @param string $sentence
+     * @return string
+     */
+    private function prepareProductDataForMatching(string $sentence, bool $strict = true, int $limitations = 4): string
+    {
+        $productData = $this->helper->pregWordsFromDictionary(
+            $sentence
+        );
+        $matchData = preg_replace('!\s+!', ',', $productData['result']);
+        $matchData = strip_tags($matchData);
+
+        $prepareDataForGINSearch = $this->prepareDataForGINSearch($matchData, $limitations);
+        $prepareDataForGINSearch = $this->helper
+            ->handleSearchValue($prepareDataForGINSearch, $strict);
+        if (isset($productData['match']) && count($productData['match'])) {
+            $resultSpaceWord = array_shift($productData['match']);
+            if (is_array($resultSpaceWord) && count($resultSpaceWord)) {
+                $this->redisHelper->incr('pregWordsFromDictionary');
+                $arrayMapSpaceWord = array_map(function ($v) {
+                    return str_replace(' ', '', $v);
+                }, $resultSpaceWord);
+                if (strlen($prepareDataForGINSearch)) {
+                    $prepareDataForGINSearch .= '|' . implode('|', $arrayMapSpaceWord);
+                } else {
+                    $prepareDataForGINSearch .= implode('|', $arrayMapSpaceWord);
+                }
+            }
+        }
+        return $prepareDataForGINSearch;
     }
 }

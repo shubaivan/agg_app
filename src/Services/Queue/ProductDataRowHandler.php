@@ -3,9 +3,13 @@
 namespace App\Services\Queue;
 
 use App\Cache\CacheManager;
+use App\Entity\Product;
 use App\Entity\Shop;
+use App\Exception\GlobalMatchException;
+use App\Exception\GlobalMatchExceptionBrand;
 use App\Exception\ValidatorException;
 use App\QueueModel\ResourceDataRow;
+use App\QueueModel\VacuumJob;
 use App\Services\HandleDownloadFileData;
 use App\Services\Models\BrandService;
 use App\Services\Models\CategoryService;
@@ -25,7 +29,7 @@ class ProductDataRowHandler
     /**
      * @var TraceableMessageBus
      */
-    private $bus;
+    private $vacuumBus;
 
     /**
      * @var Logger
@@ -74,7 +78,7 @@ class ProductDataRowHandler
 
     /**
      * AdtractionDataRowHandler constructor.
-     * @param MessageBusInterface $bus
+     * @param MessageBusInterface $vacuumBus
      * @param Logger $adtractionCsvRowHandlerLogger
      * @param ProductService $productService
      * @param BrandService $brandService
@@ -84,7 +88,7 @@ class ProductDataRowHandler
      * @param RedisHelper $redisHelper
      */
     public function __construct(
-        MessageBusInterface $bus,
+        MessageBusInterface $vacuumBus,
         LoggerInterface $adtractionCsvRowHandlerLogger,
         ProductService $productService,
         BrandService $brandService,
@@ -97,7 +101,7 @@ class ProductDataRowHandler
     )
     {
         $this->cacheManager = $cacheManager;
-        $this->bus = $bus;
+        $this->vacuumBus = $vacuumBus;
         $this->logger = $adtractionCsvRowHandlerLogger;
         $this->productService = $productService;
         $this->brandService = $brandService;
@@ -119,12 +123,16 @@ class ProductDataRowHandler
             $filePath = $dataRow->getFilePath();
 
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
+
+            $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
+            $this->getCategoryService()->matchGlobalNegativeBrandWords($product);
+
             $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);
             $this->getShopService()->createShopFromProduct($product);
             if (!$product->isMatchForCategories() || $this->forceAnalysis == '1') {
                 $handleAnalysisProductByMainCategory = $this->getCategoryService()
-                        ->handleAnalysisProductByMainCategory($product);
+                    ->handleAnalysisProductByMainCategory($product);
                 if (count($handleAnalysisProductByMainCategory)) {
                     $product->setMatchForCategories(true);
 
@@ -149,12 +157,27 @@ class ProductDataRowHandler
 
             if ($dataRow->getLastProduct()) {
                 $this->getCacheManager()->clearAllPoolsCache();
-                $this->getProductService()->autoVACUUM();
+//                $this->getProductService()->autoVACUUM();
+                $this->vacuumBus->dispatch(new VacuumJob(true));
                 $this->getRedisHelper()
                     ->hMSet(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $dataRow->getRedisUniqKey(),
                         [$filePath => (new \DateTime())->getTimestamp()]
                     );
             }
+        } catch (GlobalMatchExceptionBrand $globalMatchException) {
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $dataRow->getShop());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $filePath);
+        } catch (GlobalMatchException $globalMatchException) {
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $dataRow->getShop());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $filePath);
         } catch (ValidatorException $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
@@ -250,14 +273,6 @@ class ProductDataRowHandler
     protected function getRedisHelper(): RedisHelper
     {
         return $this->redisHelper;
-    }
-
-    /**
-     * @return TraceableMessageBus
-     */
-    public function getBus(): TraceableMessageBus
-    {
-        return $this->bus;
     }
 
     /**

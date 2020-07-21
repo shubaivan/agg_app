@@ -8,6 +8,7 @@ use App\QueueModel\AdrecordDataRow;
 use App\QueueModel\AdtractionDataRow;
 use App\QueueModel\CarriageShop;
 use App\QueueModel\FileReadyDownloaded;
+use App\Services\Models\CategoryService;
 use App\Util\RedisHelper;
 use League\Csv\Reader;
 use League\Csv\ResultSet;
@@ -104,6 +105,16 @@ class HandleDownloadFileData
     private $csvHandleStep;
 
     /**
+     * @var CategoryService
+     */
+    private $categoryService;
+
+    /**
+     * @var Helpers
+     */
+    private $helper;
+
+    /**
      * HandleDownloadFileData constructor.
      * @param MessageBusInterface $commandBus
      * @param MessageBusInterface $productsBus
@@ -112,6 +123,8 @@ class HandleDownloadFileData
      * @param array $adtractionDownloadUrls
      * @param array $adrecordDownloadUrls
      * @param string $csvHandleStep
+     * @param CategoryService $categoryService
+     * @param Helpers $helpers
      */
     public function __construct(
         MessageBusInterface $commandBus,
@@ -120,7 +133,9 @@ class HandleDownloadFileData
         RedisHelper $redisHelper,
         array $adtractionDownloadUrls,
         array $adrecordDownloadUrls,
-        string $csvHandleStep
+        string $csvHandleStep,
+        CategoryService $categoryService,
+        Helpers $helpers
     )
     {
         $this->adrecordDownloadUrls = $adrecordDownloadUrls;
@@ -130,6 +145,8 @@ class HandleDownloadFileData
         $this->logger = $adtractionFileHandlerLogger;
         $this->redisHelper = $redisHelper;
         $this->csvHandleStep = (int)$csvHandleStep;
+        $this->categoryService = $categoryService;
+        $this->helper = $helpers;
     }
 
     /**
@@ -172,6 +189,9 @@ class HandleDownloadFileData
 //        $header = $csv->getHeader();
 
         foreach ($records as $offsetRecord=>$record) {
+            if ($offsetRecord == 0) {
+                continue;
+            }
             $this->handleProductJobInQueue(
                 $shop,
                 $offsetRecord,
@@ -274,6 +294,7 @@ class HandleDownloadFileData
         if (isset($this->adtractionDownloadUrls[$shop])) {
             $csv->setHeaderOffset(0);
             $csv->setDelimiter(',');
+            $csv->setEscape('"');
             $csv->setEnclosure('\'');
         } elseif (isset($this->adrecordDownloadUrls[$shop])) {
             $csv->setHeaderOffset(0);

@@ -216,9 +216,6 @@ class ResourceDownloadFile extends Command
         while (!feof($phpStream)) {
             $read = fread($phpStream, 1024);
 
-            $read = str_replace('""\'', '\"\"\'', $read);
-            $read = str_replace('"\'', '\"\\\'', $read);
-
             file_put_contents(
                 $fileRelativePath,
                 $read,

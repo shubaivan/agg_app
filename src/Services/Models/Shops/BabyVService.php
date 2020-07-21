@@ -6,7 +6,7 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class BabyVService implements IdentityGroup
+class BabyVService extends AbstractShop implements IdentityGroup
 {
     /**
      * productUrl: "https://www.babyv.se/sv/articles/1.37.18/babybjorn-babybjorn-balance-bliss-mesh-antracitgra"
@@ -30,6 +30,14 @@ class BabyVService implements IdentityGroup
             array_splice($explodeIdentity, -1, 1);
 
             $product->setGroupIdentity(implode('.', $explodeIdentity));
+        }
+
+        if ($product->getName()) {
+            $explodeName = explode(',', $product->getName());
+            if (count($explodeName) > 1) {
+                $color = array_pop($explodeName);
+                $this->analysisColorValue($color, $product);
+            }
         }
     }
 }
