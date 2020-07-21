@@ -19,6 +19,7 @@ use App\Validation\Constraints\CustomUrl;
  *     uniqueConstraints={@UniqueConstraint(name="uniq_sku_index", columns={"sku"})},
  *     indexes={
  *     @ORM\Index(name="sku_idx", columns={"sku"}),
+ *     @ORM\Index(name="instock_idx", columns={"instock"}),
  *     @ORM\Index(name="group_identity", columns={"group_identity"}),
  *     @ORM\Index(name="created_desc_index", columns={"created_at"}),
  *     @ORM\Index(name="created_asc_index", columns={"created_at"}),
@@ -863,19 +864,27 @@ class Product implements EntityValidatorException
         }
     }
 
-    public function setInStockAccessor(?string $value = null)
+    /**
+     * @param null|string|integer $value
+     * @return bool|$this
+     */
+    public function setInStockAccessor($value = null)
     {
-        if (!$value) {
+        if ($value === null) {
             return false;
         }
 
         if (in_array($value, self::$enumInStock)) {
             $this->instock = (int)$value;
+
+            return $this;
         }
 
         if (array_key_exists($value, self::$enumInStock)) {
             $this->instock = (int)self::$enumInStock[$value];
         }
+
+        return $this;
     }
 
     /**

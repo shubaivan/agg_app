@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200721092852 extends AbstractMigration
+final class Version20200721094258 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -22,8 +22,7 @@ final class Version20200721092852 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
-        $this->addSql('ALTER TABLE products ALTER instock TYPE INT');
-        $this->addSql('ALTER TABLE products ALTER instock DROP DEFAULT');
+        $this->addSql('ALTER TABLE products DROP instock');
     }
 
     public function down(Schema $schema) : void
@@ -31,7 +30,6 @@ final class Version20200721092852 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
-        $this->addSql('ALTER TABLE products ALTER instock TYPE VARCHAR(255)');
-        $this->addSql('ALTER TABLE products ALTER instock DROP DEFAULT');
+        $this->addSql('ALTER TABLE products ADD instock VARCHAR(255) DEFAULT NULL');
     }
 }
