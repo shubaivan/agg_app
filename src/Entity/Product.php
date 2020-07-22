@@ -672,6 +672,9 @@ class Product implements EntityValidatorException
         if (is_null($extras)) {
             return;
         }
+        if ($this->id) {
+            $this->extras = [];
+        }
         $result = [];
         $preg_match_all = preg_match_all('~{([^{}]*)}~', $extras, $matches);
         if ($preg_match_all > 0) {
@@ -682,10 +685,12 @@ class Product implements EntityValidatorException
                         $explode = explode('#', $field);
                         if (isset($explode[0]) && isset($explode[1])) {
                             if ($explode[0] == self::SIZE) {
+                                $excludeOriginalValue = false;
                                 if (preg_match_all('/[0-9]+/', $explode[1], $matchesD)) {
                                     $sizes = array_shift($matchesD);
-                                    $arrayMapSizes = array_map(function ($v) {
+                                    $arrayMapSizes = array_map(function ($v) use (&$excludeOriginalValue) {
                                         if (mb_substr($v, 0, 1) == '0') {
+                                            $excludeOriginalValue = true;
                                             return mb_substr($v, 1);
                                         }
 
@@ -695,7 +700,9 @@ class Product implements EntityValidatorException
                                 } else {
                                     $result[$explode[0]] = [];
                                 }
-                                array_push($result[$explode[0]], $explode[1]);
+                                if (!$excludeOriginalValue) {
+                                    array_push($result[$explode[0]], $explode[1]);
+                                }
                                 $result[$explode[0]] = array_unique($result[$explode[0]]);
                             } else {
                                 $result[$explode[0]] = $explode[1];
@@ -736,6 +743,8 @@ class Product implements EntityValidatorException
                     $value = mb_substr($value, 1);
                 }
                 $extras[$key][] = $value;
+                $sizesUniq = array_unique($extras[$key]);
+                $extras[$key] = $sizesUniq;
                 $this->extras = $extras;
             } elseif(!array_key_exists($key, $extras)) {
                 $this->extras = array_merge($extras, [$key => $value]);

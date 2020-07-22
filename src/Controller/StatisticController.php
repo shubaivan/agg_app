@@ -106,8 +106,8 @@ EOF;
                     $shopName = array_pop($explodeFilepath);
                     $resourceName = array_pop($explodeFilepath);
                     if ($blockName == 'failed') {
-                        if ((int)$hashValue >= 4) {
-                            $hashValue = $hashValue/4;
+                        if ((int)$hashValue >= 3) {
+                            $hashValue = $hashValue/3;
                         } else {
                             continue;
                         }
