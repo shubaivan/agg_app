@@ -6,8 +6,6 @@
 parameters:
     adtraction_download_urls:
         'Pyret': '%env(ANDRACTION_DOWNLOAD_URL_Pyret)%'
-#        'Babyshop': '%env(ANDRACTION_DOWNLOAD_URL_Babyshop)%'
-#        'Jollyroom': '%env(ANDRACTION_DOWNLOAD_URL_Jollyroom)%'
         'Reima': '%env(ANDRACTION_DOWNLOAD_URL_Reima)%'
         'Lekmer': '%env(ANDRACTION_DOWNLOAD_URL_Lekmer)%'
         'Babyland': '%env(ANDRACTION_DOWNLOAD_URL_Babyland)%'

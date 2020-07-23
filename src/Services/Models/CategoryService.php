@@ -481,6 +481,11 @@ class CategoryService extends AbstractModel
         return $arrayModelsCategory;
     }
 
+    public function matchCustomerExcludeRules(Product $product)
+    {
+
+    }
+
     /**
      * @param Product $product
      * @return bool

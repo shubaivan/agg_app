@@ -70,8 +70,28 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                     Capri Pants, Sweatpants, Sweatshorts, Manchesterpants, Linnen chinos, Linnenchinos, Pull-up chinos, Shorts chinos                     
                 ',
                 'sub_key_word' => [
-                    'Stövlar' => 'Stövlar',
-                    'Kängor' => 'Kängor',
+                    'Byxor' => 'Byxor, Byxa, Trousers, Troucer',
+                    'Chinos' => 'Chinos, Linnechinos, Linne Chinos',
+                    'Jeans' => 'Jeans pants, Jeansbyxa, Jeansbyxor',
+                    'Sweatpants' => 'Sweatpants',
+                    'Leggings' => 'Legging, Leggings',
+                    'Jeggings' => 'Jeggings, Jegging',
+                    'Jeansshorts' => 'Jeansshorts, Jeans shorts',
+                    'Cargopants' => 'Cargopants, Cargobyxa',
+                    'Termobyxor' => 'Termobyxa, Termobyxor, Thermopants, Täckbyxor, Överdragsbyxor',
+                    'Skalbyxor' => 'Skalbyxor, Skalbyxa, Shellpants, Shellpant, Shell pants, Shell pant',
+                    'Cargobyxor' => 'Cargobyxor, Cargobyxa, Cargopants, Cargo pants',
+                    'Haremsbyxor' => 'Haremsbyxor, Harembyxa, Harem Pants, Harem Pants',
+                    'Mjukisbyxor' => 'Mjukisbyxa, Mjukisbyxor, Softpants',
+                    'Regnbyxor' => 'Regnbyxor, Rainpants, Rain pants',
+                    'Trekvartsbyxor' => 'Trekvartsbyxa',
+                    'Trekvartsbyxa' => 'Three Quarter Pants, Tre kvart byxa, Trekvartsbyxor, Trekvartsbyxa',
+                    'Capribyxor' => 'Capribyxor, Capribyxa, Capripants, Capri pants',
+                    'Träningsbyxor' => 'Träningsbyxa, Träningsbyxor, Sweatpants',
+                    'Pull-up byxor' => 'Pull-upp byxor, Pull upp byxor, Pull-up pants, Pull upp pants',
+                    'Linnebyxor' => 'Linnebyxor, Linnebyxa, Linnen pants, Linnen pants',
+                    'Manchesterbyxor' => 'Manchesterbyxor, Manchesterbyxa, Manchesterpants, Manchester pants',
+                    'Shorts' => 'Shorts, Kortbyxor, Kortbyxa'
                 ],
                 'negative_key_words' => 'skor, byxa, snutte, tossor',
             ],
@@ -98,6 +118,16 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                     tights, stockings, Socks, Pantyhose, Pantyhose Underwear set, Underliners, Underliners                     
                 ',
                 'negative_key_words' => 'skor, byxa, snutte, tossor,  babyskor',
+                'sub_key_word' => [
+                    'Strumpor' => 'Strumpor',
+                    'Strumpbyxor' => 'Strumpbyxor',
+                    'Benvärmare' => 'Benvärmare',
+                    'Bloomers' => 'Bloomers',
+                    'Long johns' => 'Long johns',
+                    'Underbyxor' => 'Underbyxor',
+                    'Underklädsset' => 'Underklädsset',
+                    'Underlinnen' => 'Underlinnen'
+                ]
             ],
             [
                 'name' => 'Baby Ytterkläder',
@@ -110,6 +140,44 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                         Västar, Jeansjacka, Jeansjackor, Utomhus Jacka, Streetjacka, Vardagsjacka, Softshell, Soft-Shell                     
                 ',
                 'negative_key_words' => 'skor, vinterstövel',
+                'sub_key_word' => [
+                    'Jackor' => 'Jackor',
+                    'Fleece' => 'Fleece',
+                    'Fleecetröjor' => 'Fleecetröjor',
+                    'Fleecebyxor' => 'Fleecebyxor',
+                    'Fleecejackor' => 'Fleecejackor',
+                    'Fleeceoveraller' => 'Fleeceoveraller',
+                    'Mössor med öronlappar' => 'Mössor med öronlappar',
+                    'Mössor' => 'Mössor',
+                    'Halsduk' => 'Halsduk',
+                    'vantar' => 'vantar',
+                    'Parkas' => 'Parkas',
+                    'Regnhandskar' => 'Regnhandskar',
+                    'Regnhattar' => 'Regnhattar',
+                    'Regnjackor' => 'Regnjackor',
+                    'Regnoveraller' => 'Regnoveraller',
+                    'Regnställ' => 'Regnställ',
+                    'Skaljackor' => 'Skaljackor',
+                    'Skaloveraller' => 'Skaloveraller',
+                    'Skidbyxor och thermobyxor' => 'Skidbyxor och thermobyxor',
+                    'Skidhandskar och vantar' => 'Skidhandskar och vantar',
+                    'Skidjackor' => 'Skidjackor',
+                    'Skidoveraller' => 'Skidoveraller',
+                    'Solhattar' => 'Solhattar',
+                    'Vår och höst jackor' => 'Vår och höst jackor',
+                    'Stickade halsdukar' => 'Stickade halsdukar',
+                    'Ullvantar' => 'Ullvantar',
+                    'Vadderade jackor' => 'Vadderade jackor',
+                    'Vindjackor' => 'Vindjackor',
+                    'Vinterjackor' => 'Vinterjackor',
+                    'Vinteroveraller' => 'Vinteroveraller',
+                    'Västar' => 'Västar',
+                    'Jeansjackor' => 'Jeansjackor',
+                    'Utomhus Jackor' => 'Utomhus Jackor',
+                    'Streetjackor' => 'Streetjackor',
+                    'Vardagsjackor' => 'Vardagsjackor',
+                    'Soft-Shell' => 'Soft-Shell'
+                ]
             ],
             [
                 'name' => 'Baby UV & Bad',
@@ -122,6 +190,25 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                     Diaper Tights, UV Bathing Suits, UV Bathing Shorts, UV Bathing Shorts, Sunsuits, Sunsuit, Sweater, 
                     Bathing Sweater, Bathing Suits, Bathrobe                     
                 ',
+                'sub_key_word' => [
+                    'UV-Dräkter' => 'UV-Dräkter',
+                    'UV-byxoror' => 'UV-byxoror',
+                    'UV-tröjor' => 'UV-tröjor',
+                    'UV-set' => 'UV-set',
+                    'Badbyxor' => 'Badbyxor',
+                    'Badshorts' => 'Badshorts',
+                    'Bikini' => 'Bikini',
+                    'Baddräkter' => 'Baddräkter',
+                    'Simbyxor' => 'Simbyxor',
+                    'Blöjbadbyxor' => 'Blöjbadbyxor',
+                    'UV-Baddräckter' => 'UV-Baddräckter',
+                    'UV Badshorts' => 'UV Badshorts',
+                    'Soldräkter' => 'Soldräkter',
+                    'Badtröjor' => 'Badtröjor',
+                    'Badrockar' => 'Badrockar',
+                    'UV skjortor' => 'UV skjortor',
+                    'Solskydd' => 'Solskydd'
+                ]
             ],
             [
                 'name' => 'Baby Accessoarer',
@@ -139,6 +226,16 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                     Babylarm, Matnings set, Luftrenare, Flaskvärmare, Dryckesmugg, Tröstplåster, Toalettsits, Badkar, Stickkontaktplugg, 
                     Förvaringsmugg, Hörnskydd, Fönsterlås, Våtservett                      
                 ',
+                'sub_key_word' => [
+                    'Nappar' =>  'Nappar, tröstnapp, sugnapp, nippel, napper,Pacifiers, dummy, pacifier, comforter, nipple',
+                    'Haklappar' => 'Haklappar, haklapp, bröstlapp, Bibs, bib, feeder',
+                    'Halsdukar' => 'Halsdukar, halsdukar, Neckwear',
+                    'Handskar & Vantar' => 'Handskar, Vantar, vante, handske, gloves, glove, gantlet, gauntlet, tumvante',
+                    'Huvudbonad' => 'Huvudbonad, hatt, Panama, keps, mössa, headdress, hat, lid, muff, dupe, pigeon, cap',
+                    'Slipsar & flugor' => 'Slipsar, flugor, slips, fluga, tie, necktie, bow-tie',
+                    'Skärp & Hängslen' => 'Skärp, Hängslen, bälte, rem, Belt, strap, Braces, suspenders, galluses',
+                    'Väskor' => 'Väskor, påse, väska, säck, Bags, Bag, bagful, sack'
+        ]
             ],
         ],
         'ACCESSOARER' => [

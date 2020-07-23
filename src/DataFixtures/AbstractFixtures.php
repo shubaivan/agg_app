@@ -195,8 +195,6 @@ abstract class AbstractFixtures extends Fixture
 
                     $subKeyWordsArray = array_unique($subKeyWords);
                     foreach ($subKeyWordsArray as $key => $words) {
-                        $words = preg_replace('/\s+/', '', $words);
-
                         $wordCategory = $this->createCategoryWithConf(
                             $key, $words
                         );
@@ -501,6 +499,12 @@ abstract class AbstractFixtures extends Fixture
      */
     private function setDataInFile(string $path, string $data): void
     {
+        if (file_exists($path) && $data !== PHP_EOL) {
+            if( exec('grep '.escapeshellarg(preg_replace('/\R/', '', $data)).' ' . $path)) {
+                return;
+            }
+        }
+
         file_put_contents(
             $path,
             $data,
