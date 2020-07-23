@@ -235,14 +235,20 @@ class ManagerShopsService
     public function __call($name, $arguments)
     {
         $prepareProperty = mb_strtolower($name);
+
         $patterns = array();
-        $patterns[0] = '/.se/';
-        $patterns[1] = '/ö/';
-        $patterns[2] = '/ /';
+        $patterns[] = '/.se/';
+        $patterns[] = '/ö/';
+        $patterns[] = '/ /';
+        $patterns[] = '/åhlens/';
+
         $replacements = array();
-        $replacements[2] = '';
-        $replacements[1] = 'o';
-        $replacements[0] = '';
+
+        $replacements[] = '';
+        $replacements[] = 'o';
+        $replacements[] = '';
+        $replacements[] = 'ahlens';
+
         $prepareProperty = preg_replace($patterns, $replacements, $prepareProperty);
 
         if (property_exists($this, $prepareProperty)) {
