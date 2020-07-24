@@ -209,8 +209,8 @@ class CategoryRepository extends ServiceEntityRepository
 
                 }
             }
-            $this->getTagAwareQueryResultCacheCategory()->save('main_category_ids', $mainCategoryIds);
-            $result = $mainCategoryIds;
+            $this->getTagAwareQueryResultCacheCategory()->save('main_category_ids', $mainCategoryWords);
+            $result = $mainCategoryWords;
         }
 
 
