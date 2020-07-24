@@ -5,12 +5,14 @@ namespace App\Services\Queue;
 use App\Cache\CacheManager;
 use App\Entity\Product;
 use App\Entity\Shop;
+use App\Exception\AdminShopRulesException;
 use App\Exception\GlobalMatchException;
 use App\Exception\GlobalMatchExceptionBrand;
 use App\Exception\ValidatorException;
 use App\QueueModel\ResourceDataRow;
 use App\QueueModel\VacuumJob;
 use App\Services\HandleDownloadFileData;
+use App\Services\Models\AdminShopRulesService;
 use App\Services\Models\BrandService;
 use App\Services\Models\CategoryService;
 use App\Services\Models\ProductService;
@@ -77,6 +79,11 @@ class ProductDataRowHandler
     private $cacheManager;
 
     /**
+     * @var AdminShopRulesService
+     */
+    private $adminShopRulesService;
+
+    /**
      * AdtractionDataRowHandler constructor.
      * @param MessageBusInterface $vacuumBus
      * @param Logger $adtractionCsvRowHandlerLogger
@@ -86,6 +93,7 @@ class ProductDataRowHandler
      * @param ShopService $shopService
      * @param EntityManagerInterface $em
      * @param RedisHelper $redisHelper
+     * @param AdminShopRulesService $adminShopRulesService
      */
     public function __construct(
         MessageBusInterface $vacuumBus,
@@ -97,7 +105,8 @@ class ProductDataRowHandler
         EntityManagerInterface $em,
         RedisHelper $redisHelper,
         CacheManager $cacheManager,
-        string $forceAnalysis
+        string $forceAnalysis,
+        AdminShopRulesService $adminShopRulesService
     )
     {
         $this->cacheManager = $cacheManager;
@@ -110,6 +119,7 @@ class ProductDataRowHandler
         $this->em = $em;
         $this->redisHelper = $redisHelper;
         $this->forceAnalysis = $forceAnalysis;
+        $this->adminShopRulesService = $adminShopRulesService;
     }
 
     /**
@@ -124,6 +134,7 @@ class ProductDataRowHandler
 
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
 
+            $this->getAdminShopRulesService()->executeShopRule($product);
             $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
             $this->getCategoryService()->matchGlobalNegativeBrandWords($product);
 
@@ -164,6 +175,13 @@ class ProductDataRowHandler
                         [$filePath => (new \DateTime())->getTimestamp()]
                     );
             }
+        } catch (AdminShopRulesException $exception) {
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION . $dataRow->getShop());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION . $filePath);
         } catch (GlobalMatchExceptionBrand $globalMatchException) {
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
@@ -281,5 +299,13 @@ class ProductDataRowHandler
     private function getCacheManager(): CacheManager
     {
         return $this->cacheManager;
+    }
+
+    /**
+     * @return AdminShopRulesService
+     */
+    private function getAdminShopRulesService(): AdminShopRulesService
+    {
+        return $this->adminShopRulesService;
     }
 }

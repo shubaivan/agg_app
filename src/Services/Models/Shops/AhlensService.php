@@ -11,7 +11,6 @@ class AhlensService implements IdentityGroup
 
     public function identityGroupColumn(Product $product)
     {
-
         $productUrl = $product->getProductUrl();
         $lastChar = substr($productUrl, -1);
         if ($lastChar == '/') {

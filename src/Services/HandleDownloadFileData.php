@@ -322,7 +322,7 @@ class HandleDownloadFileData
     {
 //        echo 'shop' . $shop . ' offset ' . $offsetRecord . PHP_EOL;
         $record['shop'] = $shop ;
-        if ($shop = 'Ahlens') {
+        if ($shop == 'Ahlens') {
             $record['shop'] = 'Åhlens' ;
         }
 

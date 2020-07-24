@@ -37,6 +37,7 @@
         "symfony/notifier": "5.0.*",
         "symfony/orm-pack": "*",
         "symfony/process": "5.0.*",
+        "symfony/property-access": "5.0.*",
         "symfony/proxy-manager-bridge": "5.0.*",
         "symfony/security-bundle": "5.0.*",
         "symfony/serializer-pack": "*",

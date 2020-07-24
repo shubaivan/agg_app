@@ -31,6 +31,7 @@ class Shop
     const PREFIX_PROCESSING_DATA_SHOP_FAILED = 'shop:processing:failed:';
     const PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND = 'shop:processing:global_match_exception_brand:';
     const PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION = 'shop:processing:global_match_exception:';
+    const PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION = 'shop:processing:admin_shop_rules_exception:';
 
     const PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL = 'shop:handle:successful:';
     const PREFIX_HANDLE_DATA_SHOP_FAILED = 'shop:handle:failed:';

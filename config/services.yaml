@@ -139,6 +139,9 @@ services:
     App\Services\Models\ShopService:
       lazy: true
 
+    App\Services\Models\AdminShopRulesService:
+      lazy: true
+
     App\Services\ObjectsHandler:
       lazy: true
 
