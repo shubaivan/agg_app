@@ -23,7 +23,7 @@ interface ResourceDataRow
      * @param string $sku
      * @return mixed
      */
-    public function setSku(string $sku);
+    public function setSkuValueToRow(string $sku);
 
     /**
      * @param int $id

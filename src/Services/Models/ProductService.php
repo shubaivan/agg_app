@@ -341,7 +341,7 @@ class ProductService extends AbstractModel
                 $adtractionDataRow->setExistProductId($product->getId());
             } else {
                 $newSku = $this->modifyToUniqSku($adtractionDataRow->getSku());
-                $adtractionDataRow->setSku($newSku);
+                $adtractionDataRow->setSkuValueToRow($newSku);
             }
         }
 
