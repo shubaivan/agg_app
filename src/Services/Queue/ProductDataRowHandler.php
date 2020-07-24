@@ -175,7 +175,7 @@ class ProductDataRowHandler
                         [$filePath => (new \DateTime())->getTimestamp()]
                     );
             }
-        } catch (AdminShopRulesException $exception) {
+        } catch (AdminShopRulesException $adminShopRulesException) {
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION . $dataRow->getShop());

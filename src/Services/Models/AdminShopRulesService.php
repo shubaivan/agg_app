@@ -48,17 +48,23 @@ class AdminShopRulesService
             }
 
         }
-        
+        $identityColumns = false;
         foreach ($columnConf as $column=>$rule) {
             $implode = implode('|', $rule);
             $value = $propertyAccessor->getValue($product, $column);
             if ($value) {
+                $identityColumns = true;
                 if (preg_match_all("/$implode/u", $value, $mt)) {
-                    return $mt;
+                    $failedRule = false;
+                    break;
                 } else {
-                    throw new AdminShopRulesException();
+                    $failedRule = true;
                 }
             }
+        }
+
+        if ($identityColumns && $failedRule) {
+            throw new AdminShopRulesException();
         }
 
         return [];
