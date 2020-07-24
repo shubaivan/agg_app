@@ -60,7 +60,8 @@ class AdminShopsRulesRepository extends ServiceEntityRepository
                 $result = $oneOrNullResult['columnsKeywords'];
             }
 
-            $this->getTagAwareQueryResultCacheCommon()->save($value, $result);
+            $this->getTagAwareQueryResultCacheCommon()
+                ->save($value, $result, 86399);
         }
 
 

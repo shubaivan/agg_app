@@ -348,12 +348,16 @@ class ProductService extends AbstractModel
         return $adtractionDataRow;
     }
 
-    private function modifyToUniqSku(string $sku)
+    /**
+     * @param string|null $sku
+     * @return string
+     */
+    private function modifyToUniqSku(?string $sku = '')
     {
         $modifySku = $sku . '_1';
         $matchSku = $this->getProductRepository()
             ->findOneBy(['sku' => $modifySku]);;
-        while ($matchSku) {
+        while ($matchSku instanceof Product) {
             $modifySku = $modifySku . '1';
             $matchSku = $this->getProductRepository()
                 ->findOneBy(['sku' => $modifySku]);

@@ -64,7 +64,7 @@ class AdtractionDataRow extends Queues implements ResourceDataRow, LastProductIn
     /**
      * @return string|null
      */
-    public function setSku(string $sku)
+    public function setSku($sku)
     {
         return $this->row['SKU'] = $sku;
     }
