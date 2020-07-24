@@ -45,6 +45,8 @@ class AdminShopRulesService
         foreach ($adminShopsRules as $column=>$keyWords) {
             if (is_array($keyWords)) {
                 $columnConf[$column] = array_unique($keyWords);
+            } else {
+                $columnConf[$column] = [$keyWords];
             }
 
         }
