@@ -768,7 +768,7 @@ class CategoryRepository extends ServiceEntityRepository
         if (count($isMatchResult)) {
             $result = array_shift($isMatchResult);
 
-            if (preg_match_all("/<b>.*?<\/b>/", $result['ts_headline_result'], $m)) {
+            if (preg_match_all("/<b>.*?<\/b>/iu", $result['ts_headline_result'], $m)) {
                 $resultMainCategoryWords = [];
                 $regTsHeadLightResult = array_shift($m);
                 $explodeMainCategoriesData = explode('|', $mainCategoryWordsString);
@@ -778,7 +778,7 @@ class CategoryRepository extends ServiceEntityRepository
                         $mainCategoryWord = preg_replace('/:\*/', '', $mainCategoryWord);
 
                         if (mb_stripos($matchingWord, $mainCategoryWord) !== false) {
-                            $resultMatchArray = preg_grep("/\b$mainCategoryWord\b/", $mainCategoryWordsArray);
+                            $resultMatchArray = preg_grep("/\b$mainCategoryWord\b/iu", $mainCategoryWordsArray);
                             foreach ($resultMatchArray as $nameMainCategory=>$matchPool) {
                                 if (isset($mainCategoriesData['categories'][$nameMainCategory]['negative'])) {
                                     $resultMainCategoryWords[] = '(' . $mainCategoryWord . ', ' . $mainCategoriesData['categories'][$nameMainCategory]['negative'] . ')';
