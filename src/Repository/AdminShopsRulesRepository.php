@@ -38,7 +38,7 @@ class AdminShopsRulesRepository extends ServiceEntityRepository
             ->useQueryCache(true)
             ->getOneOrNullResult();
         $result = [];
-        if (count($oneOrNullResult)
+        if (!is_null($oneOrNullResult)
             && isset($oneOrNullResult['columnsKeywords'])
             && count($oneOrNullResult['columnsKeywords'])
         ) {
