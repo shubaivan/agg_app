@@ -605,7 +605,7 @@ class CategoryService extends AbstractModel
         if (isset($productData['match']) && count($productData['match'])) {
             $resultSpaceWord = array_shift($productData['match']);
             if (is_array($resultSpaceWord) && count($resultSpaceWord)) {
-                $this->redisHelper->incr(date('Y-m-d') . 'pregWordsFromDictionary');
+                $this->redisHelper->incr(date('Y-m-d') . '_pregWordsFromDictionary');
                 $arrayMapSpaceWord = array_map(function ($v) {
                     return str_replace(' ', '', $v);
                 }, $resultSpaceWord);
