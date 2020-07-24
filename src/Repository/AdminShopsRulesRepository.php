@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Cache\TagAwareQueryResultCacheCommon;
 use App\Entity\AdminShopsRules;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -14,9 +15,18 @@ use Doctrine\Common\Persistence\ManagerRegistry;
  */
 class AdminShopsRulesRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    /**
+     * @var TagAwareQueryResultCacheCommon
+     */
+    private $tagAwareQueryResultCacheCommon;
+
+    public function __construct(
+        ManagerRegistry $registry,
+        TagAwareQueryResultCacheCommon $tagAwareQueryResultCacheCommon
+    )
     {
         parent::__construct($registry, AdminShopsRules::class);
+        $this->tagAwareQueryResultCacheCommon = $tagAwareQueryResultCacheCommon;
     }
 
     /**
@@ -26,25 +36,42 @@ class AdminShopsRulesRepository extends ServiceEntityRepository
      */
     public function findConfByStore(string $value)
     {
-        $oneOrNullResult = $this->createQueryBuilder('a')
-            ->select('
+        $contains = $this->getTagAwareQueryResultCacheCommon()
+            ->contains($value);
+        if ($contains) {
+            $result = $this->getTagAwareQueryResultCacheCommon()->fetch($value);
+        } else {
+            $oneOrNullResult = $this->createQueryBuilder('a')
+                ->select('
                 a.id,
                 a.columnsKeywords
             ')
-            ->andWhere('a.store = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->enableResultCache()
-            ->useQueryCache(true)
-            ->getOneOrNullResult();
-        $result = [];
-        if (!is_null($oneOrNullResult)
-            && isset($oneOrNullResult['columnsKeywords'])
-            && count($oneOrNullResult['columnsKeywords'])
-        ) {
-            $result = $oneOrNullResult['columnsKeywords'];
+                ->andWhere('a.store = :val')
+                ->setParameter('val', $value)
+                ->getQuery()
+                ->enableResultCache()
+                ->useQueryCache(true)
+                ->getOneOrNullResult();
+            $result = [];
+            if (!is_null($oneOrNullResult)
+                && isset($oneOrNullResult['columnsKeywords'])
+                && count($oneOrNullResult['columnsKeywords'])
+            ) {
+                $result = $oneOrNullResult['columnsKeywords'];
+            }
+
+            $this->getTagAwareQueryResultCacheCommon()->save($value, $result);
         }
 
+
         return $result;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheCommon
+     */
+    public function getTagAwareQueryResultCacheCommon(): TagAwareQueryResultCacheCommon
+    {
+        return $this->tagAwareQueryResultCacheCommon;
     }
 }

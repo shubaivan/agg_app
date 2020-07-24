@@ -56,7 +56,7 @@ class AdminShopRulesService
             $value = $propertyAccessor->getValue($product, $column);
             if ($value) {
                 $identityColumns = true;
-                if (preg_match_all("/$implode/u", $value, $mt)) {
+                if (preg_match_all("/$implode/iu", $value, $mt)) {
                     $failedRule = false;
                     break;
                 } else {

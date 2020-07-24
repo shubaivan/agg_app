@@ -215,8 +215,8 @@ class Helpers
                 ->set(self::THESAURUS_MY_SWEDISH_REGULARS, $implode, 31536000);
         }
 
-        preg_match_all("/$implode/u", $inputString, $mt);
-        $result = preg_replace("/$implode/u", '', $inputString);
+        preg_match_all("/$implode/iu", $inputString, $mt);
+        $result = preg_replace("/$implode/iu", '', $inputString);
 
         return [
             'match' => $mt,

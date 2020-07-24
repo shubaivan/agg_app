@@ -221,31 +221,13 @@ class CategoryService extends AbstractModel
      */
     public function handleAnalysisProductByMainCategory(Product $product)
     {
-        $mainSubCategoryIds = $this->getCategoryRepository()
+        $mainCategoryWords = $this->getCategoryRepository()
             ->getMainSubCategoryIds();
-        $mainCategoryWords = [];
-        foreach ($mainSubCategoryIds as $main) {
-            if (isset($main['category_name'])) {
-                $mainCategoryWords['categories'][$main['category_name']]['positive'] = $main['key_words'];
-                $negative_key_words = null;
-                if (strlen($main['negative_key_words'])) {
-                    $negative_key_words = implode(', ', array_map(function ($v) {return '!' . $v;}, explode(', ', $main['negative_key_words'])));
-                }
 
-                $mainCategoryWords['categories'][$main['category_name']]['negative'] = $negative_key_words;
-                if ($negative_key_words) {
-                    $mainCategoryWords['common'][] = '(' . $main['key_words'] . ', ' . $negative_key_words . ')';
-                } else {
-                    $mainCategoryWords['common'][] = $main['key_words'];
-                }
-
-            }
-        }
         if (!count($mainCategoryWords)) {
             return [];
         }
 
-//        $mainCategoryWordsString = implode(',', $mainCategoryWordsForQuery);
         $resultAnalysis = $this->analysisProductByMainCategory(
             $product, $mainCategoryWords
         );
@@ -623,7 +605,7 @@ class CategoryService extends AbstractModel
         if (isset($productData['match']) && count($productData['match'])) {
             $resultSpaceWord = array_shift($productData['match']);
             if (is_array($resultSpaceWord) && count($resultSpaceWord)) {
-                $this->redisHelper->incr('pregWordsFromDictionary');
+                $this->redisHelper->incr(date('Y-m-d') . 'pregWordsFromDictionary');
                 $arrayMapSpaceWord = array_map(function ($v) {
                     return str_replace(' ', '', $v);
                 }, $resultSpaceWord);

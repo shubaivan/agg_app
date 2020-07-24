@@ -153,9 +153,14 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function getMainSubCategoryIds()
     {
-        $connection = $this->getEntityManager()->getConnection();
+        $contains = $this->getTagAwareQueryResultCacheCategory()->contains('main_category_ids');
 
-        $query  = '
+        if ($contains) {
+            $result = $this->getTagAwareQueryResultCacheCategory()->fetch('main_category_ids');
+        } else {
+            $connection = $this->getEntityManager()->getConnection();
+
+            $query  = '
             SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words FROM category AS c
             INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
             WHERE 
@@ -163,30 +168,53 @@ class CategoryRepository extends ServiceEntityRepository
             AND
             NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
         ';
-        $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
-            $query,
-            [],
-            [],
-            ['main_category_ids'],
-            0,
-            "main_category_ids"
-        );
-        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
-            ->prepareParamsForExecuteCacheQuery();
+            $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
+                $query,
+                [],
+                [],
+                ['main_category_ids'],
+                0,
+                "main_category_ids"
+            );
+            [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
+                ->prepareParamsForExecuteCacheQuery();
 
-        /** @var ResultCacheStatement $statement */
-        $statement = $connection->executeCacheQuery(
-            $query,
-            $params,
-            $types,
-            $queryCacheProfile
-        );
+            /** @var ResultCacheStatement $statement */
+            $statement = $connection->executeCacheQuery(
+                $query,
+                $params,
+                $types,
+                $queryCacheProfile
+            );
 
-        $mainCategoryIds = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $mainCategoryIds = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
-        $statement->closeCursor();
+            $statement->closeCursor();
 
-        return $mainCategoryIds;
+            $mainCategoryWords = [];
+            foreach ($mainCategoryIds as $main) {
+                if (isset($main['category_name'])) {
+                    $mainCategoryWords['categories'][$main['category_name']]['positive'] = $main['key_words'];
+                    $negative_key_words = null;
+                    if (strlen($main['negative_key_words'])) {
+                        $negative_key_words = implode(', ', array_map(function ($v) {return '!' . $v;}, explode(', ', $main['negative_key_words'])));
+                    }
+
+                    $mainCategoryWords['categories'][$main['category_name']]['negative'] = $negative_key_words;
+                    if ($negative_key_words) {
+                        $mainCategoryWords['common'][] = '(' . $main['key_words'] . ', ' . $negative_key_words . ')';
+                    } else {
+                        $mainCategoryWords['common'][] = $main['key_words'];
+                    }
+
+                }
+            }
+            $this->getTagAwareQueryResultCacheCategory()->save('main_category_ids', $mainCategoryIds);
+            $result = $mainCategoryIds;
+        }
+
+
+        return $result;
     }
 
     /**
