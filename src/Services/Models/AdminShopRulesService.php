@@ -63,7 +63,7 @@ class AdminShopRulesService
             }
         }
 
-        if ($identityColumns && $failedRule) {
+        if ($identityColumns && isset($failedRule) && $failedRule) {
             throw new AdminShopRulesException();
         }
 
