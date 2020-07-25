@@ -22,7 +22,7 @@ parameters:
         'Lekia': '%env(ANDRACTION_DOWNLOAD_URL_Lekia)%'
         'Litenleker': '%env(ANDRACTION_DOWNLOAD_URL_Litenleker)%'
         'SneakersPoint': '%env(ANDRACTION_DOWNLOAD_URL_SneakersPoint)%'
-        'Stor&Liten': '%env(ANDRACTION_DOWNLOAD_URL_Stor_and_Liten)%'
+        'Stor\&Liten': '%env(ANDRACTION_DOWNLOAD_URL_Stor_and_Liten)%'
 
     adtraction_download_file_path: '%env(ANDRACTION_DOWNLOAD_FILE_PATH)%'
 

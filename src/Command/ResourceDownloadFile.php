@@ -225,7 +225,11 @@ class ResourceDownloadFile extends Command
         $this->getOutput()->writeln(
             '<fg=green>' . date('H:i:s') . ' finish download file: ' . $fileRelativePath . '</>'
         );
-        $this->getBus()->dispatch(new FileReadyDownloaded($fileRelativePath, $key, $this->redisUniqKey));
+        $this->getBus()->dispatch(new FileReadyDownloaded(
+            $fileRelativePath,
+            $key,
+            $this->redisUniqKey)
+        );
         $this->getOutput()->writeln(
             '<bg=yellow;options=bold>' . date('H:i:s') . ' success sent queue' . '</>'
         );
