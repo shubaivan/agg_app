@@ -259,7 +259,7 @@ class HandleDownloadFileData
                     ($i + $this->csvHandleStep >= $count
                         ? $count - $i : $this->csvHandleStep),
                     $filePath,
-                    preg_replace('/\\\\&/', '&', $shop),
+                    $shop,
                     $redisUniqKey
                 )
             );
@@ -272,7 +272,6 @@ class HandleDownloadFileData
      */
     private function checkExistResourceWithShop(string $shop)
     {
-        $shop = preg_replace('/\\\\&/', '&', $shop);
         if (isset($this->adtractionDownloadUrls[$shop])
             || isset($this->adrecordDownloadUrls[$shop])
         ) {

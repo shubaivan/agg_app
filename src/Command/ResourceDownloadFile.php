@@ -227,7 +227,7 @@ class ResourceDownloadFile extends Command
         );
         $this->getBus()->dispatch(new FileReadyDownloaded(
             $fileRelativePath,
-            preg_replace('/\&/', '\&', $key),
+            $key,
             $this->redisUniqKey)
         );
         $this->getOutput()->writeln(
