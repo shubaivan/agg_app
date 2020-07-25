@@ -33,6 +33,12 @@ class JmsEventSubscriber implements EventSubscriberInterface
         if (!$object->getGroupIdentity()) {
             $object->setGroupIdentity($object->getSku());
         }
+
+        if ($object->getShop() == 'COS') {
+            $object->setProductUrl(urldecode($object->getProductUrl()));
+            $object->setImageUrl(urldecode($object->getImageUrl()));
+            $object->setTrackingUrl(urldecode($object->getTrackingUrl()));
+        }
     }
 
     /**
