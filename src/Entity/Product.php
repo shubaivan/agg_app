@@ -124,6 +124,7 @@ class Product implements EntityValidatorException
      *
      * @ORM\Column(type="decimal", precision=10, scale=2, nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Accessor(getter="getPriceAccessor")
      */
     private $price;
 
@@ -911,6 +912,13 @@ class Product implements EntityValidatorException
         }
 
         return $this;
+    }
+    
+    public function getPriceAccessor()
+    {
+        $price = preg_replace('/.00/', '', $this->price);
+
+        return $price;
     }
 
     /**

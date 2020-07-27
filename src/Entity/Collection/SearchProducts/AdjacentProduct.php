@@ -54,6 +54,7 @@ class AdjacentProduct extends CommonProduct
      * @Annotation\Type("string")
      * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT,
      *     SearchProductCollection::GROUP_GET, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Accessor(getter="getPriceAccessor")
      */
     private $price;
 
@@ -124,5 +125,12 @@ class AdjacentProduct extends CommonProduct
         if ($inStockValue) {
             return $inStockValue;
         }
+    }
+
+    public function getPriceAccessor()
+    {
+        $price = preg_replace('/.00/', '', $this->price);
+
+        return $price;
     }
 }
