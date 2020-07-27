@@ -279,7 +279,10 @@ class Category implements EntityValidatorException
 
     public function getCategoryNameAccessor()
     {
-        return preg_replace('/sub/', '', $this->categoryName);
+        $shop = preg_replace('/\bsub\b/u', '', $this->categoryName);
+        $shop = preg_replace('/\bBaby\b/u', '', $shop);
+        
+        return $shop;
     }
 
     public function setCategoryNameAccessor(?string $categoryName = null)
