@@ -32,6 +32,7 @@ class CategoryRepository extends ServiceEntityRepository
 {
     use PaginationRepository;
     const STRICT = 'strict';
+    const MAIN_CATEGORY_IDS_DATA = 'main_category_ids_data';
     /**
      * @var Helpers
      */
@@ -93,12 +94,10 @@ class CategoryRepository extends ServiceEntityRepository
     public function getCustomCategories(ParamFetcher $paramFetcher)
     {
         $rs = $this->getMainSubCategoryIds();
-        $mainCategoryIds = [];
-        foreach ($rs as $id) {
-            if (isset($id['id'])) {
-                $mainCategoryIds[] = $id['id'];
-            }
+        if (!isset($rs['category_ids'])) {
+            return [];
         }
+        $mainCategoryIds = $rs['category_ids'];
         $parameterBag = new ParameterBag($paramFetcher->all());
 
         $limit = (int)$parameterBag->get('count');
@@ -153,10 +152,10 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function getMainSubCategoryIds()
     {
-        $contains = $this->getTagAwareQueryResultCacheCategory()->contains('main_category_ids');
+        $contains = $this->getTagAwareQueryResultCacheCategory()->contains(self::MAIN_CATEGORY_IDS_DATA);
 
         if ($contains) {
-            $result = $this->getTagAwareQueryResultCacheCategory()->fetch('main_category_ids');
+            $result = $this->getTagAwareQueryResultCacheCategory()->fetch(self::MAIN_CATEGORY_IDS_DATA);
         } else {
             $connection = $this->getEntityManager()->getConnection();
 
@@ -194,6 +193,7 @@ class CategoryRepository extends ServiceEntityRepository
             $mainCategoryWords = [];
             foreach ($mainCategoryIds as $main) {
                 if (isset($main['category_name'])) {
+                    $mainCategoryWords['category_ids'][] = $main['id'];
                     $mainCategoryWords['categories'][$main['category_name']]['positive'] = $main['key_words'];
                     $negative_key_words = null;
                     if (strlen($main['negative_key_words'])) {
@@ -210,7 +210,7 @@ class CategoryRepository extends ServiceEntityRepository
                 }
             }
             $this->getTagAwareQueryResultCacheCategory()
-                ->save('main_category_ids', $mainCategoryWords,86399);
+                ->save(self::MAIN_CATEGORY_IDS_DATA, $mainCategoryWords,86399);
             $result = $mainCategoryWords;
         }
 
@@ -799,45 +799,5 @@ class CategoryRepository extends ServiceEntityRepository
         } else {
             return false;
         }
-    }
-
-    /**
-     * @param int $productId
-     * @param $mainParams
-     * @param $mainType
-     * @param string $mainSearch
-     * @param \Doctrine\DBAL\Connection $connection
-     * @return array
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function checkAvailableAnalysisProduct(
-        int $productId,
-        string $mainSearch
-    ): array
-    {
-        $connection = $this->getEntityManager()->getConnection();
-
-        $checkMainCategories = '
-                SELECT pr.id
-                FROM products pr
-                WHERE to_tsvector(\'pg_catalog.swedish\',pr.category) @@ to_tsquery(\'pg_catalog.swedish\', :main_search)
-                AND pr.id = :product_id
-            ';
-        $mainParams[':product_id'] = $productId;
-        $mainType[':product_id'] = \PDO::PARAM_INT;
-
-        $mainParams[':main_search'] = $mainSearch;
-        $mainType[':main_search'] = \PDO::PARAM_STR;
-
-        /** @var ResultCacheStatement $statement */
-        $statement = $connection->executeQuery(
-            $checkMainCategories,
-            $mainParams,
-            $mainType
-        );
-
-        $checkMainCategoriesResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
-
-        return $checkMainCategoriesResult;
     }
 }

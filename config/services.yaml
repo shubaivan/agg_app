@@ -17,12 +17,12 @@ parameters:
         'Cykloteket': '%env(ANDRACTION_DOWNLOAD_URL_Cykloteket)%'
         'Ahlens': '%env(ANDRACTION_DOWNLOAD_URL_Ahlens)%'
 
-#        'COS': '%env(ANDRACTION_DOWNLOAD_URL_COS)%'
-#        'Björn_Borg': '%env(ANDRACTION_DOWNLOAD_URL_Bjorn_Borg)%'
-#        'Lekia': '%env(ANDRACTION_DOWNLOAD_URL_Lekia)%'
-#        'Litenleker': '%env(ANDRACTION_DOWNLOAD_URL_Litenleker)%'
-#        'SneakersPoint': '%env(ANDRACTION_DOWNLOAD_URL_SneakersPoint)%'
-#        'Stor_and_Liten': '%env(ANDRACTION_DOWNLOAD_URL_Stor_and_Liten)%'
+        'COS': '%env(ANDRACTION_DOWNLOAD_URL_COS)%'
+        'Björn_Borg': '%env(ANDRACTION_DOWNLOAD_URL_Bjorn_Borg)%'
+        'Lekia': '%env(ANDRACTION_DOWNLOAD_URL_Lekia)%'
+        'Litenleker': '%env(ANDRACTION_DOWNLOAD_URL_Litenleker)%'
+        'SneakersPoint': '%env(ANDRACTION_DOWNLOAD_URL_SneakersPoint)%'
+        'Stor_and_Liten': '%env(ANDRACTION_DOWNLOAD_URL_Stor_and_Liten)%'
 
     adtraction_download_file_path: '%env(ANDRACTION_DOWNLOAD_FILE_PATH)%'
 

@@ -98,9 +98,9 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
             [
                 'name' => 'Sovkläder',
                 'key_word' => '
-                Pyjamas, Morgonrock, Badrockar, Badrock, Nattlinne, Nattklänning,
-                Pajamas, Bathrobe, Bathrobes, Nightdress                     
-            ',
+                    Pyjamas, Morgonrock, Badrockar, Badrock, Nattlinne, Nattklänning,
+                    Pajamas, Bathrobe, Bathrobes, Nightdress                     
+                ',
                 'sub_key_word' => [
                     'Pyjamas' => 'Pyjamas, Pyjama',
                     'Morgonrockar' => 'Morgonrock',
