@@ -55,7 +55,11 @@ class AdminShopRulesService
             $value = $propertyAccessor->getValue($product, $column);
             if ($value) {
                 $identityColumns = true;
-                if (is_array($rule)) {
+                $extraRue = false;
+                foreach ($rule as $execRule) {
+                    if (is_array($execRule)) {$extraRue = true; break;}
+                }
+                if ($extraRue) {
                     foreach ($rule as $extraKey=>$extraRule) {
                         if (isset($value[$extraKey])) {
                             $implode = implode('|', $extraRule);
