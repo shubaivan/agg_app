@@ -39,6 +39,18 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
                 ]
             ]
         ,
+        'COS' =>
+            [
+                'extras' => [
+                    'AGE_GROUP' => ['kids']
+                ]
+            ]
+        ,
+        'Björn_Borg' => [
+            'category' => [
+                'Barn'
+            ]
+        ],
         'Twar.se' =>
             [
                 'description' => [
