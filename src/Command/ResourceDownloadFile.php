@@ -193,7 +193,11 @@ class ResourceDownloadFile extends Command
                 ]
             )->getBody();
         } catch (ClientException $exception) {
-            if ($exception->getCode() === 403 || $exception->getCode() === 404) {
+            if ($exception->getCode() === 403
+                || $exception->getCode() === 404
+                || $exception->getCode() === 400
+            )
+            {
                 $this->getOutput()->writeln(
                     '<fg=red>' . date('H:i:s') . 'shop: ' . $key .' error code: ' . $exception->getCode() . 'message: ' .$exception->getMessage() . '</>'
                 );
@@ -202,7 +206,14 @@ class ResourceDownloadFile extends Command
                 throw $exception;
             }
         }
-
+        $metadata = $response->getMetadata();
+        if (isset($metadata['wrapper_data']) && is_array($metadata['wrapper_data'])) {
+            foreach ($metadata['wrapper_data'] as $meta) {
+                if ($meta == 'Content-Type: application/zip') {
+                    $zipExt = true;
+                }
+            }
+        }
         $phpStream = $response->detach();
         unset($client);
         unset($response);
@@ -211,7 +222,7 @@ class ResourceDownloadFile extends Command
             '<fg=green>' . date('H:i:s') . ' guzzle stream way get body' . '</>'
         );
         $date = date('YmdHis');
-        $fileRelativePath = $this->getDirForFiles($key) . '/' . $date . '.csv';
+        $fileRelativePath = $this->getDirForFiles($key) . '/' . $date . '.csv' .((isset($zipExt) && $zipExt) ? '.zip' : '');
         // Read bytes off of the stream until the end of the stream is reached
         while (!feof($phpStream)) {
             $read = fread($phpStream, 1024);
@@ -225,13 +236,37 @@ class ResourceDownloadFile extends Command
         $this->getOutput()->writeln(
             '<fg=green>' . date('H:i:s') . ' finish download file: ' . $fileRelativePath . '</>'
         );
-        $this->getBus()->dispatch(new FileReadyDownloaded(
-            $fileRelativePath,
-            $key,
-            $this->redisUniqKey)
-        );
+        $file_parts = pathinfo($fileRelativePath);
+
+        switch($file_parts['extension']) {
+            case 'zip':
+                $zip = new \ZipArchive();
+                if ($zip->open($fileRelativePath) === TRUE) {
+                    $zip->extractTo($this->getDirForFiles($key) . '/' . $date . '.csv');
+                    $zip->close();
+                }
+                break;
+            case 'csv':
+                $this->getBus()->dispatch(new FileReadyDownloaded(
+                        $fileRelativePath,
+                        $key,
+                        $this->redisUniqKey)
+                );
+                $this->getOutput()->writeln(
+                    '<bg=yellow;options=bold>' . date('H:i:s') . ' success sent queue' . '</>'
+                );
+                break;
+            default:
+                $this->getOutput()->writeln(
+                    '<fg=red>' . date('H:i:s') . 'shop: ' . $key . 'message: inaccessible extension' . '</>'
+                );
+                break;
+        }
+
+
+
         $this->getOutput()->writeln(
-            '<bg=yellow;options=bold>' . date('H:i:s') . ' success sent queue' . '</>'
+            '<bg=yellow;options=bold>' . date('H:i:s') . ' success' . '</>'
         );
     }
 

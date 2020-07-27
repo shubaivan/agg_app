@@ -4,6 +4,11 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    awin_download_urls:
+          'Vegaoo': '%env(AWIN_DOWNLOAD_URL_VEGAOO)%'
+
+    awin_download_file_path: '%env(AWIN_DOWNLOAD_FILE_PATH)%'
+
     adtraction_download_urls:
         'Pyret': '%env(ANDRACTION_DOWNLOAD_URL_Pyret)%'
         'Reima': '%env(ANDRACTION_DOWNLOAD_URL_Reima)%'
@@ -152,6 +157,7 @@ services:
 
     App\Services\HandleDownloadFileData:
       arguments:
+        $awinDownloadUrls: '%awin_download_urls%'
         $adtractionDownloadUrls: '%adtraction_download_urls%'
         $adrecordDownloadUrls: '%adrecord_download_urls%'
         $csvHandleStep: '%csv_handle_step%'

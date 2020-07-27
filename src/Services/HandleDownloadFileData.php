@@ -100,6 +100,11 @@ class HandleDownloadFileData
     private $adrecordDownloadUrls;
 
     /**
+     * @var 
+     */
+    private $awinDownloadUrls;
+
+    /**
      * @var int
      */
     private $csvHandleStep;
@@ -122,6 +127,7 @@ class HandleDownloadFileData
      * @param RedisHelper $redisHelper
      * @param array $adtractionDownloadUrls
      * @param array $adrecordDownloadUrls
+     * @param array $awinDownloadUrls
      * @param string $csvHandleStep
      * @param CategoryService $categoryService
      * @param Helpers $helpers
@@ -133,11 +139,13 @@ class HandleDownloadFileData
         RedisHelper $redisHelper,
         array $adtractionDownloadUrls,
         array $adrecordDownloadUrls,
+        array $awinDownloadUrls,
         string $csvHandleStep,
         CategoryService $categoryService,
         Helpers $helpers
     )
     {
+        $this->awinDownloadUrls = $awinDownloadUrls;
         $this->adrecordDownloadUrls = $adrecordDownloadUrls;
         $this->adtractionDownloadUrls = $adtractionDownloadUrls;
         $this->commandBus = $commandBus;

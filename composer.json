@@ -10,6 +10,7 @@
         "ext-openssl": "*",
         "ext-pdo": "*",
         "ext-redis": "*",
+        "ext-zip": "*",
         "doctrine/dbal": "2.10.2",
         "friendsofsymfony/rest-bundle": "master",
         "guzzlehttp/guzzle": "~6.0",
