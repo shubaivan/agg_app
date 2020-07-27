@@ -76,7 +76,7 @@ class AwinResourceDownload extends ResourceDownloadFile
         ]);
 
         try {
-            //$this->getCacheManager()->clearAllPoolsCache();
+            $this->getCacheManager()->clearAllPoolsCache();
             $this->createGuzzleStreamWayForEachUrl();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());

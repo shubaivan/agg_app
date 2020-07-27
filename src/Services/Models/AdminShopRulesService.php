@@ -75,6 +75,7 @@ class AdminShopRulesService
                     if (isset($failedRule) && !$failedRule) {
                         break;
                     }
+                    continue;
                 } else {
                     $implode = implode('|', $rule);
                 }
