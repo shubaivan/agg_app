@@ -240,9 +240,14 @@ class ResourceDownloadFile extends Command
 
         switch($file_parts['extension']) {
             case 'zip':
+                $path = $file_parts['basename'];
                 $zip = new \ZipArchive();
                 if ($zip->open($fileRelativePath) === TRUE) {
-                    $zip->extractTo($this->getDirForFiles($key) . '/' . $date . '.csv');
+                    for($i = 0; $i < $zip->numFiles; $i++) {
+                        $filename = $zip->getNameIndex($i);
+                        $fileinfo = pathinfo($filename);
+                        copy("zip://".$fileRelativePath."#".$filename, $this->getDirForFiles($key) . '/' . $date . '.csv');
+                    }
                     $zip->close();
                 }
                 break;
