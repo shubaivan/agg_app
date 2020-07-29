@@ -135,7 +135,7 @@ class ProductDataRowHandler
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
 
             $this->getAdminShopRulesService()->executeShopRule($product);
-            $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
+//            $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
             $this->getCategoryService()->matchGlobalNegativeBrandWords($product);
 
             $this->getBrandService()->createBrandFromProduct($product);
