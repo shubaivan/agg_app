@@ -3,6 +3,8 @@
 namespace App\Services\Queue;
 
 use App\Cache\CacheManager;
+use App\Document\AdrecordProduct;
+use App\Document\AdtractionProduct;
 use App\Entity\Product;
 use App\Entity\Shop;
 use App\Exception\AdminShopRulesException;
@@ -18,6 +20,7 @@ use App\Services\Models\CategoryService;
 use App\Services\Models\ProductService;
 use App\Services\Models\ShopService;
 use App\Util\RedisHelper;
+use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
@@ -84,6 +87,12 @@ class ProductDataRowHandler
     private $adminShopRulesService;
 
     /**
+     * @var DocumentManager
+     */
+    private $dm;
+
+
+    /**
      * AdtractionDataRowHandler constructor.
      * @param MessageBusInterface $vacuumBus
      * @param Logger $adtractionCsvRowHandlerLogger
@@ -94,6 +103,7 @@ class ProductDataRowHandler
      * @param EntityManagerInterface $em
      * @param RedisHelper $redisHelper
      * @param AdminShopRulesService $adminShopRulesService
+     * @param DocumentManager $dm
      */
     public function __construct(
         MessageBusInterface $vacuumBus,
@@ -106,7 +116,8 @@ class ProductDataRowHandler
         RedisHelper $redisHelper,
         CacheManager $cacheManager,
         string $forceAnalysis,
-        AdminShopRulesService $adminShopRulesService
+        AdminShopRulesService $adminShopRulesService,
+        DocumentManager $dm
     )
     {
         $this->cacheManager = $cacheManager;
@@ -120,6 +131,7 @@ class ProductDataRowHandler
         $this->redisHelper = $redisHelper;
         $this->forceAnalysis = $forceAnalysis;
         $this->adminShopRulesService = $adminShopRulesService;
+        $this->dm = $dm;
     }
 
     /**
@@ -176,6 +188,7 @@ class ProductDataRowHandler
                     );
             }
         } catch (AdminShopRulesException $adminShopRulesException) {
+            $this->markDocumentProduct($dataRow, $adminShopRulesException);
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION . $dataRow->getShop());
@@ -183,6 +196,7 @@ class ProductDataRowHandler
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION . $filePath);
         } catch (GlobalMatchExceptionBrand $globalMatchException) {
+            $this->markDocumentProduct($dataRow, $globalMatchException);
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $dataRow->getShop());
@@ -190,6 +204,7 @@ class ProductDataRowHandler
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $filePath);
         } catch (GlobalMatchException $globalMatchException) {
+            $this->markDocumentProduct($dataRow, $globalMatchException);
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $dataRow->getShop());
@@ -235,6 +250,33 @@ class ProductDataRowHandler
         }
 
         echo $dataRow->getSku() . PHP_EOL;
+    }
+
+    /**
+     * @param ResourceDataRow $dataRow
+     * @throws \Doctrine\ODM\MongoDB\MongoDBException
+     */
+    private function markDocumentProduct(ResourceDataRow $dataRow, \Exception $exception)
+    {
+        /** @var AdrecordProduct $adrecordDoc */
+        $adrecordDoc = $this->dm->getRepository(AdrecordProduct::class)
+            ->findOneBy(['SKU' => $dataRow->getSku()]);
+        
+        if ($adrecordDoc) {
+            $adrecordDoc->setDecline(true);
+        }
+        /** @var AdtractionProduct $adtractionDoc */
+        $adtractionDoc = $this->dm->getRepository(AdtractionProduct::class)
+            ->findOneBy(['SKU' => $dataRow->getSku()]);
+        
+        if ($adtractionDoc) {
+            $adtractionDoc
+                ->setDeclineReasonClass(get_class($exception) . ':' . $exception->getMessage())
+                ->setDecline(true);
+        }
+        if ($adrecordDoc || $adtractionDoc) {
+            $this->dm->flush();
+        }
     }
 
     /**

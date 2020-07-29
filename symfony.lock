@@ -96,6 +96,18 @@
     "doctrine/migrations": {
         "version": "2.2.1"
     },
+    "doctrine/mongodb-odm": {
+        "version": "2.0.x-dev"
+    },
+    "doctrine/mongodb-odm-bundle": {
+        "version": "3.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "3.3",
+            "ref": "1fd8598bf42227a1c8905edd32f640e4c5d15eff"
+        }
+    },
     "doctrine/orm": {
         "version": "v2.7.1"
     },
@@ -210,6 +222,9 @@
     "martin-georgiev/postgresql-for-doctrine": {
         "version": "dev-master"
     },
+    "mongodb/mongodb": {
+        "version": "v1.6.x-dev"
+    },
     "monolog/monolog": {
         "version": "2.0.2"
     },
@@ -247,7 +262,7 @@
         "version": "dev-master"
     },
     "php": {
-        "version": "7.3"
+        "version": "7.4"
     },
     "php-http/client-common": {
         "version": "2.1.x-dev"

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Cache\CacheManager;
+use App\Document\AdrecordProduct;
+use App\Document\AdtractionProduct;
 use App\Entity\Shop;
 use App\QueueModel\AdrecordDataRow;
 use App\QueueModel\AdtractionDataRow;
@@ -10,6 +12,7 @@ use App\QueueModel\CarriageShop;
 use App\QueueModel\FileReadyDownloaded;
 use App\Services\Models\CategoryService;
 use App\Util\RedisHelper;
+use Doctrine\ODM\MongoDB\DocumentManager;
 use League\Csv\Reader;
 use League\Csv\ResultSet;
 use League\Csv\Statement;
@@ -100,7 +103,7 @@ class HandleDownloadFileData
     private $adrecordDownloadUrls;
 
     /**
-     * @var 
+     * @var
      */
     private $awinDownloadUrls;
 
@@ -120,6 +123,11 @@ class HandleDownloadFileData
     private $helper;
 
     /**
+     * @var DocumentManager
+     */
+    private $dm;
+
+    /**
      * HandleDownloadFileData constructor.
      * @param MessageBusInterface $commandBus
      * @param MessageBusInterface $productsBus
@@ -131,6 +139,7 @@ class HandleDownloadFileData
      * @param string $csvHandleStep
      * @param CategoryService $categoryService
      * @param Helpers $helpers
+     * @param DocumentManager $dm
      */
     public function __construct(
         MessageBusInterface $commandBus,
@@ -142,9 +151,11 @@ class HandleDownloadFileData
         array $awinDownloadUrls,
         string $csvHandleStep,
         CategoryService $categoryService,
-        Helpers $helpers
+        Helpers $helpers,
+        DocumentManager $dm
     )
     {
+        $this->dm = $dm;
         $this->awinDownloadUrls = $awinDownloadUrls;
         $this->adrecordDownloadUrls = $adrecordDownloadUrls;
         $this->adtractionDownloadUrls = $adtractionDownloadUrls;
@@ -197,7 +208,7 @@ class HandleDownloadFileData
         $records = $stmt->process($csv);
         $header = $csv->getHeader();
 
-        foreach ($records as $offsetRecord=>$record) {
+        foreach ($records as $offsetRecord => $record) {
             if ($offsetRecord == 0) {
                 continue;
             }
@@ -261,7 +272,7 @@ class HandleDownloadFileData
                 );
         }
 
-        for($i = 0; $i<=$count; $i = $i + $this->csvHandleStep) {
+        for ($i = 0; $i <= $count; $i = $i + $this->csvHandleStep) {
             $this->getCommandBus()->dispatch(
                 new CarriageShop(
                     $i,
@@ -332,9 +343,9 @@ class HandleDownloadFileData
     ): void
     {
 //        echo 'shop' . $shop . ' offset ' . $offsetRecord . PHP_EOL;
-        $record['shop'] = $shop ;
+        $record['shop'] = $shop;
         if ($shop == 'Ahlens') {
-            $record['shop'] = 'Åhlens' ;
+            $record['shop'] = 'Åhlens';
         }
 
         $this->getRedisHelper()
@@ -346,12 +357,47 @@ class HandleDownloadFileData
                 Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
 
         if (isset($this->adtractionDownloadUrls[$shop])) {
-            $this->getProductsBus()->dispatch(new AdtractionDataRow(
+            $adtractionDataRow = new AdtractionDataRow(
                 $record,
                 $filePath,
                 $redisUniqKey,
                 ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey))
-            ));
+            );
+            $this->getProductsBus()->dispatch($adtractionDataRow);
+
+            $existProduct = $this->dm->getRepository(AdtractionProduct::class)
+                ->findOneBy(['SKU' => $adtractionDataRow->getSku()]);
+
+            if (!$existProduct) {
+                list(
+                    'SKU' => $SKU,
+                    'Name' => $Name,
+                    'Description' => $Description,
+                    'Category' => $Category,
+                    'Price' => $Price,
+                    'Shipping' => $Shipping,
+                    'Currency' => $Currency,
+                    'Instock' => $Instock,
+                    'ProductUrl' => $ProductUrl,
+                    'ImageUrl' => $ImageUrl,
+                    'TrackingUrl' => $TrackingUrl,
+                    'Brand' => $Brand,
+                    'OriginalPrice' => $OriginalPrice,
+                    'Ean' => $Ean,
+                    'ManufacturerArticleNumber' => $ManufacturerArticleNumber,
+                    'Extras' => $Extras,
+                    'shop' => $shopM
+                    ) = $adtractionDataRow->getRow();
+
+                $adrecordProduct = new AdtractionProduct(
+                    $SKU, $Name, $Description, $Category, $Price,
+                    $Shipping, $Currency, $Instock, $ProductUrl, $ImageUrl,
+                    $TrackingUrl, $Brand, $OriginalPrice, $Ean,
+                    $ManufacturerArticleNumber, $Extras, $shop
+                );
+                $this->dm->persist($adrecordProduct);
+                $this->dm->flush();
+            }
         }
 
         if (isset($this->adrecordDownloadUrls[$shop])) {
@@ -362,6 +408,39 @@ class HandleDownloadFileData
                 ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey))
             );
             $adrecordDataRow->transform();
+            $existProduct = $this->dm->getRepository(AdrecordProduct::class)
+                ->findOneBy(['SKU' => $adrecordDataRow->getSku()]);
+            if (!$existProduct) {
+                list(
+                    'name' => $name,
+                    'category' => $category,
+                    'SKU' => $SKU,
+                    'EAN' => $EAN,
+                    'description' => $description,
+                    'model' => $model,
+                    'brand' => $brand,
+                    'price' => $price,
+                    'shippingPrice' => $shippingPrice,
+                    'currency' => $currency,
+                    'productUrl' => $productUrl,
+                    'graphicUrl' => $graphicUrl,
+                    'inStock' => $inStock,
+                    'inStockQty' => $inStockQty,
+                    'deliveryTime' => $deliveryTime,
+                    'regularPrice' => $regularPrice,
+                    'gender' => $gender,
+                    'shop' => $shopM) = $adrecordDataRow->getRow();
+
+                $adrecordProduct = new AdrecordProduct(
+                    $name, $category, $SKU, $EAN, $description,
+                    $model, $brand, $price, $shippingPrice, $currency,
+                    $productUrl, $graphicUrl, $inStock, $inStockQty, $deliveryTime,
+                    $regularPrice, $gender, $shopM
+                );
+                $this->dm->persist($adrecordProduct);
+                $this->dm->flush();
+            }
+
             $this->getProductsBus()->dispatch($adrecordDataRow);
         }
     }
@@ -379,7 +458,7 @@ class HandleDownloadFileData
                 $filePath
             );
 
-        return (int) $count;
+        return (int)$count;
     }
 
 
