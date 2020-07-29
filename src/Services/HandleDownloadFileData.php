@@ -172,6 +172,7 @@ class HandleDownloadFileData
     {
         if (!$this->checkExistResourceWithShop($shop)) {
             $this->getLogger()->error('shop ' . $shop . ' not present on resources');
+            throw new \Exception('shop ' . $shop . ' not present on resources');
         }
 
         if (!file_exists($filePath)) {
@@ -194,7 +195,7 @@ class HandleDownloadFileData
 
         //query your records from the document
         $records = $stmt->process($csv);
-//        $header = $csv->getHeader();
+        $header = $csv->getHeader();
 
         foreach ($records as $offsetRecord=>$record) {
             if ($offsetRecord == 0) {
@@ -282,6 +283,7 @@ class HandleDownloadFileData
     {
         if (isset($this->adtractionDownloadUrls[$shop])
             || isset($this->adrecordDownloadUrls[$shop])
+            || isset($this->awinDownloadUrls[$shop])
         ) {
             return true;
         }
@@ -299,13 +301,14 @@ class HandleDownloadFileData
     {
         /** @var Reader $csv */
         $csv = Reader::createFromPath($filePath, 'r');
+        $csv->setHeaderOffset(0);
         if (isset($this->adtractionDownloadUrls[$shop])) {
-            $csv->setHeaderOffset(0);
             $csv->setDelimiter(',');
             $csv->setEscape('"');
             $csv->setEnclosure('\'');
+        } elseif (isset($this->awinDownloadUrls[$shop])) {
+            $csv->setDelimiter(',');
         } elseif (isset($this->adrecordDownloadUrls[$shop])) {
-            $csv->setHeaderOffset(0);
             $csv->setDelimiter(';');
         }
 

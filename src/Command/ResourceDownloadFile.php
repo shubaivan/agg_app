@@ -240,26 +240,20 @@ class ResourceDownloadFile extends Command
 
         switch($file_parts['extension']) {
             case 'zip':
-                $path = $file_parts['basename'];
                 $zip = new \ZipArchive();
                 if ($zip->open($fileRelativePath) === TRUE) {
                     for($i = 0; $i < $zip->numFiles; $i++) {
                         $filename = $zip->getNameIndex($i);
-                        $fileinfo = pathinfo($filename);
-                        copy("zip://".$fileRelativePath."#".$filename, $this->getDirForFiles($key) . '/' . $date . '.csv');
+                        $filePatWithIter = $this->getDirForFiles($key) . '/' . $date . '.csv';
+                        copy("zip://".$fileRelativePath."#".$filename, $filePatWithIter);
                     }
                     $zip->close();
+                    unlink($fileRelativePath);
+                    $this->dispatchFileReadyDownload($key, $filePatWithIter);
                 }
                 break;
             case 'csv':
-                $this->getBus()->dispatch(new FileReadyDownloaded(
-                        $fileRelativePath,
-                        $key,
-                        $this->redisUniqKey)
-                );
-                $this->getOutput()->writeln(
-                    '<bg=yellow;options=bold>' . date('H:i:s') . ' success sent queue' . '</>'
-                );
+                $this->dispatchFileReadyDownload($key, $fileRelativePath);
                 break;
             default:
                 $this->getOutput()->writeln(
@@ -330,5 +324,22 @@ class ResourceDownloadFile extends Command
     protected function getCacheManager(): CacheManager
     {
         return $this->cacheManager;
+    }
+
+    /**
+     * @param string $key
+     * @param string $filePatWithIter
+     * @throws \Throwable
+     */
+    protected function dispatchFileReadyDownload(string $key, string $filePatWithIter): void
+    {
+        $this->getBus()->dispatch(new FileReadyDownloaded(
+                $filePatWithIter,
+                $key,
+                $this->redisUniqKey)
+        );
+        $this->getOutput()->writeln(
+            '<bg=yellow;options=bold>' . date('H:i:s') . ' success sent queue' . '</>'
+        );
     }
 }
