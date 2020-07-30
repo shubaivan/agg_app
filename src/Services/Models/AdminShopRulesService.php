@@ -90,7 +90,7 @@ class AdminShopRulesService
         }
 
         if ($identityColumns && isset($failedRule) && $failedRule) {
-            throw new AdminShopRulesException();
+            throw new AdminShopRulesException('failed rule');
         }
 
         return [];

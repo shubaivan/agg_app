@@ -263,7 +263,9 @@ class ProductDataRowHandler
             ->findOneBy(['SKU' => $dataRow->getSku()]);
         
         if ($adrecordDoc) {
-            $adrecordDoc->setDecline(true);
+            $adrecordDoc
+                ->setDeclineReasonClass(get_class($exception) . ':' . $exception->getMessage())
+                ->setDecline(true);
         }
         /** @var AdtractionProduct $adtractionDoc */
         $adtractionDoc = $this->dm->getRepository(AdtractionProduct::class)

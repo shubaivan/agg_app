@@ -181,51 +181,57 @@ class HandleDownloadFileData
         string $offset, string $limit, string $filePath, string $shop, string $redisUniqKey
     )
     {
-        if (!$this->checkExistResourceWithShop($shop)) {
-            $this->getLogger()->error('shop ' . $shop . ' not present on resources');
-            throw new \Exception('shop ' . $shop . ' not present on resources');
-        }
-
-        if (!file_exists($filePath)) {
-            $this->getLogger()->error('file ' . $filePath . ' no exist');
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
-                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
-            throw new \Exception('file ' . $filePath . ' no exist');
-        }
-
-        $csv = $this->generateCsvReader($filePath, $shop);
-
-        //build a statement
-        $stmt = (new Statement())
-            ->offset($offset)
-            ->limit($limit);
-
-        //query your records from the document
-        $records = $stmt->process($csv);
-        $header = $csv->getHeader();
-
-        foreach ($records as $offsetRecord => $record) {
-            if ($offsetRecord == 0) {
-                continue;
+        try {
+            if (!$this->checkExistResourceWithShop($shop)) {
+                $this->getLogger()->error('shop ' . $shop . ' not present on resources');
+                throw new \Exception('shop ' . $shop . ' not present on resources');
             }
-            $this->handleProductJobInQueue(
-                $shop,
-                $offsetRecord,
-                $record,
-                $redisUniqKey,
-                $filePath
-            );
-        }
-        if ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)) {
-            //ToDo don't forget rerun back
-            unlink($filePath);
-            $this->getLogger()->info(
-                'file ' . $filePath . ' was removed'
-            );
+
+            if (!file_exists($filePath)) {
+                $this->getLogger()->error('file ' . $filePath . ' no exist');
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+                throw new \Exception('file ' . $filePath . ' no exist');
+            }
+
+            $csv = $this->generateCsvReader($filePath, $shop);
+
+            //build a statement
+            $stmt = (new Statement())
+                ->offset($offset)
+                ->limit($limit);
+
+            //query your records from the document
+            $records = $stmt->process($csv);
+//            $header = $csv->getHeader();
+
+            foreach ($records as $offsetRecord => $record) {
+                if ($offsetRecord == 0) {
+                    continue;
+                }
+                $this->handleProductJobInQueue(
+                    $shop,
+                    $offsetRecord,
+                    $record,
+                    $redisUniqKey,
+                    $filePath
+                );
+            }
+            $this->dm->flush();
+            if ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)) {
+                //ToDo don't forget rerun back
+                unlink($filePath);
+                $this->getLogger()->info(
+                    'file ' . $filePath . ' was removed'
+                );
+            }
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            throw $e;
         }
     }
 
@@ -369,25 +375,26 @@ class HandleDownloadFileData
                 ->findOneBy(['SKU' => $adtractionDataRow->getSku()]);
 
             if (!$existProduct) {
-                list(
-                    'SKU' => $SKU,
-                    'Name' => $Name,
-                    'Description' => $Description,
-                    'Category' => $Category,
-                    'Price' => $Price,
-                    'Shipping' => $Shipping,
-                    'Currency' => $Currency,
-                    'Instock' => $Instock,
-                    'ProductUrl' => $ProductUrl,
-                    'ImageUrl' => $ImageUrl,
-                    'TrackingUrl' => $TrackingUrl,
-                    'Brand' => $Brand,
-                    'OriginalPrice' => $OriginalPrice,
-                    'Ean' => $Ean,
-                    'ManufacturerArticleNumber' => $ManufacturerArticleNumber,
-                    'Extras' => $Extras,
-                    'shop' => $shopM
-                    ) = $adtractionDataRow->getRow();
+                /**
+                 * @var $SKU
+                 * @var $Name
+                 * @var $Description
+                 * @var $Category
+                 * @var $Price
+                 * @var $Shipping
+                 * @var $Currency
+                 * @var $Instock
+                 * @var $ProductUrl
+                 * @var $ImageUrl
+                 * @var $TrackingUrl
+                 * @var $Brand
+                 * @var $OriginalPrice
+                 * @var $Ean
+                 * @var $ManufacturerArticleNumber
+                 * @var $Extras
+                 * @var $shop
+                 */
+                extract($adtractionDataRow->getRow());
 
                 $adrecordProduct = new AdtractionProduct(
                     $SKU, $Name, $Description, $Category, $Price,
@@ -396,7 +403,6 @@ class HandleDownloadFileData
                     $ManufacturerArticleNumber, $Extras, $shop
                 );
                 $this->dm->persist($adrecordProduct);
-                $this->dm->flush();
             }
         }
 
@@ -408,40 +414,40 @@ class HandleDownloadFileData
                 ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey))
             );
             $adrecordDataRow->transform();
+            $this->getProductsBus()->dispatch($adrecordDataRow);
             $existProduct = $this->dm->getRepository(AdrecordProduct::class)
                 ->findOneBy(['SKU' => $adrecordDataRow->getSku()]);
             if (!$existProduct) {
-                list(
-                    'name' => $name,
-                    'category' => $category,
-                    'SKU' => $SKU,
-                    'EAN' => $EAN,
-                    'description' => $description,
-                    'model' => $model,
-                    'brand' => $brand,
-                    'price' => $price,
-                    'shippingPrice' => $shippingPrice,
-                    'currency' => $currency,
-                    'productUrl' => $productUrl,
-                    'graphicUrl' => $graphicUrl,
-                    'inStock' => $inStock,
-                    'inStockQty' => $inStockQty,
-                    'deliveryTime' => $deliveryTime,
-                    'regularPrice' => $regularPrice,
-                    'gender' => $gender,
-                    'shop' => $shopM) = $adrecordDataRow->getRow();
+                /**
+                 * @var $name
+                 * @var $category
+                 * @var $SKU
+                 * @var $EAN
+                 * @var $description
+                 * @var $model
+                 * @var $brand
+                 * @var $price
+                 * @var $shippingPrice
+                 * @var $currency
+                 * @var $productUrl
+                 * @var $graphicUrl
+                 * @var $inStock
+                 * @var $inStockQty
+                 * @var $deliveryTime
+                 * @var $regularPrice
+                 * @var $gender
+                 * @var $shop
+                 */
+                extract($adrecordDataRow->getRow());
 
                 $adrecordProduct = new AdrecordProduct(
                     $name, $category, $SKU, $EAN, $description,
                     $model, $brand, $price, $shippingPrice, $currency,
                     $productUrl, $graphicUrl, $inStock, $inStockQty, $deliveryTime,
-                    $regularPrice, $gender, $shopM
+                    $regularPrice, $gender, $shop
                 );
                 $this->dm->persist($adrecordProduct);
-                $this->dm->flush();
             }
-
-            $this->getProductsBus()->dispatch($adrecordDataRow);
         }
     }
 
