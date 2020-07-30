@@ -2,42 +2,8 @@
 
 namespace App\QueueModel;
 
-class AdrecordDataRow extends Queues implements ResourceDataRow, LastProductInterface
+class AdrecordDataRow extends ResourceProductQueues implements ResourceDataRow, LastProductInterface
 {
-    /**
-     * @var array
-     */
-    private $row;
-
-    /**
-     * @var bool
-     */
-    private $lastProduct;
-
-    /**
-     * @var string
-     */
-    private $filePath;
-
-    /**
-     * AdrecordDataRow constructor.
-     * @param array $row
-     * @param string $filePath
-     * @param string $redisUniqKey
-     * @param bool $lastProduct
-     */
-    public function __construct(
-        array $row,
-        string $filePath,
-        string $redisUniqKey,
-        bool $lastProduct = false
-    ) {
-        $this->row = $row;
-        $this->lastProduct = $lastProduct;
-        $this->redisUniqKey = $redisUniqKey;
-        $this->filePath = $filePath;
-    }
-
     public function transform()
     {
         $rowData = $this->getRow();
@@ -50,7 +16,7 @@ class AdrecordDataRow extends Queues implements ResourceDataRow, LastProductInte
 
         $row['ImageUrl'] = $row['graphicUrl'];
         $row['originalPrice'] = $row['regularPrice'];
-
+        $row['manufacturerArticleNumber'] = $row['EAN'];
         $row['Extras'] = '';
         if (isset($row['gender']) && strlen($row['gender']) > 0) {
             $row['Extras'] .= '{GENDER#' . $row['gender'] . '}';
@@ -63,75 +29,5 @@ class AdrecordDataRow extends Queues implements ResourceDataRow, LastProductInte
         }
 
         $this->row = $row;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRow(): array
-    {
-        return $this->row;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getShop()
-    {
-        return $this->row['shop'] ?? null;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getSku()
-    {
-        return $this->row['SKU'] ?? null;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function setSkuValueToRow($sku)
-    {
-        return $this->row['SKU'] = $sku;
-    }
-
-    /**
-     * @param int $id
-     * @return $this
-     */
-    public function setExistProductId(int $id)
-    {
-        if ($this->getRow() && is_array($this->row)) {
-            $this->row['id'] = $id;
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getLastProduct(): bool
-    {
-        return $this->lastProduct;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setLastProduct(bool $lastProduct)
-    {
-        $this->lastProduct = $lastProduct;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFilePath()
-    {
-        return $this->filePath;
     }
 }

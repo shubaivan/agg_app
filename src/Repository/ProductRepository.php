@@ -703,10 +703,17 @@ class ProductRepository extends ServiceEntityRepository
                 ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.name)) AS "storeNames"
                 ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.extras::text)) AS "storeExtras"
             ';
+            if ($parameterBag->get(ProductService::SELF_PRODUCT)
+                || $parameterBag->get(ProductService::FAVORITE_PRODUCT)
+            ) {
+                $query .= '
+                            ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.tracking_url::text)) AS "storeProductUrl"
+                ';
+            }
+
 
             if ($parameterBag->get(ProductService::SELF_PRODUCT)) {
                 $query .= '
-                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.product_url::text)) AS "storeProductUrl"
                     ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.description::text)) AS "storeDescription"
                     ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.instock::text)) AS "storeInstock"
                     ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.manufacturer_article_number::text)) AS "storeManufacturerArticleNumber"                                                             

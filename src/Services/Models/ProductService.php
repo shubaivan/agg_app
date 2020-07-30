@@ -47,6 +47,7 @@ class ProductService extends AbstractModel
     const EXCLUDE_GROUP_IDENTITY = 'exclude_group_identity';
     const WITHOUT_FACET = 'without_facet';
     const SELF_PRODUCT = 'self_product';
+    const FAVORITE_PRODUCT = 'favorite_product';
     const TOP_PRODUCTS = 'top_products';
     const PRODUCT_PRICE = 'product_price';
     /**
@@ -230,6 +231,12 @@ class ProductService extends AbstractModel
      */
     public function searchProductsByFilter(ParamFetcher $paramFetcher)
     {
+        $paramFetcher = $this->setParamFetcherData(
+            $this->requestStack,
+            $paramFetcher,
+            ProductService::FAVORITE_PRODUCT,
+            true
+        );
         $collection = $this->getProductRepository()
             ->fullTextSearchByParameterFetcher($paramFetcher);
         $count = $this->getProductRepository()

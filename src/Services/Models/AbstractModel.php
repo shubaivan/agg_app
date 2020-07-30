@@ -2,8 +2,30 @@
 
 namespace App\Services\Models;
 
+use FOS\RestBundle\Controller\Annotations\QueryParam;
+use FOS\RestBundle\Request\ParamFetcher;
+use Symfony\Component\HttpFoundation\RequestStack;
+
 abstract class AbstractModel
 {
+    /**
+     * @param ParamFetcher $paramFetcher
+     * @param $key
+     * @param $data
+     *
+     * @return ParamFetcher
+     */
+    protected function setParamFetcherData(RequestStack $requestStack, ParamFetcher $paramFetcher, $key, $data)
+    {
+        $request = $requestStack->getCurrentRequest();
+        $request->query->set($key, $data);
+        $param = new QueryParam();
+        $param->name = $key;
+        $paramFetcher->addParam($param);
+
+        return $paramFetcher;
+    }
+    
     /**
      * @param string $matchData
      * @param int $limitations
