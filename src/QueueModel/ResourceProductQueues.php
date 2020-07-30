@@ -14,7 +14,7 @@ abstract class ResourceProductQueues
     /**
      * @var bool
      */
-    protected $lastProduct;
+    protected $lastProduct = false;
 
     /**
      * @var string
@@ -33,7 +33,12 @@ abstract class ResourceProductQueues
      * @param string $filePath
      * @param string $redisUniqKey
      */
-    public function __construct(array $row, bool $lastProduct, string $filePath, string $redisUniqKey)
+    public function __construct(
+        array $row, 
+        bool $lastProduct, 
+        string $filePath, 
+        string $redisUniqKey
+    )
     {
         $this->row = $row;
         $this->lastProduct = $lastProduct;

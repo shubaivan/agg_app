@@ -365,9 +365,9 @@ class HandleDownloadFileData
         if (isset($this->adtractionDownloadUrls[$shop])) {
             $adtractionDataRow = new AdtractionDataRow(
                 $record,
+                ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)),
                 $filePath,
-                $redisUniqKey,
-                ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey))
+                $redisUniqKey
             );
             $this->getProductsBus()->dispatch($adtractionDataRow);
 
@@ -409,9 +409,9 @@ class HandleDownloadFileData
         if (isset($this->adrecordDownloadUrls[$shop])) {
             $adrecordDataRow = new AdrecordDataRow(
                 $record,
+                ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)),
                 $filePath,
-                $redisUniqKey,
-                ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey))
+                $redisUniqKey
             );
             $adrecordDataRow->transform();
             $this->getProductsBus()->dispatch($adrecordDataRow);

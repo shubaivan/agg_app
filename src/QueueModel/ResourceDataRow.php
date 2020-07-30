@@ -2,7 +2,7 @@
 
 namespace App\QueueModel;
 
-interface ResourceDataRow
+interface ResourceDataRow extends LastProductInterface
 {
     /**
      * @return array

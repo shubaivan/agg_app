@@ -4,7 +4,7 @@
 namespace App\QueueModel;
 
 
-class AwinDataRow extends ResourceProductQueues implements ResourceDataRow, LastProductInterface
+class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
 {
     public function tranform()
     {

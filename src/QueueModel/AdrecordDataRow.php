@@ -2,7 +2,7 @@
 
 namespace App\QueueModel;
 
-class AdrecordDataRow extends ResourceProductQueues implements ResourceDataRow, LastProductInterface
+class AdrecordDataRow extends ResourceProductQueues implements ResourceDataRow
 {
     public function transform()
     {

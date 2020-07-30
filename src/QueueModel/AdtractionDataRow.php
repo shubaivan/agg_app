@@ -2,7 +2,7 @@
 
 namespace App\QueueModel;
 
-class AdtractionDataRow extends ResourceProductQueues implements ResourceDataRow, LastProductInterface
+class AdtractionDataRow extends ResourceProductQueues implements ResourceDataRow
 {
   
 }
