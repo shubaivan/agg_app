@@ -730,7 +730,12 @@ class Product implements EntityValidatorException
 
                                         return $v;
                                     }, $sizes);
-                                    $result[$explode[0]] = array_merge($result[$explode[0]], $arrayMapSizes);
+                                    if (isset($result[$explode[0]])) {
+                                        $result[$explode[0]] = array_merge($result[$explode[0]], $arrayMapSizes);
+                                    } else {
+                                        $result[$explode[0]] = $arrayMapSizes;
+                                    }
+
                                 } else {
                                     $result[$explode[0]] = [];
                                 }

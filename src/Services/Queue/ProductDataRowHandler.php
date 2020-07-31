@@ -143,7 +143,7 @@ class ProductDataRowHandler
     {
         try {
             $filePath = $dataRow->getFilePath();
-
+            
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
 
             $this->getAdminShopRulesService()->executeShopRule($product);

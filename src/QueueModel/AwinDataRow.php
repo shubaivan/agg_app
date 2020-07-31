@@ -32,7 +32,9 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
         if (isset($rowData['aw_image_url']) && strlen($rowData['aw_image_url']) > 0) {
             $rowData['Extras'] .= '{ALTERNATIVE_IMAGE#' . $rowData['aw_image_url'] . '}';
         }
-        
+
+        $rowData['productUrl'] = $rowData['merchant_deep_link'];
+
         $rowData['brand'] = $rowData['brand_name'];
         if (isset($rowData['colour']) && strlen($rowData['colour']) > 0) {
             $rowData['Extras'] .= '{COLOUR#' . $rowData['colour'] . '}';
@@ -105,7 +107,9 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
         if (isset($rowData['Fashion:category'])) {
             $rowData['Fashion_category'] = $rowData['Fashion:category'];
             unset($rowData['Fashion:category']);
-            $this->categories[] = $rowData['Fashion_category'];
+            if (strlen($rowData['Fashion_category'])) {
+                $this->categories[] = $rowData['Fashion_category'];   
+            }
         }
 
         if (isset($rowData['Fashion:material'])) {

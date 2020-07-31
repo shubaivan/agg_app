@@ -16,7 +16,7 @@ class AwinDataRowHandler implements MessageHandlerInterface
     private $productDataRowHandler;
 
     /**
-     * AdrecordDataRowHandler constructor.
+     * AwinDataRowHandler constructor.
      * @param ProductDataRowHandler $productDataRowHandler
      */
     public function __construct(ProductDataRowHandler $productDataRowHandler)
