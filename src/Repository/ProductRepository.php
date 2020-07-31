@@ -103,13 +103,13 @@ class ProductRepository extends ServiceEntityRepository
             jsonb_agg(DISTINCT e.value) as fields 
             from products AS p 
             join jsonb_each_text(p.extras) e on true
-            WHERE e.key != :exclude_key       
+            WHERE e.key NOT LIKE :exclude_key       
             GROUP BY e.key
         ';
 
         return $this->facetFiltersExtraFields(
             $query,
-            [':exclude_key' => 'ALTERNATIVE_IMAGE'],
+            [':exclude_key' => 'ALTERNATIVE_%'],
             [':exclude_key' => ParameterType::STRING]
         );
     }
@@ -134,7 +134,8 @@ class ProductRepository extends ServiceEntityRepository
             $params,
             $type,
             ['fetch_all_extras_fields'],
-            0, "extras_fields"
+            0,
+            "extras_fields"
         );
 
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCommon()
@@ -145,7 +146,6 @@ class ProductRepository extends ServiceEntityRepository
         );
         $fetchAll = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $statement->closeCursor();
-
 
         $result = [];
         foreach ($fetchAll as $key => $value) {

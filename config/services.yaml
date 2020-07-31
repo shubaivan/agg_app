@@ -7,7 +7,7 @@ parameters:
     mongodb_server: '%env(MONGO_URL)%'
 
     awin_download_urls:
-          'Vegaoo': '%env(AWIN_DOWNLOAD_URL_VEGAOO)%'
+        'Vegaoo': '%env(AWIN_DOWNLOAD_URL_VEGAOO)%'
 
     awin_download_file_path: '%env(AWIN_DOWNLOAD_FILE_PATH)%'
 
@@ -211,6 +211,12 @@ services:
       autoconfigure: false
 
     App\QueueModelHandlers\AdtractionDataRowHandler:
+      tags: [{ name: messenger.message_handler, bus: products.bus }]
+      # prevent handlers from being registered twice (or you can remove
+      # the MessageHandlerInterface that autoconfigure uses to find handlers)
+      autoconfigure: false
+
+    App\QueueModelHandlers\AwinDataRowHandler:
       tags: [{ name: messenger.message_handler, bus: products.bus }]
       # prevent handlers from being registered twice (or you can remove
       # the MessageHandlerInterface that autoconfigure uses to find handlers)

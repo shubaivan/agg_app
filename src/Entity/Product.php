@@ -103,6 +103,39 @@ class Product implements EntityValidatorException
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $productShortDescription;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $productModel;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $modelNumber;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $deliveryRestrictions;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     * @CustomUrl(
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
+     */
+    private $basketLink;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -697,7 +730,7 @@ class Product implements EntityValidatorException
 
                                         return $v;
                                     }, $sizes);
-                                    $result[$explode[0]] = $arrayMapSizes;
+                                    $result[$explode[0]] = array_merge($result[$explode[0]], $arrayMapSizes);
                                 } else {
                                     $result[$explode[0]] = [];
                                 }

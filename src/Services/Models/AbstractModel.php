@@ -34,7 +34,7 @@ abstract class AbstractModel
     public function prepareDataForGINSearch(string $matchData, int $limitations = 4, bool $relation = false)
     {
         if ($relation) {
-            $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®]+';
+            $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®«»©]+';
         } else {
             if (preg_match_all('/\b\w*\&+\w*\b/', $matchData, $m)) {
                 $resultMatchAmpersand = array_shift($m);
@@ -42,7 +42,7 @@ abstract class AbstractModel
                     $matchData = preg_replace("/$ampersand/", str_replace('&', '-', $ampersand), $matchData);
                 }
             }
-            $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®\-]+';
+            $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®«»©\-]+';
         }
 
         $resultData = '';

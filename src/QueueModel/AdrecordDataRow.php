@@ -15,6 +15,7 @@ class AdrecordDataRow extends ResourceProductQueues implements ResourceDataRow
         });
 
         $row['ImageUrl'] = $row['graphicUrl'];
+        $row['TrackingUrl'] = $row['productUrl'];
         $row['originalPrice'] = $row['regularPrice'];
         $row['manufacturerArticleNumber'] = $row['EAN'];
         $row['Extras'] = '';
