@@ -14,7 +14,7 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
 
         $rowData['trackingUrl'] = $rowData['aw_deep_link'];
         $rowData['name'] = $rowData['product_name'];
-        $rowData['sku'] = $rowData['merchant_product_id'];
+        $rowData['sku'] = $rowData['aw_product_id'];
         $rowData['imageUrl'] = $rowData['merchant_image_url'];
 
         if (isset($rowData['merchant_category']) && $rowData['merchant_category']) {
@@ -153,6 +153,6 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
 
     public function getSku()
     {
-        return $this->row['aw_product_id'] ?? null; 
+        return $this->row['sku'] ?? null;
     }
 }

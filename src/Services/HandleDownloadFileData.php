@@ -279,7 +279,9 @@ class HandleDownloadFileData
                     [$filePath => $count]
                 );
         }
-
+        if (!(int)$count) {
+            return;
+        }
         for ($i = 0; $i <= $count; $i = $i + $this->csvHandleStep) {
             $this->getCommandBus()->dispatch(
                 new CarriageShop(
