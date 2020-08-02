@@ -165,7 +165,9 @@ class ProductRepository extends ServiceEntityRepository
                         $resultValues = explode('", "', $matches[1][0]);
                     }
                 }
-                $result[$value['key']] = $resultValues;
+                if (isset($resultValues)) {
+                    $result[$value['key']] = $resultValues;
+                }
             }
         }
 
@@ -964,12 +966,12 @@ class ProductRepository extends ServiceEntityRepository
         $queryFacet .= $this->clearFacetQueryFromJoin();
         $queryFacet .= preg_match('/\b(WHERE)\b/', $queryFacet, $matches) > 0 ? ' AND ' : ' WHERE ';
         $queryFacet .= '
-             e.key != :exclude_key 
+             e.key NOT LIKE :exclude_key 
             GROUP BY e.key
         ';
 
         $realCacheKey = 'query=' . $queryFacet .
-            '&&params=' . serialize(array_merge($this->params, [':exclude_key' => 'ALTERNATIVE_IMAGE'])) .
+            '&&params=' . serialize(array_merge($this->params, [':exclude_key' => 'ALTERNATIVE_IMAGE%'])) .
             '&&types=' . serialize(array_merge($this->types, [':exclude_key' => ParameterType::STRING])) .
             '&&connectionParams=' . hash('sha256', serialize($connectionParams));
 

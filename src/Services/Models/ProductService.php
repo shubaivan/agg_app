@@ -130,10 +130,10 @@ class ProductService extends AbstractModel
         }
 
         $brandQuery = $facetQueries[ProductRepository::FACET_EXTRA_FIELDS_QUERY_KEY];
-        $pregSplitBrandQuery = preg_split('/&&/', $brandQuery[0]);
-        $query = preg_replace('/query=/', '', $pregSplitBrandQuery[0]);
-        $params = unserialize(preg_replace('/params=/', '', $pregSplitBrandQuery[1]));
-        $types = unserialize(preg_replace('/types=/', '', $pregSplitBrandQuery[2]));
+        $pregSplitFacetQuery = preg_split('/&&/', $brandQuery[0]);
+        $query = preg_replace('/query=/', '', $pregSplitFacetQuery[0]);
+        $params = unserialize(preg_replace('/params=/', '', $pregSplitFacetQuery[1]));
+        $types = unserialize(preg_replace('/types=/', '', $pregSplitFacetQuery[2]));
 
         return $this->getProductRepository()
             ->facetFiltersExtraFields($query, $params, $types);
