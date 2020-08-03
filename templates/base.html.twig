@@ -44,7 +44,7 @@
         <div class="navbar navbar-dark bg-dark shadow-sm">
             <div class="container d-flex justify-content-between">
                 {% if is_granted('IS_AUTHENTICATED_REMEMBERED')%}
-                    <a href="{{ path('index') }}" class="navbar-brand d-flex align-items-center">
+                    <a href="{{ path('home_index') }}" class="navbar-brand d-flex align-items-center">
                         <i class="fas fa-home"></i>
                     </a>
                 {% endif %}#}
@@ -57,9 +57,9 @@
                     </a>
                 {% endif %}
 
-                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') == false %}
+                {% if is_granted('ROLE_SUPER_ADMIN') %}
                     <a href="{{ path('app_register') }}" class="float-lg-right">
-                        Registration <i class="fas fa-registered"></i>
+                        Registration new Admin <i class="fas fa-registered"></i>
                     </a>
                 {% endif %}
 

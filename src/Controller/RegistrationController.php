@@ -60,16 +60,19 @@ class RegistrationController extends AbstractController
                 $user->setRoles([User::ROLE_ADMIN]);
                 $entityManager->persist($user);
                 $entityManager->flush();
+                $this->addFlash(
+                    'alert-success',
+                    $user->getFirstName() . ' ' . $user->getLastName() . ' was create'
+                );
+//                return $this->guardAuthenticatorHandler
+//                    ->authenticateUserAndHandleSuccess(
+//                        $user,
+//                        $request,
+//                        $appMyAuthAuthenticator,
+//                        'main'
+//                    );
 
-                return $this->guardAuthenticatorHandler
-                    ->authenticateUserAndHandleSuccess(
-                        $user,
-                        $request,
-                        $appMyAuthAuthenticator,
-                        'main'
-                    );
-
-//            return $this->redirectToRoute('index');
+            return $this->redirectToRoute('index');
             }
             $render['registrationForm'] = $form->createView();
         } catch (\Exception $e) {

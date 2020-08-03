@@ -12,22 +12,58 @@
                     Hello, {{ app.user.email }}
                 {% elseif is_granted('ROLE_ADMIN') %}
                     Hello, admin
+                {% elseif is_granted('ROLE_SUPER_ADMIN') %}
+                    Hello, super admin
                 {% else %}
                     Hello, anonymous
                 {% endif %}
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                    You are logged
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="float-lg-left">
+                        Login <i class="fas fa-door-open"></i>
+                    </a>
+                {% endif %}
+
+                {% if is_granted('ROLE_SUPER_ADMIN') %}
+                    <a href="{{ path('app_register') }}" class="float-lg-right">
+                        Registration new Admin <i class="fas fa-registered"></i>
+                    </a>
+                {% endif %}
             </p>
         </div>
-        {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-            You are logged
-        {% else %}
-            <a href="{{ path('app_login') }}" class="float-lg-left">
-                Login <i class="fas fa-door-open"></i>
-            </a>
-        {% endif %}
 
-        <a href="{{ path('app_register') }}" class="float-lg-right">
-            Registration <i class="fas fa-registered"></i>
-        </a>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">First</th>
+                <th scope="col">Last</th>
+                <th scope="col">Handle</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>Mark</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row">2</th>
+                <td>Jacob</td>
+                <td>Thornton</td>
+                <td>@fat</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Larry</td>
+                <td>the Bird</td>
+                <td>@twitter</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 {% endblock %}
 
