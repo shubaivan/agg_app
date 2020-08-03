@@ -1,3 +1,6 @@
+fos_js_routing:
+  resource: "@FOSJsRoutingBundle/Resources/config/routing/routing-sf4.xml"
+
 app.swagger_ui:
   path: /api/doc
   methods: GET

@@ -4,6 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    app.logout_listener.class: App\Listener\LogoutListener
     mongodb_server: '%env(MONGO_URL)%'
 
     awin_download_urls:
@@ -230,3 +231,8 @@ services:
       # prevent handlers from being registered twice (or you can remove
       # the MessageHandlerInterface that autoconfigure uses to find handlers)
       autoconfigure: false
+
+    app.logout.listener:
+      class: "%app.logout_listener.class%"
+      arguments:
+        - "@doctrine.orm.default_entity_manager"

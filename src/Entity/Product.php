@@ -915,6 +915,29 @@ class Product implements EntityValidatorException
         }
     }
 
+    public function getInStockAccessor()
+    {
+        $inStockValue = array_search($this->instock, self::$enumInStock);
+        if ($inStockValue) {
+            return $inStockValue;
+        }
+    }
+
+    public function setInStockAccessor(?string $value = null)
+    {
+        if (!$value) {
+            return false;
+        }
+
+        if (in_array($value, self::$enumInStock)) {
+            $this->instock = (int)$value;
+        }
+
+        if (array_key_exists($value, self::$enumInStock)) {
+            $this->instock = (int)self::$enumInStock[$value];
+        }
+    }
+
     /**
      * @return false|int|string|null
      */
