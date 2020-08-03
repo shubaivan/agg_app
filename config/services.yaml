@@ -8,6 +8,9 @@ parameters:
 
     awin_download_urls:
         'Vegaoo': '%env(AWIN_DOWNLOAD_URL_VEGAOO)%'
+        'Nike': '%env(AWIN_DOWNLOAD_URL_Nike)%'
+        'Plusshop': '%env(AWIN_DOWNLOAD_URL_Plusshop)%'
+        'Nordic Nest': '%env(AWIN_DOWNLOAD_URL_Nordic_Nest)%'
 
     awin_download_file_path: '%env(AWIN_DOWNLOAD_FILE_PATH)%'
 

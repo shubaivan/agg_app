@@ -56,7 +56,32 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
                 'description' => [
                     'Barn', 'Baby'
                 ]
+            ],
+        'Vegaoo' =>
+            [
+                'category' => [
+                    'Children\'s Clothing'
+                ]
+            ],
+        'Nike' =>
+            [
+                'category' => [
+                    'Kids', 'Barn'
+                ]
+            ],
+        'SneakersPoint' =>
+            [
+                'category' => [
+                    'Sneakers junior'
+                ]
+            ],
+        'Gus Textil' => [
+            [
+                'name' => [
+                    'barn', 'Baby'
+                ],
             ]
+        ]
     ];
 
     public function load(ObjectManager $manager)

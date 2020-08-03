@@ -311,29 +311,40 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param array $mn
+     * @param array $aft
      * @param int|null $shopId
      * @return array|mixed[]
      * @throws \Doctrine\DBAL\Cache\CacheException
      */
-    public function getAvailableTo(array $mn, int $shopId = null)
+    public function getAvailableTo(array $aft, int $shopId = null)
     {
-        if (!count($mn))
+        if (!count($aft))
         {
             return [];
         }
         $connection = $this->getEntityManager()->getConnection();
+        $preparedParams = [];
+        foreach ($aft as $key=>$column) {
+            if (!$column) {
+                continue;
+            }
+            $preparedParams[$key] = array_combine(
+                array_map(function ($k) use ($key) {
+                    return ':var_' . $key . $k;
+                }, array_keys($column)),
+                array_values($column)
+            );
+        }
+        $bindParams = [];
+        $conditions = [];
+        foreach ($preparedParams as $columnName => $param) {
+            $bindParams = array_merge($bindParams, $param);
+            $bindKeysMN = implode(',', array_keys($param));
+            $conditions[] = "                           
+                p.$columnName IN ($bindKeysMN)
+            ";
+        }
 
-        $preparedParams = array_combine(
-            array_map(function ($key) {
-                return ':var_manufacturer_article_number' . $key;
-            }, array_keys($mn)),
-            array_values($mn)
-        );
-        $bindKeysMN = implode(',', array_keys($preparedParams));
-        $conditionMN = "                           
-            p.manufacturer_article_number IN ($bindKeysMN)
-        ";
 
         $query = '
             SELECT 
@@ -347,13 +358,13 @@ class ProductRepository extends ServiceEntityRepository
             FROM products AS p';
 
         $query .= '
-            WHERE '.$conditionMN;
+            WHERE ('.implode(' OR ', $conditions) .')';
 
         if ($shopId) {
             $query .= '            
                 AND p.shop_relation_id != :shop_id
             ';
-            $preparedParams = array_merge([':shop_id' => $shopId], $preparedParams);
+            $bindParams = array_merge([':shop_id' => $shopId], $bindParams);
         }
 
         $query .= '            
@@ -362,7 +373,7 @@ class ProductRepository extends ServiceEntityRepository
 
         $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
             $query,
-            $preparedParams,
+            $bindParams,
             [],
             ['available_to'],
             0,
@@ -718,7 +729,9 @@ class ProductRepository extends ServiceEntityRepository
                 $query .= '
                     ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.description::text)) AS "storeDescription"
                     ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.instock::text)) AS "storeInstock"
-                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.manufacturer_article_number::text)) AS "storeManufacturerArticleNumber"                                                             
+                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.manufacturer_article_number::text)) AS "storeManufacturerArticleNumber"
+                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.ean::text)) AS "storeEan"
+                    ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.sku::text)) AS "storeSku"                                                             
                 ';
             }
 

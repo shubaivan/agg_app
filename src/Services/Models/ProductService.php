@@ -492,7 +492,7 @@ class ProductService extends AbstractModel
             $currentProductCollection,
             $this->prepareAvailableToModel(
                 $product,
-                $currentProductCollectionModel->getStoreManufacturerArticleNumber()
+                $currentProductCollectionModel->getAvailableToData()
             )
         );
 
@@ -501,16 +501,16 @@ class ProductService extends AbstractModel
 
     /**
      * @param Product $product
-     * @param array $alsoAvailableToArrayMN
+     * @param array $alsoAvailableToArray
      * @return mixed
      * @throws CacheException
      * @throws ValidatorException
      */
-    private function prepareAvailableToModel(Product $product, array $alsoAvailableToArrayMN)
+    private function prepareAvailableToModel(Product $product, array $alsoAvailableToArray)
     {
         $shopId = $product->getShopRelation() ? $product->getShopRelation()->getId() : null;
         $availableTo = $this->getProductRepository()
-            ->getAvailableTo($alsoAvailableToArrayMN, $shopId);
+            ->getAvailableTo($alsoAvailableToArray, $shopId);
         /** @var AvailableToCollection $availableToCollection */
         $availableToCollection = $this->getObjectHandler()
             ->handleObject(

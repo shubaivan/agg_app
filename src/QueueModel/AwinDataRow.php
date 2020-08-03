@@ -92,9 +92,7 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
         if (isset($rowData['alternate_image_four']) && strlen($rowData['alternate_image_four']) > 0) {
             $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_6#' . $rowData['alternate_image_four'] . '}';
         }
-
-        $rowData['manufacturerArticleNumber'] = $rowData['ean'];
-
+        
         if (isset($rowData['alternate_image_four']) && strlen($rowData['alternate_image_four']) > 0) {
             $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_6#' . $rowData['alternate_image_four'] . '}';
         }

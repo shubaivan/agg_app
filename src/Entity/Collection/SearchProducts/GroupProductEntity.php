@@ -30,6 +30,22 @@ class GroupProductEntity extends CommonProduct
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreEanAccessor")
+     */
+    private $storeEan;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreSkuAccessor")
+     */
+    private $storeSku;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
      * @Annotation\Accessor(setter="setStoreDescriptionAccessor")
      */
     private $storeDescription;
@@ -193,6 +209,16 @@ class GroupProductEntity extends CommonProduct
     {
         $this->storeManufacturerArticleNumber = $this->storePropertyAccessor($value);
     }
+    
+    public function setStoreEanAccessor(string $value)
+    {
+        $this->storeEan = $this->storePropertyAccessor($value);
+    }
+    
+    public function setStoreSkuAccessor(string $value) 
+    {
+        $this->storeSku = $this->storePropertyAccessor($value);
+    }
 
     /**
      * @param string $value
@@ -235,6 +261,10 @@ class GroupProductEntity extends CommonProduct
         if (is_array($this->storePrice)) {
             $max = max($this->storePrice);
             $min = min($this->storePrice);
+
+            $max = preg_replace('/.00/', '', $max);
+            $min = preg_replace('/.00/', '', $min);
+            
             $this->rangePrice = ((float)$max != (float)$min ? $min .' - ' .$max : $max);
         }
     }
@@ -542,9 +572,37 @@ class GroupProductEntity extends CommonProduct
     /**
      * @return array|string
      */
-    public function getStoreManufacturerArticleNumber()
+    private function getStoreManufacturerArticleNumber()
     {
         return $this->storeManufacturerArticleNumber;
+    }
+
+    /**
+     * @return array|string
+     */
+    private function getStoreEan()
+    {
+        return $this->storeEan;
+    }
+
+    /**
+     * @return array|string
+     */
+    private function getStoreSku()
+    {
+        return $this->storeSku;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAvailableToData()
+    {
+        return [
+            'manufacturer_article_number' => $this->getStoreManufacturerArticleNumber(),
+            'ean' => $this->getStoreEan(),
+            'sku' => $this->getStoreSku()
+        ];
     }
 
     /**
