@@ -75,13 +75,12 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
                     'Sneakers junior'
                 ]
             ],
-        'Gus Textil' => [
+        'Gus Textil' =>
             [
                 'name' => [
                     'barn', 'Baby'
-                ],
+                ]
             ]
-        ]
     ];
 
     public function load(ObjectManager $manager)
