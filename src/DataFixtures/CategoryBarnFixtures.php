@@ -311,7 +311,12 @@ class CategoryBarnFixtures extends AbstractFixtures
         $this->reUpdateFiles();
         $this->setManager($manager);
 
-        $main = $this->createCategoryWithConf('Barn', 'barn', 'main', 'barnvagnar');
+        $main = $this->createCategoryWithConf(
+            'Barn',
+            'barn, Jr, Junior, Kids',
+            'main',
+            'barnvagnar, Leksaker, Skor, Baby'
+        );
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
         $this->afterLoad();

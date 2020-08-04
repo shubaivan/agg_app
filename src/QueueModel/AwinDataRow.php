@@ -145,7 +145,7 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
     private function postTransform()
     {
         if (count($this->categories)) {
-            $this->row['category'] = implode(' - ', $this->categories);
+            $this->row['category'] = implode(' - ', array_unique($this->categories));
         }
     }
 

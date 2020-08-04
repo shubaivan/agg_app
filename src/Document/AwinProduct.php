@@ -4,9 +4,10 @@
 namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use App\DocumentRepository\AwinProductRepository;
 
 /**
- * @MongoDB\Document
+ * @MongoDB\Document(repositoryClass=AwinProductRepository::class)
  */
 class AwinProduct extends AbstractDocument
 {
@@ -19,10 +20,10 @@ class AwinProduct extends AbstractDocument
      * @MongoDB\Field(type="string")
      */
     protected $product_name;
-
-
+    
     /**
      * @MongoDB\Field(type="string")
+     * @MongoDB\Index()
      */
     protected $aw_product_id;
 

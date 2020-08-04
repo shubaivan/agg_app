@@ -197,7 +197,7 @@ class CategoryRepository extends ServiceEntityRepository
                     $mainCategoryWords['categories'][$main['category_name']]['positive'] = $main['key_words'];
                     $negative_key_words = null;
                     if (strlen($main['negative_key_words'])) {
-                        $negative_key_words = implode(', ', array_map(function ($v) {return '!' . $v;}, explode(', ', $main['negative_key_words'])));
+                        $negative_key_words = implode(', ', array_map(function ($v) {return '!' . $v;}, explode(',', $main['negative_key_words'])));
                     }
 
                     $mainCategoryWords['categories'][$main['category_name']]['negative'] = $negative_key_words;

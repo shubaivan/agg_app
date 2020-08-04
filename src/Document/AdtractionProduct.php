@@ -4,14 +4,16 @@
 namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use App\DocumentRepository\AdtractionProductRepository;
 
 /**
- * @MongoDB\Document
+ * @MongoDB\Document(repositoryClass=AdtractionProductRepository::class)
  */
 class AdtractionProduct extends AbstractDocument
 {
     /**
      * @MongoDB\Field(type="string")
+     * @MongoDB\Index()
      */
     private $SKU;
     /**

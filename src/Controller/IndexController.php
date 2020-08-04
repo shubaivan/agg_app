@@ -2,8 +2,13 @@
 
 namespace App\Controller;
 
+use App\Document\AdrecordProduct;
+use App\Document\AdtractionProduct;
+use App\Document\AwinProduct;
+use Doctrine\ODM\MongoDB\DocumentManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Router;
 
 class IndexController extends AbstractController
 {
@@ -23,12 +28,30 @@ class IndexController extends AbstractController
     /**
      * @Route("/index", name="index")
      */
-    public function index()
+    public function index(DocumentManager $dm)
     {
         $user = $this->getUser();
-        $t = 1;
+        $resourceDocuments = [
+            [
+                'name' => 'Awin',
+                'count' => $dm->getRepository(AwinProduct::class)->getCountDoc(),
+                'path' => '#'
+            ],
+            [
+                'name' => 'Adrecord',
+                'count' => $dm->getRepository(AdrecordProduct::class)->getCountDoc(),
+                'path' => '#'
+            ],
+            [
+                'name' => 'Adtraction',
+                'count' => $dm->getRepository(AdtractionProduct::class)->getCountDoc(),
+                'path' => '#'
+            ],
+        ];
+        
         return $this->render('index/index.html.twig', [
             'controller_name' => 'Catalog Serial',
+            'resourceDocuments' => $resourceDocuments
         ]);
     }
 }

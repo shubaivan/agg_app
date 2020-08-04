@@ -259,7 +259,12 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
     {
         $this->setManager($manager);
 
-        $main = $this->createCategoryWithConf('Barnvagnar', 'barnvagnar', 'main');
+        $main = $this->createCategoryWithConf(
+            'Barnvagnar',
+            'Barnvagn, Barnvagnar, Vagn',
+            'main',
+            'Skor, Leksaker, Bilbarnstol'
+        );
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
         $this->afterLoad();

@@ -80,6 +80,18 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
                 'name' => [
                     'barn', 'Baby'
                 ]
+            ],
+        'Cykloteket' =>
+            [
+                'category' => [
+                    'Barn, Junior, Baby, Kids'
+                ]
+            ],
+        'Nordic Nest' =>
+            [
+                'name' => [
+                    'barn, baby, Junior'
+                ]
             ]
     ];
 

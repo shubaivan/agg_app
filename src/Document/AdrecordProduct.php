@@ -4,9 +4,10 @@
 namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use App\DocumentRepository\AdrecordProductRepository;
 
 /**
- * @MongoDB\Document
+ * @MongoDB\Document(repositoryClass=AdrecordProductRepository::class)
  */
 class AdrecordProduct extends AbstractDocument
 {
@@ -22,6 +23,7 @@ class AdrecordProduct extends AbstractDocument
 
     /**
      * @MongoDB\Field(type="string")
+     * @MongoDB\Index()
      */
     private $SKU;
 
