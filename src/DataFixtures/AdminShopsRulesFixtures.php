@@ -25,10 +25,10 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
         'Sportshopen' =>
             [
                 'name' => [
-                    'JR', 'Boy', 'Girl', 'Toddler'
+                    'JR', 'Boy', 'Girl', 'Toddler', 'kids', 'juniorer'
                 ],
                 'description' => [
-                    'JR', 'Boy', 'Girl', 'Toddler'
+                    'JR', 'Boy', 'Girl', 'Toddler', 'kids', 'juniorer'
                 ],
             ]
         ,
