@@ -22,7 +22,7 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
         }
         
         $rowData['price'] = $rowData['search_price'];
-        $rowData['shop'] = $rowData['merchant_name'];
+//        $rowData['shop'] = $rowData['merchant_name'];
 
         if (isset($rowData['category_name']) && $rowData['category_name']) {
             $this->categories[] = $rowData['category_name'];

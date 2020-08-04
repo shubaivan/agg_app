@@ -8,7 +8,7 @@ parameters:
     mongodb_server: '%env(MONGO_URL)%'
 
     awin_download_urls:
-        'Vegaoo SE': '%env(AWIN_DOWNLOAD_URL_VEGAOO)%'
+        'Vegaoo': '%env(AWIN_DOWNLOAD_URL_VEGAOO)%'
         'Nike': '%env(AWIN_DOWNLOAD_URL_Nike)%'
 #        'Plusshop': '%env(AWIN_DOWNLOAD_URL_Plusshop)%'
         'Nordic Nest': '%env(AWIN_DOWNLOAD_URL_Nordic_Nest)%'
