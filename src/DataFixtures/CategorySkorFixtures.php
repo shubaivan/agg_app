@@ -130,7 +130,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
     {
         $this->setManager($manager);
 
-        $main = $this->createCategoryWithConf('Skor', 'skor', 'main');
+        $main = $this->createCategoryWithConf('Skor', 'skor, shoes', 'main');
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
         $this->afterLoad();
