@@ -133,4 +133,12 @@ class AdjacentProduct extends CommonProduct
 
         return $price;
     }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
 }

@@ -209,13 +209,13 @@ class GroupProductEntity extends CommonProduct
     {
         $this->storeManufacturerArticleNumber = $this->storePropertyAccessor($value);
     }
-    
+
     public function setStoreEanAccessor(string $value)
     {
         $this->storeEan = $this->storePropertyAccessor($value);
     }
-    
-    public function setStoreSkuAccessor(string $value) 
+
+    public function setStoreSkuAccessor(string $value)
     {
         $this->storeSku = $this->storePropertyAccessor($value);
     }
@@ -264,8 +264,8 @@ class GroupProductEntity extends CommonProduct
 
             $max = preg_replace('/.00/', '', $max);
             $min = preg_replace('/.00/', '', $min);
-            
-            $this->rangePrice = ((float)$max != (float)$min ? $min .' - ' .$max : $max);
+
+            $this->rangePrice = ((float)$max != (float)$min ? $min . ' - ' . $max : $max);
         }
     }
 
@@ -340,7 +340,7 @@ class GroupProductEntity extends CommonProduct
      */
     public function setStoreExtrasAccessor(string $value)
     {
-        $substr = str_replace(self::NULL, '"{"'.self::NULL.'"}"', $value);
+        $substr = str_replace(self::NULL, '"{"' . self::NULL . '"}"', $value);
         $substr = str_replace('\\', '', $substr);
 
         $storeContainOneProduct = explode('}", "', $substr);
@@ -445,6 +445,21 @@ class GroupProductEntity extends CommonProduct
     public function getStoreImageUrlDataByKey($key)
     {
         return isset($this->storeImageUrl[$key]) ? $this->storeImageUrl[$key] : null;
+    }
+
+    public function getStoreManufacturerArticleNumberDataByKey($key)
+    {
+        return isset($this->storeManufacturerArticleNumber[$key]) ? $this->storeManufacturerArticleNumber[$key] : null;
+    }
+
+    public function getStoreEanDataByKey($key)
+    {
+        return isset($this->storeEan[$key]) ? $this->storeEan[$key] : null;
+    }
+
+    public function getStoreSkuDataByKey($key)
+    {
+        return isset($this->storeSku[$key]) ? $this->storeSku[$key] : null;
     }
 
     /**
@@ -598,11 +613,29 @@ class GroupProductEntity extends CommonProduct
      */
     public function getAvailableToData()
     {
-        return [
-            'manufacturer_article_number' => $this->getStoreManufacturerArticleNumber(),
-            'ean' => $this->getStoreEan(),
-            'sku' => $this->getStoreSku()
-        ];
+        $aft = [];
+        $storeManufacturerArticleNumberDataByKey = $this
+            ->getStoreManufacturerArticleNumberDataByKey($this->currentProduct->getId());
+        if ($storeManufacturerArticleNumberDataByKey) {
+            $aft['manufacturer_article_number'] = [
+                'current' => $storeManufacturerArticleNumberDataByKey
+            ];
+        }
+        $storeEanDataByKey = $this
+            ->getStoreEanDataByKey($this->currentProduct->getId());
+        if ($storeEanDataByKey) {
+            $aft['ean'] = [
+                'current' => $storeEanDataByKey
+            ];
+        }
+        $storeSkuDataByKey = $this
+            ->getStoreSkuDataByKey($this->currentProduct->getId());
+        if ($storeSkuDataByKey) {
+            $aft['sku'] = [
+                'current' => $storeSkuDataByKey
+            ];
+        }
+        return $aft;
     }
 
     /**
@@ -641,7 +674,7 @@ class GroupProductEntity extends CommonProduct
             'description' => $this->getStoreDescriptionDataByKey($id),
             'instock' => $this->getStoreInstockDataByKey($id)
         ];
-        return  $arr;
+        return $arr;
     }
 
 }

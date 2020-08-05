@@ -519,28 +519,8 @@ class ProductService extends AbstractModel
             ->handleObject(
                 ['collection' => $availableTo],
                 AvailableToCollection::class,
-                [AvailableToDTO::GROUP_CREATE]
+                [AvailableToModel::GROUP_CREATE]
             );
-
-        if ($availableToCollection->getCollection()->count()) {
-            foreach ($availableToCollection->getCollection() as $dto) {
-                if ($dto->getPresentAvailableToModel()) {
-                    $arrayCollection = new ArrayCollection();
-                    foreach ($dto->getPresentAvailableToModel() as $dtoData) {
-                        /** @var AvailableToModel $availableToModel */
-                        $availableToModel = $this->getObjectHandler()
-                            ->handleObject(
-                                $dtoData,
-                                AvailableToModel::class,
-                                [AvailableToModel::GROUP_CREATE]
-                            );
-                        $arrayCollection->add($availableToModel);
-                    }
-
-                    $dto->setAvailableToModel($arrayCollection);
-                }
-            }
-        }
 
         return $availableToCollection;
     }

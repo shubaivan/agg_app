@@ -348,13 +348,38 @@ class ProductRepository extends ServiceEntityRepository
 
         $query = '
             SELECT 
-                COUNT(DISTINCT p.id) as count
-                ,hstore(array_agg(p.id::text), array_agg(p.product_url)) as "storeProductUrls"
-                ,hstore(array_agg(p.id::text), array_agg(p.shop)) as "storeShops"
+                p.id
+                ,p.product_url as "productUrl"
+                ,p.shop 
+                ,p.updated_at as "updatedAt"
+                ,p.price
+                ,p.currency
+                ,p.ean as ean
                 ,p.manufacturer_article_number as "manufacturerArticleNumber"
-                ,hstore(array_agg(p.id::text), array_agg(p.updated_at::text)) as "storeUpdatedAt"
-                ,hstore(array_agg(p.id::text), array_agg(p.price::text)) as "storePrice"
-                ,hstore(array_agg(p.id::text), array_agg(p.currency::text)) as "storeCurrency"        
+                ,p.sku as sku,
+                
+                 CASE';
+
+            if (isset($bindParams[':var_eancurrent'])) {
+                $query .= '
+                    WHEN ean = :var_eancurrent THEN \'ean\'
+                ';
+            }
+
+            if (isset($bindParams[':var_skucurrent'])) {
+                $query .= '
+                    WHEN sku = :var_skucurrent THEN \'sku\'
+                ';
+            }
+
+            if (isset($bindParams[':var_manufacturer_article_numbercurrent'])) {
+                $query .= '
+                    WHEN ean = :var_manufacturer_article_numbercurrent THEN \'manufacturer_article_number\'
+                ';
+            }
+            $query .= '                    
+                    ELSE \'not matched\'
+                 END        
             FROM products AS p';
 
         $query .= '
@@ -366,10 +391,6 @@ class ProductRepository extends ServiceEntityRepository
             ';
             $bindParams = array_merge([':shop_id' => $shopId], $bindParams);
         }
-
-        $query .= '            
-            GROUP BY p.manufacturer_article_number
-        ';
 
         $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
             $query,

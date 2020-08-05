@@ -16,8 +16,7 @@ class AvailableToModel
      * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      */
     private $id;
-
-
+    
     /**
      * @var string
      * @Annotation\Type("string")
@@ -52,4 +51,32 @@ class AvailableToModel
      * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      */
     private $productUrl;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $sku;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $ean;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $manufacturerArticleNumber;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $case;
 }
