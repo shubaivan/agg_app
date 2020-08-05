@@ -31,21 +31,27 @@
                     <td>
                         {% if rule.columnsKeywords is iterable and rule.columnsKeywords|length %}
                             {% for colmnName, keyWord in rule.columnsKeywords %}
-                                {{ dump(colmnName, keyWord) }}
+{#                                {{ dump(colmnName, keyWord) }}#}
                                 {% if keyWord is iterable and keyWord|length %}
+                                    {% set extra_rule = false %}
 
-                                    {% for word in keyWord %}
+                                    {% for extraKey, word in keyWord %}
                                         {% if word is iterable %}
                                             {% set extra_rule = true %}
+
+                                            <b>{{ colmnName }}:</b>
+                                            {% for extraValue in word %}
+                                                <p>
+                                                    <b>{{ extraKey }}:</b> - {{ extraValue }}
+                                                </p>
+                                            {% endfor %}
+
                                         {% endif %}
                                     {% endfor %}
-                                    {% if extra_rule is defined %}
-                                        hhhh
-                                    {% endif %}
 
-{#                                    {% else %}#}
-{#                                        <b>{{ colmnName }}:</b> - {{ keyWord|join('|')  }}#}
-{#                                    {% endif %}#}
+                                    {% if extra_rule == false %}
+                                        <b>{{ colmnName }}:</b> - {{ keyWord|join(',')  }}
+                                    {% endif %}
 
                                     <br>
                                 {% else %}
