@@ -25,11 +25,7 @@ class AdminConfigurationFixtures extends AbstractFixtures implements DependentFi
         Blankens';
 
     const PROPERTYDATA_KEYWORDS = '
-                perfumery, perfume, parfym, parfymer, manlig, mannen, man, men,  adult, vuxen, rakning, 
-                shaving, razor, shaver, rakapparat, Bluetooth-högtalare, högtalare, Spiralvisp, Rivjärn, Raklödder,
-                Hårspray , Scrub, Face Cream, Eye Pencil, Lip Pencil, toning, Tonings-Shampoo, Lipstick, Powder,
-                Makeup Remover, nagellack, nagellackremoverpads, Stop mot nagelbitning, Doften, Hydro-pigment-tekniken,
-                puderfoundation, läppstift, Parfum, doft, Eau Dynamisante, Lip Stick, Blush, Honungssked 
+               vuxen, fucker
             ';
 
     public function load(ObjectManager $manager)

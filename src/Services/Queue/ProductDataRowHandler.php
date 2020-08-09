@@ -148,7 +148,7 @@ class ProductDataRowHandler
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
 
             $this->getAdminShopRulesService()->executeShopRule($product);
-//            $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
+            $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
             $this->getCategoryService()->matchGlobalNegativeBrandWords($product);
 
             $this->getBrandService()->createBrandFromProduct($product);
@@ -213,6 +213,7 @@ class ProductDataRowHandler
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                     Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $filePath);
         } catch (ValidatorException $e) {
+            $this->markDocumentProduct($dataRow, $e);
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
