@@ -22,7 +22,7 @@ abstract class AbstractDocument
     /**
      * @MongoDB\Field(type="string")
      */
-    protected $declineReasonClass;
+    protected $declineReasonClass = '';
 
     /**
      * @MongoDB\Field(type="string")
