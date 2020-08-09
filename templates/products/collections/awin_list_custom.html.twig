@@ -36,7 +36,10 @@
 
         let th_keys = getJSonObject("{{ dataTbaleKeys ? dataTbaleKeys|json_encode() : "{}" }}");
         let for_prepare_defs = getJSonObject("{{ dataTbaleKeys ? dataTbaleKeys|json_encode() : "{}" }}");
+
         let img_columns = getJSonObject("{{ img_columns ? img_columns|json_encode() : "{}" }}");
+        let link_columns = getJSonObject("{{ link_columns ? link_columns|json_encode() : "{}" }}");
+        let short_preview_columns = getJSonObject("{{ short_preview_columns ? short_preview_columns|json_encode() : "{}" }}");
 
     </script>
 {% endblock %}

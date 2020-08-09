@@ -1236,6 +1236,20 @@ class AwinProduct extends AbstractDocument
         ];
     }
 
+    public static function getLinkColumns()
+    {
+        return [
+            'aw_deep_link', 'merchant_deep_link'
+        ];
+    }
+
+    public static function getShortPreviewText()
+    {
+        return [
+            'description', 'id'
+        ];
+    }
+
     public static function getSortColumns()
     {
         return [

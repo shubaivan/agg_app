@@ -52,7 +52,9 @@ class ProductCollectionController extends AbstractController
         return $this->render('products/collections/awin_list_custom.html.twig', [
             'th_keys' => $keys,
             'dataTbaleKeys' => $dataTableColumnData,
-            'img_columns' => AwinProduct::getImageColumns()
+            'img_columns' => AwinProduct::getImageColumns(),
+            'link_columns' => AwinProduct::getLinkColumns(),
+            'short_preview_columns' => AwinProduct::getShortPreviewText()
         ]);
     }
 }
