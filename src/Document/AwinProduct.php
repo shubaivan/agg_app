@@ -5,6 +5,7 @@ namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use App\DocumentRepository\AwinProductRepository;
+use JMS\Serializer\Annotation;
 
 /**
  * @MongoDB\Document(repositoryClass=AwinProductRepository::class)
@@ -22,6 +23,16 @@ use App\DocumentRepository\AwinProductRepository;
  *     "Fashion_size"="text",
  *     "declineReasonClass"="text",
  *     "shop"="text"
+ * })
+ * @Annotation\AccessorOrder("custom", custom = {
+ *     "id",
+ *     "merchant_image_url",
+ *     "decline",
+ *     "declineReasonClass",
+ *     "shop",
+ *     "aw_deep_link",
+ *     "product_name",
+ *     "search_price"
  * })
  */
 class AwinProduct extends AbstractDocument
@@ -1243,6 +1254,13 @@ class AwinProduct extends AbstractDocument
         ];
     }
 
+    public static function getSeparateFilterColumn()
+    {
+        return [
+            'shop', 'decline'
+        ];
+    }
+    
     public static function getShortPreviewText()
     {
         return [

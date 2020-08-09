@@ -55,25 +55,8 @@ class AwinProductRepository extends ServiceDocumentRepository
     {
         $filterCount = false;
         $client = $this->getDocumentManager()->getClient();
-        $manager = $client->getManager();
+
         $collection = $client->symfony->AwinProduct;
-
-
-//        db.getCollection('AwinProduct').aggregate(
-//                    [
-//             { $match: { $text: { $search: "nike" } } },
-//
-//             { $addFields: { score: { $meta: "textScore" } } },
-//
-//             { $match: { score: { $gt: 1.0 } } },
-
-
-//             { $sort: { score: { $meta: "textScore" }, aw_product_id : -1  } },
-//             { $skip : 5 },
-//             { $limit : 5 }
-//           ],
-//           { "allowDiskUse" : true }
-//        )
 
         $columnIndex = $params['order'][0]['column']; // Column index
         $columnName = $params['columns'][$columnIndex]['data']; // Column name
@@ -82,25 +65,54 @@ class AwinProductRepository extends ServiceDocumentRepository
         $sort = [];
 
         $filter = [];
+        $filterQuantity = [];
 
         if (isset($params['search']['value']) && strlen($params['search']['value'])) {
             $match = ['$match' => ['$text' => ['$search' => $params['search']['value']]]];
             array_push($filter, $match);
+            array_push($filterQuantity, $match);
+
             $addFields = ['$addFields' => ['score' => ['$meta' => 'textScore']]];
             array_push($filter, $addFields);
+            array_push($filterQuantity, $addFields);
+
             $addMatch = ['$match' => ['score' => ['$gt' => 1.0]]];
             array_push($filter, $addMatch);
+            array_push($filterQuantity, $addMatch);
+
+            $sort_by_search = [
+                'score' => ['$meta' => 'textScore']
+            ];
+        }
+
+        if (isset($params['columns']) && is_array($params['columns'])) {
+            foreach ($params['columns'] as $column) {
+                if (isset($column['search']['value'])
+                    && isset($column['data'])
+                    && strlen($column['search']['value'])
+                ) {
+                    $match = ['$match' => [
+                        $column['data'] => $column['data'] == 'decline'
+                            ? ($column['search']['value'] == 'true' ? true : false)
+                            : $column['search']['value']]
+                    ];
+                    array_push($filter, $match);
+                    array_push($filterQuantity, $match);
+
+                }
+            }
+        }
+
+        if (count($filterQuantity)) {
+            $groupForCount = ['$group' => ['_id' => null, 'myCount' => ['$sum' => 1]]];
+            $projectForCount = ['$project' => ['_id' => 0]];
+            array_push($filterQuantity, $groupForCount);
+            array_push($filterQuantity, $projectForCount);
+            
             $cursorCount = $collection->aggregate(
-                [
-                    $match,
-                    $addFields,
-                    $addMatch,
-                    ['$group' => [ '_id' => null, 'myCount' => [ '$sum' => 1 ] ]],
-                    ['$project' => [ '_id' => 0 ]]
-                ],
+                $filterQuantity,
                 ["allowDiskUse" => true]
             );
-
             $toArray = $cursorCount->toArray();
             if (count($toArray)) {
                 $array_shift = array_shift($toArray);
@@ -108,11 +120,8 @@ class AwinProductRepository extends ServiceDocumentRepository
                     $filterCount = $array_shift['myCount'];
                 }
             }
-
-            $sort_by_search = [
-                'score' => ['$meta' => 'textScore']
-            ];
         }
+
         if (isset($sort_by_search)) {
             $sort['$sort'] = $sort_by_search;
         }

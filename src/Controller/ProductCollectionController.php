@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Document\AbstractDocument;
 use App\Document\AwinProduct;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use JMS\Serializer\SerializerInterface;
@@ -39,7 +40,10 @@ class ProductCollectionController extends AbstractController
         $oneAwinProduct = $this->documentManager
             ->getRepository(AwinProduct::class)->findOneBy([]);
 
-        $serialize = $this->serializer->serialize($oneAwinProduct, 'json');
+        $serialize = $this->serializer->serialize(
+            $oneAwinProduct,
+            'json'
+        );
         $json_decode = json_decode($serialize, true);
         $dataTableColumnData = [];
         $keys = array_keys($json_decode);
@@ -54,7 +58,9 @@ class ProductCollectionController extends AbstractController
             'dataTbaleKeys' => $dataTableColumnData,
             'img_columns' => AwinProduct::getImageColumns(),
             'link_columns' => AwinProduct::getLinkColumns(),
-            'short_preview_columns' => AwinProduct::getShortPreviewText()
+            'short_preview_columns' => AwinProduct::getShortPreviewText(),
+            'separate_filter_column' => AwinProduct::getSeparateFilterColumn(),
+            'decline_reason' => AbstractDocument::getDeclineReasonKey()
         ]);
     }
 }

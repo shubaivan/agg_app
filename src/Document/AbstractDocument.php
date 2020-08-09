@@ -69,4 +69,9 @@ abstract class AbstractDocument
     {
         return $this->decline ? 'true' : 'false';
     }
+
+    public static function getDeclineReasonKey()
+    {
+        return ['declineReasonClass'];
+    }
 }
