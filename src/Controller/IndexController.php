@@ -31,11 +31,13 @@ class IndexController extends AbstractController
     public function index(DocumentManager $dm)
     {
         $user = $this->getUser();
+        /** @var Router $obj */
+        $obj = $this->get('router');
         $resourceDocuments = [
             [
                 'name' => 'Awin',
                 'count' => $dm->getRepository(AwinProduct::class)->getCountDoc(),
-                'path' => '#'
+                'path' => $obj->generate('product_collection_awin')
             ],
             [
                 'name' => 'Adrecord',

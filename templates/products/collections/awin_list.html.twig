@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile!{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+
+
+    <div class="container">
+        <div class="count">
+            {{ appointments.getTotalItemCount }}
+        </div>
+        <table class="table table-hover table-responsive" id="awin_collection">
+{#            <caption>List of resources</caption>#}
+            <thead>
+            <tr>
+                {% set productForHeadrer = appointments|first %}
+
+                {% for columnProduct, productvalue in productForHeadrer|cast_to_array %}
+                    {% if columnProduct == 'id' %}
+                        <th>{{ knp_pagination_sortable(appointments, 'Id', 'id') }}</th>
+                    {% elseif columnProduct in sort_columns %}
+
+                        <th{% if appointments.isSorted(columnProduct ) %} class="sorted"{% endif %}>
+                            {{ knp_pagination_sortable(appointments, columnProduct|capitalize, columnProduct) }}
+                        </th>
+
+                    {% else %}
+                        <th scope="col">{{ columnProduct }}</th>
+                    {% endif %}
+
+                {% endfor %}
+            </tr>
+            </thead>
+
+            <tfoot>
+            <tr>
+                {% for columnProduct, productvalue in productForHeadrer|cast_to_array %}
+                    {% if columnProduct == 'id' %}
+                        <th>{{ knp_pagination_sortable(appointments, 'Id', 'id') }}</th>
+                    {% elseif columnProduct in sort_columns %}
+
+                        <th{% if appointments.isSorted(columnProduct ) %} class="sorted"{% endif %}>
+                            {{ knp_pagination_sortable(appointments, columnProduct|capitalize, columnProduct) }}
+                        </th>
+
+                    {% else %}
+                        <th scope="col">{{ columnProduct }}</th>
+                    {% endif %}
+
+                {% endfor %}
+            </tr>
+            </tfoot>
+
+            <tbody>
+
+            {% for newheaderKey, document in appointments %}
+                    <tr>
+                        {# @var document \App\Document\AwinProduct #}
+                        {% for keyData, data in document|cast_to_array %}
+
+                                {% if keyData == 'description' %}
+                                    <td data-toggle="tooltip" title="{{data}}">
+                                        {{ data|length > 20 ? data|slice(0, 20) ~ '...' : data  }}
+                                    </td>
+                                {% elseif keyData == 'aw_deep_link'
+                                    or keyData == 'merchant_deep_link'
+                                %}
+                                    <td>
+                                        <a href="{{ data }}">link</a>
+                                    </td>
+                                {% elseif keyData == 'id' %}
+                                    <td data-toggle="tooltip" title="{{data}}">
+                                        #
+                                    </td>
+                                {% elseif keyData in image_columns %}
+                                    <td>
+                                        <img src="{{ data }}" class="img-thumbnail">
+                                    </td>
+                                {% else %}
+                                    <td>{{data}}</td>
+                                {% endif %}
+
+
+                        {% endfor %}
+                    </tr>
+
+            {% endfor %}
+
+            </tbody>
+        </table>
+
+
+
+        <div class="navigation">
+            {{ knp_pagination_render(appointments) }}
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('build/index/js/awin.min.js') }}"></script>
+{% endblock %}

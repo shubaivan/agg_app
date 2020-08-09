@@ -12,6 +12,7 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
     {
         $rowData = $this->getRow();
 
+        $rowData['product_language'] = $rowData['language'];
         $rowData['trackingUrl'] = $rowData['aw_deep_link'];
         $rowData['name'] = $rowData['product_name'];
         $rowData['sku'] = $rowData['aw_product_id'];
@@ -29,6 +30,7 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
         }
 
         $rowData['Extras'] = '';
+
         if (isset($rowData['aw_image_url']) && strlen($rowData['aw_image_url']) > 0) {
             $rowData['Extras'] .= '{ALTERNATIVE_IMAGE#' . $rowData['aw_image_url'] . '}';
         }
@@ -95,6 +97,10 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
         
         if (isset($rowData['alternate_image_four']) && strlen($rowData['alternate_image_four']) > 0) {
             $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_6#' . $rowData['alternate_image_four'] . '}';
+        }
+
+        if (isset($rowData['large_image']) && strlen($rowData['large_image']) > 0) {
+            $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_7#' . $rowData['large_image'] . '}';
         }
 
         if (isset($rowData['Fashion:suitable_for'])) {

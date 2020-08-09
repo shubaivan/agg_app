@@ -4,6 +4,7 @@
 namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use JMS\Serializer\Annotation;
 
 abstract class AbstractDocument
 {
@@ -14,6 +15,7 @@ abstract class AbstractDocument
     
     /**
      * @MongoDB\Field(type="boolean")
+     * @Annotation\Accessor(getter="getDeclineAccessor")
      */
     protected $decline = false;
 
@@ -61,5 +63,10 @@ abstract class AbstractDocument
     {
         $this->declineReasonClass = $declineReasonClass;
         return $this;
+    }
+
+    public function getDeclineAccessor()
+    {
+        return $this->decline ? 'true' : 'false';
     }
 }

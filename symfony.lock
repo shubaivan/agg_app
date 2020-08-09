@@ -210,6 +210,9 @@
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
+    "jean85/pretty-package-versions": {
+        "version": "1.2"
+    },
     "jms/metadata": {
         "version": "2.1.0"
     },
@@ -224,6 +227,12 @@
             "version": "3.0",
             "ref": "384cec52df45f3bfd46a09930d6960a58872b268"
         }
+    },
+    "knplabs/knp-components": {
+        "version": "2.5.0-dev"
+    },
+    "knplabs/knp-paginator-bundle": {
+        "version": "5.3.x-dev"
     },
     "league/csv": {
         "version": "8.2.3"
@@ -396,6 +405,9 @@
     },
     "symfony/dependency-injection": {
         "version": "v5.0.5"
+    },
+    "symfony/deprecation-contracts": {
+        "version": "2.1-dev"
     },
     "symfony/doctrine-bridge": {
         "version": "v5.0.5"

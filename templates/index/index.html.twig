@@ -25,8 +25,14 @@
                 {% if document is iterable %}
                     <tr>
                         <th scope="row">{{ key + 1 }}</th>
-                        {% for data in document %}
-                            <td>{{ data }}</td>
+                        {% for keyData, data in document %}
+                            <td>
+                                {% if keyData == 'path' %}
+                                    <a href="{{ data }}">List</a>
+                                {% else %}
+                                    {{ data }}
+                                {% endif %}
+                            </td>
                         {% endfor %}
                     </tr>
                 {% endif %}

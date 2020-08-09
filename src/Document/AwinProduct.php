@@ -8,6 +8,21 @@ use App\DocumentRepository\AwinProductRepository;
 
 /**
  * @MongoDB\Document(repositoryClass=AwinProductRepository::class)
+ * @MongoDB\Index(keys={
+ *     "product_name"="text",
+ *     "merchant_category"="text",
+ *     "description"="text",
+ *     "merchant_name"="text",
+ *     "category_name"="text",
+ *     "brand_name"="text",
+ *     "colour"="text",
+ *     "product_short_description"="text",
+ *     "merchant_product_category_path"="text",
+ *     "Fashion_category"="text",
+ *     "Fashion_size"="text",
+ *     "declineReasonClass"="text",
+ *     "shop"="text"
+ * })
  */
 class AwinProduct extends AbstractDocument
 {
@@ -101,7 +116,7 @@ class AwinProduct extends AbstractDocument
     /**
      * @MongoDB\Field(type="string")
      */
-    protected $language;
+    protected $product_language;
 
     /**
      * @MongoDB\Field(type="string")
@@ -578,5 +593,665 @@ class AwinProduct extends AbstractDocument
         $this->Fashion_pattern = $Fashion_pattern;
         $this->Fashion_swatch = $Fashion_swatch;
         $this->shop = $shop;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAwDeepLink()
+    {
+        return $this->aw_deep_link;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProductName()
+    {
+        return $this->product_name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAwProductId()
+    {
+        return $this->aw_product_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMerchantProductId()
+    {
+        return $this->merchant_product_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMerchantImageUrl()
+    {
+        return $this->merchant_image_url;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMerchantCategory()
+    {
+        return $this->merchant_category;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSearchPrice()
+    {
+        return $this->search_price;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMerchantName()
+    {
+        return $this->merchant_name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMerchantId()
+    {
+        return $this->merchant_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCategoryName()
+    {
+        return $this->category_name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCategoryId()
+    {
+        return $this->category_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAwImageUrl()
+    {
+        return $this->aw_image_url;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrency()
+    {
+        return $this->currency;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStorePrice()
+    {
+        return $this->store_price;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDeliveryCost()
+    {
+        return $this->delivery_cost;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMerchantDeepLink()
+    {
+        return $this->merchant_deep_link;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLanguage()
+    {
+        return $this->language;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastUpdated()
+    {
+        return $this->last_updated;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDisplayPrice()
+    {
+        return $this->display_price;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDataFeedId()
+    {
+        return $this->data_feed_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBrandName()
+    {
+        return $this->brand_name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBrandId()
+    {
+        return $this->brand_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getColour()
+    {
+        return $this->colour;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProductShortDescription()
+    {
+        return $this->product_short_description;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSpecifications()
+    {
+        return $this->specifications;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCondition()
+    {
+        return $this->condition;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProductModel()
+    {
+        return $this->product_model;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModelNumber()
+    {
+        return $this->model_number;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDimensions()
+    {
+        return $this->dimensions;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getKeywords()
+    {
+        return $this->keywords;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPromotionalText()
+    {
+        return $this->promotional_text;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProductType()
+    {
+        return $this->product_type;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCommissionGroup()
+    {
+        return $this->commission_group;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMerchantProductCategoryPath()
+    {
+        return $this->merchant_product_category_path;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMerchantProductSecondCategory()
+    {
+        return $this->merchant_product_second_category;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMerchantProductThirdCategory()
+    {
+        return $this->merchant_product_third_category;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRrpPrice()
+    {
+        return $this->rrp_price;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSaving()
+    {
+        return $this->saving;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSavingsPercent()
+    {
+        return $this->savings_percent;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBasePrice()
+    {
+        return $this->base_price;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBasePriceAmount()
+    {
+        return $this->base_price_amount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBasePriceText()
+    {
+        return $this->base_price_text;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProductPriceOld()
+    {
+        return $this->product_price_old;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDeliveryRestrictions()
+    {
+        return $this->delivery_restrictions;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDeliveryWeight()
+    {
+        return $this->delivery_weight;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWarranty()
+    {
+        return $this->warranty;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTermsOfContract()
+    {
+        return $this->terms_of_contract;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDeliveryTime()
+    {
+        return $this->delivery_time;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInStock()
+    {
+        return $this->in_stock;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStockQuantity()
+    {
+        return $this->stock_quantity;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValidFrom()
+    {
+        return $this->valid_from;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValidTo()
+    {
+        return $this->valid_to;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsForSale()
+    {
+        return $this->is_for_sale;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWebOffer()
+    {
+        return $this->web_offer;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPreOrder()
+    {
+        return $this->pre_order;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStockStatus()
+    {
+        return $this->stock_status;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSizeStockStatus()
+    {
+        return $this->size_stock_status;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSizeStockAmount()
+    {
+        return $this->size_stock_amount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMerchantThumbUrl()
+    {
+        return $this->merchant_thumb_url;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLargeImage()
+    {
+        return $this->large_image;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAlternateImage()
+    {
+        return $this->alternate_image;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAwThumbUrl()
+    {
+        return $this->aw_thumb_url;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAlternateImageTwo()
+    {
+        return $this->alternate_image_two;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAlternateImageThree()
+    {
+        return $this->alternate_image_three;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAlternateImageFour()
+    {
+        return $this->alternate_image_four;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEan()
+    {
+        return $this->ean;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsbn()
+    {
+        return $this->isbn;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUpc()
+    {
+        return $this->upc;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMpn()
+    {
+        return $this->mpn;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParentProductId()
+    {
+        return $this->parent_product_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProductGTIN()
+    {
+        return $this->product_GTIN;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBasketLink()
+    {
+        return $this->basket_link;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFashionSuitableFor()
+    {
+        return $this->Fashion_suitable_for;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFashionCategory()
+    {
+        return $this->Fashion_category;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFashionSize()
+    {
+        return $this->Fashion_size;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFashionMaterial()
+    {
+        return $this->Fashion_material;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFashionPattern()
+    {
+        return $this->Fashion_pattern;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFashionSwatch()
+    {
+        return $this->Fashion_swatch;
+    }
+
+    public static function getImageColumns()
+    {
+        return [
+            'alternate_image_four', 'alternate_image_three', 'alternate_image_three',
+            'aw_thumb_url', 'alternate_image', 'aw_image_url',
+            'merchant_image_url', 'alternate_image_two', 'large_image'
+        ];
+    }
+
+    public static function getSortColumns()
+    {
+        return [
+            'aw_product_id',
+            'search_price',
+            'merchant_name',
+            'merchant_id',
+            'currency',
+            'colour',
+            'in_stock',
+            'is_for_sale',
+            'web_offer',
+            'mpn',
+            'Fashion_size',
+            'shop',
+            'decline'
+        ];
     }
 }

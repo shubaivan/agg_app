@@ -1,0 +1,1 @@
+fos.Router.setData({"base_url":"","routes":{"app_rest_awinproductcollection_postproducts":{"tokens":[["text","\/api\/colleciton\/awin"]],"defaults":[],"requirements":[],"hosttokens":[],"methods":["POST"],"schemes":[]}},"prefix":"","host":"localhost","port":"","scheme":"http","locale":[]});
