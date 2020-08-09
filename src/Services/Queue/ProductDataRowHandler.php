@@ -5,6 +5,7 @@ namespace App\Services\Queue;
 use App\Cache\CacheManager;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
+use App\Document\AwinProduct;
 use App\Entity\Product;
 use App\Entity\Shop;
 use App\Exception\AdminShopRulesException;
@@ -276,7 +277,16 @@ class ProductDataRowHandler
                 ->setDeclineReasonClass(get_class($exception) . ':' . $exception->getMessage())
                 ->setDecline(true);
         }
-        if ($adrecordDoc || $adtractionDoc) {
+
+        $awinDoc = $this->dm->getRepository(AwinProduct::class)
+            ->findOneBy(['aw_product_id' => $dataRow->getSku()]);
+
+        if ($awinDoc) {
+            $awinDoc
+                ->setDeclineReasonClass(get_class($exception) . ':' . $exception->getMessage())
+                ->setDecline(true);
+        }
+        if ($adrecordDoc || $adtractionDoc || $awinDoc) {
             $this->dm->flush();
         }
     }

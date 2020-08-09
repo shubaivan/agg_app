@@ -66,6 +66,8 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
             if (strlen($rowData['Fashion_size']) > 0) {
                 $rowData['Extras'] .= '{SIZE#' . $rowData['Fashion_size'] . '}';
             }
+        } else {
+            $rowData['Fashion_size'] = '';
         }
 
         $rowData['deliveryRestrictions'] = $rowData['delivery_restrictions'];
@@ -106,6 +108,8 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
         if (isset($rowData['Fashion:suitable_for'])) {
             $rowData['Fashion_suitable_for'] = $rowData['Fashion:suitable_for'];
             unset($rowData['Fashion:suitable_for']);
+        } else {
+            $rowData['Fashion_suitable_for'] = '';
         }
 
         if (isset($rowData['Fashion:category'])) {
@@ -114,6 +118,8 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
             if (strlen($rowData['Fashion_category'])) {
                 $this->categories[] = $rowData['Fashion_category'];   
             }
+        } else {
+            $rowData['Fashion_category'] = '';
         }
 
         if (isset($rowData['Fashion:material'])) {
@@ -122,6 +128,8 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
             if (strlen($rowData['Fashion_material'])) {
                 $rowData['Extras'] .= '{MATERIAL#' . $rowData['Fashion_material'] . '}';
             }
+        } else {
+            $rowData['Fashion_material'] = '';
         }
 
         if (isset($rowData['delivery_time']) && strlen($rowData['delivery_time'])) {
@@ -138,11 +146,15 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
             if (strlen($rowData['Fashion_pattern'])) {
                 $rowData['Extras'] .= '{PATTERN#' . $rowData['Fashion_pattern'] . '}';
             }
+        } else {
+            $rowData['Fashion_pattern'] = '';
         }
 
         if (isset($rowData['Fashion:swatch'])) {
             $rowData['Fashion_swatch'] = $rowData['Fashion:swatch'];
             unset($rowData['Fashion:swatch']);
+        } else {
+            $rowData['Fashion_swatch'] = '';
         }
         $this->row = $rowData;
         $this->postTransform();
