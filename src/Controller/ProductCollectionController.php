@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Document\AbstractDocument;
+use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use JMS\Serializer\SerializerInterface;
@@ -33,17 +34,53 @@ class ProductCollectionController extends AbstractController
     }
 
     /**
+     * @Route("/admin/product_collection/adtraction", name="product_collection_adtraction")
+     */
+    public function adtractionProductCollectionList(Request $request, PaginatorInterface $paginator)
+    {
+        $oneProduct = $this->documentManager
+            ->getRepository(AdtractionProduct::class)->findOneBy([]);
+        $serialize = '{}';
+        if ($oneProduct) {
+            $serialize = $this->serializer->serialize(
+                $oneProduct,
+                'json'
+            );
+        }
+        $json_decode = json_decode($serialize, true);
+        $dataTableColumnData = [];
+        $keys = array_keys($json_decode);
+        array_map(function ($k) use (&$dataTableColumnData) {
+            $dataTableColumnData[] = ['data' => $k];
+        }, $keys);
+
+
+        // Render the twig view
+        return $this->render('products/collections/adtraction_list_custom.html.twig', [
+            'th_keys' => $keys,
+            'dataTbaleKeys' => $dataTableColumnData,
+            'img_columns' => AdtractionProduct::getImageColumns(),
+            'link_columns' => AdtractionProduct::getLinkColumns(),
+            'short_preview_columns' => AdtractionProduct::getShortPreviewText(),
+            'separate_filter_column' => AdtractionProduct::getSeparateFilterColumn(),
+            'decline_reason' => AdtractionProduct::getDeclineReasonKey()
+        ]);
+    }
+    
+    /**
      * @Route("/admin/product_collection/awin", name="product_collection_awin")
      */
     public function awinProductCollectionList(Request $request, PaginatorInterface $paginator)
     {
         $oneAwinProduct = $this->documentManager
             ->getRepository(AwinProduct::class)->findOneBy([]);
-
-        $serialize = $this->serializer->serialize(
-            $oneAwinProduct,
-            'json'
-        );
+        $serialize = '{}';
+        if ($oneAwinProduct) {
+            $serialize = $this->serializer->serialize(
+                $oneAwinProduct,
+                'json'
+            );   
+        }
         $json_decode = json_decode($serialize, true);
         $dataTableColumnData = [];
         $keys = array_keys($json_decode);
@@ -60,7 +97,7 @@ class ProductCollectionController extends AbstractController
             'link_columns' => AwinProduct::getLinkColumns(),
             'short_preview_columns' => AwinProduct::getShortPreviewText(),
             'separate_filter_column' => AwinProduct::getSeparateFilterColumn(),
-            'decline_reason' => AbstractDocument::getDeclineReasonKey()
+            'decline_reason' => AdtractionProduct::getDeclineReasonKey()
         ]);
     }
 }

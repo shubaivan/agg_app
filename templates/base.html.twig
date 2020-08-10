@@ -21,6 +21,8 @@
                                 Hello, {{ app.user.email }}
                             {% elseif is_granted(constant('App\\Entity\\User::ROLE_ADMIN')) %}
                                 Hello, admin
+                            {% elseif is_granted(constant('App\\Entity\\User::ROLE_SUPER_ADMIN')) %}
+                                Hello, super admin
                             {% else %}
                                 Hello, anonymous
                             {% endif %}
@@ -50,7 +52,7 @@
                 {% endif %}#}
 
                 {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-                    You are logged
+                    You are logged.
                 {% else %}
                     <a href="{{ path('app_login') }}" class="float-lg-left">
                         Login <i class="fas fa-door-open"></i>

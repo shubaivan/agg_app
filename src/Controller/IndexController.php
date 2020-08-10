@@ -47,7 +47,7 @@ class IndexController extends AbstractController
             [
                 'name' => 'Adtraction',
                 'count' => $dm->getRepository(AdtractionProduct::class)->getCountDoc(),
-                'path' => '#'
+                'path' => $obj->generate('product_collection_adtraction')
             ],
         ];
         

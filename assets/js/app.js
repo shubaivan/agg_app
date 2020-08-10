@@ -24,6 +24,6 @@ global.$ = global.jQuery = $;
 require('bootstrap');
 console.log( "app" );
 var text = 'app';
-text = text.replace("app", "replce");
+text = text.replace("app", "replace");
 
 console.log(text);

@@ -30,6 +30,13 @@
                         Registration new Admin <i class="fas fa-registered"></i>
                     </a>
                 {% endif %}
+
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                    You can follow to index
+                    <a href="{{ path('index') }}" class="float-lg-left">
+                        Index <i class="fa fa-bars" aria-hidden="true"></i>
+                    </a>
+                {% endif %}
             </p>
         </div>
 

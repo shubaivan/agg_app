@@ -49,7 +49,7 @@ class AwinProduct extends AbstractDocument
     
     /**
      * @MongoDB\Field(type="string")
-     * @MongoDB\Index()
+     * @MongoDB\UniqueIndex(order="asc")
      */
     protected $aw_product_id;
 
@@ -1238,7 +1238,7 @@ class AwinProduct extends AbstractDocument
         return $this->Fashion_swatch;
     }
 
-    public static function getImageColumns()
+    public static function getImageColumns():array 
     {
         return [
             'alternate_image_four', 'alternate_image_three', 'alternate_image_three',
@@ -1247,43 +1247,17 @@ class AwinProduct extends AbstractDocument
         ];
     }
 
-    public static function getLinkColumns()
+    public static function getLinkColumns():array
     {
         return [
             'aw_deep_link', 'merchant_deep_link'
         ];
     }
-
-    public static function getSeparateFilterColumn()
-    {
-        return [
-            'shop', 'decline'
-        ];
-    }
     
-    public static function getShortPreviewText()
+    public static function getShortPreviewText():array
     {
         return [
             'description', 'id'
-        ];
-    }
-
-    public static function getSortColumns()
-    {
-        return [
-            'aw_product_id',
-            'search_price',
-            'merchant_name',
-            'merchant_id',
-            'currency',
-            'colour',
-            'in_stock',
-            'is_for_sale',
-            'web_offer',
-            'mpn',
-            'Fashion_size',
-            'shop',
-            'decline'
         ];
     }
 }

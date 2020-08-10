@@ -5,15 +5,23 @@ namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use App\DocumentRepository\AdtractionProductRepository;
+use JMS\Serializer\Annotation;
 
 /**
  * @MongoDB\Document(repositoryClass=AdtractionProductRepository::class)
+ * @MongoDB\Index(keys={
+ *     "Name"="text",
+ *     "Description"="text",
+ *     "Category"="text",
+ *     "Price"="text",
+ *     "Brand"="text"
+ * })
  */
 class AdtractionProduct extends AbstractDocument
 {
     /**
      * @MongoDB\Field(type="string")
-     * @MongoDB\Index()
+     * @MongoDB\UniqueIndex(order="asc") 
      */
     private $SKU;
     /**
@@ -122,5 +130,24 @@ class AdtractionProduct extends AbstractDocument
         $this->shop = $shop;
     }
 
+    public static function getImageColumns():array
+    {
+        return [
+            'ImageUrl'
+        ];
+    }
 
+    public static function getLinkColumns():array
+    {
+        return [
+            'ProductUrl', 'TrackingUrl'
+        ];
+    }
+
+    public static function getShortPreviewText():array
+    {
+        return [
+            'Description', 'id'
+        ];
+    }
 }

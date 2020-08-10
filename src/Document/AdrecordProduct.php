@@ -23,7 +23,7 @@ class AdrecordProduct extends AbstractDocument
 
     /**
      * @MongoDB\Field(type="string")
-     * @MongoDB\Index()
+     * @MongoDB\UniqueIndex(order="asc")
      */
     private $SKU;
 
@@ -468,5 +468,26 @@ class AdrecordProduct extends AbstractDocument
     {
         $this->gender = $gender;
         return $this;
+    }
+
+    public static function getImageColumns():array
+    {
+        return [
+            'graphicUrl'
+        ];
+    }
+
+    public static function getLinkColumns():array
+    {
+        return [
+            'ProductUrl'
+        ];
+    }
+
+    public static function getShortPreviewText():array
+    {
+        return [
+            'description', 'id'
+        ];
     }
 }

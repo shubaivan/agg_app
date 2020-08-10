@@ -6,7 +6,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use JMS\Serializer\Annotation;
 
-abstract class AbstractDocument
+abstract class AbstractDocument implements DataTableInterface
 {
     /**
      * @MongoDB\Id
@@ -73,5 +73,12 @@ abstract class AbstractDocument
     public static function getDeclineReasonKey()
     {
         return ['declineReasonClass'];
+    }
+
+    public static function getSeparateFilterColumn():array
+    {
+        return [
+            'shop', 'decline'
+        ];
     }
 }
