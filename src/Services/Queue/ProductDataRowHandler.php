@@ -144,12 +144,12 @@ class ProductDataRowHandler
     {
         try {
             $filePath = $dataRow->getFilePath();
-            
+
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
 
-            $this->getAdminShopRulesService()->executeShopRule($product);
             $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
             $this->getCategoryService()->matchGlobalNegativeBrandWords($product);
+            $this->getAdminShopRulesService()->executeShopRule($product);
 
             $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);

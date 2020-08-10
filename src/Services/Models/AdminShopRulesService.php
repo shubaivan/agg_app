@@ -43,54 +43,113 @@ class AdminShopRulesService
         }
         $columnConf = [];
         foreach ($adminShopsRules as $column=>$keyWords) {
-            if (is_array($keyWords)) {
-                $columnConf[$column] = array_unique($keyWords);
+            if (strpos($column, '!') !== false) {
+                if (is_array($keyWords)) {
+                    $columnConf['negative'][$column] = array_unique($keyWords);
+                } else {
+                    $columnConf['negative'][$column] = [$keyWords];
+                }
             } else {
-                $columnConf[$column] = [$keyWords];
+                if (is_array($keyWords)) {
+                    $columnConf['positive'][$column] = array_unique($keyWords);
+                } else {
+                    $columnConf['positive'][$column] = [$keyWords];
+                }
             }
 
         }
-        $identityColumns = false;
-        foreach ($columnConf as $column=>$rule) {
-            $value = $propertyAccessor->getValue($product, $column);
-            if ($value) {
-                $identityColumns = true;
-                $extraRue = false;
-                foreach ($rule as $execRule) {
-                    if (is_array($execRule)) {$extraRue = true; break;}
-                }
-                if ($extraRue) {
-                    foreach ($rule as $extraKey=>$extraRule) {
-                        if (isset($value[$extraKey])) {
-                            $implode = implode('|', $extraRule);
 
-                            if (preg_match_all("/$implode/iu", $value[$extraKey], $mt)) {
-                                $failedRule = false;
-                                break;
-                            } else {
-                                $failedRule = true;
+        if (isset($columnConf['positive'])) {
+            $identityColumns = false;
+            foreach ($columnConf['positive'] as $column=>$rule) {
+                $value = $propertyAccessor->getValue($product, $column);
+                if ($value) {
+                    $identityColumns = true;
+                    $extraRue = false;
+                    foreach ($rule as $execRule) {
+                        if (is_array($execRule)) {$extraRue = true; break;}
+                    }
+                    if ($extraRue) {
+                        foreach ($rule as $extraKey=>$extraRule) {
+                            if (isset($value[$extraKey])) {
+                                $implode = implode('|', $extraRule);
+
+                                if (preg_match_all("/$implode/iu", $value[$extraKey], $mt)) {
+                                    $failedRule = false;
+                                    break;
+                                } else {
+                                    $failedRule = true;
+                                }
                             }
                         }
+                        if (isset($failedRule) && !$failedRule) {
+                            break;
+                        }
+                        continue;
+                    } else {
+                        $implode = implode('|', $rule);
                     }
-                    if (isset($failedRule) && !$failedRule) {
+
+                    if (preg_match_all("/$implode/iu", $value, $mt)) {
+                        $failedRule = false;
                         break;
+                    } else {
+                        $failedRule = true;
                     }
-                    continue;
-                } else {
-                    $implode = implode('|', $rule);
                 }
-                
-                if (preg_match_all("/$implode/iu", $value, $mt)) {
-                    $failedRule = false;
-                    break;
-                } else {
-                    $failedRule = true;
-                }
+            }
+
+            if ($identityColumns && isset($failedRule) && $failedRule) {
+                throw new AdminShopRulesException('positive key word was not found');
             }
         }
 
-        if ($identityColumns && isset($failedRule) && $failedRule) {
-            throw new AdminShopRulesException('failed rule');
+        if (isset($columnConf['negative'])) {
+            $identityColumns = false;
+            foreach ($columnConf['negative'] as $column=>$rule) {
+                $column = preg_replace('/\!/', '', $column);
+                $value = $propertyAccessor->getValue($product, $column);
+                if ($value) {
+                    $identityColumns = true;
+                    $extraRue = false;
+                    foreach ($rule as $execRule) {
+                        if (is_array($execRule)) {$extraRue = true; break;}
+                    }
+                    if ($extraRue) {
+                        foreach ($rule as $extraKey=>$extraRule) {
+                            if (isset($value[$extraKey])) {
+                                $implode = implode('|', $extraRule);
+
+                                if (preg_match_all("/$implode/iu", $value[$extraKey], $mt)) {
+                                    $failedRule = true;
+                                    break;
+                                } else {
+                                    $failedRule = false;
+                                }
+                            }
+                        }
+                        if (isset($failedRule) && !$failedRule) {
+                            break;
+                        }
+                        continue;
+                    } else {
+                        $implode = implode('|', $rule);
+                    }
+
+                    if (preg_match_all("/$implode/iu", $value, $mt)) {
+                        $failedRule = true;
+                        break;
+                    } else {
+                        $failedRule = false;
+                    }
+                }
+            }
+
+            if ($identityColumns && isset($failedRule) && $failedRule) {
+                throw new AdminShopRulesException('
+                negative key word was found ' 
+                    . (isset($mt) && count($mt) ? implode(',',array_shift($mt)) : ''));
+            }
         }
 
         return [];

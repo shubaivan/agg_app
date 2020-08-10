@@ -61,6 +61,12 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
             [
                 'category' => [
                     'Children\'s Clothing'
+                ],
+                '!name' => [
+                    'sex', 'vux'
+                ],
+                '!description' => [
+                    'sex', 'vux'
                 ]
             ],
         'Nike' =>
