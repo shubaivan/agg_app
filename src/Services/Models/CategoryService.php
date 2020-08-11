@@ -14,6 +14,7 @@ use App\Entity\Product;
 use App\Entity\Shop;
 use App\Exception\GlobalMatchException;
 use App\Exception\GlobalMatchExceptionBrand;
+use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Services\Helpers;
@@ -32,6 +33,11 @@ class CategoryService extends AbstractModel
      * @var CategoryRepository
      */
     private $categoryRepository;
+
+    /**
+     * @var CategoryConfigurationsRepository
+     */
+    private $categoryConfigurationsRepository;
 
     /**
      * @var ObjectsHandler
@@ -60,13 +66,15 @@ class CategoryService extends AbstractModel
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
      * @param Helpers $helper
      * @param RedisHelper $redisHelper
+     * @param CategoryConfigurationsRepository $categoryConfigurationsRepository
      */
     public function __construct(
         CategoryRepository $categoryRepository,
         ObjectsHandler $objecHandler,
         TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
         Helpers $helper,
-        RedisHelper $redisHelper
+        RedisHelper $redisHelper,
+        CategoryConfigurationsRepository $categoryConfigurationsRepository
     )
     {
         $this->categoryRepository = $categoryRepository;
@@ -74,6 +82,7 @@ class CategoryService extends AbstractModel
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
         $this->helper = $helper;
         $this->redisHelper = $redisHelper;
+        $this->categoryConfigurationsRepository = $categoryConfigurationsRepository;
     }
 
     /**
@@ -268,6 +277,16 @@ class CategoryService extends AbstractModel
         if (!$matchCategoryMain) {
             return [];
         }
+
+        $extras = $product->getExtras();
+        if (isset($extras[Product::SIZE])) {
+            $sizeCategoriesids = $this->categoryConfigurationsRepository
+                ->matchSizeCategories($extras[Product::SIZE], $matchCategoryMain);
+            if (count($sizeCategoriesids)) {
+                $matchCategoryMain = array_merge($sizeCategoriesids, $matchCategoryMain);
+            }
+        }
+        
         $result = array_merge($result, $matchCategoryMain);
         $prepareDataForGINSearch = $this->prepareProductDataForMatching(
             $product->getName() . ', ' . $product->getDescription()

@@ -306,6 +306,19 @@ class CategoryBarnFixtures extends AbstractFixtures
         ]
     ];
 
+    private $configurationsSize = [
+        'KLÄDER 92-128 CL (1-8 ÅR)' => [
+            'Flicka' => [
+                'sizes' => '92, 98, 104, 110, 116, 122, 128',
+                'positive_key_words' => 'girl',
+            ],
+            'Pojke' => [
+                'sizes' => '92, 98, 104, 110, 116, 122, 128',
+                'positive_key_words' => 'boy',
+            ]
+        ]
+    ];
+
     public function load(ObjectManager $manager)
     {
         $this->reUpdateFiles();
@@ -319,6 +332,7 @@ class CategoryBarnFixtures extends AbstractFixtures
         );
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
+        $this->processSizeCategories($this->configurationsSize, $main);
         $this->afterLoad();
     }
 }

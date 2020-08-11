@@ -23,9 +23,12 @@ abstract class AbstractShop
             $product->setSeparateExtra(Product::COLOUR, $color);
         }
 
-        if (preg_match_all('/[0-9]+/', $color, $matchesD)
+        if (preg_match('/[0-9]+/', $color, $matchesD)
         ) {
-            $product->setSeparateExtra(Product::SIZE, $color);
+            if (count($matchesD)) {
+                $exactlySize = array_shift($matchesD);
+                $product->setSeparateExtra(Product::SIZE, $exactlySize);
+            }
         }
 
         if (preg_match_all("/$one/", $color, $foundOne)) {

@@ -72,9 +72,9 @@ class AdtractionProductCollectionController extends AbstractRestController
                 [
                     "draw" => $request->request->get('draw'),
                     "recordsTotal" => $this->documentManager
-                        ->getRepository(AwinProduct::class)->getCountDoc(),
+                        ->getRepository(AdtractionProduct::class)->getCountDoc(),
                     "recordsFiltered"=> $dataTable['count'] ? $dataTable['count'] : $this->documentManager
-                        ->getRepository(AwinProduct::class)->getCountDoc()
+                        ->getRepository(AdtractionProduct::class)->getCountDoc()
                 ],
                 ['data' => $dataTable['data']]
             )

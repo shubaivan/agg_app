@@ -350,8 +350,7 @@ class ProductService extends AbstractModel
             if ($product->getShop() == $adtractionDataRow->getShop()) {
                 $adtractionDataRow->setExistProductId($product->getId());
             } else {
-                $newSku = $this->modifyToUniqSku($adtractionDataRow->getSku());
-                $adtractionDataRow->setSkuValueToRow($newSku);
+                $this->modifyToUniqSku($adtractionDataRow);
             }
         }
 
@@ -359,21 +358,24 @@ class ProductService extends AbstractModel
     }
 
     /**
-     * @param string|null $sku
-     * @return string
+     * @param ResourceDataRow $adtractionDataRow
      */
-    private function modifyToUniqSku(?string $sku = '')
+    private function modifyToUniqSku(ResourceDataRow $adtractionDataRow)
     {
-        $modifySku = $sku . '_1';
+        $modifySku = $adtractionDataRow->getSku() . '_1';
         $matchSku = $this->getProductRepository()
-            ->findOneBy(['sku' => $modifySku]);;
+            ->findOneBy(['sku' => $modifySku]);
+        $adtractionDataRow->setSkuValueToRow($modifySku);
         while ($matchSku instanceof Product) {
+            if ($matchSku->getShop() == $adtractionDataRow->getShop()) {
+                $adtractionDataRow->setExistProductId($matchSku->getId());
+                break;
+            }
             $modifySku = $modifySku . '1';
             $matchSku = $this->getProductRepository()
                 ->findOneBy(['sku' => $modifySku]);
+            $adtractionDataRow->setSkuValueToRow($modifySku);
         }
-
-        return $modifySku;
     }
 
     /**

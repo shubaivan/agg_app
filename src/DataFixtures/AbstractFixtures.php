@@ -169,6 +169,48 @@ abstract class AbstractFixtures extends Fixture
         $this->kernel = $kernel;
     }
 
+    protected function processSizeCategories($configurationsSize, Category $m)
+    {
+        foreach ($configurationsSize as $sectionName=>$sizes)
+        {
+            $categorySection = $this->createdCategorySection($sectionName);
+            foreach ($sizes as $prefixName=>$size) {
+                $name = $m->getCategoryName() . ' ' . $prefixName;
+                $category = $this->checkExistCategory($name);
+
+                if (!$category instanceof Category) {
+                    $category = new Category();
+                    $category->setCategoryName($name);
+                    $this->getManager()->persist($category);
+                }
+
+                $category->setSectionRelation($categorySection);
+                $categoryConfigurations = $category->getCategoryConfigurations();
+                if (!$categoryConfigurations) {
+                    $categoryConfigurations = new CategoryConfigurations();
+                    $this->getManager()->persist($categoryConfigurations);
+                }
+                if (isset($size['sizes'])) {
+                    $explodeSizes = explode(',', $size['sizes']);
+                    $categoryConfigurations
+                        ->setSizes([
+                            'min' => min($explodeSizes),
+                            'max' => max($explodeSizes)
+                        ]);
+                }
+
+                if (isset($size['positive_key_words'])) {
+                    $categoryConfigurations
+                        ->setKeyWords($size['positive_key_words']);
+                }
+                $category->setCategoryConfigurations($categoryConfigurations);
+                $this->createCategoryRelations($m, $category);
+            }
+
+        }
+        $this->getManager()->flush();
+    }
+
     /**
      * @param ObjectManager $manager
      * @param array $configurations

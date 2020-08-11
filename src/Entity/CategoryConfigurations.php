@@ -25,14 +25,19 @@ class CategoryConfigurations
     private $categoryId;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private $keyWords;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private $negativeKeyWords;
+
+    /**
+     * @ORM\Column(type="jsonb", nullable=true)
+     */
+    private $sizes = [];
 
     public function getId(): ?int
     {
@@ -73,6 +78,18 @@ class CategoryConfigurations
     {
 //        $this->negativeKeyWords = preg_replace('/\s+/', '', $negativeKeyWords);;
         $this->negativeKeyWords = $negativeKeyWords;
+
+        return $this;
+    }
+
+    public function getSizes()
+    {
+        return $this->sizes;
+    }
+
+    public function setSizes($sizes): self
+    {
+        $this->sizes = $sizes;
 
         return $this;
     }

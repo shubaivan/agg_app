@@ -16,6 +16,10 @@ use JMS\Serializer\Annotation;
  *     "Price"="text",
  *     "Brand"="text"
  * })
+ * @Annotation\AccessorOrder("custom", custom = {
+ *     "id",
+ *     "ImageUrl"
+ * })
  */
 class AdtractionProduct extends AbstractDocument
 {

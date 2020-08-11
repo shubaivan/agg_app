@@ -223,7 +223,7 @@ class HandleDownloadFileData
                     $filePath
                 );
             }
-            $this->dm->flush();
+            $this->dm->flush(array('safe'=>true));
             
             if ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)) {
                 //ToDo don't forget rerun back
@@ -355,10 +355,6 @@ class HandleDownloadFileData
     {
 //        echo 'shop' . $shop . ' offset ' . $offsetRecord . PHP_EOL;
         $record['shop'] = $shop;
-        if ($shop == 'Ahlens') {
-            $record['shop'] = 'Åhlens';
-        }
-
         $this->getRedisHelper()
             ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
                 Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $filePath);

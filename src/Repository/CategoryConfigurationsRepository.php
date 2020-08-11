@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\CategoryConfigurations;
+use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\DBAL\Cache\ResultCacheStatement;
 
 /**
  * @method CategoryConfigurations|null find($id, $lockMode = null, $lockVersion = null)
@@ -19,32 +21,59 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
         parent::__construct($registry, CategoryConfigurations::class);
     }
 
-    // /**
-    //  * @return CategoryConfigurations[] Returns an array of CategoryConfigurations objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function matchSizeCategories(array $sizes, array $ids)
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $params = [];
+        $types = [];
+        foreach ($ids as $key=>$id) {
+            if (isset($id['id'])) {
+                $params[':main_id' . $key] = $id['id'];
+                $types[':main_id' . $key] = \PDO::PARAM_INT;
+            }
+        }
+        if (!count($params)) {
+            return [];
+        }
+        $idsMain = implode(',', array_keys($params));
+        $connection = $this->getEntityManager()->getConnection();
+        $query = '
+            SELECT cc.category_id_id as id
+    
+            FROM category_configurations as cc
+            INNER JOIN category_relations as cr ON cr.sub_category_id = cc.id
+            WHERE 
+                cr.main_category_id IN ('.$idsMain.')';
 
-    /*
-    public function findOneBySomeField($value): ?CategoryConfigurations
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $sizesCond = [];
+        foreach ($sizes as $key=>$size) {
+            if (preg_match('/[0-9]+/', $size, $matchesSize)
+            ) {
+                if (count($matchesSize)) {
+                    $exactlySize = array_shift($matchesSize);
+                    $keyFoSize = ':size' . $key;
+                    $params[$keyFoSize] = $exactlySize;
+                    $types[$keyFoSize] = \PDO::PARAM_INT;
+                    $qs = $keyFoSize . ' BETWEEN (cc.sizes ->>\'min\')::int AND (cc.sizes ->>\'max\')::int ';
+                    $sizesCond[] = $qs;
+                }
+            }
+        }
+
+        $sizeCondStr = implode(' OR ', $sizesCond);
+
+        $query .= '
+            AND ('.$sizeCondStr.')
+        ';
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeQuery(
+            $query,
+            $params,
+            $types
+        );
+
+        $idsCategorySize = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $idsCategorySize;
     }
-    */
 }

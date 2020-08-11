@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Category;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
@@ -300,6 +301,19 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
         ]
     ];
 
+    private $configurationsSize = [
+        'KLÄDER 50-86 CL (0-1 ÅR)' => [
+            'Flicka' => [
+                'sizes' => '50,56,62,68,74,80,86',
+                'positive_key_words' => 'girl',
+            ],
+            'Pojke' => [
+                'sizes' => '50,56,62,68,74,80,86',
+                'positive_key_words' => 'boy',
+            ]   
+        ]
+    ];
+
     public function load(ObjectManager $manager)
     {
         $this->setManager($manager);
@@ -312,6 +326,9 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
         );
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
+
+        $this->processSizeCategories($this->configurationsSize, $main);
+
         $this->afterLoad();
     }
 

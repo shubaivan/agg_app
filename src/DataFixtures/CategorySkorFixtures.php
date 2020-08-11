@@ -126,6 +126,40 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
         ]
     ];
 
+    private $configurationsSize = [
+        'SHOPPA EFTER STORLEK (EU)' => [
+            '15 - 20' => [
+                'sizes' => '15, 16, 17, 18, 19, 20',
+                'positive_key_words' => 'boy, girl',
+            ],
+            '21 - 25' => [
+                'sizes' => '21, 22, 23, 24, 25',
+                'positive_key_words' => 'boy, girl',
+            ],
+            '26 - 30' => [
+                'sizes' => '26, 27, 28, 29, 30',
+                'positive_key_words' => 'boy, girl',
+            ],
+            '31 - 35' => [
+                'sizes' => ' 31, 32, 33, 34, 35',
+                'positive_key_words' => 'boy, girl',
+            ],
+            '36 - 40' => [
+                'sizes' => '36, 37, 38, 39, 40',
+                'positive_key_words' => 'boy, girl',
+            ],
+            'Flicka' => [
+                'sizes' => '15, 40',
+                'positive_key_words' => 'girl',
+            ],
+            'Pojke' => [
+                'sizes' => '15, 40',
+                'positive_key_words' => 'boy',
+            ],
+        ]
+    ];
+
+
     public function load(ObjectManager $manager)
     {
         $this->setManager($manager);
@@ -137,6 +171,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
         );
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
+        $this->processSizeCategories($this->configurationsSize, $main);
         $this->afterLoad();
     }
 
