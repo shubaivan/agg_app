@@ -212,7 +212,11 @@ class CategoryLeksakerFixtures extends AbstractFixtures implements DependentFixt
     {
         $this->setManager($manager);
 
-        $main = $this->createCategoryWithConf('Leksaker', 'leksaker, leksak', 'main');
+        $main = $this->createCategoryWithConf(
+            'Leksaker',
+            'leksaker, leksak, maskerad',
+            'main'
+        );
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
         $this->afterLoad();

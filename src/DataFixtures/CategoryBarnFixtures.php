@@ -328,7 +328,7 @@ class CategoryBarnFixtures extends AbstractFixtures
             'Barn',
             'barn, Jr, Junior, Kids',
             'main',
-            'barnvagnar, Leksaker, Skor, Baby'
+            'barnvagnar, Leksaker, Skor, Baby, Maskerad'
         );
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);

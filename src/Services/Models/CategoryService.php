@@ -280,10 +280,10 @@ class CategoryService extends AbstractModel
 
         $extras = $product->getExtras();
         if (isset($extras[Product::SIZE])) {
-            $sizeCategoriesids = $this->categoryConfigurationsRepository
+            $sizeCategoriesIds = $this->categoryConfigurationsRepository
                 ->matchSizeCategories($extras[Product::SIZE], $matchCategoryMain);
-            if (count($sizeCategoriesids)) {
-                $matchCategoryMain = array_merge($sizeCategoriesids, $matchCategoryMain);
+            if (count($sizeCategoriesIds)) {
+                $matchCategoryMain = array_merge($sizeCategoriesIds, $matchCategoryMain);
             }
         }
         

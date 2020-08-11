@@ -21,10 +21,36 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
         parent::__construct($registry, CategoryConfigurations::class);
     }
 
+    /**
+     * @param array $sizes
+     * @param array $ids
+     * @return array|mixed[]
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function matchSizeCategories(array $sizes, array $ids)
     {
         $params = [];
         $types = [];
+
+        $sizesCond = [];
+        foreach ($sizes as $key=>$size) {
+            if (preg_match('/[0-9]+/', $size, $matchesSize)
+            ) {
+                if (count($matchesSize)) {
+                    $exactlySize = array_shift($matchesSize);
+                    $keyFoSize = ':size' . $key;
+                    $params[$keyFoSize] = $exactlySize;
+                    $types[$keyFoSize] = \PDO::PARAM_INT;
+                    $qs = $keyFoSize . ' BETWEEN (cc.sizes ->>\'min\')::int AND (cc.sizes ->>\'max\')::int ';
+                    $sizesCond[] = $qs;
+                }
+            }
+        }
+
+        if (!count($sizesCond)) {
+            return [];
+        }
+
         foreach ($ids as $key=>$id) {
             if (isset($id['id'])) {
                 $params[':main_id' . $key] = $id['id'];
@@ -43,21 +69,6 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
             INNER JOIN category_relations as cr ON cr.sub_category_id = cc.id
             WHERE 
                 cr.main_category_id IN ('.$idsMain.')';
-
-        $sizesCond = [];
-        foreach ($sizes as $key=>$size) {
-            if (preg_match('/[0-9]+/', $size, $matchesSize)
-            ) {
-                if (count($matchesSize)) {
-                    $exactlySize = array_shift($matchesSize);
-                    $keyFoSize = ':size' . $key;
-                    $params[$keyFoSize] = $exactlySize;
-                    $types[$keyFoSize] = \PDO::PARAM_INT;
-                    $qs = $keyFoSize . ' BETWEEN (cc.sizes ->>\'min\')::int AND (cc.sizes ->>\'max\')::int ';
-                    $sizesCond[] = $qs;
-                }
-            }
-        }
 
         $sizeCondStr = implode(' OR ', $sizesCond);
 

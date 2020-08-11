@@ -263,7 +263,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
             'Barnvagnar',
             'Barnvagn, Barnvagnar, Vagn',
             'main',
-            'Skor, Leksaker, Bilbarnstol'
+            'Skor, Leksaker, Bilbarnstol, Maskerad'
         );
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);

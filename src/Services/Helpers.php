@@ -83,7 +83,9 @@ class Helpers
     public function handleSearchValue($searchField, bool $strict, bool $combineWordWithSpace = false): string
     {
         $result = str_replace('.', ',', $searchField);
+        $result = str_replace('&', ' ', $result);
         $result = strip_tags( $result);
+
         if (!$combineWordWithSpace) {
             $result = preg_replace('!\s+!', ' ', $result);
         }

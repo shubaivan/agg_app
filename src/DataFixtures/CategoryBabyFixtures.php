@@ -322,7 +322,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
             'Baby',
             'Baby, Toddler, Infant, Premature',
             'main',
-            'Barn, Skor, Barnvagnar, Leksaker, Förälder'
+            'Barn, Skor, Barnvagnar, Leksaker, Förälder, Maskerad'
         );
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
