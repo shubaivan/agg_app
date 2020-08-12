@@ -5,11 +5,31 @@ namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use App\DocumentRepository\AdrecordProductRepository;
+use JMS\Serializer\Annotation;
 
 /**
  * @MongoDB\Document(repositoryClass=AdrecordProductRepository::class)
+ * @MongoDB\Index(keys={
+ *     "name"="text",
+ *     "SKU"="text",
+ *     "description"="text",
+ *     "category"="text",
+ *     "price"="text",
+ *     "brand"="text"
+ * })
+ * @Annotation\AccessorOrder("custom", custom = {
+ *     "SKU",
+ *     "graphicUrl",
+ *     "decline",
+ *     "declineReasonClass",
+ *     "shop",
+ *     "name",
+ *     "description",
+ *     "category",
+ *     "price"
+ * })
  */
-class AdrecordProduct extends AbstractDocument
+class AdrecordProduct extends AbstractDocument implements DataTableInterface
 {
     /**
      * @MongoDB\Field(type="string")
@@ -480,14 +500,19 @@ class AdrecordProduct extends AbstractDocument
     public static function getLinkColumns():array
     {
         return [
-            'ProductUrl'
+            'productUrl'
         ];
     }
 
     public static function getShortPreviewText():array
     {
         return [
-            'description', 'id'
+            'description', 'id', 'SKU'
         ];
+    }
+
+    public static function getSeparateFilterColumn(): array
+    {
+        return array_merge(['SKU'], parent::getSeparateFilterColumn());
     }
 }

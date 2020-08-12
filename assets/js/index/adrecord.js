@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     let path = window.Routing
-        .generate('app_rest_adtractionproductcollection_postproducts');
+        .generate('app_rest_adrecordproductcollection_postproducts');
     
     var common_defs = [];
     $.each( for_prepare_defs, function( key, value ) {

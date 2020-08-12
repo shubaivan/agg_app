@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Document\AbstractDocument;
+use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
 use Doctrine\ODM\MongoDB\DocumentManager;
@@ -36,7 +37,7 @@ class ProductCollectionController extends AbstractController
     /**
      * @Route("/admin/product_collection/adtraction", name="product_collection_adtraction")
      */
-    public function adtractionProductCollectionList(Request $request, PaginatorInterface $paginator)
+    public function adtractionProductCollectionList()
     {
         $oneProduct = $this->documentManager
             ->getRepository(AdtractionProduct::class)->findOneBy([]);
@@ -70,7 +71,7 @@ class ProductCollectionController extends AbstractController
     /**
      * @Route("/admin/product_collection/awin", name="product_collection_awin")
      */
-    public function awinProductCollectionList(Request $request, PaginatorInterface $paginator)
+    public function awinProductCollectionList()
     {
         $oneAwinProduct = $this->documentManager
             ->getRepository(AwinProduct::class)->findOneBy([]);
@@ -100,4 +101,38 @@ class ProductCollectionController extends AbstractController
             'decline_reason' => AdtractionProduct::getDeclineReasonKey()
         ]);
     }
+
+    /**
+     * @Route("/admin/product_collection/adrecord", name="product_collection_adrecord")
+     */
+    public function adrecordProductCollectionList()
+    {
+        $oneProduct = $this->documentManager
+            ->getRepository(AdrecordProduct::class)->findOneBy([]);
+        $serialize = '{}';
+        if ($oneProduct) {
+            $serialize = $this->serializer->serialize(
+                $oneProduct,
+                'json'
+            );
+        }
+        $json_decode = json_decode($serialize, true);
+        $dataTableColumnData = [];
+        $keys = array_keys($json_decode);
+        array_map(function ($k) use (&$dataTableColumnData) {
+            $dataTableColumnData[] = ['data' => $k];
+        }, $keys);
+
+
+        // Render the twig view
+        return $this->render('products/collections/adrecord_list_custom.html.twig', [
+            'th_keys' => $keys,
+            'dataTbaleKeys' => $dataTableColumnData,
+            'img_columns' => AdrecordProduct::getImageColumns(),
+            'link_columns' => AdrecordProduct::getLinkColumns(),
+            'short_preview_columns' => AdrecordProduct::getShortPreviewText(),
+            'separate_filter_column' => AdrecordProduct::getSeparateFilterColumn(),
+            'decline_reason' => AdrecordProduct::getDeclineReasonKey()
+        ]);
+    }    
 }
