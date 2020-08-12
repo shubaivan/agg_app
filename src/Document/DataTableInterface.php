@@ -10,4 +10,5 @@ interface DataTableInterface
     public static function getLinkColumns(): array;
     public static function getSeparateFilterColumn(): array;
     public static function getShortPreviewText(): array;
+    public static function convertToHtmColumns():array;
 }

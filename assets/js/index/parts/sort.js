@@ -39,6 +39,21 @@ export default function list() {
             })
         }
 
+        if ($.inArray(value.data, convert_to_html_columns ) !== -1) {
+            common_defs.push({
+                "targets": key,
+                "data": value.data,
+                "render": function ( data, type, row, meta ) {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(data, 'text/html');
+
+                    return type === 'display' ?
+                        doc.firstChild.innerHTML :
+                        '';
+                }
+            })
+        }
+
         if ($.inArray(value.data, decline_reason ) !== -1) {
             common_defs.push({
                 "targets": key,

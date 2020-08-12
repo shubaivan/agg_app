@@ -1258,7 +1258,14 @@ class AwinProduct extends AbstractDocument
     public static function getShortPreviewText():array
     {
         return [
-            'description', 'id', 'SKU'
+            'id', 'SKU'
+        ];
+    }
+
+    public static function convertToHtmColumns():array
+    {
+        return [
+            'description'
         ];
     }
 

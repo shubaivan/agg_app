@@ -64,7 +64,8 @@ class ProductCollectionController extends AbstractController
             'link_columns' => AdtractionProduct::getLinkColumns(),
             'short_preview_columns' => AdtractionProduct::getShortPreviewText(),
             'separate_filter_column' => AdtractionProduct::getSeparateFilterColumn(),
-            'decline_reason' => AdtractionProduct::getDeclineReasonKey()
+            'decline_reason' => AdtractionProduct::getDeclineReasonKey(),
+            'convert_to_html_columns' => AdtractionProduct::convertToHtmColumns()
         ]);
     }
     
@@ -98,7 +99,8 @@ class ProductCollectionController extends AbstractController
             'link_columns' => AwinProduct::getLinkColumns(),
             'short_preview_columns' => AwinProduct::getShortPreviewText(),
             'separate_filter_column' => AwinProduct::getSeparateFilterColumn(),
-            'decline_reason' => AdtractionProduct::getDeclineReasonKey()
+            'decline_reason' => AwinProduct::getDeclineReasonKey(),
+            'convert_to_html_columns' => AwinProduct::convertToHtmColumns()
         ]);
     }
 
@@ -132,7 +134,8 @@ class ProductCollectionController extends AbstractController
             'link_columns' => AdrecordProduct::getLinkColumns(),
             'short_preview_columns' => AdrecordProduct::getShortPreviewText(),
             'separate_filter_column' => AdrecordProduct::getSeparateFilterColumn(),
-            'decline_reason' => AdrecordProduct::getDeclineReasonKey()
+            'decline_reason' => AdrecordProduct::getDeclineReasonKey(),
+            'convert_to_html_columns' => AdrecordProduct::convertToHtmColumns()
         ]);
     }    
 }

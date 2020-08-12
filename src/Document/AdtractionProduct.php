@@ -24,7 +24,9 @@ use JMS\Serializer\Annotation;
  *     "declineReasonClass",
  *     "shop",
  *     "Name",
- *     "Description"
+ *     "Category",
+ *     "Brand",
+ *     "Price"
  * })
  */
 class AdtractionProduct extends AbstractDocument
@@ -157,7 +159,14 @@ class AdtractionProduct extends AbstractDocument
     public static function getShortPreviewText():array
     {
         return [
-            'Description', 'id', 'SKU'
+            'id', 'SKU'
+        ];
+    }
+
+    public static function convertToHtmColumns():array
+    {
+        return [
+            'Description'
         ];
     }
 

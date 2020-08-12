@@ -24,9 +24,9 @@ use JMS\Serializer\Annotation;
  *     "declineReasonClass",
  *     "shop",
  *     "name",
- *     "description",
  *     "category",
- *     "price"
+ *     "price",
+ *     "brand"
  * })
  */
 class AdrecordProduct extends AbstractDocument implements DataTableInterface
@@ -507,7 +507,14 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
     public static function getShortPreviewText():array
     {
         return [
-            'description', 'id', 'SKU'
+            'id', 'SKU'
+        ];
+    }
+    
+    public static function convertToHtmColumns():array
+    {
+        return [
+            'description'
         ];
     }
 

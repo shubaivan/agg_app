@@ -43,6 +43,7 @@
 
         let separate_filter_column = getJSonObject("{{ separate_filter_column ? separate_filter_column|json_encode() : "{}" }}");
         let decline_reason = getJSonObject("{{ decline_reason ? decline_reason|json_encode() : "{}" }}");
+        let convert_to_html_columns = getJSonObject("{{ convert_to_html_columns ? convert_to_html_columns|json_encode() : "{}" }}");
 
     </script>
 {% endblock %}
