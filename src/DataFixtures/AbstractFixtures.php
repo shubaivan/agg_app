@@ -11,10 +11,11 @@ use App\Kernel;
 use App\Repository\CategoryRelationsRepository;
 use App\Repository\CategoryRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-abstract class AbstractFixtures extends Fixture
+abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
 {
     private $manager;
 
@@ -552,5 +553,10 @@ abstract class AbstractFixtures extends Fixture
             $data,
             FILE_APPEND
         );
+    }
+
+    public static function getGroups(): array
+    {
+        return ['my_pg_fixtures'];
     }
 }

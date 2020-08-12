@@ -38,7 +38,6 @@ parameters:
       'FrankDandy': '%env(ADRECORD_DOWNLOAD_URL_FrankDandy)%'
       'Gus Textil': '%env(ADRECORD_DOWNLOAD_URL_Gus_Textil)%'
       'Jultröja': '%env(ADRECORD_DOWNLOAD_URL_Jultroja)%'
-      'LaplandEcostore': '%env(ADRECORD_DOWNLOAD_URL_LaplandEcostore)%'
       'Leksakscity': '%env(ADRECORD_DOWNLOAD_URL_Leksakscity)%'
       'Nalleriet.se': '%env(ADRECORD_DOWNLOAD_URL_Nalleriet_se)%'
       'Namnband': '%env(ADRECORD_DOWNLOAD_URL_Namnband)%'
@@ -46,7 +45,6 @@ parameters:
       'Spelexperten': '%env(ADRECORD_DOWNLOAD_URL_Spelexperten)%'
       'Sportshopen': '%env(ADRECORD_DOWNLOAD_URL_Sportshopen)%'
       'StigaSports': '%env(ADRECORD_DOWNLOAD_URL_StigaSports)%'
-      'Strumpgalen.se': '%env(ADRECORD_DOWNLOAD_URL_Strumpgalen_se)%'
       'Twar.se': '%env(ADRECORD_DOWNLOAD_URL_Twar_se)%'
     adrecord_download_file_path: '%env(ADRECORD_DOWNLOAD_FILE_PATH)%'
 

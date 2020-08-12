@@ -1,0 +1,4 @@
+name: Doctrine Mysql Migrations
+migrations_namespace: MigrationsMysql
+table_name: migration_versions
+migrations_directory: 'MigrationsMysql'

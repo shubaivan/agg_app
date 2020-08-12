@@ -51,6 +51,7 @@ class Product implements EntityValidatorException
     const SERIALIZED_GROUP_CREATE_IDENTITY = 'product_group_create_identity';
     const SIZE = 'SIZE';
     const COLOUR = 'COLOUR';
+    const OWN_COLOUR = 'OWN_COLOUR';
 
     public static $enumInStock = [
         'yes' => '1',
@@ -723,12 +724,13 @@ class Product implements EntityValidatorException
                                 if (preg_match_all('/[0-9]+/', $explode[1], $matchesD)) {
                                     $sizes = array_shift($matchesD);
                                     $arrayMapSizes = array_map(function ($v) use (&$excludeOriginalValue) {
+                                        $valueSite = $v;
                                         if (mb_substr($v, 0, 1) == '0') {
                                             $excludeOriginalValue = true;
-                                            return mb_substr($v, 1);
+                                            $valueSite = mb_substr($v, 1);
                                         }
 
-                                        return $v;
+                                        return $valueSite;
                                     }, $sizes);
                                     if (isset($result[$explode[0]])) {
                                         $result[$explode[0]] = array_merge($result[$explode[0]], $arrayMapSizes);
@@ -743,6 +745,26 @@ class Product implements EntityValidatorException
                                     array_push($result[$explode[0]], $explode[1]);
                                 }
                                 $result[$explode[0]] = array_unique($result[$explode[0]]);
+                            } elseif ($explode[0] == self::COLOUR){
+                                $valueSite = $explode[1];
+
+                                $countWords = count(preg_split('~[^\p{L}\p{N}\']+~u', $valueSite));
+                                if ($countWords > 1) {
+                                    $last_word_start = strrpos($valueSite, ' ') + 1; // +1 so we don't include the space in our result
+                                    if ($last_word_start) {
+                                        $last_word = substr($valueSite, $last_word_start);
+                                        if ($last_word) {
+                                            $valueSite = substr($valueSite, 0, $last_word_start) . ' ' . ucfirst($last_word);
+                                        }
+                                    }
+                                    if ($countWords > 2 && isset($last_word)) {
+                                        $valueSite = ucfirst($last_word);
+                                    }
+                                }
+
+
+                                $result[$explode[0]] = $valueSite;
+
                             } else {
                                 $result[$explode[0]] = $explode[1];
                             }
