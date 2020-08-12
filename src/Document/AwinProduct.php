@@ -10,6 +10,7 @@ use JMS\Serializer\Annotation;
 /**
  * @MongoDB\Document(repositoryClass=AwinProductRepository::class)
  * @MongoDB\Index(keys={
+ *     "aw_product_id"="text",
  *     "product_name"="text",
  *     "merchant_category"="text",
  *     "description"="text",
@@ -25,7 +26,7 @@ use JMS\Serializer\Annotation;
  *     "shop"="text"
  * })
  * @Annotation\AccessorOrder("custom", custom = {
- *     "id",
+ *     "aw_product_id",
  *     "merchant_image_url",
  *     "decline",
  *     "declineReasonClass",
@@ -1257,7 +1258,12 @@ class AwinProduct extends AbstractDocument
     public static function getShortPreviewText():array
     {
         return [
-            'description', 'id'
+            'description', 'id', 'SKU'
         ];
+    }
+
+    public static function getSeparateFilterColumn(): array
+    {
+        return array_merge(['aw_product_id'], parent::getSeparateFilterColumn());
     }
 }

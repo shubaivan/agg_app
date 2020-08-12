@@ -11,14 +11,20 @@ use JMS\Serializer\Annotation;
  * @MongoDB\Document(repositoryClass=AdtractionProductRepository::class)
  * @MongoDB\Index(keys={
  *     "Name"="text",
+ *     "SKU"="text",
  *     "Description"="text",
  *     "Category"="text",
  *     "Price"="text",
  *     "Brand"="text"
  * })
  * @Annotation\AccessorOrder("custom", custom = {
- *     "id",
- *     "ImageUrl"
+ *     "SKU",
+ *     "ImageUrl",
+ *     "decline",
+ *     "declineReasonClass",
+ *     "shop",
+ *     "Name",
+ *     "Description"
  * })
  */
 class AdtractionProduct extends AbstractDocument
@@ -151,7 +157,12 @@ class AdtractionProduct extends AbstractDocument
     public static function getShortPreviewText():array
     {
         return [
-            'Description', 'id'
+            'Description', 'id', 'SKU'
         ];
+    }
+
+    public static function getSeparateFilterColumn(): array
+    {
+        return array_merge(['SKU'], parent::getSeparateFilterColumn());
     }
 }
