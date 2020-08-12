@@ -6,10 +6,11 @@ namespace App\DataFixtures;
 
 use App\Entity\AdminShopsRules;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterface
+class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
     private $configuration = [
         'Lindex' =>
@@ -121,5 +122,10 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
         return array(
             AdminConfigurationFixtures::class,
         );
+    }
+
+    public static function getGroups(): array
+    {
+        return ['my_pg_fixtures'];
     }
 }
