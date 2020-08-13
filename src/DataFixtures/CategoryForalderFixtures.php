@@ -43,10 +43,10 @@ class CategoryForalderFixtures extends AbstractFixtures implements DependentFixt
                 ',
             ],
             [
-                'name' => 'Hud- och Bröstvård',
+                'name' => 'Hud & Bröstvård',
                 'key_word' => '
                     kräm, grädde, grädda, krämfärg, vård, omsorg, skötsel, försiktighet, vara, Bröstvård,
-                    cream,care
+                    cream, care, aktivkräm
                 ',
             ],
             [
@@ -82,7 +82,7 @@ class CategoryForalderFixtures extends AbstractFixtures implements DependentFixt
             [
                 'name' => 'Bärsjalar',
                 'key_word' => '
-                    sling, slunga, Bärsjalar,
+                    sling, slunga, Bärsjalar, Bärsjal,
                     Baby Slings, Baby-Slings, Slings       
                 ',
             ],
@@ -107,7 +107,11 @@ class CategoryForalderFixtures extends AbstractFixtures implements DependentFixt
     {
         $this->setManager($manager);
 
-        $main = $this->createCategoryWithConf('Förälder', 'förälder', 'main');
+        $main = $this->createCategoryWithConf(
+            'Förälder',
+            'förälder, accessoarer',
+            'main'
+        );
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
         $this->afterLoad();

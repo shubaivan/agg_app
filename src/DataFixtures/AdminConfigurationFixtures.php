@@ -25,7 +25,7 @@ class AdminConfigurationFixtures extends AbstractFixtures implements DependentFi
         Blankens';
 
     const PROPERTYDATA_KEYWORDS = '
-               vuxen, fucker
+               vuxen, fucker, sex
             ';
 
     public function load(ObjectManager $manager)

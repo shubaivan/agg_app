@@ -63,6 +63,7 @@ EOF;
 
     /**
      * @Route(name="statistics", path="statistics")
+     * @throws \Exception
      */
     public function bufferTestAction()
     {
@@ -103,7 +104,7 @@ EOF;
                     $filePath = $explode[3];
                     $explodeFilepath = explode('/', $filePath);
                     array_pop($explodeFilepath);
-                    $shopName = array_pop($explodeFilepath);
+                    $shopName = Shop::getRealShopNameByKey(array_pop($explodeFilepath));
                     $resourceName = array_pop($explodeFilepath);
                     if ($blockName == 'failed') {
                         if ((int)$hashValue >= 3) {

@@ -23,10 +23,10 @@ use JMS\Serializer\Annotation;
  *     "decline",
  *     "declineReasonClass",
  *     "shop",
+ *     "brand",
  *     "name",
  *     "category",
- *     "price",
- *     "brand"
+ *     "price"
  * })
  */
 class AdrecordProduct extends AbstractDocument implements DataTableInterface
@@ -520,6 +520,6 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
 
     public static function getSeparateFilterColumn(): array
     {
-        return array_merge(['SKU'], parent::getSeparateFilterColumn());
+        return array_merge(['SKU', 'brand'], parent::getSeparateFilterColumn());
     }
 }

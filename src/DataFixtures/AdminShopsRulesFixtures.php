@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 
 
 use App\Entity\AdminShopsRules;
+use App\Entity\Shop;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -47,12 +48,18 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
                 ]
             ]
         ,
-        'Björn_Borg' => [
+        'Björn Borg' => [
             'category' => [
                 'Barn'
+            ],
+            '!name' => [
+                'Woman', 'Men', 'Dam', 'Herr'
+            ],
+            '!description' => [
+                'Woman', 'Men', 'Dam', 'Herr'
             ]
         ],
-        'Twar.se' =>
+        'Twar' =>
             [
                 'description' => [
                     'Barn', 'Baby'
@@ -73,7 +80,7 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
         'Nike' =>
             [
                 'category' => [
-                    'Kids', 'Barn'
+                    'Kids', 'Barn', 'Girls', 'Boys'
                 ]
             ],
         'SneakersPoint' =>
@@ -98,6 +105,9 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
             [
                 'name' => [
                     'barn, baby, Junior'
+                ],
+                '!name' => [
+                    'vas'
                 ]
             ]
     ];
@@ -105,12 +115,15 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
     public function load(ObjectManager $manager)
     {
         foreach ($this->configuration as $shopName => $conf) {
-            $adminShopsRules = new AdminShopsRules();
-            $adminShopsRules
-                ->setStore($shopName)
-                ->setColumnsKeywords($conf);
+            $mapShopNameByKey = Shop::getMapShopNameByKey($shopName);
+            if ($mapShopNameByKey) {
+                $adminShopsRules = new AdminShopsRules();
+                $adminShopsRules
+                    ->setStore($shopName)
+                    ->setColumnsKeywords($conf);
 
-            $manager->persist($adminShopsRules);
+                $manager->persist($adminShopsRules);
+            }
         }
 
         $manager->flush();

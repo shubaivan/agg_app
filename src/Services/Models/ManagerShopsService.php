@@ -2,6 +2,7 @@
 
 namespace App\Services\Models;
 
+use App\Entity\Shop;
 use App\Services\Models\Shops\Adrecord\BabyBjornService;
 use App\Services\Models\Shops\Adrecord\CardooniaService;
 use App\Services\Models\Shops\Adrecord\EbbeKids;
@@ -33,10 +34,21 @@ use App\Services\Models\Shops\ReimaService;
 
 class ManagerShopsService
 {
+//Todo grouping waiting 
+//'vegaoo'
+//'nike'
+//'nordic_nest'
+//'cos'
+//'bjorn_borg'
+//'lekia'
+//'litenleker'
+//'sneakersPoint'
+//'stor_and_liten'
+
     /**
      * @var PyretService
      */
-    private $pyret;
+    private $polarn_pyret;
 
     /**
      * @var BabyShopService
@@ -66,7 +78,7 @@ class ManagerShopsService
     /**
      * @var BabyVService
      */
-    private $babyv;
+    private $babyV;
 
     /**
      * @var ElodiService
@@ -98,7 +110,7 @@ class ManagerShopsService
     /**
      * @var BabyBjornService
      */
-    private $babybjorn;
+    private $baby_bjorn;
 
     /**
      * @var CardooniaService
@@ -108,12 +120,12 @@ class ManagerShopsService
     /**
      * @var EbbeKids
      */
-    private $ebbekids;
+    private $ebbeKids;
 
     /**
      * @var FrankDandy
      */
-    private $frankdandy;
+    private $frankDandy;
 
     /**
      * @var Jultroja
@@ -123,7 +135,7 @@ class ManagerShopsService
     /**
      * @var GusTextil
      */
-    private $gustextil;
+    private $gus_rextil;
 
     /**
      * @var LeksakscityService
@@ -158,7 +170,7 @@ class ManagerShopsService
     /**
      * @var StigaSportsService
      */
-    private $stigasports;
+    private $stigaSports;
 
     /**
      * @var StrumpgalenService
@@ -172,61 +184,61 @@ class ManagerShopsService
 
     /**
      * ManagerShopsService constructor.
-     * @param PyretService $pyret
+     * @param PyretService $polarn_pyret
      * @param BabyShopService $babyshop
      * @param JollyRoomService $jollyroom
      * @param ReimaService $reima
      * @param LekmerService $lekmer
      * @param BabyLandService $babyland
-     * @param BabyVService $babyv
+     * @param BabyVService $babyV
      * @param ElodiService $elodi
      * @param LindexService $lindex
      * @param LitenlekermerService $litenlekermer
      * @param CykloteketService $cykloteket
      * @param AhlensService $ahlens
-     * @param BabyBjornService $babybjorn
+     * @param BabyBjornService $baby_bjorn
      * @param CardooniaService $cardoonia
-     * @param EbbeKids $ebbekids
-     * @param FrankDandy $frankdandy
+     * @param EbbeKids $ebbeKids
+     * @param FrankDandy $frankDandy
      * @param Jultroja $jultroja
-     * @param GusTextil $gustextil
+     * @param GusTextil $gus_rextil
      * @param LeksakscityService $leksakscity
      * @param NallerietService $nalleriet
      * @param NamnbandService $namnband
      * @param ShirtstoreService $shirtstore
      * @param SpelexpertenService $spelexperten
      * @param SportshopenService $sportshopen
-     * @param StigaSportsService $stigasports
+     * @param StigaSportsService $stigaSports
      * @param StrumpgalenService $strumpgalen
      * @param TwarService $twar
      */
-    public function __construct(PyretService $pyret, BabyShopService $babyshop, JollyRoomService $jollyroom, ReimaService $reima, LekmerService $lekmer, BabyLandService $babyland, BabyVService $babyv, ElodiService $elodi, LindexService $lindex, LitenlekermerService $litenlekermer, CykloteketService $cykloteket, AhlensService $ahlens, BabyBjornService $babybjorn, CardooniaService $cardoonia, EbbeKids $ebbekids, FrankDandy $frankdandy, Jultroja $jultroja, GusTextil $gustextil, LeksakscityService $leksakscity, NallerietService $nalleriet, NamnbandService $namnband, ShirtstoreService $shirtstore, SpelexpertenService $spelexperten, SportshopenService $sportshopen, StigaSportsService $stigasports, StrumpgalenService $strumpgalen, TwarService $twar)
+    public function __construct(PyretService $polarn_pyret, BabyShopService $babyshop, JollyRoomService $jollyroom, ReimaService $reima, LekmerService $lekmer, BabyLandService $babyland, BabyVService $babyV, ElodiService $elodi, LindexService $lindex, LitenlekermerService $litenlekermer, CykloteketService $cykloteket, AhlensService $ahlens, BabyBjornService $baby_bjorn, CardooniaService $cardoonia, EbbeKids $ebbeKids, FrankDandy $frankDandy, Jultroja $jultroja, GusTextil $gus_rextil, LeksakscityService $leksakscity, NallerietService $nalleriet, NamnbandService $namnband, ShirtstoreService $shirtstore, SpelexpertenService $spelexperten, SportshopenService $sportshopen, StigaSportsService $stigaSports, StrumpgalenService $strumpgalen, TwarService $twar)
     {
-        $this->pyret = $pyret;
+        $this->polarn_pyret = $polarn_pyret;
         $this->babyshop = $babyshop;
         $this->jollyroom = $jollyroom;
         $this->reima = $reima;
         $this->lekmer = $lekmer;
         $this->babyland = $babyland;
-        $this->babyv = $babyv;
+        $this->babyV = $babyV;
         $this->elodi = $elodi;
         $this->lindex = $lindex;
         $this->litenlekermer = $litenlekermer;
         $this->cykloteket = $cykloteket;
         $this->ahlens = $ahlens;
-        $this->babybjorn = $babybjorn;
+        $this->baby_bjorn = $baby_bjorn;
         $this->cardoonia = $cardoonia;
-        $this->ebbekids = $ebbekids;
-        $this->frankdandy = $frankdandy;
+        $this->ebbeKids = $ebbeKids;
+        $this->frankDandy = $frankDandy;
         $this->jultroja = $jultroja;
-        $this->gustextil = $gustextil;
+        $this->gus_rextil = $gus_rextil;
         $this->leksakscity = $leksakscity;
         $this->nalleriet = $nalleriet;
         $this->namnband = $namnband;
         $this->shirtstore = $shirtstore;
         $this->spelexperten = $spelexperten;
         $this->sportshopen = $sportshopen;
-        $this->stigasports = $stigasports;
+        $this->stigaSports = $stigaSports;
         $this->strumpgalen = $strumpgalen;
         $this->twar = $twar;
     }
@@ -234,22 +246,7 @@ class ManagerShopsService
 
     public function __call($name, $arguments)
     {
-        $prepareProperty = mb_strtolower($name);
-
-        $patterns = array();
-        $patterns[] = '/.se/';
-        $patterns[] = '/ö/';
-        $patterns[] = '/ /';
-        $patterns[] = '/åhlens/';
-
-        $replacements = array();
-
-        $replacements[] = '';
-        $replacements[] = 'o';
-        $replacements[] = '';
-        $replacements[] = 'ahlens';
-
-        $prepareProperty = preg_replace($patterns, $replacements, $prepareProperty);
+        $prepareProperty = Shop::getMapShopNameByKey($name);
 
         if (property_exists($this, $prepareProperty)) {
             $this->getProprtyObject($prepareProperty)

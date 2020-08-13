@@ -53,7 +53,7 @@ class ColoursFixtures extends Fixture implements FixtureGroupInterface
         $csv->setDelimiter(',');
         $colours = [];
         foreach ($csv as $record) {
-            $colours[mb_strtolower(trim($record['original']))] = trim($record[' substitute']);
+            $colours[mb_strtolower(trim($record['original']))] = ucfirst(mb_strtolower(trim($record[' substitute'])));
         }
 
         foreach ($colours as $originalColor=>$substituteColor) {

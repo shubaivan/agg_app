@@ -10,6 +10,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use JMS\Serializer\SerializerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -68,14 +69,34 @@ class ProductCollectionController extends AbstractController
             'convert_to_html_columns' => AdtractionProduct::convertToHtmColumns()
         ]);
     }
+
+
+    /**
+     * @Route(
+     *     "/admin/product_collection/awin/dictDeclineError",
+     *      name="product_collection_awin_dictDeclineError",
+     *     options={"expose": true},
+     *     methods={"POST"}
+     * )
+     */
+    public function awinDictDeclineError(Request $request)
+    {
+        $collectionName = $request->get('collectionName');
+        $objectRepository = $this->documentManager
+            ->getRepository(AwinProduct::class);
+        $dictDeclineError = $objectRepository->dictDeclineError($collectionName);
+        
+        return new JsonResponse($dictDeclineError);
+    }
     
     /**
      * @Route("/admin/product_collection/awin", name="product_collection_awin")
      */
     public function awinProductCollectionList()
     {
-        $oneAwinProduct = $this->documentManager
-            ->getRepository(AwinProduct::class)->findOneBy([]);
+        $objectRepository = $this->documentManager
+            ->getRepository(AwinProduct::class);
+        $oneAwinProduct = $objectRepository->findOneBy([]);
         $serialize = '{}';
         if ($oneAwinProduct) {
             $serialize = $this->serializer->serialize(
@@ -89,7 +110,6 @@ class ProductCollectionController extends AbstractController
         array_map(function ($k) use (&$dataTableColumnData) {
             $dataTableColumnData[] = ['data' => $k];
         }, $keys);
-        
         
         // Render the twig view
         return $this->render('products/collections/awin_list_custom.html.twig', [

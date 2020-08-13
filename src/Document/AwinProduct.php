@@ -31,6 +31,7 @@ use JMS\Serializer\Annotation;
  *     "decline",
  *     "declineReasonClass",
  *     "shop",
+ *     "brand_name",
  *     "aw_deep_link",
  *     "product_name",
  *     "search_price"
@@ -1271,6 +1272,6 @@ class AwinProduct extends AbstractDocument
 
     public static function getSeparateFilterColumn(): array
     {
-        return array_merge(['aw_product_id'], parent::getSeparateFilterColumn());
+        return array_merge(['aw_product_id', 'brand_name'], parent::getSeparateFilterColumn());
     }
 }

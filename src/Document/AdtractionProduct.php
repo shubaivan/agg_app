@@ -23,9 +23,9 @@ use JMS\Serializer\Annotation;
  *     "decline",
  *     "declineReasonClass",
  *     "shop",
+ *     "Brand",
  *     "Name",
  *     "Category",
- *     "Brand",
  *     "Price"
  * })
  */
@@ -162,7 +162,7 @@ class AdtractionProduct extends AbstractDocument
             'id', 'SKU'
         ];
     }
-
+    
     public static function convertToHtmColumns():array
     {
         return [
@@ -172,6 +172,6 @@ class AdtractionProduct extends AbstractDocument
 
     public static function getSeparateFilterColumn(): array
     {
-        return array_merge(['SKU'], parent::getSeparateFilterColumn());
+        return array_merge(['SKU', 'Brand'], parent::getSeparateFilterColumn());
     }
 }

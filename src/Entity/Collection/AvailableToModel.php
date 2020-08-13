@@ -21,6 +21,7 @@ class AvailableToModel
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Accessor(getter="getPriceAccessor")
      */
     private $price;
 
@@ -79,4 +80,11 @@ class AvailableToModel
      * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      */
     private $case;
+
+    public function getPriceAccessor()
+    {
+        $price = preg_replace('/.00/', '', $this->price);
+
+        return $price;
+    }
 }

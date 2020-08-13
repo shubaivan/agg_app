@@ -37,6 +37,39 @@ class Shop
 
     const SERIALIZED_GROUP_LIST = 'shop_group_list';
 
+    private static $shopNamesMapping = [
+        'vegaoo' => 'Vegaoo',
+        'nike' => 'Nike',
+        'nordic_nest' => 'Nordic Nest',
+        'babyland' => 'Babyland',
+        'babyV' => 'BabyV',
+        'elodi' => 'Elodi',
+        'lindex' => 'Lindex',
+        'ahlens' => 'Åhlens',
+        'cykloteket' => 'Cykloteket',
+        'cos' => 'COS',
+        'bjorn_borg' => 'Björn Borg',
+        'lekia' => 'Lekia',
+        'litenleker' => 'Litenleker',
+        'sneakersPoint' => 'SneakersPoint',
+        'stor_and_liten' => 'Stor & Liten',
+        'polarn_pyret' => 'Polarn O. Pyret',
+        'baby_bjorn' => 'Baby Björn',
+        'cardoonia' => 'Cardoonia',
+        'ebbeKids' => 'EbbeKids',
+        'frankDandy' => 'FrankDandy',
+        'gus_textil' => 'Gus Textil',
+        'jultroja' => 'Jultröja',
+        'leksakscity' => 'Leksakscity',
+        'nalleriet' => 'Nalleriet',
+        'namnband' => 'Namnband',
+        'shirtstore' => 'Shirtstore',
+        'spelexperten' => 'Spelexperten',
+        'sportshopen' => 'Sportshopen',
+        'stigaSports' => 'StigaSports',
+        'twar' => 'Twar'
+    ];
+
     use TimestampableEntity;
 
     /**
@@ -117,5 +150,25 @@ class Shop
         return $this;
     }
 
+    /**
+     * @return array
+     */
+    public static function getShopNamesMapping(): array
+    {
+        return self::$shopNamesMapping;
+    }
+    
+    public static function getRealShopNameByKey(string $name)
+    {
+        if (isset(self::getShopNamesMapping()[$name])) {
+            return self::getShopNamesMapping()[$name];
+        } else {
+            throw new \Exception('shop ' . $name . ' not present on resources');   
+        }
+    }
 
+    public static function getMapShopNameByKey(string $name)
+    {
+        return array_search($name, self::$shopNamesMapping);
+    }
 }

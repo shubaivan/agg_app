@@ -354,7 +354,7 @@ class HandleDownloadFileData
     ): void
     {
 //        echo 'shop' . $shop . ' offset ' . $offsetRecord . PHP_EOL;
-        $record['shop'] = $shop;
+        $record['shop'] = Shop::getRealShopNameByKey($shop);
         $this->getRedisHelper()
             ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
                 Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $filePath);

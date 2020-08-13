@@ -45,6 +45,21 @@ class AwinProductRepository extends ServiceDocumentRepository
 
         return $cursor;
     }
+    
+    public function dictDeclineError(string $collectionName)
+    {
+//        db.getCollection('AwinProduct').distinct("declineReasonClass",
+// { declineReasonClass: { $ne: '' } })
+        $client = $this->getDocumentManager()->getClient();
+        $collection = $client->symfony->$collectionName;
+
+        return $collection->distinct(
+            'declineReasonClass',
+            [
+                "declineReasonClass" => ['$ne' => '']
+            ]
+        );
+    }
 
     /**
      * @param array $params

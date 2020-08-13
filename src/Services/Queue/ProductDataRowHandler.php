@@ -256,17 +256,19 @@ class ProductDataRowHandler
 
     /**
      * @param ResourceDataRow $dataRow
+     * @param \Exception $exception
      * @throws \Doctrine\ODM\MongoDB\MongoDBException
+     * @throws \ReflectionException
      */
     private function markDocumentProduct(ResourceDataRow $dataRow, \Exception $exception)
     {
         /** @var AdrecordProduct $adrecordDoc */
         $adrecordDoc = $this->dm->getRepository(AdrecordProduct::class)
             ->findOneBy(['SKU' => $dataRow->getSku()]);
-        
+        $declineReasonClass = (new \ReflectionClass($exception))->getShortName().':'.$exception->getMessage();
         if ($adrecordDoc) {
             $adrecordDoc
-                ->setDeclineReasonClass(get_class($exception) . ':' . $exception->getMessage())
+                ->setDeclineReasonClass($declineReasonClass)
                 ->setDecline(true);
         }
         /** @var AdtractionProduct $adtractionDoc */
@@ -275,7 +277,7 @@ class ProductDataRowHandler
         
         if ($adtractionDoc) {
             $adtractionDoc
-                ->setDeclineReasonClass(get_class($exception) . ':' . $exception->getMessage())
+                ->setDeclineReasonClass($declineReasonClass)
                 ->setDecline(true);
         }
 
@@ -284,11 +286,11 @@ class ProductDataRowHandler
 
         if ($awinDoc) {
             $awinDoc
-                ->setDeclineReasonClass(get_class($exception) . ':' . $exception->getMessage())
+                ->setDeclineReasonClass($declineReasonClass)
                 ->setDecline(true);
         }
         if ($adrecordDoc || $adtractionDoc || $awinDoc) {
-            $this->dm->flush();
+            $this->dm->flush(array('safe'=>true));
         }
     }
 

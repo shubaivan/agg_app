@@ -82,10 +82,9 @@ class CategoryBarnFixtures extends AbstractFixtures
                 ]
             ],
             [
-                'name' => 'Toppar & linnen',
+                'name' => 'subToppar',
                 'key_word' => '
-                    topp, toppar, topar, linne, linnen, tanktop, tanktopp,
-                    top, tops, linen, linen
+                    topp, toppar, topar,tanktop, tanktopp, top, tops
                 ',
                 'sub_key_word' => [
                     'Toppar' => 'Topp, Top, Toppar',
@@ -308,12 +307,30 @@ class CategoryBarnFixtures extends AbstractFixtures
 
     private $configurationsSize = [
         'KLÄDER 92-128 CL (1-8 ÅR)' => [
-            'Flicka' => [
+            '(1-8 ÅR)Visa alla' => [
+                'size' => '92, 98, 104, 110, 116, 122, 128',
+                'positive_key_words' => 'girl',
+            ],
+            '(1-8 ÅR)Flicka' => [
                 'sizes' => '92, 98, 104, 110, 116, 122, 128',
                 'positive_key_words' => 'girl',
             ],
-            'Pojke' => [
+            '(1-8 ÅR)Pojke' => [
                 'sizes' => '92, 98, 104, 110, 116, 122, 128',
+                'positive_key_words' => 'boy',
+            ]
+        ],
+        'KLÄDER 134-164 CL (9-14 ÅR)' => [
+            '(9-14 ÅR)Visa alla' => [
+                'size' => '134, 140, 146, 152, 158, 164',
+                'positive_key_words' => 'girl',
+            ],
+            '(9-14 ÅR)Flicka' => [
+                'sizes' => '134, 140, 146, 152, 158, 164',
+                'positive_key_words' => 'girl',
+            ],
+            '(9-14 ÅR)Pojke' => [
+                'sizes' => '134, 140, 146, 152, 158, 164',
                 'positive_key_words' => 'boy',
             ]
         ]
@@ -328,8 +345,7 @@ class CategoryBarnFixtures extends AbstractFixtures
             'Barn',
             'barn, Jr, Junior, Kids',
             'main',
-            'barnvagnar, Leksaker, Skor, Baby, Maskerad'
-        );
+            'barnvagnar, Leksaker, Skor, Baby, Maskerad, Kostym, Barndräkt, Halloween, Utklädnad, Sagodräkt');
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
         $this->processSizeCategories($this->configurationsSize, $main);

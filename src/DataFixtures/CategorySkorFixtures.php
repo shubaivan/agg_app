@@ -100,8 +100,8 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
             [
                 'name' => 'Träningsskor',
                 'key_word' => '
-                Träningsskor, Fotbollsskor, Trainers, Tennisskor, Dansskor, Ballerinaskor, Ballerina skor, Ballerinasko, Ballerina sko                     
-            ',
+                    Träningsskor, Fotbollsskor, Trainers, Tennisskor, Dansskor, Ballerinaskor, Ballerina skor, Ballerinasko, Ballerina sko                     
+                ',
                 'sub_key_word' => [
                     'subTräningsskor' => 'Träningsskor, trainers, trainingshoes',
                     'Fotbollsskor' => 'Fotbollsskor, soccershoes, soccer shoes, fotballshoes',
