@@ -419,6 +419,14 @@ class CategoryService extends AbstractModel
                 $this->getObjecHandler()
                     ->validateEntity($categoryModel, [Category::SERIALIZED_GROUP_CREATE]);
             }
+            if ($categoryModel->getSubCategoryRelations()->count()) {
+                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
+                    /** @var $categoryRelation CategoryRelations */
+                    if ($categoryRelation->getMainCategory()) {
+                        $product->addCategoryRelation($categoryRelation->getMainCategory());
+                    }
+                }
+            }
 //            if ($categoryModel->getSubCategoryRelations()->count()) {
 //                $mainCategoryChallengerIds = [];
 //                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
