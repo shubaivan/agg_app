@@ -144,7 +144,7 @@ class ProductDataRowHandler
     {
         try {
             $filePath = $dataRow->getFilePath();
-
+            
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
 
             $this->getCategoryService()->matchGlobalNegativeKeyWords($product);

@@ -100,7 +100,7 @@ class Helpers
 
         $delimiter = ($strict !== true ? ':*|' : '|');
 
-        if (preg_match_all('/[,]/', $searchField, $matches) > 0) {
+        if (preg_match_all('/[,]/', $result, $matches) > 0) {
             $search = str_replace(',', $delimiter, $result) . ($strict !== true ? ':*' : '');
         } else {
             $search = $result . ($strict !== true ? ':*' : '');
@@ -108,14 +108,14 @@ class Helpers
 
         $search = str_replace(':*|:*|', ':*|', $search);
         $search = str_replace('", "', '|', $search);
-        if (preg_match_all("/\(.*?\):\*/", $search, $m)) {
-            $matchResults = array_shift($m);
-            foreach ($matchResults as $matchResult) {
-                $matchResultTransform = preg_replace("/\|/", '&', $matchResult);
-                $matchResultTransform = trim($matchResultTransform, ':*');
-                $search = str_replace($matchResult, $matchResultTransform, $search);
-            }
-        }
+//        if (preg_match_all("/\(.*?\):\*/", $search, $m)) {
+//            $matchResults = array_shift($m);
+//            foreach ($matchResults as $matchResult) {
+//                $matchResultTransform = preg_replace("/\|/", '&', $matchResult);
+//                $matchResultTransform = trim($matchResultTransform, ':*');
+//                $search = str_replace($matchResult, $matchResultTransform, $search);
+//            }
+//        }
 
         return $search;
     }

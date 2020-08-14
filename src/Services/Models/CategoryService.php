@@ -27,6 +27,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 class CategoryService extends AbstractModel
 {
     const MAIN_SEARCH = 'main_search';
+    const MAIN_CATEGORY_SEARCH = 'main_category_search';
     const SUB_MAIN_SEARCH = 'sub_main_search';
     const SUB_SUB_MAIN_SEARCH = 'sub_sub_main_search';
     /**
@@ -118,7 +119,7 @@ class CategoryService extends AbstractModel
     {
         $parameterBag = new ParameterBag($paramFetcher->all());
 
-        return  $this->matchCategoryWithSub(null , $parameterBag, true);
+        return  $this->matchCategoryWithSub($parameterBag, true);
     }
 
     /**
@@ -137,49 +138,21 @@ class CategoryService extends AbstractModel
             throw new \Exception('category don\'t have configuration modle');
         }
 
-        $mainCategoryWords = [];
-        $mainCategoryWords['categories'][$category->getCategoryName()]['positive'] = $category->getCategoryConfigurations()->getKeyWords();
-        $negativeKeyWords = $category->getCategoryConfigurations()->getNegativeKeyWords();
-        if (strlen($negativeKeyWords)) {
-            $negativeKeyWords = implode(',', array_map(function ($v) {return '!' . $v;}, explode(', ', $negativeKeyWords)));
-        } else {
-            $negativeKeyWords = null;
-        }
-
-        $mainCategoryWords['categories'][$category->getCategoryName()]['negative'] = $negativeKeyWords;
-        if ($negativeKeyWords) {
-            $mainCategoryWords['common'][] = '(' . $category->getCategoryConfigurations()->getKeyWords() . ', ' . $negativeKeyWords . ')';
-        } else {
-            $mainCategoryWords['common'][] = $category->getCategoryConfigurations()->getKeyWords();
-        }
-
-        $isMatchPlainCategories = $this->getCategoryRepository()->isMatchPlainCategoriesString(
-            $product->getCategory(),
-            $mainCategoryWords,
-            true
-        );
-
         $analysisProductByMainCategory = $this->analysisProductByMainCategory(
             $product,
-            $mainCategoryWords,
             true
         );
-
-        if (isset($isMatchPlainCategories['ts_headline_result'])) {
-            $analysisProductByMainCategory['category_ts_headline_result'] = $isMatchPlainCategories['ts_headline_result'];
-        }
 
         return $analysisProductByMainCategory;
     }
 
     /**
-     * @param Product|null $product
      * @param ParameterBag $parameterBag
      * @param bool $explain
      * @return array|mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function matchCategoryWithSub(?Product $product = null, ParameterBag $parameterBag, bool $explain = false) {
+    public function matchCategoryWithSub(ParameterBag $parameterBag, bool $explain = false) {
         $depth[] = $parameterBag->get( self::MAIN_SEARCH );
 
         if ($parameterBag->get( self::SUB_MAIN_SEARCH)) {
@@ -191,7 +164,7 @@ class CategoryService extends AbstractModel
         }
 
         return $this->getCategoryRepository()->matchCategoryWithSub(
-            $product, $parameterBag, count($depth), $explain
+            $parameterBag, count($depth), $explain
         );
     }
 
@@ -204,15 +177,15 @@ class CategoryService extends AbstractModel
      */
     public function handleAnalysisProductByMainCategory(Product $product)
     {
-        $mainCategoryWords = $this->getCategoryRepository()
-            ->getMainSubCategoryIds();
-
-        if (!count($mainCategoryWords)) {
-            return [];
-        }
+//        $mainCategoryWords = $this->getCategoryRepository()
+//            ->getMainSubCategoryIds();
+//
+//        if (!count($mainCategoryWords)) {
+//            return [];
+//        }
 
         $resultAnalysis = $this->analysisProductByMainCategory(
-            $product, $mainCategoryWords
+            $product
         );
         if (!count($resultAnalysis)) {
             return [];
@@ -256,62 +229,69 @@ class CategoryService extends AbstractModel
 
     /**
      * @param Product $product
-     * @param array $mainCategoryKeyWord
      * @param bool $explain
      * @return array|mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
     public function analysisProductByMainCategory(
         Product $product,
-        array $mainCategoryKeyWord,
         bool $explain = false
     )
     {
-        $result = [];
+//        $result = [];
         $parameterBag = new ParameterBag();
-        $parameterBag->set(CategoryRepository::STRICT, true);
-        $parameterBag->set(self::MAIN_SEARCH, $mainCategoryKeyWord);
-        $matchCategoryMain = $this->matchCategoryWithSub(
-            $product, $parameterBag, $explain
+//        $parameterBag->set(CategoryRepository::STRICT, true);
+//        $parameterBag->set(self::MAIN_SEARCH, $mainCategoryKeyWord);
+        $prepareCategoryDataForGINSearch = $this->prepareProductDataForMatching(
+            $product->getCategory(), false
         );
-        if (!$matchCategoryMain) {
+        
+        $isMatchToMainCategory = $this->getCategoryRepository()
+            ->isMatchToMainCategory($prepareCategoryDataForGINSearch);
+        $mainCategoryIds = [];
+        array_map(function ($v) use (&$mainCategoryIds){
+                    if (isset($v['id'])) {
+                        $mainCategoryIds[] = $v['id']; 
+                    }
+        }, $isMatchToMainCategory);
+
+        if (!$mainCategoryIds) {
             return [];
         }
+        $parameterBag->set(self::MAIN_SEARCH, $mainCategoryIds);
 
         $extras = $product->getExtras();
         if (isset($extras[Product::SIZE])) {
             $sizeCategoriesIds = $this->categoryConfigurationsRepository
-                ->matchSizeCategories($extras[Product::SIZE], $matchCategoryMain);
+                ->matchSizeCategories($extras[Product::SIZE], $mainCategoryIds);
             if (count($sizeCategoriesIds)) {
-                $matchCategoryMain = array_merge($sizeCategoriesIds, $matchCategoryMain);
+                $mainCategoryIds = array_merge($sizeCategoriesIds, $mainCategoryIds);
             }
         }
         
-        $result = array_merge($result, $matchCategoryMain);
+        $result = $mainCategoryIds;
         $prepareDataForGINSearch = $this->prepareProductDataForMatching(
             $product->getName() . ', ' . $product->getDescription()
         );
         if ($prepareDataForGINSearch) {
             $resultData = $prepareDataForGINSearch;
             $parameterBag->set(self::SUB_MAIN_SEARCH, $resultData);
-            $matchCategoryWithoutSub = $this->matchCategoryWithSub($product, $parameterBag, $explain);
+            $matchCategoryWithoutSub = $this->matchCategoryWithSub($parameterBag, $explain);
 
             if (!$matchCategoryWithoutSub) {
                 return  $result;
             }
             $result = array_merge($result, $matchCategoryWithoutSub);
             $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $resultData);
-            $matchCategoryWithSub = $this->matchCategoryWithSub($product, $parameterBag, $explain);
+            $matchCategoryWithSub = $this->matchCategoryWithSub($parameterBag, $explain);
 
             if (!$matchCategoryWithSub) {
                 return  $result;
             }
             $result = array_merge($result, $matchCategoryWithSub);
-
-            return $result;
         }
 
-        return [];
+        return $result;
     }
 
     /**

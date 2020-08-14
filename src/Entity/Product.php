@@ -302,10 +302,10 @@ class Product implements EntityValidatorException
      */
     private $matchForCategories = false;
 
-    /**
-     * @var string
-     */
-    private $matchMainCategoryData = '';
+//    /**
+//     * @var string
+//     */
+//    private $matchMainCategoryData = '';
 
     public function __construct()
     {
@@ -908,13 +908,13 @@ class Product implements EntityValidatorException
         }
     }
 
-    /**
-     * @return string
-     */
-    public function getMatchMainCategoryData(): string
-    {
-        return $this->matchMainCategoryData;
-    }
+//    /**
+//     * @return string
+//     */
+//    public function getMatchMainCategoryData(): string
+//    {
+//        return $this->matchMainCategoryData;
+//    }
 
     /**
      * @param string $matchMainCategoryData

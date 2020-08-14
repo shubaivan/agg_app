@@ -160,14 +160,14 @@ class CategoryRepository extends ServiceEntityRepository
             $connection = $this->getEntityManager()->getConnection();
 
             $query  = '
-            SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words FROM category AS c
-            INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
-            WHERE 
-            EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
-            AND
-            NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
-        ';
-            $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
+                SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words FROM category AS c
+                INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
+                WHERE 
+                EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
+                AND
+                NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
+            ';
+                $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
                 $query,
                 [],
                 [],
@@ -232,44 +232,52 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param Product|null $product
      * @param ParameterBag $parameterBag
      * @param int $depth
      * @param bool $explain
-     * @return array|mixed[]
+     * @return mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
     public function matchCategoryWithSub(
-        ?Product $product = null, ParameterBag $parameterBag, int $depth = 3, $explain = false
+        ParameterBag $parameterBag, int $depth = 3, $explain = false
     )
     {
         $connection = $this->getEntityManager()->getConnection();
-        if ($product->getMatchMainCategoryData()) {
-            $mainSearch = $product->getMatchMainCategoryData();
+//        if ($product->getMatchMainCategoryData()) {
+//            $mainSearch = $product->getMatchMainCategoryData();
+//        }
+
+//        if (!isset($mainSearch) && $product && !$product->getMatchMainCategoryData()) {
+//            if (!$product->getCategory()) {
+//                return [];
+//            }
+//            $checkMainCategoriesResult = $this->isMatchPlainCategoriesString(
+//                $parameterBag->get(CategoryService::MAIN_CATEGORY_SEARCH),
+//                $parameterBag->get(CategoryService::MAIN_SEARCH),
+//                true
+//            );
+//
+//            if (isset($checkMainCategoriesResult['match']) && !$checkMainCategoriesResult['match']) {
+//                return [];
+//            }
+//            if (isset($checkMainCategoriesResult[CategoryService::MAIN_SEARCH])) {
+//                $mainSearch =
+//                    $this->getHelpers()
+//                        ->handleSearchValue($checkMainCategoriesResult[CategoryService::MAIN_SEARCH], false);
+//
+//                $product->setMatchMainCategoryData($mainSearch);
+//            }
+//        }
+        $params = [];
+        $ids = $parameterBag->get( CategoryService::MAIN_SEARCH );
+        foreach ($ids as $key=>$id) {
+            $params[':main_id' . $key] = $id;
+            $types[':main_id' . $key] = \PDO::PARAM_INT;
         }
-
-        if (!isset($mainSearch) && $product && !$product->getMatchMainCategoryData()) {
-            if (!$product->getCategory()) {
-                return [];
-            }
-            $checkMainCategoriesResult = $this->isMatchPlainCategoriesString(
-                $product->getCategory(),
-                $parameterBag->get(CategoryService::MAIN_SEARCH),
-                true
-            );
-
-            if (isset($checkMainCategoriesResult['match']) && !$checkMainCategoriesResult['match']) {
-                return [];
-            }
-            if (isset($checkMainCategoriesResult[CategoryService::MAIN_SEARCH])) {
-                $mainSearch =
-                    $this->getHelpers()
-                        ->handleSearchValue($checkMainCategoriesResult[CategoryService::MAIN_SEARCH], false);
-
-                $product->setMatchMainCategoryData($mainSearch);
-            }
+        if (!count($params)) {
+            return [];
         }
-
+        $idsMain = implode(',', array_keys($params));
         if ($depth > 1) {
             $subMainSearch = $parameterBag->get(CategoryService::SUB_MAIN_SEARCH);
         }
@@ -345,7 +353,7 @@ class CategoryRepository extends ServiceEntityRepository
         }
 
         $query .= '
-                WHERE cc.common_fts @@ to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)
+                WHERE ca.id IN ('.$idsMain.')
             ';
 
 
@@ -353,12 +361,14 @@ class CategoryRepository extends ServiceEntityRepository
             $query .= '
                 AND crsub.common_fts @@ to_tsquery(\'my_swedish\', :sub_main_search)
                 AND crsub.negative_key_words_fts @@ to_tsquery(\'my_swedish\', :sub_main_search) = FALSE
+                AND (crsub.sizes = \'{}\' OR crsub.sizes = \'[]\')
             ';
         }
 
         if ($depth > 2) {
             $query .= '
                 AND crsub_main.common_fts @@ to_tsquery(\'my_swedish\', :sub_sub_main_search)
+                AND (crsub_main.sizes = \'{}\' OR crsub_main.sizes = \'[]\')
             ';
         }
 
@@ -389,8 +399,8 @@ class CategoryRepository extends ServiceEntityRepository
             }
         }
 
-        $params[':main_search_parial_category'] = $mainSearch;
-        $types[':main_search_parial_category'] = \PDO::PARAM_STR;
+//        $params[':main_search_parial_category'] = $mainSearch;
+//        $types[':main_search_parial_category'] = \PDO::PARAM_STR;
 
         if ($depth > 1) {
             $params[':sub_main_search'] = $subMainSearch;
@@ -721,6 +731,39 @@ class CategoryRepository extends ServiceEntityRepository
         $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
         return count($result);
+    }
+
+    /**
+     * @param string $productCategoriesData
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function isMatchToMainCategory(
+        string $productCategoriesData
+    ) {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $query  = '
+                SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words FROM category AS c
+                INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
+                WHERE 
+                EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
+                AND
+                NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
+                AND conf.common_fts @@ to_tsquery(\'my_swedish\', :productCategoriesData)
+                AND conf.negative_key_words_fts @@ to_tsquery(\'my_swedish\', :productCategoriesData) = FALSE
+            ';
+
+        $mainParams[':productCategoriesData'] = $productCategoriesData;
+        $mainType[':productCategoriesData'] = \PDO::PARAM_INT;
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeQuery(
+            $query,
+            $mainParams,
+            $mainType
+        );
+
+        return $statement->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**

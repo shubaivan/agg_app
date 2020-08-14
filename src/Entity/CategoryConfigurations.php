@@ -37,7 +37,7 @@ class CategoryConfigurations
     /**
      * @ORM\Column(type="jsonb", nullable=true)
      */
-    private $sizes = [];
+    private $sizes = '{}';
 
     public function getId(): ?int
     {
