@@ -19,7 +19,7 @@ class CategoryBarnFixtures extends AbstractFixtures
                     Regnhatt, thermobyxor, Skidhandska, kidjackor, Skidoveraller, Skidoverall, Solhatt, Trenchcoat,  
                     Vinterjackor, Vardagsjacka,  Streetjacka, Löparjacka,                    
                     jacket, jackets, fleece, fleece, balaclava, bomber jackets, capes,  gloves, Blazers, cap, 
-                    Hat, scarf, mittens, Hats, Parkas, Raincoat, Overalls, Thermo, coat, Vests, Raincoat                     
+                    Hat, scarf, mittens, Hats, Parkas, Raincoat, Overalls, Thermo, coat, Vests, Raincoat, Regnjacka                     
                 ',
                 'negative_key_words' => 'mugghållare, transportväska, chassi, Thule, solhatt, sandal, pärlsammetfilt',
                 'sub_key_word' => [

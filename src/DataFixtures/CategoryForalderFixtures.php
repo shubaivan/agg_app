@@ -109,7 +109,7 @@ class CategoryForalderFixtures extends AbstractFixtures implements DependentFixt
 
         $main = $this->createCategoryWithConf(
             'Förälder',
-            'förälder, accessoarer',
+            'förälder, Bärsjalar, Bebis och småbarn, Bärselar',
             'main'
         );
         $configurations = $this->configurations;

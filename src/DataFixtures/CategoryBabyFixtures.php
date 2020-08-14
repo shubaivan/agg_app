@@ -138,7 +138,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                         Regnhatt, Regnjackor, Regnoveraller, Regnställ, Skaljackor, Regnjacka, Skaloveraller, Skid och thermobyxor, 
                         Skidhandskar och vantar, Skidjackor, Skidjacka, Skidoveraller, Skidoverall, Solhatt, Vår och höst jackor, 
                         Stickade halsdukar, Stickad halsduk, Ullvantar, Vadderade jackor, Vindjackor, Vinterjackor, Vinteroveraller, 
-                        Västar, Jeansjacka, Jeansjackor, Utomhus Jacka, Streetjacka, Vardagsjacka, Softshell, Soft-Shell                     
+                        Västar, Jeansjacka, Jeansjackor, Utomhus Jacka, Streetjacka, Vardagsjacka, Softshell, Soft-Shell, Regnjackor                     
                 ',
                 'negative_key_words' => 'skor, vinterstövel',
                 'sub_key_word' => [
@@ -155,7 +155,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                     'Parkas' => 'Parkas',
                     'Regnhandskar' => 'Regnhandskar',
                     'Regnhattar' => 'Regnhattar',
-                    'Regnjackor' => 'Regnjackor',
+                    'Regnjackor' => 'Regnjackor, Regnjacka',
                     'Regnoveraller' => 'Regnoveraller',
                     'Regnställ' => 'Regnställ',
                     'Skaljackor' => 'Skaljackor',

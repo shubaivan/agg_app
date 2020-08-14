@@ -404,6 +404,7 @@ class CategoryService extends AbstractModel
      * @param Product $product
      * @return array
      * @throws \App\Exception\ValidatorException
+     * @throws \Doctrine\DBAL\DBALException
      */
     private function createArrayModelCategory(array $arrayCategories, Product $product)
     {
@@ -418,14 +419,32 @@ class CategoryService extends AbstractModel
                 $this->getObjecHandler()
                     ->validateEntity($categoryModel, [Category::SERIALIZED_GROUP_CREATE]);
             }
-            if ($categoryModel->getSubCategoryRelations()->count()) {
-                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
-                    /** @var $categoryRelation CategoryRelations */
-                    if ($categoryRelation->getMainCategory()) {
-                        $product->addCategoryRelation($categoryRelation->getMainCategory());
-                    }
-                }
-            }
+//            if ($categoryModel->getSubCategoryRelations()->count()) {
+//                $mainCategoryChallengerIds = [];
+//                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
+//                    /** @var $categoryRelation CategoryRelations */
+//                    if ($categoryRelation->getMainCategory()) {
+//                        $mainCategoryChallengerIds[$categoryRelation->getMainCategory()->getId()] = $categoryRelation->getMainCategory();
+//                    }
+//                }
+//                if (count($mainCategoryChallengerIds)) {
+//                    $prepareDataForGINSearch = $this->prepareProductDataForMatching(
+//                        $product->getName() . ', ' . $product->getDescription()
+//                    );
+//                    $matchSeparateCategoryById = $this->getCategoryRepository()
+//                        ->matchSeparateCategoryById(
+//                            array_keys($mainCategoryChallengerIds),
+//                            $prepareDataForGINSearch
+//                        );
+//                    if (count($matchSeparateCategoryById)) {
+//                        foreach ($matchSeparateCategoryById as $id) {
+//                            if (isset($id['id']) && isset($mainCategoryChallengerIds[$id['id']])) {
+//                                $product->addCategoryRelation($mainCategoryChallengerIds[$id['id']]);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
             $product->addCategoryRelation($categoryModel);
             array_push($arrayModelsCategory, $categoryModel);
         }

@@ -371,7 +371,7 @@ class CategoryRepository extends ServiceEntityRepository
                 AND (crsub_main.sizes = \'{}\' OR crsub_main.sizes = \'[]\')
             ';
         }
-        
+
 
         if ($depth > 1) {
 //            $query .= '
@@ -405,6 +405,58 @@ class CategoryRepository extends ServiceEntityRepository
             $params[':sub_sub_main_search'] = $subSubMainSearch;
             $types[':sub_sub_main_search'] = \PDO::PARAM_STR;
         }
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeQuery(
+            $query,
+            $params,
+            $types
+        );
+
+        $runkCategories = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $runkCategories;
+    }
+
+    /**
+     * @param array $ids
+     * @param string $matchData
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function matchSeparateCategoryById(
+        array $ids, string $matchData
+    )
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $params = [];
+
+        foreach ($ids as $key=>$id) {
+            $params[':main_id' . $key] = $id;
+            $types[':main_id' . $key] = \PDO::PARAM_INT;
+        }
+        $idsMain = implode(',', array_keys($params));
+
+        $query = '
+            SELECT             
+            DISTINCT ca.id';
+
+        $query .= '
+                FROM category as ca
+            ';
+
+        $query .= '           
+            INNER JOIN category_configurations as cc ON cc.category_id_id = ca.id
+        ';
+
+        $query .= '
+                WHERE ca.id IN ('.$idsMain.')
+                AND cc.common_fts @@ to_tsquery(\'my_swedish\', :main_search)
+                AND cc.negative_key_words_fts @@ to_tsquery(\'my_swedish\', :main_search) = FALSE
+            ';
+
+        $params[':main_search'] = $matchData;
+        $types[':main_search'] = \PDO::PARAM_STR;
 
         /** @var ResultCacheStatement $statement */
         $statement = $connection->executeQuery(
