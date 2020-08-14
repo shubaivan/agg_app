@@ -180,10 +180,15 @@ class CategoryService extends AbstractModel
     public function handleAnalysisProductByMainCategory(Product $product)
     {
         $parameterBag = new ParameterBag();
+        if (!strlen($product->getCategory()) && !strlen($product->getShop())) {
+            return [];
+        }
         $prepareCategoryDataForGINSearch = $this->prepareProductDataForMatching(
-            $product->getCategory(), false
+            $product->getCategory() .','.$product->getShop(), false, 2
         );
-
+        if (!strlen($prepareCategoryDataForGINSearch)) {
+            return [];
+        }
         $isMatchToMainCategory = $this->getCategoryRepository()
             ->isMatchToMainCategory($prepareCategoryDataForGINSearch);
         $mainCategoryIds = [];
@@ -268,7 +273,9 @@ class CategoryService extends AbstractModel
         }
 
         $prepareDataForGINSearch = $this->prepareProductDataForMatching(
-            $product->getName() . ', ' . $product->getDescription()
+            $product->getName() . ', ' . $product->getDescription(),
+            false,
+            3
         );
         if ($prepareDataForGINSearch) {
             $resultData = $prepareDataForGINSearch;
@@ -593,12 +600,16 @@ class CategoryService extends AbstractModel
         $productData = $this->helper->pregWordsFromDictionary(
             $sentence
         );
-        $matchData = preg_replace('!\s+!', ',', $productData['result']);
-        $matchData = strip_tags($matchData);
+        $prepareDataForGINSearch = '';
+        if (strlen($productData['result']) && strlen($productData['result']) >= $limitations) {
+            $matchData = preg_replace('!\s+!', ',', $productData['result']);
+            $matchData = strip_tags($matchData);
 
-        $prepareDataForGINSearch = $this->prepareDataForGINSearch($matchData, $limitations);
-        $prepareDataForGINSearch = $this->helper
-            ->handleSearchValue($prepareDataForGINSearch, $strict);
+            $prepareDataForGINSearch = $this->prepareDataForGINSearch($matchData, $limitations);
+            $prepareDataForGINSearch = $this->helper
+                ->handleSearchValue($prepareDataForGINSearch, $strict);            
+        }
+
         if (isset($productData['match']) && count($productData['match'])) {
             $resultSpaceWord = array_shift($productData['match']);
             if (is_array($resultSpaceWord) && count($resultSpaceWord)) {

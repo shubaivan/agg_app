@@ -70,11 +70,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         "targets": key,
                         "data": value.data,
                         "render": function ( data, type, row, meta ) {
-                            var parser = new DOMParser();
-                            var doc = parser.parseFromString(data, 'text/html');
-                            return type === 'display' ?
-                                doc.firstChild.innerHTML:
-                                '';
+                            return type === 'display' && data.length > 10 ?
+                                '<span title="'+data+'">'+data.substr( 0, 10 )+'...</span>' :
+                                data;
                         }
                     })
                 }
@@ -120,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             } );
                         $.each(data, function( key, value ) {
                             // console.log(key, value);
-                            select.append( '<option value="'+value+'">'+value+'</option>' )
+                            select.append( '<option value="'+value+'">'+value.substr( 0, 10 )+'</option>' )
                         });
                     } );
                 },

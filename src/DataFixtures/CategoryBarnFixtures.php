@@ -346,7 +346,7 @@ class CategoryBarnFixtures extends AbstractFixtures
 
         $main = $this->createCategoryWithConf(
             'Barn',
-            'barn, Jr, Junior, Kids, Boys, Girls',
+            'barn, Jr, Junior, Kids, Boys, Girls, Shirtstore',
             'main',
             'barnvagnar, Leksaker, Skor, Baby, Maskerad, Kostym, Barndräkt, Halloween, Utklädnad, Sagodräkt, maskeradkläder');
         $configurations = $this->configurations;
