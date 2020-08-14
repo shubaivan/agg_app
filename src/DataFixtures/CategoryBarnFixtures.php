@@ -72,7 +72,7 @@ class CategoryBarnFixtures extends AbstractFixtures
                 'name' => 'T-shirts',
                 'key_word' => '
                     t-shirt, kortärmad, tee, shortsleve, piké, pike, långärmad t-shirt, Rugbytröja, Rugby tröja,
-                    t-shirt, short-sleeved, tee, shortsleeve, piké, long-sleeved t-shirt, ungdom
+                    t-shirt, short-sleeved, tee, shortsleeve, piké, long-sleeved t-shirt
                 ',
                 'negative_key_words' => 'dress, tunika',
                 'sub_key_word' => [
@@ -346,7 +346,7 @@ class CategoryBarnFixtures extends AbstractFixtures
 
         $main = $this->createCategoryWithConf(
             'Barn',
-            'barn, Jr, Junior, Kids, Boys, Girls',
+            'barn, Jr, Junior, Kids',
             'main',
             'barnvagnar, Leksaker, Skor, Baby, Maskerad, Kostym, Barndräkt, Halloween, Utklädnad, Sagodräkt, maskeradkläder');
         $configurations = $this->configurations;
