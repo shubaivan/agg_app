@@ -72,7 +72,7 @@ class CategoryBarnFixtures extends AbstractFixtures
                 'name' => 'T-shirts',
                 'key_word' => '
                     t-shirt, kortärmad, tee, shortsleve, piké, pike, långärmad t-shirt, Rugbytröja, Rugby tröja,
-                    t-shirt, short-sleeved, tee, shortsleeve, piké, long-sleeved t-shirt
+                    t-shirt, short-sleeved, tee, shortsleeve, piké, long-sleeved t-shirt, T-shirten
                 ',
                 'negative_key_words' => 'dress, tunika',
                 'sub_key_word' => [
