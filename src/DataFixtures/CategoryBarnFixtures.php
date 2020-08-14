@@ -74,7 +74,7 @@ class CategoryBarnFixtures extends AbstractFixtures
                     t-shirt, kortärmad, tee, shortsleve, piké, pike, långärmad t-shirt, Rugbytröja, Rugby tröja,
                     t-shirt, short-sleeved, tee, shortsleeve, piké, long-sleeved t-shirt
                 ',
-                'negative_key_words' => 'dress',
+                'negative_key_words' => 'dress, tunika',
                 'sub_key_word' => [
                     'subT-shirts' => 'T-shirt, Kortärmad, Tee, Shortsleeve, short sleeve, short sleeved',
                     'Pikéer' => 'Piké, Rugbytröja, Rugby tröja',
@@ -82,7 +82,7 @@ class CategoryBarnFixtures extends AbstractFixtures
                 ]
             ],
             [
-                'name' => 'subToppar',
+                'name' => 'sub Toppar',
                 'key_word' => '
                     topp, toppar, topar,tanktop, tanktopp, top, tops
                 ',
@@ -124,7 +124,10 @@ class CategoryBarnFixtures extends AbstractFixtures
                     'Tunikor' => 'Tunik, Tunikor, Tunic, Tunics',
                     'Tröjklänningar' => 'Tröjklänning, Sweater dress, Sweaterdress',
                     'Kjolar' => 'kjol, kjolar, skirt, skirts, jeanskjol, denimskirt, jeans skirt, korta kjolar, miniskirt, mini skirt, short skirt, maxikjolar, maxikjol maxidresses, maxidress, midikjolar, midikjol, midiskirts, midiskirt, tyllkjol, tyllkjolar, tulle skirts, tulleskirt, veckade kjolar, veckad kjol, pleated skirts, pleated skirt'
-                ]
+                ],
+                'negative_key_words' => '
+                    bloomers
+                ',
             ],
             [
                 'name' => 'Skjortor & Blusar',
@@ -236,7 +239,7 @@ class CategoryBarnFixtures extends AbstractFixtures
                      Jumpsuit, Jumpsuit, Spark suit, Bodysuit
                 ',
                 'sub_key_word' => [
-                    'subJumpsuits' => 'Jumpsuit, Jumpsuits, overall, overalls',
+                    'sub Jumpsuits' => 'Jumpsuit, Jumpsuits, overall, overalls',
                     'Sparkdräkter' => 'Sparkdräkt, Sparkdräkter, Spark suit',
                     'Bodysuits' => 'Bodysuit, Bodysuits'
                 ]
@@ -345,7 +348,7 @@ class CategoryBarnFixtures extends AbstractFixtures
             'Barn',
             'barn, Jr, Junior, Kids',
             'main',
-            'barnvagnar, Leksaker, Skor, Baby, Maskerad, Kostym, Barndräkt, Halloween, Utklädnad, Sagodräkt');
+            'barnvagnar, Leksaker, Skor, Baby, Maskerad, Kostym, Barndräkt, Halloween, Utklädnad, Sagodräkt, maskeradkläder');
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
         $this->processSizeCategories($this->configurationsSize, $main);

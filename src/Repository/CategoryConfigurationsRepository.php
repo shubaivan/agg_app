@@ -52,10 +52,8 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
         }
 
         foreach ($ids as $key=>$id) {
-            if (isset($id['id'])) {
-                $params[':main_id' . $key] = $id['id'];
-                $types[':main_id' . $key] = \PDO::PARAM_INT;
-            }
+            $params[':main_id' . $key] = $id;
+            $types[':main_id' . $key] = \PDO::PARAM_INT;
         }
         if (!count($params)) {
             return [];

@@ -137,8 +137,10 @@ class CategoryService extends AbstractModel
         if (!$category->getCategoryConfigurations()) {
             throw new \Exception('category don\'t have configuration modle');
         }
-
+        $parameterBag = new ParameterBag();
+        $parameterBag->set(self::MAIN_SEARCH, [$category->getId()]);
         $analysisProductByMainCategory = $this->analysisProductByMainCategory(
+            $parameterBag,
             $product,
             true
         );
@@ -177,15 +179,26 @@ class CategoryService extends AbstractModel
      */
     public function handleAnalysisProductByMainCategory(Product $product)
     {
-//        $mainCategoryWords = $this->getCategoryRepository()
-//            ->getMainSubCategoryIds();
-//
-//        if (!count($mainCategoryWords)) {
-//            return [];
-//        }
+        $parameterBag = new ParameterBag();
+        $prepareCategoryDataForGINSearch = $this->prepareProductDataForMatching(
+            $product->getCategory(), false
+        );
 
+        $isMatchToMainCategory = $this->getCategoryRepository()
+            ->isMatchToMainCategory($prepareCategoryDataForGINSearch);
+        $mainCategoryIds = [];
+        array_map(function ($v) use (&$mainCategoryIds){
+            if (isset($v['id'])) {
+                $mainCategoryIds[] = $v['id'];
+            }
+        }, $isMatchToMainCategory);
+
+        if (!$mainCategoryIds) {
+            return [];
+        }
+        $parameterBag->set(self::MAIN_SEARCH, $mainCategoryIds);
         $resultAnalysis = $this->analysisProductByMainCategory(
-            $product
+            $parameterBag, $product
         );
         if (!count($resultAnalysis)) {
             return [];
@@ -228,48 +241,32 @@ class CategoryService extends AbstractModel
     }
 
     /**
+     * @param ParameterBag $parameterBag
      * @param Product $product
      * @param bool $explain
-     * @return array|mixed[]
+     * @return array|mixed
      * @throws \Doctrine\DBAL\DBALException
      */
     public function analysisProductByMainCategory(
+        ParameterBag $parameterBag,
         Product $product,
         bool $explain = false
     )
     {
-//        $result = [];
-        $parameterBag = new ParameterBag();
-//        $parameterBag->set(CategoryRepository::STRICT, true);
-//        $parameterBag->set(self::MAIN_SEARCH, $mainCategoryKeyWord);
-        $prepareCategoryDataForGINSearch = $this->prepareProductDataForMatching(
-            $product->getCategory(), false
-        );
-        
-        $isMatchToMainCategory = $this->getCategoryRepository()
-            ->isMatchToMainCategory($prepareCategoryDataForGINSearch);
-        $mainCategoryIds = [];
-        array_map(function ($v) use (&$mainCategoryIds){
-                    if (isset($v['id'])) {
-                        $mainCategoryIds[] = $v['id']; 
-                    }
-        }, $isMatchToMainCategory);
-
-        if (!$mainCategoryIds) {
-            return [];
+        $result = [];
+        $mainCategoryIds = $parameterBag->get(self::MAIN_SEARCH);
+        foreach ($mainCategoryIds as $id) {
+            $result[] = ['id' => $id];
         }
-        $parameterBag->set(self::MAIN_SEARCH, $mainCategoryIds);
-
         $extras = $product->getExtras();
         if (isset($extras[Product::SIZE])) {
             $sizeCategoriesIds = $this->categoryConfigurationsRepository
                 ->matchSizeCategories($extras[Product::SIZE], $mainCategoryIds);
             if (count($sizeCategoriesIds)) {
-                $mainCategoryIds = array_merge($sizeCategoriesIds, $mainCategoryIds);
+                $result = array_merge($sizeCategoriesIds, $result);
             }
         }
-        
-        $result = $mainCategoryIds;
+
         $prepareDataForGINSearch = $this->prepareProductDataForMatching(
             $product->getName() . ', ' . $product->getDescription()
         );

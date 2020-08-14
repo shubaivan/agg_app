@@ -18,7 +18,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     Sneaker, Sneakers, Basketball Sneakers, Basketball Sneaker, Slipp-on sneaker, Gympaskor, Gympasko                     
                 ',
                 'sub_key_word' => [
-                    'subSneakers' => 'Sneakers',
+                    'sub Sneakers' => 'Sneakers',
                     'Basketskor' => 'Basketskor'
                 ]
             ],
@@ -40,7 +40,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     Rubber boots, Rain boots, Rain boot, Rubber boot                     
                 ',
                 'sub_key_word' => [
-                    'subGummistövlar' => 'Gummistövlar',
+                    'sub Gummistövlar' => 'Gummistövlar',
                 ]
             ],
             [
@@ -65,7 +65,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     Kick Lo Velcro School Skor                     
                 ',
                 'sub_key_word' => [
-                    'subFinskor' => 'Finskor, fin sko, fin-sko, festsko, fest sko, fest-sko, festskor, fest skor, fest-skor',
+                    'sub Finskor' => 'Finskor, fin sko, fin-sko, festsko, fest sko, fest-sko, festskor, fest skor, fest-skor',
                 ],
                 'negative_key_words' => 'midjan'
             ],
@@ -75,7 +75,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                 Espadrillos, Espadrillo, Espadriller, Espadrill                     
             ',
                 'sub_key_word' => [
-                    'subEspadrillos' => 'Espadrillos'
+                    'sub Espadrillos' => 'Espadrillos'
                 ]
             ],
             [
@@ -84,7 +84,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                 Badskor, Badsko                     
             ',
                 'sub_key_word' => [
-                    'subBadskor' => 'Badskor, swimmingshoes',
+                    'sub Badskor' => 'Badskor, swimmingshoes',
                     'Strandskor' => 'Strandskor, beach shoes',
                 ]
             ],
@@ -103,7 +103,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     Träningsskor, Fotbollsskor, Trainers, Tennisskor, Dansskor, Ballerinaskor, Ballerina skor, Ballerinasko, Ballerina sko                     
                 ',
                 'sub_key_word' => [
-                    'subTräningsskor' => 'Träningsskor, trainers, trainingshoes',
+                    'sub Träningsskor' => 'Träningsskor, trainers, trainingshoes',
                     'Fotbollsskor' => 'Fotbollsskor, soccershoes, soccer shoes, fotballshoes',
                     'Ballerinaskor' => 'Ballerinaskor, ballerinas, ballerinashoes',
                 ],

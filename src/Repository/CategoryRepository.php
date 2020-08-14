@@ -290,13 +290,13 @@ class CategoryRepository extends ServiceEntityRepository
             SELECT             
             DISTINCT ca.id';
 
-        if ($explain === true) {
-            $query .= '
-                ,ca.category_name            
-                ,ts_headline(\'my_swedish\',cc.key_words, to_tsquery(\'my_swedish\', :main_search_parial_category))
-                ,ts_rank_cd(cc.common_fts, to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)) AS  main_runk
-            ';
-        }
+//        if ($explain === true) {
+//            $query .= '
+//                ,ca.category_name
+//                ,ts_headline(\'my_swedish\',cc.key_words, to_tsquery(\'my_swedish\', :main_search_parial_category))
+//                ,ts_rank_cd(cc.common_fts, to_tsquery(\'pg_catalog.swedish\', :main_search_parial_category)) AS  main_runk
+//            ';
+//        }
 
         if ($depth > 1) {
             $query .= '
@@ -371,20 +371,14 @@ class CategoryRepository extends ServiceEntityRepository
                 AND (crsub_main.sizes = \'{}\' OR crsub_main.sizes = \'[]\')
             ';
         }
-
-        if ($explain === true) {
-            $query .= '
-                ORDER BY
-                main_runk
-            ';
-        }
+        
 
         if ($depth > 1) {
 //            $query .= '
 //                    ,cr_main.sub_category_id';
             if ($explain === true) {
                 $query .= '
-                        ,sub_runk
+                    ORDER BY sub_runk
                 ';
             }
         }
