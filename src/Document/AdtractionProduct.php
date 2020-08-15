@@ -26,7 +26,9 @@ use JMS\Serializer\Annotation;
  *     "Brand",
  *     "Name",
  *     "Category",
- *     "Price"
+ *     "Price",
+ *     "Currency",
+ *     "Instock"
  * })
  */
 class AdtractionProduct extends AbstractDocument

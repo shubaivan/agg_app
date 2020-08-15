@@ -183,20 +183,34 @@ class CategoryService extends AbstractModel
         if (!strlen($product->getCategory()) && !strlen($product->getShop())) {
             return [];
         }
-        $prepareCategoryDataForGINSearch = $this->prepareProductDataForMatching(
-            $product->getCategory() .','.$product->getShop(), false, 2
-        );
-        if (!strlen($prepareCategoryDataForGINSearch)) {
+//        $prepareCategoryDataForGINSearch = $this->prepareProductDataForMatching(
+//            $product->getCategory() .','.$product->getShop(), false, 2
+//        );
+//        if (!strlen($prepareCategoryDataForGINSearch)) {
+//            return [];
+//        }
+//        $isMatchToMainCategory = $this->getCategoryRepository()
+//            ->isMatchToMainCategory($prepareCategoryDataForGINSearch);
+
+
+        $mainCategoryWords = $this->getCategoryRepository()
+            ->getMainSubCategoryIds();
+
+        if (!count($mainCategoryWords)) {
             return [];
         }
-        $isMatchToMainCategory = $this->getCategoryRepository()
-            ->isMatchToMainCategory($prepareCategoryDataForGINSearch);
-        $mainCategoryIds = [];
-        array_map(function ($v) use (&$mainCategoryIds){
-            if (isset($v['id'])) {
-                $mainCategoryIds[] = $v['id'];
-            }
-        }, $isMatchToMainCategory);
+
+        $mainCategoryIds = $this->getCategoryRepository()
+            ->isMatchPlainCategoriesString($product->getCategory() .','.$product->getShop(), $mainCategoryWords, true);
+
+
+        
+//        $mainCategoryIds = [];
+//        array_map(function ($v) use (&$mainCategoryIds){
+//            if (isset($v['id'])) {
+//                $mainCategoryIds[] = $v['id'];
+//            }
+//        }, $isMatchToMainCategory);
 
         if (!$mainCategoryIds) {
             return [];

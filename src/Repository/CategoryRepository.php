@@ -195,6 +195,8 @@ class CategoryRepository extends ServiceEntityRepository
                 if (isset($main['category_name'])) {
                     $mainCategoryWords['category_ids'][] = $main['id'];
                     $mainCategoryWords['categories'][$main['category_name']]['positive'] = $main['key_words'];
+                    $mainCategoryWords['categories'][$main['category_name']]['id'] = $main['id'];
+                    
                     $negative_key_words = null;
                     if (strlen($main['negative_key_words'])) {
                         $negative_key_words = implode(', ', array_map(function ($v) {return '!' . $v;}, explode(',', $main['negative_key_words'])));
@@ -860,6 +862,7 @@ class CategoryRepository extends ServiceEntityRepository
 
             if (preg_match_all("/<b>.*?<\/b>/iu", $result['ts_headline_result'], $m)) {
                 $resultMainCategoryWords = [];
+                $resultMainCategoryIds = [];
                 $regTsHeadLightResult = array_shift($m);
                 $explodeMainCategoriesData = explode('|', $mainCategoryWordsString);
                 foreach ($explodeMainCategoriesData as $mainCategoryWord) {
@@ -875,6 +878,10 @@ class CategoryRepository extends ServiceEntityRepository
                                 } else {
                                     $resultMainCategoryWords[] = $mainCategoryWord;
                                 }
+                                
+                                if (isset($mainCategoriesData['categories'][$nameMainCategory]['id'])) {
+                                    $resultMainCategoryIds[] = $mainCategoriesData['categories'][$nameMainCategory]['id'];
+                                }
                             }
                         }
                     }
@@ -884,7 +891,7 @@ class CategoryRepository extends ServiceEntityRepository
                 }
             }
 
-            return $result;
+            return array_unique($resultMainCategoryIds);
         } else {
             return false;
         }
