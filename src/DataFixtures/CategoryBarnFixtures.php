@@ -348,7 +348,7 @@ class CategoryBarnFixtures extends AbstractFixtures
             'Barn',
             'barn, Jr, Junior, Kids, Boys, Girls, Shirtstore',
             'main',
-            'barnvagnar, Leksaker, Skor, Baby, Maskerad, Kostym, Barndräkt, Halloween, Utklädnad, Sagodräkt, maskeradkläder');
+            'barnvagnar, Leksaker, Skor, Baby, Maskerad, Kostym, Barndräkt, Halloween, Utklädnad, Sagodräkt, maskeradkläder, eStore');
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
         $this->processSizeCategories($this->configurationsSize, $main);

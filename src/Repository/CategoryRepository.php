@@ -798,12 +798,14 @@ class CategoryRepository extends ServiceEntityRepository
                 EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
                 AND
                 NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
-                AND conf.common_fts @@ to_tsquery(\'my_swedish\', :productCategoriesData)
-                AND conf.negative_key_words_fts @@ to_tsquery(\'my_swedish\', :productCategoriesData) = FALSE
+                AND to_tsvector(\'my_swedish\', :productCategoriesData) 
+                        @@ to_tsquery(\'my_swedish\', REGEXP_REPLACE(REGEXP_REPLACE(conf.key_words, \'\s+\', \'\', \'g\'), \',\', \':*|\', \'g\'))
+                AND to_tsvector(\'my_swedish\', :productCategoriesData) 
+                        @@ to_tsquery(\'my_swedish\', REGEXP_REPLACE(REGEXP_REPLACE(conf.negative_key_words, \'\s+\', \'\', \'g\'), \',\', \'|\', \'g\')) = FALSE
             ';
 
         $mainParams[':productCategoriesData'] = $productCategoriesData;
-        $mainType[':productCategoriesData'] = \PDO::PARAM_INT;
+        $mainType[':productCategoriesData'] = \PDO::PARAM_STR;
         /** @var ResultCacheStatement $statement */
         $statement = $connection->executeQuery(
             $query,
@@ -873,11 +875,11 @@ class CategoryRepository extends ServiceEntityRepository
                         if (mb_stripos($matchingWord, $mainCategoryWord) !== false) {
                             $resultMatchArray = preg_grep("/\b$mainCategoryWord\b/iu", $mainCategoryWordsArray);
                             foreach ($resultMatchArray as $nameMainCategory=>$matchPool) {
-                                if (isset($mainCategoriesData['categories'][$nameMainCategory]['negative'])) {
-                                    $resultMainCategoryWords[] = '(' . $mainCategoryWord . ', ' . $mainCategoriesData['categories'][$nameMainCategory]['negative'] . ')';
-                                } else {
-                                    $resultMainCategoryWords[] = $mainCategoryWord;
-                                }
+//                                if (isset($mainCategoriesData['categories'][$nameMainCategory]['negative'])) {
+//                                    $resultMainCategoryWords[] = '(' . $mainCategoryWord . ', ' . $mainCategoriesData['categories'][$nameMainCategory]['negative'] . ')';
+//                                } else {
+//                                    $resultMainCategoryWords[] = $mainCategoryWord;
+//                                }
                                 
                                 if (isset($mainCategoriesData['categories'][$nameMainCategory]['id'])) {
                                     $resultMainCategoryIds[] = $mainCategoriesData['categories'][$nameMainCategory]['id'];
@@ -886,9 +888,9 @@ class CategoryRepository extends ServiceEntityRepository
                         }
                     }
                 }
-                if (count($resultMainCategoryWords)) {
-                    $result[CategoryService::MAIN_SEARCH] = implode(', ', $resultMainCategoryWords);
-                }
+//                if (count($resultMainCategoryWords)) {
+//                    $result[CategoryService::MAIN_SEARCH] = implode(', ', $resultMainCategoryWords);
+//                }
             }
 
             return array_unique($resultMainCategoryIds);

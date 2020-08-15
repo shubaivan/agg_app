@@ -410,6 +410,22 @@ class Product implements EntityValidatorException
     }
 
     /**
+     * @return string
+     */
+    public function getCategoryWithShop()
+    {
+        $result = [];
+        if ($this->category) {
+            $result[] = $this->category;    
+        }
+
+        if ($this->shop) {
+            $result[] = $this->shop;
+        }
+        return implode(',', $result);
+    }
+
+    /**
      * @param mixed $category
      * @return Product
      */
