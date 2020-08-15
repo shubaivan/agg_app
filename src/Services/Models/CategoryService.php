@@ -193,7 +193,9 @@ class CategoryService extends AbstractModel
         $isMatchToMainCategory = $this->getCategoryRepository()
             ->isMatchToMainCategory($product->getCategoryWithShop());
 
-
+        if (!$isMatchToMainCategory) {
+            return [];
+        }
 //        $mainCategoryWords = $this->getCategoryRepository()
 //            ->getMainSubCategoryIds();
 //
