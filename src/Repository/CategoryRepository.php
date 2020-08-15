@@ -859,10 +859,10 @@ class CategoryRepository extends ServiceEntityRepository
         $isMatchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
         if (count($isMatchResult)) {
             $result = array_shift($isMatchResult);
-
+            $resultMainCategoryIds = [];
             if (preg_match_all("/<b>.*?<\/b>/iu", $result['ts_headline_result'], $m)) {
                 $resultMainCategoryWords = [];
-                $resultMainCategoryIds = [];
+
                 $regTsHeadLightResult = array_shift($m);
                 $explodeMainCategoriesData = explode('|', $mainCategoryWordsString);
                 foreach ($explodeMainCategoriesData as $mainCategoryWord) {
