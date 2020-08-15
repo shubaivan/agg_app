@@ -320,9 +320,9 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
 
         $main = $this->createCategoryWithConf(
             'Baby',
-            'Baby, Toddler, Infant, Premature',
+            'Baby, Toddler, Infant, Premature, eStore',
             'main',
-            'Barn, Skor, Barnvagnar, Leksaker, Förälder, Maskerad, Kostym, Barndräkt, Halloween, Utklädnad, Sagodräkt, maskeradkläder, eStore');
+            'Barn, Skor, Barnvagnar, Leksaker, Förälder, Maskerad, Kostym, Barndräkt, Halloween, Utklädnad, Sagodräkt, maskeradkläder');
         $configurations = $this->configurations;
         $this->processConfiguration($configurations, $main);
 
