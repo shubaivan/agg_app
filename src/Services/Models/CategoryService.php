@@ -274,7 +274,7 @@ class CategoryService extends AbstractModel
 
         $prepareDataForGINSearch = $this->prepareProductDataForMatching(
             $product->getName() . ', ' . $product->getDescription(),
-            false,
+            true,
             3
         );
         if ($prepareDataForGINSearch) {
