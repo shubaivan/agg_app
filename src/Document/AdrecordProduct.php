@@ -43,7 +43,7 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
 
     /**
      * @MongoDB\Field(type="string")
-     * @MongoDB\UniqueIndex(order="asc")
+     * @MongoDB\Index()
      */
     private $SKU;
 

@@ -51,7 +51,7 @@ class AwinProduct extends AbstractDocument
     
     /**
      * @MongoDB\Field(type="string")
-     * @MongoDB\UniqueIndex(order="asc")
+     * @MongoDB\Index()
      */
     protected $aw_product_id;
 

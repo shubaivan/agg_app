@@ -35,7 +35,7 @@ class AdtractionProduct extends AbstractDocument
 {
     /**
      * @MongoDB\Field(type="string")
-     * @MongoDB\UniqueIndex(order="asc") 
+     * @MongoDB\Index()
      */
     private $SKU;
     /**
