@@ -73,6 +73,13 @@ class Shop
         'blue_tomato' => 'Blue Tomato',
         'ellos_se' => 'Ellos SE',
         'jd_sports' => 'JD Sports',
+        
+        'sportamore' => 'Sportamore',
+        'bonprix' => 'Bonprix',
+        'cdon_barn_and_baby' => 'CDON Barn and Baby',
+        'cdon_shoes' => 'CDON Shoes',
+        'geggamoja' => 'Geggamoja',
+        'gina_tricot' => 'Gina Tricot'
     ];
 
     use TimestampableEntity;

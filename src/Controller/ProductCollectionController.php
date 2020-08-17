@@ -6,6 +6,7 @@ use App\Document\AbstractDocument;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
+use App\Document\TradeDoublerProduct;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use JMS\Serializer\SerializerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -157,5 +158,40 @@ class ProductCollectionController extends AbstractController
             'decline_reason' => AdrecordProduct::getDeclineReasonKey(),
             'convert_to_html_columns' => AdrecordProduct::convertToHtmColumns()
         ]);
-    }    
+    }
+
+    /**
+     * @Route("/admin/product_collection/trade_doubler", name="product_collection_trade_doubler")
+     */
+    public function tradeDoublerProductCollectionList()
+    {
+        $oneProduct = $this->documentManager
+            ->getRepository(TradeDoublerProduct::class)->findOneBy([]);
+        $serialize = '{}';
+        if ($oneProduct) {
+            $serialize = $this->serializer->serialize(
+                $oneProduct,
+                'json'
+            );
+        }
+        $json_decode = json_decode($serialize, true);
+        $dataTableColumnData = [];
+        $keys = array_keys($json_decode);
+        array_map(function ($k) use (&$dataTableColumnData) {
+            $dataTableColumnData[] = ['data' => $k];
+        }, $keys);
+
+
+        // Render the twig view
+        return $this->render('products/collections/trade_doubler_list_custom.html.twig', [
+            'th_keys' => $keys,
+            'dataTbaleKeys' => $dataTableColumnData,
+            'img_columns' => TradeDoublerProduct::getImageColumns(),
+            'link_columns' => TradeDoublerProduct::getLinkColumns(),
+            'short_preview_columns' => TradeDoublerProduct::getShortPreviewText(),
+            'separate_filter_column' => TradeDoublerProduct::getSeparateFilterColumn(),
+            'decline_reason' => TradeDoublerProduct::getDeclineReasonKey(),
+            'convert_to_html_columns' => TradeDoublerProduct::convertToHtmColumns()
+        ]);
+    }
 }

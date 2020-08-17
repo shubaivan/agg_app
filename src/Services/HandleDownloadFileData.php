@@ -7,10 +7,12 @@ use App\Document\AbstractDocument;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
+use App\Document\TradeDoublerProduct;
 use App\DocumentRepository\AdrecordProductRepository;
 use App\DocumentRepository\AdtractionProductRepository;
 use App\DocumentRepository\AwinProductRepository;
 use App\DocumentRepository\CarefulSavingSku;
+use App\DocumentRepository\TradeDoublerProductRepository;
 use App\Entity\Product;
 use App\Entity\Shop;
 use App\QueueModel\AdrecordDataRow;
@@ -20,6 +22,7 @@ use App\QueueModel\CarriageShop;
 use App\QueueModel\FileReadyDownloaded;
 use App\QueueModel\ResourceDataRow;
 use App\QueueModel\ResourceProductQueues;
+use App\QueueModel\TradeDoublerDataRow;
 use App\Services\Models\CategoryService;
 use App\Util\RedisHelper;
 use Doctrine\ODM\MongoDB\DocumentManager;
@@ -118,6 +121,11 @@ class HandleDownloadFileData
     private $awinDownloadUrls;
 
     /**
+     * @var
+     */
+    private $tradedoublerDownloadUrls;
+
+    /**
      * @var int
      */
     private $csvHandleStep;
@@ -146,6 +154,7 @@ class HandleDownloadFileData
      * @param array $adtractionDownloadUrls
      * @param array $adrecordDownloadUrls
      * @param array $awinDownloadUrls
+     * @param array $tradedoublerDownloadUrls
      * @param string $csvHandleStep
      * @param CategoryService $categoryService
      * @param Helpers $helpers
@@ -159,6 +168,7 @@ class HandleDownloadFileData
         array $adtractionDownloadUrls,
         array $adrecordDownloadUrls,
         array $awinDownloadUrls,
+        array $tradedoublerDownloadUrls,
         string $csvHandleStep,
         CategoryService $categoryService,
         Helpers $helpers,
@@ -169,6 +179,7 @@ class HandleDownloadFileData
         $this->awinDownloadUrls = $awinDownloadUrls;
         $this->adrecordDownloadUrls = $adrecordDownloadUrls;
         $this->adtractionDownloadUrls = $adtractionDownloadUrls;
+        $this->tradedoublerDownloadUrls = $tradedoublerDownloadUrls;
         $this->commandBus = $commandBus;
         $this->productsBus = $productsBus;
         $this->logger = $adtractionFileHandlerLogger;
@@ -314,6 +325,7 @@ class HandleDownloadFileData
         if (isset($this->adtractionDownloadUrls[$shop])
             || isset($this->adrecordDownloadUrls[$shop])
             || isset($this->awinDownloadUrls[$shop])
+            || isset($this->tradedoublerDownloadUrls[$shop])
         ) {
             return true;
         }
@@ -380,6 +392,16 @@ class HandleDownloadFileData
                 $filePath
             );
         }
+
+        if (isset($this->tradedoublerDownloadUrls[$shop])) {
+            $this->createTradeDoublerJob(
+                $shop,
+                $offsetRecord,
+                $record,
+                $redisUniqKey,
+                $filePath
+            );
+        }
         
         if (isset($this->adtractionDownloadUrls[$shop])) {
             $this->createAdtractionDataJob(
@@ -418,6 +440,43 @@ class HandleDownloadFileData
         return (int)$count;
     }
 
+    /**
+     * @param string|null $shop
+     * @param $offsetRecord
+     * @param $record
+     * @param string $redisUniqKey
+     * @param string $filePath
+     *
+     * @return array
+     * @throws \Throwable
+     */
+    private function createTradeDoublerJob(
+        ?string $shop,
+        $offsetRecord,
+        $record,
+        string $redisUniqKey,
+        string $filePath
+    ) :void
+    {
+        $tradeDoublerDataRow = new TradeDoublerDataRow(
+            $record,
+            ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)),
+            $filePath,
+            $redisUniqKey
+        );
+        $tradeDoublerDataRow->transform();
+        $this->getProductsBus()->dispatch($tradeDoublerDataRow);
+
+
+        /** @var TradeDoublerProductRepository $savingSku */
+        $savingSku = $this->dm->getRepository(TradeDoublerProduct::class);
+        $this->saveProductInMongo(
+            $tradeDoublerDataRow,
+            $shop,
+            $savingSku
+        );
+    }
+    
     /**
      * @param string|null $shop
      * @param $offsetRecord
@@ -522,6 +581,11 @@ class HandleDownloadFileData
         );
     }
 
+    /**
+     * @param ResourceProductQueues $productQueues
+     * @param $shop
+     * @param CarefulSavingSku $savingSku
+     */
     private function saveProductInMongo(
         ResourceProductQueues $productQueues,
         $shop,
@@ -534,7 +598,7 @@ class HandleDownloadFileData
 
         if ($productMatch && $productMatch->getId()) {
             if ($productMatch->getShop() != $productQueues->getShop()) {
-                $this->modifyToUniqSku($productQueues);
+                $this->modifyToUniqSku($productQueues, $savingSku);
             } else {
                 return;
             }
@@ -545,12 +609,16 @@ class HandleDownloadFileData
 
     /**
      * @param ResourceProductQueues $adtractionDataRow
+     * @param CarefulSavingSku $savingSku
      */
-    private function modifyToUniqSku(ResourceProductQueues $adtractionDataRow)
+    private function modifyToUniqSku(
+        ResourceProductQueues $adtractionDataRow,
+        CarefulSavingSku $savingSku
+    )
     {
         $modifySku = $adtractionDataRow->getSku() . '_1';
-        $objectRepository = $this->dm->getRepository(AdtractionProduct::class);
-        $matchSku = $objectRepository
+        
+        $matchSku = $savingSku
             ->matchExistProduct($modifySku);
         $adtractionDataRow->setSkuValueToRow($modifySku);
         while ($matchSku instanceof AbstractDocument) {
@@ -558,7 +626,7 @@ class HandleDownloadFileData
                 break;
             }
             $modifySku = $modifySku . '1';
-            $matchSku = $objectRepository
+            $matchSku = $savingSku
                 ->matchExistProduct($modifySku);
             $adtractionDataRow->setSkuValueToRow($modifySku);
         }

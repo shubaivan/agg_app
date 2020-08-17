@@ -225,7 +225,7 @@ class ResourceDownloadFile extends Command
         $fileRelativePath = $this->getDirForFiles($key) . '/' . $date . '.csv' .((isset($zipExt) && $zipExt) ? '.zip' : '');
         // Read bytes off of the stream until the end of the stream is reached
         while (!feof($phpStream)) {
-            $read = fread($phpStream, 1024);
+            $read = fread($phpStream, 2048);
 
             file_put_contents(
                 $fileRelativePath,
