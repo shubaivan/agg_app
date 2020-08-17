@@ -514,7 +514,7 @@ class HandleDownloadFileData
         $this->getProductsBus()->dispatch($adrecordDataRow);
 
         /** @var AdrecordProductRepository $savingSku */
-        $savingSku = $this->dm->getRepository(AdtractionProduct::class);
+        $savingSku = $this->dm->getRepository(AdrecordProduct::class);
         $this->saveProductInMongo(
             $adrecordDataRow,
             $shop,
