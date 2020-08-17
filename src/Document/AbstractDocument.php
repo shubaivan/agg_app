@@ -65,6 +65,22 @@ abstract class AbstractDocument implements DataTableInterface
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getShop()
+    {
+        return $this->shop;
+    }
+
     public function getDeclineAccessor()
     {
         return $this->decline ? 'true' : 'false';

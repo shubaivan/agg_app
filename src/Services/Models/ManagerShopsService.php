@@ -44,6 +44,11 @@ class ManagerShopsService
 //'litenleker'
 //'sneakersPoint'
 //'stor_and_liten'
+//
+//'nepiece_nordic'
+//'blue_tomato'
+//'ellos_se' 
+//'jd_sports' 
 
     /**
      * @var PyretService

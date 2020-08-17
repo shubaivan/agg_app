@@ -4,6 +4,7 @@
 namespace App\DocumentRepository;
 
 use App\Document\AdrecordProduct;
+use App\QueueModel\ResourceProductQueues;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
 use Doctrine\ODM\MongoDB\Query\Builder;
@@ -13,13 +14,22 @@ use Doctrine\ODM\MongoDB\Query\Builder;
  * @package App\DocumentRepository
  * @method int getCount(Builder $builder)
  */
-class AdrecordProductRepository extends ServiceDocumentRepository
+class AdrecordProductRepository extends ServiceDocumentRepository implements CarefulSavingSku
 {
     use CommonTrait;
     
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, AdrecordProduct::class);
+    }
+
+    /**
+     * @param string $sku
+     * @return object|null
+     */
+    public function matchExistProduct(string $sku)
+    {
+        return $this->findOneBy(['SKU' => $sku]);
     }
 
     /**
@@ -135,5 +145,38 @@ class AdrecordProductRepository extends ServiceDocumentRepository
             'data' => $cursor->toArray(),
             'count' => $filterCount
         ];
-    }    
+    }
+
+    public function createProduct(ResourceProductQueues $productQueues, string $shop)
+    {
+        /**
+         * @var $name
+         * @var $category
+         * @var $SKU
+         * @var $EAN
+         * @var $description
+         * @var $model
+         * @var $brand
+         * @var $price
+         * @var $shippingPrice
+         * @var $currency
+         * @var $productUrl
+         * @var $graphicUrl
+         * @var $inStock
+         * @var $inStockQty
+         * @var $deliveryTime
+         * @var $regularPrice
+         * @var $gender
+         * @var $shop
+         */
+        extract($productQueues->getRow());
+
+        $adrecordProduct = new AdrecordProduct(
+            $name, $category, $SKU, $EAN, $description,
+            $model, $brand, $price, $shippingPrice, $currency,
+            $productUrl, $graphicUrl, $inStock, $inStockQty, $deliveryTime,
+            $regularPrice, $gender, $shop
+        );
+        $this->dm->persist($adrecordProduct);
+    }
 }

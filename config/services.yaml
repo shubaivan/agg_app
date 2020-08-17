@@ -11,6 +11,11 @@ parameters:
         'nike': '%env(AWIN_DOWNLOAD_URL_Nike)%'
         'nordic_nest': '%env(AWIN_DOWNLOAD_URL_Nordic_Nest)%'
 
+        'nepiece_nordic': '%env(AWIN_DOWNLOAD_URL_Onepiece_Nordic)%'
+        'blue_tomato': '%env(AWIN_DOWNLOAD_URL_Blue_Tomato)%'
+        'ellos_se': '%env(AWIN_DOWNLOAD_URL_Ellos_SE)%'
+        'jd_sports': '%env(AWIN_DOWNLOAD_URL_JD_Sports)%'
+
     awin_download_file_path: '%env(AWIN_DOWNLOAD_FILE_PATH)%'
 
     adtraction_download_urls:

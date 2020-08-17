@@ -4,6 +4,7 @@
 namespace App\DocumentRepository;
 
 use App\Document\AdtractionProduct;
+use App\QueueModel\ResourceProductQueues;
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepository;
 use Doctrine\ODM\MongoDB\Query\Builder;
@@ -13,7 +14,7 @@ use Doctrine\ODM\MongoDB\Query\Builder;
  * @package App\DocumentRepository
  * @method int getCount(Builder $builder)
  */
-class AdtractionProductRepository extends ServiceDocumentRepository
+class AdtractionProductRepository extends ServiceDocumentRepository implements CarefulSavingSku
 {
     use CommonTrait;
     
@@ -29,6 +30,15 @@ class AdtractionProductRepository extends ServiceDocumentRepository
     public function getCountDoc()
     {
         return $this->getCount($this->createQueryBuilder());
+    }
+
+    /**
+     * @param string $sku
+     * @return object|null
+     */
+    public function matchExistProduct(string $sku)
+    {
+        return $this->findOneBy(['SKU' => $sku]);
     }
 
     /**
@@ -135,5 +145,41 @@ class AdtractionProductRepository extends ServiceDocumentRepository
             'data' => $cursor->toArray(),
             'count' => $filterCount
         ];
+    }
+    
+    public function createProduct(
+        ResourceProductQueues $productQueues,
+        $shop
+    )
+    {
+        /**
+         * @var $SKU
+         * @var $Name
+         * @var $Description
+         * @var $Category
+         * @var $Price
+         * @var $Shipping
+         * @var $Currency
+         * @var $Instock
+         * @var $ProductUrl
+         * @var $ImageUrl
+         * @var $TrackingUrl
+         * @var $Brand
+         * @var $OriginalPrice
+         * @var $Ean
+         * @var $ManufacturerArticleNumber
+         * @var $Extras
+         * @var $shop
+         */
+        extract($productQueues->getRow());
+
+        $adrecordProduct = new AdtractionProduct(
+            $SKU, $Name, $Description, $Category, $Price,
+            $Shipping, $Currency, $Instock, $ProductUrl, $ImageUrl,
+            $TrackingUrl, $Brand, $OriginalPrice, $Ean,
+            $ManufacturerArticleNumber, $Extras, $shop
+        );
+        
+        $this->dm->persist($adrecordProduct);
     }
 }

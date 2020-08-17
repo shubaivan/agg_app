@@ -67,7 +67,12 @@ class Shop
         'spelexperten' => 'Spelexperten',
         'sportshopen' => 'Sportshopen',
         'stigaSports' => 'StigaSports',
-        'twar' => 'Twar'
+        'twar' => 'Twar',
+
+        'nepiece_nordic' => 'Onepiece Nordic',
+        'blue_tomato' => 'Blue Tomato',
+        'ellos_se' => 'Ellos SE',
+        'jd_sports' => 'JD Sports',
     ];
 
     use TimestampableEntity;
