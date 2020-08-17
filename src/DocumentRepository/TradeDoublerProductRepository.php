@@ -299,7 +299,7 @@ class TradeDoublerProductRepository extends ServiceDocumentRepository implements
          */
         extract($productQueues->getRow());
 
-        $TradeDoublerProduct = new TradeDoublerProduct(
+        $tradeDoublerProduct = new TradeDoublerProduct(
             $name, $productImage, $productUrl, $imageUrl, $height, 
             $width, $categories, $MerchantCategoryName, $TDCategoryName, 
             $TDCategoryId, $TDProductId, $description, $feedId, 
@@ -311,6 +311,6 @@ class TradeDoublerProductRepository extends ServiceDocumentRepository implements
             $warranty, $weight, $techSpecs, $dateformat, $shop
         );
         
-        $this->dm->persist($TradeDoublerProduct);
+        $this->dm->persist($tradeDoublerProduct);
     }
 }

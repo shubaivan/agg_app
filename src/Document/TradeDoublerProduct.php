@@ -36,48 +36,221 @@ use App\DocumentRepository\TradeDoublerProductRepository;
  */
 class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
 {
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $name;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $productImage;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $productUrl;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $imageUrl;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $height;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $width;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $categories;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $MerchantCategoryName;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $TDCategoryName;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $TDCategoryId;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $TDProductId;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $description;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $feedId;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $groupingId;
+
+    /**
+     * @MongoDB\Field(type="string")
+     * @MongoDB\Index()
+     */
     private $tradeDoublerId;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $productLanguage;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $modified;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $price;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $currency;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $programName;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $availability;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $brand;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $condition;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $deliveryTime;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $ean;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $upc;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $isbn;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $mpn;
+
+    /**
+     * @MongoDB\Field(type="string")
+     * @MongoDB\Index()
+     */
     private $sku;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $identifiers;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $inStock;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $manufacturer;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $model;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $programLogo;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $promoText;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $shippingCost;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $shortDescription;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $size;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $fields;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $warranty;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $weight;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $techSpecs;
+
+    /**
+     * @MongoDB\Field(type="string")
+     */
     private $dateformat;
 
     /**

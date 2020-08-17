@@ -80,7 +80,7 @@ class Product implements EntityValidatorException
      * @Assert\NotBlank(
      *     groups={Product::SERIALIZED_GROUP_CREATE_IDENTITY}
      * )
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST, Product::SERIALIZED_GROUP_CREATE})
      */
     private $groupIdentity;
 

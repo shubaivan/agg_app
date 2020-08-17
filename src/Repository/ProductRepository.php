@@ -250,10 +250,20 @@ class ProductRepository extends ServiceEntityRepository
         );
 
         if ($parameterBag->get('search')) {
+            $delimiter = '|';
+            if (preg_match_all('/[,]/', $parameterBag->get('search'), $matches) > 0) {
+                $delimiter = ':*|';
+            }
+            
             $parameterBag->set(
                 'search',
                 $this->getHelpers()
-                    ->handleSearchValue($parameterBag->get('search'), $parameterBag->get('strict') === true)
+                    ->handleSearchValue(
+                        $parameterBag->get('search'),
+                        $parameterBag->get('strict') === true,
+                        false,
+                        $delimiter
+                    )
             );
 
             if ($parameterBag->get(ProductService::PRODUCT_PRICE)) {

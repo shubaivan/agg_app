@@ -12,6 +12,11 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
     {
         $rowData = $this->getRow();
 
+        if (isset($rowData['id'])) {
+            $rowData['tradeDoublerId'] = $rowData['id'];
+            unset($rowData['id']);
+        }
+        
         $rowData['productLanguage'] = $rowData['language'];
         $rowData['productShortDescription'] = $rowData['shortDescription'];
         $rowData['productModel'] = $rowData['model'];
