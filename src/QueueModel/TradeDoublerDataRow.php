@@ -99,7 +99,14 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
                 }
             }
         }
-        
+        if (isset($rowData['sku']) && !strlen($rowData['sku'])) {
+            if (isset($rowData['tradeDoublerId'])) {
+                $rowData['sku'] = $rowData['tradeDoublerId'];
+            } elseif (isset($rowData['TDProductId'])) {
+                $rowData['sku'] = $rowData['TDProductId'];
+            }
+
+        }
         $this->row = $rowData;
         $this->postTransform();
     }
