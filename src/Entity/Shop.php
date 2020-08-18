@@ -38,9 +38,7 @@ class Shop
     const SERIALIZED_GROUP_LIST = 'shop_group_list';
 
     private static $shopNamesMapping = [
-        'vegaoo' => 'Vegaoo',
-        'nike' => 'Nike',
-        'nordic_nest' => 'Nordic Nest',
+        //Adtraction
         'babyland' => 'Babyland',
         'babyV' => 'BabyV',
         'elodi' => 'Elodi',
@@ -54,6 +52,8 @@ class Shop
         'sneakersPoint' => 'SneakersPoint',
         'stor_and_liten' => 'Stor & Liten',
         'polarn_pyret' => 'Polarn O. Pyret',
+
+        //Adrecord
         'baby_bjorn' => 'Baby Björn',
         'cardoonia' => 'Cardoonia',
         'ebbeKids' => 'EbbeKids',
@@ -69,11 +69,16 @@ class Shop
         'stigaSports' => 'StigaSports',
         'twar' => 'Twar',
 
+        //Awin
+        'vegaoo' => 'Vegaoo',
+        'nike' => 'Nike',
+        'nordic_nest' => 'Nordic Nest',
         'nepiece_nordic' => 'Onepiece Nordic',
         'blue_tomato' => 'Blue Tomato',
         'ellos_se' => 'Ellos SE',
         'jd_sports' => 'JD Sports',
-        
+
+        //TradeDoubler
         'sportamore' => 'Sportamore',
         'bonprix' => 'Bonprix',
         'cdon_barn_and_baby' => 'CDON Barn and Baby',

@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         success: (data) => {
             const collectionData = window.Routing
-                .generate('app_rest_trade_doublercollection_postproducts');
+                .generate('app_rest_tradedoublercollection_postproducts');
             var common_defs = [];
             var decline_reason_key = [];
             $.each( for_prepare_defs, function( key, value ) {
