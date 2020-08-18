@@ -24,7 +24,7 @@ class TradeDoublerProductRepository extends ServiceDocumentRepository implements
 
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, AwinProduct::class);
+        parent::__construct($registry, TradeDoublerProduct::class);
     }
 
     /**
