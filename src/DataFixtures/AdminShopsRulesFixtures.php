@@ -122,10 +122,10 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
         'Gina Tricot' =>
             [
                 'name' => [
-                    'Barn', 'Baby', 'Kids'
+                    'Barn', 'Baby', 'Kids', 'mini'
                 ],
                 'description' => [
-                    'Barn', 'Baby', 'Kids'
+                    'Barn', 'Baby', 'Kids', 'mini'
                 ]
             ],
         'JD Sports' =>
@@ -156,6 +156,18 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
                 ],
                 'description' => [
                     'Barn', 'Kids', 'Junior', 'Jr'
+                ],
+            ],
+        'Sportamore' =>
+            [
+                'extras' => [
+                    'AGE_GROUP' => ['kids', 'toddler']
+                ]
+            ],
+        'Bonprix'  =>
+            [
+                'description' => [
+                    'graviditet', 'barn', 'baby'
                 ],
             ],
     ];
