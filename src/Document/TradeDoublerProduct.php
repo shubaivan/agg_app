@@ -24,7 +24,7 @@ use App\DocumentRepository\TradeDoublerProductRepository;
  * })
  * @Annotation\AccessorOrder("custom", custom = {
  *     "TDProductId",
- *     "productImage",
+ *     "imageUrl",
  *     "decline",
  *     "declineReasonClass",
  *     "shop",

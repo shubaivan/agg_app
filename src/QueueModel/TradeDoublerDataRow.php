@@ -45,9 +45,11 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
             $this->categories = array_merge($this->categories, $explodeMerchantProductCategoryPathMap);
         }
 
-        $pregImageUrl = preg_replace('/;;/', '', $rowData['productImage']);
-        if ($rowData['imageUrl'] != $pregImageUrl) {
-            $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_1#' . $pregImageUrl . '}';
+        $clearImagePath = preg_replace('/;;/', '', $rowData['productImage']);
+        $rowData['productImage'] = $clearImagePath;
+        
+        if ($rowData['imageUrl'] != $clearImagePath) {
+            $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_1#' . $clearImagePath . '}';
         }
 
         if (isset($rowData['TDCategoryName']) && strlen($rowData['TDCategoryName'])) {
