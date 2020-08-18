@@ -369,4 +369,9 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
     {
         return ['description'];    
     }
+
+    public function getName()
+    {
+        return $this->name;
+    }
 }

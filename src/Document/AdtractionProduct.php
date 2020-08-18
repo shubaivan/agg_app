@@ -176,4 +176,9 @@ class AdtractionProduct extends AbstractDocument
     {
         return array_merge(['SKU', 'Brand'], parent::getSeparateFilterColumn());
     }
+
+    public function getName()
+    {
+        return $this->Name;
+    }
 }

@@ -167,6 +167,12 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
         }
     }
 
+
+    public function getName()
+    {
+        return isset($this->row['product_name']) ?? null;
+    }
+    
     public function getSku()
     {
         return $this->row['sku'] ?? null;

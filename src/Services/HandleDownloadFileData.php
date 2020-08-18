@@ -597,9 +597,18 @@ class HandleDownloadFileData
             ->matchExistProduct($productQueues->getSku());
 
         if ($productMatch && $productMatch->getId()) {
-            if ($productMatch->getShop() != $productQueues->getShop()) {
+            if ($productMatch->getShop() != $productQueues->getShop()
+                || $productMatch->getName() != $productQueues->getName()
+            ) {
                 $this->modifyToUniqSku($productQueues, $savingSku);
             } else {
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HANDLE_MATCH_BY_SKU . date('Ymd'),
+                        Shop::PREFIX_HANDLE_MATCH_BY_SKU . $productQueues->getShop());
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HANDLE_MATCH_BY_SKU . $productQueues->getRedisUniqKey(),
+                        Shop::PREFIX_HANDLE_MATCH_BY_SKU . $productQueues->getFilePath());
+
                 return;
             }
         }
@@ -608,27 +617,27 @@ class HandleDownloadFileData
     }
 
     /**
-     * @param ResourceProductQueues $adtractionDataRow
+     * @param ResourceProductQueues $queueDataRow
      * @param CarefulSavingSku $savingSku
      */
     private function modifyToUniqSku(
-        ResourceProductQueues $adtractionDataRow,
+        ResourceProductQueues $queueDataRow,
         CarefulSavingSku $savingSku
     )
     {
-        $modifySku = $adtractionDataRow->getSku() . '_1';
+        $modifySku = $queueDataRow->getSku() . '_1';
         
         $matchSku = $savingSku
             ->matchExistProduct($modifySku);
-        $adtractionDataRow->setSkuValueToRow($modifySku);
+        $queueDataRow->setSkuValueToRow($modifySku);
         while ($matchSku instanceof AbstractDocument) {
-            if ($matchSku->getShop() == $adtractionDataRow->getShop()) {
+            if ($matchSku->getShop() == $queueDataRow->getShop()) {
                 break;
             }
             $modifySku = $modifySku . '1';
             $matchSku = $savingSku
                 ->matchExistProduct($modifySku);
-            $adtractionDataRow->setSkuValueToRow($modifySku);
+            $queueDataRow->setSkuValueToRow($modifySku);
         }
     }
 

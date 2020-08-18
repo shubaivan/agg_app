@@ -80,13 +80,13 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
         'Nike' =>
             [
                 'category' => [
-                    'Kids', 'Barn', 'Girls', 'Boys'
+                    'Kids', 'Barn', 'Girls', 'Boys', 'Baby'
                 ]
             ],
         'SneakersPoint' =>
             [
                 'category' => [
-                    'Sneakers junior'
+                    'junior'
                 ]
             ],
         'Gus Textil' =>
@@ -98,18 +98,66 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
         'Cykloteket' =>
             [
                 'category' => [
-                    'Barn, Junior, Baby, Kids'
+                    'Barn', 'Junior', 'Baby', 'Kids'
                 ]
             ],
         'Nordic Nest' =>
             [
                 'name' => [
-                    'barn, baby, Junior'
+                    'barn', 'baby', 'Junior', 'kids'
                 ],
                 '!name' => [
                     'vas'
                 ]
-            ]
+            ],
+        'Shirtstore' =>
+            [
+                'name' => [
+                    'Kids'
+                ],
+                'description' => [
+                    'Kids'
+                ]
+            ],
+        'Gina Tricot' =>
+            [
+                'name' => [
+                    'Barn', 'Baby', 'Kids'
+                ],
+                'description' => [
+                    'Barn', 'Baby', 'Kids'
+                ]
+            ],
+        'JD Sports' =>
+            [
+                'category' => [
+                    'Barn', 'Junior', 'Baby', 'Juniorer'
+                ]
+            ],
+        'Ellos SE' =>
+            [
+                'category' => [
+                    'Barn', 'Junior', 'Baby'
+                ]
+            ],
+        'Blue Tomato' =>
+            [
+                'description' => [
+                    'Junior', 'Barn', 'Youth'
+                ],
+                '!description' => [
+                    'Barnhänder'
+                ]
+            ],
+        'CDON Shoes' =>
+            [
+                'name' => [
+                    'Barn', 'Kids', 'Junior', 'Jr'
+                ],
+                'description' => [
+                    'Barn', 'Kids', 'Junior', 'Jr'
+                ],
+            ],
     ];
 
     public function load(ObjectManager $manager)

@@ -25,7 +25,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                     'Tröjklänningar' => 'Tröjklänning, Sweater dress, Sweaterdress',
                     'Kjolar' => 'kjol, kjolar, skirt, skirts, jeanskjol, denimskirt, jeans skirt, korta kjolar, miniskirt, mini skirt, short skirt, maxikjolar, maxikjol maxidresses, maxidress, midikjolar, midikjol, midiskirts, midiskirt, tyllkjol, tyllkjolar, tulle skirts, tulleskirt, veckade kjolar, veckad kjol, pleated skirts, pleated skirt'
                 ],
-                'negative_key_words' => 'skor, byxa',
+                'negative_key_words' => 'skor, byxa, Bloomers',
             ],
             [
                 'name' => 'Bodys & Bodysuits',
@@ -320,7 +320,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
 
         $main = $this->createCategoryWithConf(
             'Baby',
-            'Baby, Toddler, Infant, Premature, eStore',
+            'Baby, Toddler, Infant, Premature, eStore, kids',
             'main',
             'Barn, Skor, Barnvagnar, Leksaker, Förälder, Maskerad, Kostym, Barndräkt, Halloween, Utklädnad, Sagodräkt, maskeradkläder');
         $configurations = $this->configurations;

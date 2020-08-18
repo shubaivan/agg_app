@@ -31,4 +31,9 @@ class AdrecordDataRow extends ResourceProductQueues implements ResourceDataRow
 
         $this->row = $row;
     }
+
+    public function getName()
+    {
+        return isset($this->row['name']) ?? null;
+    }
 }

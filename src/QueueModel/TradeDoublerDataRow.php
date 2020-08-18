@@ -124,4 +124,9 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
     {
         return $this->row['sku'] ?? null;
     }
+
+    public function getName()
+    {
+        return $this->row['name'] ?? null;
+    }
 }

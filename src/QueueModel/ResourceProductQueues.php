@@ -4,7 +4,9 @@
 namespace App\QueueModel;
 
 
-abstract class ResourceProductQueues
+use App\Document\MatchSameProducts;
+
+abstract class ResourceProductQueues implements MatchSameProducts
 {
     /**
      * @var array

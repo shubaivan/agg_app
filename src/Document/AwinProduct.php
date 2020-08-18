@@ -1275,4 +1275,9 @@ class AwinProduct extends AbstractDocument
     {
         return array_merge(['aw_product_id', 'brand_name'], parent::getSeparateFilterColumn());
     }
+
+    public function getName()
+    {
+        return $this->product_name;
+    }
 }
