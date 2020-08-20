@@ -20,8 +20,12 @@ use App\DocumentRepository\TradeDoublerProductRepository;
  *     "sku"="text",
  *     "model"="text",
  *     "declineReasonClass"="text",
- *     "shop"="text"
+ *     "shop"="text",
+ *     "identityUniqData"="text",
  * })
+ *
+ * @MongoDB\UniqueIndex(keys={"name"="asc", "sku"="asc", "brand"="asc", "ean"="asc", "shop"="asc", "tradeDoublerId"="asc"})
+ * 
  * @Annotation\AccessorOrder("custom", custom = {
  *     "TDProductId",
  *     "imageUrl",
@@ -368,10 +372,5 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
     public static function convertToHtmColumns(): array
     {
         return ['description'];    
-    }
-
-    public function getName()
-    {
-        return $this->name;
     }
 }

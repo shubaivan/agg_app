@@ -15,8 +15,14 @@ use JMS\Serializer\Annotation;
  *     "Description"="text",
  *     "Category"="text",
  *     "Price"="text",
- *     "Brand"="text"
+ *     "Brand"="text",
+ *     "Ean"="text",
+ *     "shop"="text",
+ *     "identityUniqData"="text", 
  * })
+ *
+ * @MongoDB\UniqueIndex(keys={"Name"="asc", "SKU"="asc", "Brand"="asc", "Ean"="asc", "shop"="asc"})
+ *
  * @Annotation\AccessorOrder("custom", custom = {
  *     "SKU",
  *     "ImageUrl",
@@ -175,10 +181,5 @@ class AdtractionProduct extends AbstractDocument
     public static function getSeparateFilterColumn(): array
     {
         return array_merge(['SKU', 'Brand'], parent::getSeparateFilterColumn());
-    }
-
-    public function getName()
-    {
-        return $this->Name;
     }
 }

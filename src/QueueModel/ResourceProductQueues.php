@@ -6,8 +6,10 @@ namespace App\QueueModel;
 
 use App\Document\MatchSameProducts;
 
-abstract class ResourceProductQueues implements MatchSameProducts
+abstract class ResourceProductQueues implements MatchSameProducts, ResourceDataRow
 {
+    protected $categories = [];
+    
     /**
      * @var array
      */
@@ -89,6 +91,14 @@ abstract class ResourceProductQueues implements MatchSameProducts
     }
 
     /**
+     * @return string|null
+     */
+    public function getAttributeByName(string $name)
+    {
+        return $this->row[$name] ?? null;
+    }
+
+    /**
      * @param int $id
      * @return $this
      */
@@ -124,5 +134,50 @@ abstract class ResourceProductQueues implements MatchSameProducts
     public function getFilePath()
     {
         return $this->filePath;
+    }
+
+    public function transform()
+    {
+        $this->postTransform();
+    }
+    
+    protected function postTransform()
+    {
+        if (count($this->categories)) {
+            $this->row['category'] = implode(' - ', array_unique($this->categories));
+        }
+
+        $this->row['identityUniqData'] = $this->generateIdentityUniqData();
+    }
+    
+    /**
+     * @return false|mixed|string|string[]|null
+     */
+    public function generateIdentityUniqData()
+    {
+        if (isset($this->row['identityUniqData']) && strlen($this->row['identityUniqData'])) {
+            return $this->row['identityUniqData'];
+        }
+
+        $prepare = [];
+        if ($this->getName()) {
+            $prepare[] = $this->getName();
+        }
+        if ($this->getSku()) {
+            $prepare[] = $this->getSku();
+        }
+        if ($this->getBrand()) {
+            $prepare[] = $this->getBrand();
+        }
+        if ($this->getEan()) {
+            $prepare[] = $this->getEan();
+        }
+        if ($this->getShop()) {
+            $prepare[] = $this->getShop();
+        }
+        $implode = implode('_', $prepare);
+        $preg_replace = preg_replace('!\s!', '_', $implode);
+
+        return mb_strtolower($preg_replace);
     }
 }

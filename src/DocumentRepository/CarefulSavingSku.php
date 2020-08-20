@@ -9,10 +9,10 @@ use App\QueueModel\ResourceProductQueues;
 interface CarefulSavingSku
 {
     /**
-     * @param string $sku
+     * @param ResourceProductQueues $productQueues
      * @return mixed
      */
-    public function matchExistProduct(string $sku);
+    public function matchExistProduct(ResourceProductQueues $productQueues);
 
     /**
      * @param ResourceProductQueues $productQueues

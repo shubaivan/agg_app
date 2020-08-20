@@ -146,7 +146,7 @@ class ProductService extends AbstractModel
      * @param ResourceDataRow $adtractionDataRow
      * @return Product
      * @throws ValidatorException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws \Exception
      */
     public function createProductFromCsvRow(ResourceDataRow $adtractionDataRow)
     {
@@ -341,50 +341,26 @@ class ProductService extends AbstractModel
     /**
      * @param ResourceDataRow $adtractionDataRow
      * @return ResourceDataRow
+     * @throws \Exception
      */
     private function prepareDataForExistProduct(ResourceDataRow $adtractionDataRow)
     {
-        $product = $this->matchExistProduct($adtractionDataRow->getSku());
+        $product = $this->matchExistProduct($adtractionDataRow->generateIdentityUniqData());
 
         if ($product && $product->getId()) {
-            if ($product->getShop() == $adtractionDataRow->getShop()) {
-                $adtractionDataRow->setExistProductId($product->getId());
-            } else {
-                $this->modifyToUniqSku($adtractionDataRow);
-            }
+            $adtractionDataRow->setExistProductId($product->getId());
         }
 
         return $adtractionDataRow;
     }
-
+    
     /**
-     * @param ResourceDataRow $adtractionDataRow
-     */
-    private function modifyToUniqSku(ResourceDataRow $adtractionDataRow)
-    {
-        $modifySku = $adtractionDataRow->getSku() . '_1';
-        $matchSku = $this->getProductRepository()
-            ->findOneBy(['sku' => $modifySku]);
-        $adtractionDataRow->setSkuValueToRow($modifySku);
-        while ($matchSku instanceof Product) {
-            if ($matchSku->getShop() == $adtractionDataRow->getShop()) {
-                $adtractionDataRow->setExistProductId($matchSku->getId());
-                break;
-            }
-            $modifySku = $modifySku . '1';
-            $matchSku = $this->getProductRepository()
-                ->findOneBy(['sku' => $modifySku]);
-            $adtractionDataRow->setSkuValueToRow($modifySku);
-        }
-    }
-
-    /**
-     * @param string $sku
+     * @param string $data
      * @return Product|object|null
      */
-    private function matchExistProduct(string $sku)
+    private function matchExistProduct(string $data)
     {
-        return $this->getProductRepository()->findOneBy(['sku' => $sku]);
+        return $this->getProductRepository()->findOneBy(['identityUniqData' => $data]);
     }
 
     private function setGroupIdentity(Product $product)

@@ -15,8 +15,12 @@ use JMS\Serializer\Annotation;
  *     "description"="text",
  *     "category"="text",
  *     "price"="text",
- *     "brand"="text"
+ *     "brand"="text",
+ *     "identityUniqData"="text",
  * })
+ *
+ * @MongoDB\UniqueIndex(keys={"name"="asc", "SKU"="asc", "brand"="asc", "EAN"="asc", "shop"="asc"})
+ * 
  * @Annotation\AccessorOrder("custom", custom = {
  *     "SKU",
  *     "graphicUrl",

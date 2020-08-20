@@ -36,9 +36,15 @@ class AdtractionProductRepository extends ServiceDocumentRepository implements C
      * @param string $sku
      * @return object|null
      */
-    public function matchExistProduct(string $sku)
+    public function matchExistProduct(ResourceProductQueues $productQueues)
     {
-        return $this->findOneBy(['SKU' => $sku]);
+        return $this->findOneBy([
+            'Name' => $productQueues->getName(),
+            'SKU' => $productQueues->getSku(),
+            'Brand' => $productQueues->getBrand(),
+            'Ean' => $productQueues->getEan(),
+            'shop' => $productQueues->getShop(),
+        ]);
     }
 
     /**

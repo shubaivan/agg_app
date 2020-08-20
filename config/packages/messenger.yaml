@@ -8,7 +8,9 @@ framework:
       default_bus: command.bus
       buses:
         command.bus:
-          middleware: ~
+          middleware:
+            - doctrine_ping_connection
+            - doctrine_close_connection
         products.bus:
           middleware:
             - doctrine_ping_connection

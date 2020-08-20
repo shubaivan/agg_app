@@ -36,9 +36,15 @@ class AwinProductRepository extends ServiceDocumentRepository implements Careful
      * @param string $sku
      * @return object|null
      */
-    public function matchExistProduct(string $sku)
+    public function matchExistProduct(ResourceProductQueues $productQueues)
     {
-        return $this->findOneBy(['aw_product_id' => $sku]);
+        return $this->findOneBy([
+            'product_name' => $productQueues->getName(),
+            'aw_product_id' => $productQueues->getSku(),
+            'brand_name' => $productQueues->getBrand(),
+            'ean' => $productQueues->getEan(),
+            'shop' => $productQueues->getShop(),
+        ]);
     }
 
     public function getListQuery()

@@ -40,4 +40,9 @@ interface ResourceDataRow extends LastProductInterface
      * @return string
      */
     public function getRedisUniqKey(): string;
+
+    /**
+     * @return mixed
+     */
+    public function generateIdentityUniqData();
 }

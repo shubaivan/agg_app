@@ -6,7 +6,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use JMS\Serializer\Annotation;
 
-abstract class AbstractDocument implements DataTableInterface, MatchSameProducts
+abstract class AbstractDocument implements DataTableInterface
 {
     /**
      * @MongoDB\Id
@@ -28,6 +28,12 @@ abstract class AbstractDocument implements DataTableInterface, MatchSameProducts
      * @MongoDB\Field(type="string")
      */
     protected $shop;
+
+    /**
+     * @MongoDB\Field(type="string")
+     * @MongoDB\Index()
+     */
+    protected $identityUniqData;
 
     /**
      * @return bool

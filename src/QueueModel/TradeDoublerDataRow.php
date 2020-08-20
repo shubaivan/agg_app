@@ -6,8 +6,6 @@ use App\Entity\Product;
 
 class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataRow
 {
-    private $categories = [];
-
     public function transform()
     {
         $rowData = $this->getRow();
@@ -16,7 +14,7 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
             $rowData['tradeDoublerId'] = $rowData['id'];
             unset($rowData['id']);
         }
-        
+
         $rowData['productLanguage'] = $rowData['language'];
         $rowData['productShortDescription'] = $rowData['shortDescription'];
         $rowData['productModel'] = $rowData['model'];
@@ -47,7 +45,7 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
 
         $clearImagePath = preg_replace('/;;/', '', $rowData['productImage']);
         $rowData['productImage'] = $clearImagePath;
-        
+
         if ($rowData['imageUrl'] != $clearImagePath) {
             $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_1#' . $clearImagePath . '}';
         }
@@ -55,7 +53,7 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
         if (isset($rowData['TDCategoryName']) && strlen($rowData['TDCategoryName'])) {
             $this->categories[] = $rowData['TDCategoryName'];
         }
-        $rowData['groupIdentity'] = $rowData['groupingId'];
+        $rowData['manufacturerArticleNumber'] = $rowData['groupingId'];
 
         $rowData['Extras'] = '';
         if (isset($rowData['size']) && strlen($rowData['size']) > 0) {
@@ -85,39 +83,32 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
                 $fieldAdditionalImageUrl = preg_replace('/additional_image_url:/', '', $field);
                 $imgs = explode(',', $fieldAdditionalImageUrl);
                 $i = 1;
-                foreach ($imgs as $key=>$img) {
+                foreach ($imgs as $key => $img) {
                     $i += 1;
-                    $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_'.$i.'#' . $img . '}';
+                    $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_' . $i . '#' . $img . '}';
                 }
             } else {
                 $explodeFields = explode(':', $field);
                 if (isset($explodeFields[0]) && isset($explodeFields[1])) {
                     if (preg_match('/color/', $explodeFields[0])) {
-                        $rowData['Extras'] .= '{'.Product::COLOUR.'#' . $explodeFields[1] . '}';
+                        $rowData['Extras'] .= '{' . Product::COLOUR . '#' . $explodeFields[1] . '}';
                         continue;
                     }
 
-                    $rowData['Extras'] .= '{'.mb_strtoupper($explodeFields[0]).'#' . $explodeFields[1] . '}';
+                    $rowData['Extras'] .= '{' . mb_strtoupper($explodeFields[0]) . '#' . $explodeFields[1] . '}';
                 }
             }
         }
-        if (isset($rowData['sku']) && !strlen($rowData['sku'])) {
-            if (isset($rowData['tradeDoublerId'])) {
-                $rowData['sku'] = $rowData['tradeDoublerId'];
-            } elseif (isset($rowData['TDProductId'])) {
-                $rowData['sku'] = $rowData['TDProductId'];
-            }
-
-        }
+//        if (isset($rowData['sku']) && !strlen($rowData['sku'])) {
+//            if (isset($rowData['tradeDoublerId'])) {
+//                $rowData['sku'] = $rowData['tradeDoublerId'];
+//            } elseif (isset($rowData['TDProductId'])) {
+//                $rowData['sku'] = $rowData['TDProductId'];
+//            }
+//
+//        }
         $this->row = $rowData;
         $this->postTransform();
-    }
-
-    private function postTransform()
-    {
-        if (count($this->categories)) {
-            $this->row['category'] = implode(' - ', array_unique($this->categories));
-        }
     }
 
     public function getSku()
@@ -128,5 +119,49 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
     public function getName()
     {
         return $this->row['name'] ?? null;
+    }
+
+    public function getBrand()
+    {
+        return $this->row['brand'] ?? null;
+    }
+
+    public function getEan()
+    {
+        return $this->row['ean'] ?? null;
+    }
+
+    /**
+     * @return false|mixed|string|string[]|null
+     */
+    public function generateIdentityUniqData()
+    {
+        if (isset($this->row['identityUniqData']) && strlen($this->row['identityUniqData'])) {
+            return $this->row['identityUniqData'];
+        }
+        //   * @MongoDB\UniqueIndex(keys={"name"="asc", "sku"="asc", "brand"="asc", "ean"="asc", "shop"="asc", "tradeDoublerId"="asc"})
+        $prepare = [];
+        if ($this->getName()) {
+            $prepare[] = $this->getName();
+        }
+        if ($this->getSku()) {
+            $prepare[] = $this->getSku();
+        }
+        if ($this->getBrand()) {
+            $prepare[] = $this->getBrand();
+        }
+        if ($this->getEan()) {
+            $prepare[] = $this->getEan();
+        }
+        if ($this->getShop()) {
+            $prepare[] = $this->getShop();
+        }
+        if ($this->getAttributeByName('tradeDoublerId')) {
+            $prepare[] = $this->getAttributeByName('tradeDoublerId');
+        }
+        $implode = implode('_', $prepare);
+        $preg_replace = preg_replace('!\s!', '_', $implode);
+
+        return mb_strtolower($preg_replace);
     }
 }

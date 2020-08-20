@@ -2,7 +2,7 @@
 
 namespace App\QueueModel;
 
-class AdrecordDataRow extends ResourceProductQueues implements ResourceDataRow
+class AdrecordDataRow extends ResourceProductQueues
 {
     public function transform()
     {
@@ -30,10 +30,21 @@ class AdrecordDataRow extends ResourceProductQueues implements ResourceDataRow
         }
 
         $this->row = $row;
+        $this->postTransform();
     }
 
     public function getName()
     {
-        return isset($this->row['name']) ?? null;
+        return $this->row['name'] ?? null;
+    }
+
+    public function getBrand()
+    {
+        return $this->row['brand'] ?? null;
+    }
+
+    public function getEan()
+    {
+        return $this->row['EAN'] ?? null;
     }
 }

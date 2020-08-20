@@ -16,7 +16,10 @@ use App\Validation\Constraints\CustomUrl;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  * @ORM\Table(name="products",
- *     uniqueConstraints={@UniqueConstraint(name="uniq_sku_index", columns={"sku"})},
+ *    uniqueConstraints={
+ *        @UniqueConstraint(name="identityUniqData_uniq_idx",
+ *            columns={"identity_uniq_data"})
+ *    },
  *     indexes={
  *     @ORM\Index(name="sku_idx", columns={"sku"}),
  *     @ORM\Index(name="instock_idx", columns={"instock"}),
@@ -38,9 +41,9 @@ use App\Validation\Constraints\CustomUrl;
  *     "extras", "createdAt"
  *      }
  * )
+ * @UniqueEntity(fields={"identityUniqData"}, groups={Product::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache("NONSTRICT_READ_WRITE")
  * @ORM\HasLifecycleCallbacks()
- * @UniqueEntity(fields={"sku"}, groups={Product::SERIALIZED_GROUP_CREATE})
  */
 class Product implements EntityValidatorException
 {
@@ -67,7 +70,16 @@ class Product implements EntityValidatorException
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="text")
+     * @Assert\NotBlank(
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $identityUniqData;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
      * @Assert\NotBlank(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
@@ -995,6 +1007,14 @@ class Product implements EntityValidatorException
         $price = preg_replace('/.00/', '', $this->price);
 
         return $price;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIdentityUniqData()
+    {
+        return $this->identityUniqData;
     }
 
     /**

@@ -266,53 +266,73 @@ class HandleDownloadFileData
     public function creatingCarriageShop(
         string $filePath, string $shop, string $redisUniqKey)
     {
-        if (!$this->checkExistResourceWithShop($shop)) {
-            $this->getLogger()->error('shop ' . $shop . ' not present on resources');
-        }
-
-
-        if (!$this->getRedisHelper()->hExists(self::COUNT_PRODUCTS_SHOP . $redisUniqKey, $filePath)) {
-            if (!file_exists($filePath)) {
-                $this->getLogger()->error('file ' . $filePath . ' no exist');
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
-                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
-                throw new \Exception('file ' . $filePath . ' no exist');
+        try {
+            if (!$this->checkExistResourceWithShop($shop)) {
+                $this->getLogger()->error('shop ' . $shop . ' not present on resources');
             }
-        }
 
-        $count = $this->getCount($filePath, $redisUniqKey);
-        if (!$count) {
-            $csv = $this->generateCsvReader($filePath, $shop);
-            $count = (int)$csv->count();
 
-            $this->getRedisHelper()
-                ->hMSet(self::TIME_SPEND_PRODUCTS_SHOP_START . $redisUniqKey,
-                    [$filePath => (new \DateTime())->getTimestamp()]
+            if (!$this->getRedisHelper()->hExists(self::COUNT_PRODUCTS_SHOP . $redisUniqKey, $filePath)) {
+                if (!file_exists($filePath)) {
+                    $this->getLogger()->error('file ' . $filePath . ' no exist');
+                    $this->getRedisHelper()
+                        ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                            Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+                    $this->getRedisHelper()
+                        ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                            Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+                    throw new \Exception('file ' . $filePath . ' no exist');
+                }
+            }
+
+            $count = $this->getCount($filePath, $redisUniqKey);
+            if (!$count) {
+                $csv = $this->generateCsvReader($filePath, $shop);
+                $count = (int)$csv->count();
+
+                $this->getRedisHelper()
+                    ->hMSet(self::TIME_SPEND_PRODUCTS_SHOP_START . $redisUniqKey,
+                        [$filePath => (new \DateTime())->getTimestamp()]
+                    );
+
+                $this->getRedisHelper()
+                    ->hMSet(self::COUNT_PRODUCTS_SHOP . $redisUniqKey,
+                        [$filePath => $count]
+                    );
+            }
+            if (!(int)$count) {
+                return;
+            }
+            for ($i = 0; $i <= $count; $i = $i + $this->csvHandleStep) {
+                $this->getCommandBus()->dispatch(
+                    new CarriageShop(
+                        $i,
+                        ($i + $this->csvHandleStep >= $count
+                            ? $count - $i : $this->csvHandleStep),
+                        $filePath,
+                        $shop,
+                        $redisUniqKey
+                    )
                 );
-
+            }
+        } catch (\Exception $e) {
+            $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->hMSet(self::COUNT_PRODUCTS_SHOP . $redisUniqKey,
-                    [$filePath => $count]
-                );
-        }
-        if (!(int)$count) {
-            return;
-        }
-        for ($i = 0; $i <= $count; $i = $i + $this->csvHandleStep) {
-            $this->getCommandBus()->dispatch(
-                new CarriageShop(
-                    $i,
-                    ($i + $this->csvHandleStep >= $count
-                        ? $count - $i : $this->csvHandleStep),
-                    $filePath,
-                    $shop,
-                    $redisUniqKey
-                )
-            );
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+            throw $e;
+        } catch (\Throwable $exception) {
+            $this->getLogger()->error($exception->getMessage());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+            throw $exception;
         }
     }
 
@@ -537,6 +557,7 @@ class HandleDownloadFileData
             $filePath,
             $redisUniqKey
         );
+        $adtractionDataRow->transform();
         $this->getProductsBus()->dispatch($adtractionDataRow);
         /** @var AdtractionProductRepository $savingSku */
         $savingSku = $this->dm->getRepository(AdtractionProduct::class);
@@ -594,50 +615,17 @@ class HandleDownloadFileData
     {
         /** @var AdtractionProduct $productMatch */
         $productMatch = $savingSku
-            ->matchExistProduct($productQueues->getSku());
+            ->matchExistProduct($productQueues);
 
         if ($productMatch && $productMatch->getId()) {
-            if ($productMatch->getShop() != $productQueues->getShop()
-                || $productMatch->getName() != $productQueues->getName()
-            ) {
-                $this->modifyToUniqSku($productQueues, $savingSku);
-            } else {
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HANDLE_MATCH_BY_SKU . date('Ymd'),
-                        Shop::PREFIX_HANDLE_MATCH_BY_SKU . $productQueues->getShop());
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HANDLE_MATCH_BY_SKU . $productQueues->getRedisUniqKey(),
-                        Shop::PREFIX_HANDLE_MATCH_BY_SKU . $productQueues->getFilePath());
-
-                return;
-            }
-        }
-
-        $savingSku->createProduct($productQueues, $shop);
-    }
-
-    /**
-     * @param ResourceProductQueues $queueDataRow
-     * @param CarefulSavingSku $savingSku
-     */
-    private function modifyToUniqSku(
-        ResourceProductQueues $queueDataRow,
-        CarefulSavingSku $savingSku
-    )
-    {
-        $modifySku = $queueDataRow->getSku() . '_1';
-        
-        $matchSku = $savingSku
-            ->matchExistProduct($modifySku);
-        $queueDataRow->setSkuValueToRow($modifySku);
-        while ($matchSku instanceof AbstractDocument) {
-            if ($matchSku->getShop() == $queueDataRow->getShop()) {
-                break;
-            }
-            $modifySku = $modifySku . '1';
-            $matchSku = $savingSku
-                ->matchExistProduct($modifySku);
-            $queueDataRow->setSkuValueToRow($modifySku);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_MATCH_BY_SKU . $productQueues->getShop());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $productQueues->getRedisUniqKey(),
+                    Shop::PREFIX_HANDLE_MATCH_BY_SKU . $productQueues->getFilePath());
+        } else {
+            $savingSku->createProduct($productQueues, $shop);   
         }
     }
 

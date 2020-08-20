@@ -27,9 +27,15 @@ class AdrecordProductRepository extends ServiceDocumentRepository implements Car
      * @param string $sku
      * @return object|null
      */
-    public function matchExistProduct(string $sku)
+    public function matchExistProduct(ResourceProductQueues $productQueues)
     {
-        return $this->findOneBy(['SKU' => $sku]);
+        return $this->findOneBy([
+            'name' => $productQueues->getName(),
+            'SKU' => $productQueues->getSku(),
+            'brand' => $productQueues->getBrand(),
+            'EAN' => $productQueues->getEan(),
+            'shop' => $productQueues->getShop(),
+        ]);
     }
 
     /**

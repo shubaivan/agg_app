@@ -23,8 +23,12 @@ use JMS\Serializer\Annotation;
  *     "Fashion_category"="text",
  *     "Fashion_size"="text",
  *     "declineReasonClass"="text",
- *     "shop"="text"
+ *     "shop"="text",
+ *     "identityUniqData"="text",
  * })
+ *
+ * @MongoDB\UniqueIndex(keys={"product_name"="asc", "aw_product_id"="asc", "brand_name"="asc", "ean"="asc", "shop"="asc"})
+ * 
  * @Annotation\AccessorOrder("custom", custom = {
  *     "aw_product_id",
  *     "merchant_image_url",
@@ -1260,7 +1264,7 @@ class AwinProduct extends AbstractDocument
     public static function getShortPreviewText():array
     {
         return [
-            'id', 'SKU'
+            'id', 'aw_product_id'
         ];
     }
 
@@ -1274,10 +1278,5 @@ class AwinProduct extends AbstractDocument
     public static function getSeparateFilterColumn(): array
     {
         return array_merge(['aw_product_id', 'brand_name'], parent::getSeparateFilterColumn());
-    }
-
-    public function getName()
-    {
-        return $this->product_name;
     }
 }
