@@ -255,7 +255,7 @@ class ProductDataRowHandler
             throw $exception;
         }
 
-        echo $dataRow->getSku() . PHP_EOL;
+        echo $dataRow->generateIdentityUniqData() . PHP_EOL;
     }
 
     /**
@@ -296,7 +296,7 @@ class ProductDataRowHandler
         /** @var TradeDoublerProduct $tradeDoublerProduct */
         $tradeDoublerProduct = $this->dm->getRepository(TradeDoublerProduct::class)
             ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
-        
+
         if ($tradeDoublerProduct) {
             $tradeDoublerProduct
                 ->setDeclineReasonClass($declineReasonClass)
