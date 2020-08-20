@@ -87,6 +87,22 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param string $name
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function matchExistByName(string $name)
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.categoryName = :name')
+            ->setParameter('name', $name)
+            ->getQuery()
+            ->enableResultCache()
+            ->useQueryCache(true)
+            ->getOneOrNullResult();
+    }
+
+    /**
      * @param ParamFetcher $paramFetcher
      * @return mixed
      * @throws \Doctrine\DBAL\Cache\CacheException

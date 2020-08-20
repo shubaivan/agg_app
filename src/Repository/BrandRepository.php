@@ -82,6 +82,22 @@ class BrandRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param string $name
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function matchExistByName(string $name) 
+    {
+        return $this->createQueryBuilder('b')
+            ->where('b.brandName = :name')
+            ->setParameter('name', $name)
+            ->getQuery()
+            ->enableResultCache()
+            ->useQueryCache(true)
+            ->getOneOrNullResult();
+    }
+
+    /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
      * @return int|mixed[]

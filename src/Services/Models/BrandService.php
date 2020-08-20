@@ -8,6 +8,7 @@ use App\Entity\Category;
 use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\Search\SearchBrandsCollection;
 use App\Entity\Product;
+use App\Exception\ValidatorException;
 use App\Repository\BrandRepository;
 use App\Repository\ProductRepository;
 use App\Services\ObjectsHandler;
@@ -55,8 +56,9 @@ class BrandService
 
     /**
      * @param Product $product
-     * @return Brand|bool|object|null
+     * @return Brand|bool|mixed
      * @throws \App\Exception\ValidatorException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function createBrandFromProduct(Product $product)
     {
@@ -64,15 +66,23 @@ class BrandService
             return false;
 //            throw new BadRequestHttpException('product id:' . $product->getId() . ' brand is empty');
         }
-        $brand = $this->matchExistBrand($product->getBrand());
-        if (!($brand instanceof Brand)) {
-            $brand = new Brand();
-            $brand
-                ->setBrandName($product->getBrand());
-            $this->getObjecHandler()
-                ->validateEntity($brand, [Brand::SERIALIZED_GROUP_LIST]);
+        
+        try {
+            $brand = $this->matchExistBrand($product->getBrand());
+            if (!($brand instanceof Brand)) {
+                $brand = new Brand();
+                $brand
+                    ->setBrandName($product->getBrand());
+                $this->getObjecHandler()
+                    ->validateEntity($brand, [Brand::SERIALIZED_GROUP_CREATE]);
+            }            
+        } catch (ValidatorException $e) {
+            $brand = $this->matchExistBrand($product->getBrand());
         }
-        $product->setBrandRelation($brand);
+
+        if ($brand instanceof Brand) {
+            $product->setBrandRelation($brand);   
+        }
 
         return $brand;
     }
@@ -188,12 +198,13 @@ class BrandService
 
     /**
      * @param string $name
-     * @return Brand|object|null
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     private function matchExistBrand(string $name)
     {
         return $this->getBrandRepository()
-            ->findOneBy(['brandName' => $name]);
+            ->matchExistByName($name);
     }
 
     /**

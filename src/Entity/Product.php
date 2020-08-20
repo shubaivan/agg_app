@@ -80,9 +80,6 @@ class Product implements EntityValidatorException
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Assert\NotBlank(
-     *     groups={Product::SERIALIZED_GROUP_CREATE}
-     * )
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      */
     private $sku;
