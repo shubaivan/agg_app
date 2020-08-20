@@ -303,8 +303,19 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
      * @param $techSpecs
      * @param $dateformat
      * @param $shop
+     * @param $identityUniqData
      */
-    public function __construct($name, $productImage, $productUrl, $imageUrl, $height, $width, $categories, $MerchantCategoryName, $TDCategoryName, $TDCategoryId, $TDProductId, $description, $feedId, $groupingId, $tradeDoublerId, $productLanguage, $modified, $price, $currency, $programName, $availability, $brand, $condition, $deliveryTime, $ean, $upc, $isbn, $mpn, $sku, $identifiers, $inStock, $manufacturer, $model, $programLogo, $promoText, $shippingCost, $shortDescription, $size, $fields, $warranty, $weight, $techSpecs, $dateformat, $shop)
+    public function __construct(
+        $name, $productImage, $productUrl, $imageUrl, $height, $width,
+        $categories, $MerchantCategoryName, $TDCategoryName, $TDCategoryId, 
+        $TDProductId, $description, $feedId, $groupingId,
+        $tradeDoublerId, $productLanguage, $modified, $price, 
+        $currency, $programName, $availability, $brand, $condition,
+        $deliveryTime, $ean, $upc, $isbn, $mpn, $sku, $identifiers,
+        $inStock, $manufacturer, $model, $programLogo, $promoText,
+        $shippingCost, $shortDescription, $size, $fields, $warranty,
+        $weight, $techSpecs, $dateformat, $shop, $identityUniqData
+    )
     {
         $this->name = $name;
         $this->productImage = $productImage;
@@ -350,6 +361,7 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
         $this->techSpecs = $techSpecs;
         $this->dateformat = $dateformat;
         $this->shop = $shop;
+        $this->identityUniqData = $identityUniqData;
     }
 
     public static function getImageColumns(): array

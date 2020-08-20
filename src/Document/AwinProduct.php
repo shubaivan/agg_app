@@ -528,8 +528,30 @@ class AwinProduct extends AbstractDocument
      * @param $Fashion_pattern
      * @param $Fashion_swatch
      * @param $shop
+     * @param $identityUniqData
      */
-    public function __construct($aw_deep_link, $product_name, $aw_product_id, $merchant_product_id, $merchant_image_url, $description, $merchant_category, $search_price, $merchant_name, $merchant_id, $category_name, $category_id, $aw_image_url, $currency, $store_price, $delivery_cost, $merchant_deep_link, $language, $last_updated, $display_price, $data_feed_id, $brand_name, $brand_id, $colour, $product_short_description, $specifications, $condition, $product_model, $model_number, $dimensions, $keywords, $promotional_text, $product_type, $commission_group, $merchant_product_category_path, $merchant_product_second_category, $merchant_product_third_category, $rrp_price, $saving, $savings_percent, $base_price, $base_price_amount, $base_price_text, $product_price_old, $delivery_restrictions, $delivery_weight, $warranty, $terms_of_contract, $delivery_time, $in_stock, $stock_quantity, $valid_from, $valid_to, $is_for_sale, $web_offer, $pre_order, $stock_status, $size_stock_status, $size_stock_amount, $merchant_thumb_url, $large_image, $alternate_image, $aw_thumb_url, $alternate_image_two, $alternate_image_three, $alternate_image_four, $ean, $isbn, $upc, $mpn, $parent_product_id, $product_GTIN, $basket_link, $Fashion_suitable_for, $Fashion_category, $Fashion_size, $Fashion_material, $Fashion_pattern, $Fashion_swatch, $shop)
+    public function __construct(
+        $aw_deep_link, $product_name, $aw_product_id, $merchant_product_id, 
+        $merchant_image_url, $description, $merchant_category, $search_price, 
+        $merchant_name, $merchant_id, $category_name, $category_id, 
+        $aw_image_url, $currency, $store_price, $delivery_cost, 
+        $merchant_deep_link, $language, $last_updated, $display_price, 
+        $data_feed_id, $brand_name, $brand_id, $colour, $product_short_description, 
+        $specifications, $condition, $product_model, $model_number, 
+        $dimensions, $keywords, $promotional_text, $product_type, 
+        $commission_group, $merchant_product_category_path, 
+        $merchant_product_second_category, $merchant_product_third_category, 
+        $rrp_price, $saving, $savings_percent, $base_price, 
+        $base_price_amount, $base_price_text, $product_price_old, $delivery_restrictions, 
+        $delivery_weight, $warranty, $terms_of_contract, $delivery_time, $in_stock, 
+        $stock_quantity, $valid_from, $valid_to, $is_for_sale, $web_offer, 
+        $pre_order, $stock_status, $size_stock_status, $size_stock_amount, 
+        $merchant_thumb_url, $large_image, $alternate_image, $aw_thumb_url, 
+        $alternate_image_two, $alternate_image_three, $alternate_image_four, 
+        $ean, $isbn, $upc, $mpn, $parent_product_id, $product_GTIN, $basket_link, 
+        $Fashion_suitable_for, $Fashion_category, $Fashion_size, 
+        $Fashion_material, $Fashion_pattern, $Fashion_swatch, $shop, $identityUniqData
+    )
     {
         $this->aw_deep_link = $aw_deep_link;
         $this->product_name = $product_name;
@@ -611,6 +633,7 @@ class AwinProduct extends AbstractDocument
         $this->Fashion_pattern = $Fashion_pattern;
         $this->Fashion_swatch = $Fashion_swatch;
         $this->shop = $shop;
+        $this->identityUniqData = $identityUniqData;
     }
 
     /**

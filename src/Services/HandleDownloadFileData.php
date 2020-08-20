@@ -252,8 +252,23 @@ class HandleDownloadFileData
                 );
             }
         } catch (\Exception $e) {
-            echo $e->getMessage();
+            $this->getLogger()->error($e->getMessage());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
             throw $e;
+        } catch (\Throwable $exception) {
+            $this->getLogger()->error($exception->getMessage());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+            throw $exception;
         }
     }
 
@@ -613,7 +628,7 @@ class HandleDownloadFileData
         CarefulSavingSku $savingSku
     )
     {
-        /** @var AdtractionProduct $productMatch */
+        /** @var AbstractDocument $productMatch */
         $productMatch = $savingSku
             ->matchExistProduct($productQueues);
 

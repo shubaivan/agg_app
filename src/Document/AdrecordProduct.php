@@ -141,12 +141,13 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
      * @param $regularPrice
      * @param $gender
      * @param $shop
+     * @param $identityUniqData
      */
     public function __construct(
         $name, $category, $SKU, $EAN, $description, $model,
         $brand, $price, $shippingPrice, $currency, $productUrl,
         $graphicUrl, $inStock, $inStockQty, $deliveryTime,
-        $regularPrice, $gender, $shop
+        $regularPrice, $gender, $shop, $identityUniqData
     )
     {
         $this->name = $name;
@@ -167,6 +168,7 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
         $this->regularPrice = $regularPrice;
         $this->gender = $gender;
         $this->shop = $shop;
+        $this->identityUniqData = $identityUniqData;
     }
 
 

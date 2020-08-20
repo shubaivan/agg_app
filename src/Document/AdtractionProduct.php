@@ -123,12 +123,14 @@ class AdtractionProduct extends AbstractDocument
      * @param $Ean
      * @param $ManufacturerArticleNumber
      * @param $Extras
+     * @param $shop
+     * @param $identityUniqData
      */
     public function __construct(
         $SKU, $Name, $Description, $Category, $Price, 
         $Shipping, $Currency, $Instock, $ProductUrl, $ImageUrl, 
         $TrackingUrl, $Brand, $OriginalPrice, $Ean, 
-        $ManufacturerArticleNumber, $Extras, $shop
+        $ManufacturerArticleNumber, $Extras, $shop, $identityUniqData
     )
     {
         $this->SKU = $SKU;
@@ -148,6 +150,7 @@ class AdtractionProduct extends AbstractDocument
         $this->ManufacturerArticleNumber = $ManufacturerArticleNumber;
         $this->Extras = $Extras;
         $this->shop = $shop;
+        $this->identityUniqData = $identityUniqData;
     }
 
     public static function getImageColumns():array

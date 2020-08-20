@@ -175,7 +175,7 @@ class AdtractionProductRepository extends ServiceDocumentRepository implements C
          * @var $Ean
          * @var $ManufacturerArticleNumber
          * @var $Extras
-         * @var $shop
+         * @var $identityUniqData
          */
         extract($productQueues->getRow());
 
@@ -183,7 +183,7 @@ class AdtractionProductRepository extends ServiceDocumentRepository implements C
             $SKU, $Name, $Description, $Category, $Price,
             $Shipping, $Currency, $Instock, $ProductUrl, $ImageUrl,
             $TrackingUrl, $Brand, $OriginalPrice, $Ean,
-            $ManufacturerArticleNumber, $Extras, $shop
+            $ManufacturerArticleNumber, $Extras, $shop, $identityUniqData
         );
         
         $this->dm->persist($adrecordProduct);

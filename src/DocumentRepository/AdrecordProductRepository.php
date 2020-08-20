@@ -173,7 +173,7 @@ class AdrecordProductRepository extends ServiceDocumentRepository implements Car
          * @var $deliveryTime
          * @var $regularPrice
          * @var $gender
-         * @var $shop
+         * @var $identityUniqData
          */
         extract($productQueues->getRow());
 
@@ -181,7 +181,7 @@ class AdrecordProductRepository extends ServiceDocumentRepository implements Car
             $name, $category, $SKU, $EAN, $description,
             $model, $brand, $price, $shippingPrice, $currency,
             $productUrl, $graphicUrl, $inStock, $inStockQty, $deliveryTime,
-            $regularPrice, $gender, $shop
+            $regularPrice, $gender, $shop, $identityUniqData
         );
         $this->dm->persist($adrecordProduct);
     }

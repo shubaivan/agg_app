@@ -33,7 +33,7 @@ abstract class AbstractDocument implements DataTableInterface
      * @MongoDB\Field(type="string")
      * @MongoDB\Index()
      */
-    protected $identityUniqData;
+    protected $identityUniqData = '';
 
     /**
      * @return bool
@@ -90,6 +90,14 @@ abstract class AbstractDocument implements DataTableInterface
     public function getDeclineAccessor()
     {
         return $this->decline ? 'true' : 'false';
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIdentityUniqData()
+    {
+        return $this->identityUniqData;
     }
 
     public static function getDeclineReasonKey()

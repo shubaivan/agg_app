@@ -303,6 +303,7 @@ class TradeDoublerProductRepository extends ServiceDocumentRepository implements
          * @var $weight
          * @var $techSpecs
          * @var $dateformat
+         * @var $identityUniqData
          */
         extract($productQueues->getRow());
 
@@ -315,7 +316,7 @@ class TradeDoublerProductRepository extends ServiceDocumentRepository implements
             $deliveryTime, $ean, $upc, $isbn, $mpn, $sku, 
             $identifiers, $inStock, $manufacturer, $model, $programLogo, 
             $promoText, $shippingCost, $shortDescription, $size, $fields, 
-            $warranty, $weight, $techSpecs, $dateformat, $shop
+            $warranty, $weight, $techSpecs, $dateformat, $shop, $identityUniqData
         );
         
         $this->dm->persist($tradeDoublerProduct);

@@ -398,6 +398,7 @@ class AwinProductRepository extends ServiceDocumentRepository implements Careful
          * @var $Fashion_material
          * @var $Fashion_pattern
          * @var $Fashion_swatch
+         * @var $identityUniqData
          */
         extract($productQueues->getRow());
 
@@ -419,7 +420,8 @@ class AwinProductRepository extends ServiceDocumentRepository implements Careful
             $alternate_image, $aw_thumb_url, $alternate_image_two, $alternate_image_three,
             $alternate_image_four, $ean, $isbn, $upc, $mpn, $parent_product_id,
             $product_GTIN, $basket_link, $Fashion_suitable_for, $Fashion_category,
-            $Fashion_size, $Fashion_material, $Fashion_pattern, $Fashion_swatch, $shop
+            $Fashion_size, $Fashion_material, $Fashion_pattern, 
+            $Fashion_swatch, $shop, $identityUniqData
         );
         $this->dm->persist($adrecordProduct);
     }
