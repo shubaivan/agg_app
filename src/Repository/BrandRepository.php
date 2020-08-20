@@ -92,7 +92,6 @@ class BrandRepository extends ServiceEntityRepository
             ->where('b.brandName = :name')
             ->setParameter('name', $name)
             ->getQuery()
-            ->enableResultCache()
             ->useQueryCache(true)
             ->getOneOrNullResult();
     }

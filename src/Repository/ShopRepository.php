@@ -84,7 +84,6 @@ class ShopRepository extends ServiceEntityRepository
             ->where('s.shopName = :name')
             ->setParameter('name', $name)
             ->getQuery()
-            ->enableResultCache()
             ->useQueryCache(true)
             ->getOneOrNullResult();
     }

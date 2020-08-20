@@ -15,7 +15,6 @@ framework:
           middleware:
             - doctrine_ping_connection
             - doctrine_close_connection
-            - doctrine_transaction
         vacuum.bus:
           middleware:
             - doctrine_ping_connection

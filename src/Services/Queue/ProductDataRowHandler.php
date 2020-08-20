@@ -6,6 +6,7 @@ use App\Cache\CacheManager;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
+use App\Document\TradeDoublerProduct;
 use App\Entity\Product;
 use App\Entity\Shop;
 use App\Exception\AdminShopRulesException;
@@ -13,6 +14,7 @@ use App\Exception\GlobalMatchException;
 use App\Exception\GlobalMatchExceptionBrand;
 use App\Exception\ValidatorException;
 use App\QueueModel\ResourceDataRow;
+use App\QueueModel\ResourceProductQueues;
 use App\QueueModel\VacuumJob;
 use App\Services\HandleDownloadFileData;
 use App\Services\Models\AdminShopRulesService;
@@ -136,11 +138,11 @@ class ProductDataRowHandler
     }
 
     /**
-     * @param ResourceDataRow $dataRow
+     * @param ResourceProductQueues $dataRow
      * @throws ValidatorException
      * @throws \Throwable
      */
-    public function handleCsvRow(ResourceDataRow $dataRow)
+    public function handleCsvRow(ResourceProductQueues $dataRow)
     {
         try {
             $filePath = $dataRow->getFilePath();
@@ -154,12 +156,15 @@ class ProductDataRowHandler
             $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);
             $this->getShopService()->createShopFromProduct($product);
+            $this->getEm()->persist($product);
+            $this->getEm()->flush();
+
             if (!$product->isMatchForCategories() || $this->forceAnalysis == '1') {
                 $handleAnalysisProductByMainCategory = $this->getCategoryService()
                     ->handleAnalysisProductByMainCategory($product);
                 if (count($handleAnalysisProductByMainCategory)) {
                     $product->setMatchForCategories(true);
-
+                    $this->getEm()->flush();
                     $this->getRedisHelper()
                         ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
                             Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $filePath);
@@ -169,7 +174,6 @@ class ProductDataRowHandler
                 }
             }
 
-            $this->getEm()->persist($product);
 
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
@@ -255,16 +259,16 @@ class ProductDataRowHandler
     }
 
     /**
-     * @param ResourceDataRow $dataRow
+     * @param ResourceProductQueues $dataRow
      * @param \Exception $exception
      * @throws \Doctrine\ODM\MongoDB\MongoDBException
      * @throws \ReflectionException
      */
-    private function markDocumentProduct(ResourceDataRow $dataRow, \Exception $exception)
+    private function markDocumentProduct(ResourceProductQueues $dataRow, \Exception $exception)
     {
         /** @var AdrecordProduct $adrecordDoc */
         $adrecordDoc = $this->dm->getRepository(AdrecordProduct::class)
-            ->findOneBy(['SKU' => $dataRow->getSku()]);
+            ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
         $declineReasonClass = (new \ReflectionClass($exception))->getShortName().':'.$exception->getMessage();
         if ($adrecordDoc) {
             $adrecordDoc
@@ -273,23 +277,33 @@ class ProductDataRowHandler
         }
         /** @var AdtractionProduct $adtractionDoc */
         $adtractionDoc = $this->dm->getRepository(AdtractionProduct::class)
-            ->findOneBy(['SKU' => $dataRow->getSku()]);
-        
+            ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
+
         if ($adtractionDoc) {
             $adtractionDoc
                 ->setDeclineReasonClass($declineReasonClass)
                 ->setDecline(true);
         }
-
+        /** @var AwinProduct $awinDoc */
         $awinDoc = $this->dm->getRepository(AwinProduct::class)
-            ->findOneBy(['aw_product_id' => $dataRow->getSku()]);
+            ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
 
         if ($awinDoc) {
             $awinDoc
                 ->setDeclineReasonClass($declineReasonClass)
                 ->setDecline(true);
         }
-        if ($adrecordDoc || $adtractionDoc || $awinDoc) {
+        /** @var TradeDoublerProduct $tradeDoublerProduct */
+        $tradeDoublerProduct = $this->dm->getRepository(TradeDoublerProduct::class)
+            ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
+        
+        if ($tradeDoublerProduct) {
+            $tradeDoublerProduct
+                ->setDeclineReasonClass($declineReasonClass)
+                ->setDecline(true);
+        }
+
+        if ($adrecordDoc || $adtractionDoc || $awinDoc || $tradeDoublerProduct) {
             $this->dm->flush(array('safe'=>true));
         }
     }

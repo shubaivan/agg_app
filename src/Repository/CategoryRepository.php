@@ -97,7 +97,6 @@ class CategoryRepository extends ServiceEntityRepository
             ->where('c.categoryName = :name')
             ->setParameter('name', $name)
             ->getQuery()
-            ->enableResultCache()
             ->useQueryCache(true)
             ->getOneOrNullResult();
     }

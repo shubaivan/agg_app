@@ -455,14 +455,15 @@ class CategoryService extends AbstractModel
                 $categoryModel = $this->matchExistCategory($category);
             }
             
-            if ($categoryModel->getSubCategoryRelations()->count()) {
-                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
-                    /** @var $categoryRelation CategoryRelations */
-                    if ($categoryRelation->getMainCategory()) {
-                        $product->addCategoryRelation($categoryRelation->getMainCategory());
+            if ($categoryModel instanceof Category) {
+                if ($categoryModel->getSubCategoryRelations()->count()) {
+                    foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
+                        /** @var $categoryRelation CategoryRelations */
+                        if ($categoryRelation->getMainCategory()) {
+                            $product->addCategoryRelation($categoryRelation->getMainCategory());
+                        }
                     }
                 }
-            }
 //            if ($categoryModel->getSubCategoryRelations()->count()) {
 //                $mainCategoryChallengerIds = [];
 //                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
@@ -489,7 +490,7 @@ class CategoryService extends AbstractModel
 //                    }
 //                }
 //            }
-            if ($categoryModel instanceof Category) {
+                
                 $product->addCategoryRelation($categoryModel);
                 array_push($arrayModelsCategory, $categoryModel);   
             }
