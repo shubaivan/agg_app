@@ -85,7 +85,7 @@ class Product implements EntityValidatorException
     private $sku;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=false)
+     * @ORM\Column(type="text", nullable=false)
      * @Assert\NotBlank(
      *     groups={Product::SERIALIZED_GROUP_CREATE_IDENTITY}
      * )
@@ -94,7 +94,7 @@ class Product implements EntityValidatorException
     private $groupIdentity;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
