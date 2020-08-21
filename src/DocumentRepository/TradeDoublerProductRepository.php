@@ -43,12 +43,7 @@ class TradeDoublerProductRepository extends ServiceDocumentRepository implements
     public function matchExistProduct(ResourceProductQueues $productQueues)
     {
         return $this->findOneBy([
-            'name' => $productQueues->getName(),
-            'sku' => $productQueues->getSku(),
-            'brand' => $productQueues->getBrand(),
-            'ean' => $productQueues->getEan(),
-            'shop' => $productQueues->getShop(),
-            'tradeDoublerId' => $productQueues->getAttributeByName('tradeDoublerId'),
+            'identityUniqData' => $productQueues->getAttributeByName('identityUniqData'),
         ]);
     }
 

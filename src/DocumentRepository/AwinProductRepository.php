@@ -39,7 +39,6 @@ class AwinProductRepository extends ServiceDocumentRepository implements Careful
     public function matchExistProduct(ResourceProductQueues $productQueues)
     {
         return $this->findOneBy([
-            'product_name' => $productQueues->getName(),
             'aw_product_id' => $productQueues->getSku(),
             'brand_name' => $productQueues->getBrand(),
             'ean' => $productQueues->getEan(),

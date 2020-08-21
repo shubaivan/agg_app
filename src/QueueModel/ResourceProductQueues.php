@@ -160,23 +160,22 @@ abstract class ResourceProductQueues implements MatchSameProducts, ResourceDataR
         }
 
         $prepare = [];
-        if ($this->getName()) {
-            $prepare[] = $this->getName();
-        }
-        if ($this->getSku()) {
+
+        if ($this->getSku() && strlen($this->getSku())) {
             $prepare[] = $this->getSku();
         }
-        if ($this->getBrand()) {
+        if ($this->getBrand() && strlen($this->getBrand())) {
             $prepare[] = $this->getBrand();
         }
-        if ($this->getEan()) {
+        if ($this->getEan() && strlen($this->getEan())) {
             $prepare[] = $this->getEan();
         }
-        if ($this->getShop()) {
+        if ($this->getShop() && strlen($this->getShop())) {
             $prepare[] = $this->getShop();
         }
         $implode = implode('_', $prepare);
-        $preg_replace = preg_replace('!\s!', '_', $implode);
+        
+        $preg_replace = preg_replace('/[\s+,.]+/', '_', $implode);
 
         return mb_strtolower($preg_replace);
     }

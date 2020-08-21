@@ -816,7 +816,7 @@ class CategoryRepository extends ServiceEntityRepository
                 AND to_tsvector(\'my_swedish\', :productCategoriesData) 
                         @@ to_tsquery(\'my_swedish\', REGEXP_REPLACE(REGEXP_REPLACE(conf.key_words, \'\s+\', \'\', \'g\'), \',\', \':*|\', \'g\'))
                 AND to_tsvector(\'my_swedish\', :productCategoriesData) 
-                        @@ to_tsquery(\'my_swedish\', REGEXP_REPLACE(REGEXP_REPLACE(conf.negative_key_words, \'\s+\', \'\', \'g\'), \',\', \'|\', \'g\')) = FALSE
+                        @@ to_tsquery(\'my_swedish\', COALESCE (REGEXP_REPLACE(REGEXP_REPLACE(conf.negative_key_words, \'\s+\', \'\', \'g\'), \',\', \'|\', \'g\'), \'\')) = FALSE                        
             ';
 
         $mainParams[':productCategoriesData'] = $productCategoriesData;

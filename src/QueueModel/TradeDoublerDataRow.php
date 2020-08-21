@@ -139,29 +139,9 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
         if (isset($this->row['identityUniqData']) && strlen($this->row['identityUniqData'])) {
             return $this->row['identityUniqData'];
         }
-        //   * @MongoDB\UniqueIndex(keys={"name"="asc", "sku"="asc", "brand"="asc", "ean"="asc", "shop"="asc", "tradeDoublerId"="asc"})
-        $prepare = [];
-        if ($this->getName()) {
-            $prepare[] = $this->getName();
-        }
-        if ($this->getSku()) {
-            $prepare[] = $this->getSku();
-        }
-        if ($this->getBrand()) {
-            $prepare[] = $this->getBrand();
-        }
-        if ($this->getEan()) {
-            $prepare[] = $this->getEan();
-        }
-        if ($this->getShop()) {
-            $prepare[] = $this->getShop();
-        }
-        if ($this->getAttributeByName('tradeDoublerId')) {
-            $prepare[] = $this->getAttributeByName('tradeDoublerId');
-        }
-        $implode = implode('_', $prepare);
-        $preg_replace = preg_replace('!\s!', '_', $implode);
-
-        return mb_strtolower($preg_replace);
+      
+        $implode = $this->getAttributeByName('identifiers');
+        
+        return $implode;
     }
 }
