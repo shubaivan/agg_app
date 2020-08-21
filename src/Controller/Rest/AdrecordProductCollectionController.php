@@ -56,7 +56,7 @@ class AdrecordProductCollectionController extends AbstractRestController
     {
         $dataTable = $this->documentManager
             ->getRepository(AdrecordProduct::class)
-            ->getDataTableAggr($request->request->all());
+            ->getDataTableAggr('AdrecordProduct', $request->request->all());
 
 
         foreach ($dataTable['data'] as $key=>$data) {

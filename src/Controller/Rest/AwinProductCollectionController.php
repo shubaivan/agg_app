@@ -55,9 +55,8 @@ class AwinProductCollectionController extends AbstractRestController
     {
         $dataTable = $this->documentManager
             ->getRepository(AwinProduct::class)
-            ->getDataTableAggr($request->request->all());
-
-
+            ->getDataTableAggr('AwinProduct', $request->request->all());
+        
         foreach ($dataTable['data'] as $key=>$data) {
             if (isset($data['_id'])) {
                 $array = (array)$data['_id'];

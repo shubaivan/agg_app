@@ -56,7 +56,7 @@ class AdtractionProductCollectionController extends AbstractRestController
     {
         $dataTable = $this->documentManager
             ->getRepository(AdtractionProduct::class)
-            ->getDataTableAggr($request->request->all());
+            ->getDataTableAggr('AdtractionProduct', $request->request->all());
 
 
         foreach ($dataTable['data'] as $key=>$data) {

@@ -57,7 +57,7 @@ class TradeDoublerCollectionController extends AbstractRestController
     {
         $dataTable = $this->documentManager
             ->getRepository(TradeDoublerProduct::class)
-            ->getDataTableAggr($request->request->all());
+            ->getDataTableAggr('TradeDoublerProduct', $request->request->all());
 
 
         foreach ($dataTable['data'] as $key=>$data) {
