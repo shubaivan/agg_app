@@ -501,16 +501,18 @@ class HandleDownloadFileData
             $redisUniqKey
         );
         $tradeDoublerDataRow->transform();
-        $this->getProductsBus()->dispatch($tradeDoublerDataRow);
-
 
         /** @var TradeDoublerProductRepository $savingSku */
         $savingSku = $this->dm->getRepository(TradeDoublerProduct::class);
-        $this->saveProductInMongo(
+        $saveProductInMongo = $this->saveProductInMongo(
             $tradeDoublerDataRow,
             $shop,
             $savingSku
         );
+
+        if ($saveProductInMongo) {
+            $this->getProductsBus()->dispatch($tradeDoublerDataRow);
+        }
     }
     
     /**
@@ -538,16 +540,18 @@ class HandleDownloadFileData
             $redisUniqKey
         );
         $awinDataRow->transform();
-        $this->getProductsBus()->dispatch($awinDataRow);
-
 
         /** @var AwinProductRepository $savingSku */
         $savingSku = $this->dm->getRepository(AwinProduct::class);
-        $this->saveProductInMongo(
+        $saveProductInMongo = $this->saveProductInMongo(
             $awinDataRow,
             $shop,
             $savingSku
         );
+
+        if ($saveProductInMongo) {
+            $this->getProductsBus()->dispatch($awinDataRow);
+        }
     }
     
     /**
@@ -574,14 +578,17 @@ class HandleDownloadFileData
             $redisUniqKey
         );
         $adtractionDataRow->transform();
-        $this->getProductsBus()->dispatch($adtractionDataRow);
+
         /** @var AdtractionProductRepository $savingSku */
         $savingSku = $this->dm->getRepository(AdtractionProduct::class);
-        $this->saveProductInMongo(
-            $adtractionDataRow, 
+        $saveProductInMongo = $this->saveProductInMongo(
+            $adtractionDataRow,
             $shop,
             $savingSku
         );
+        if ($saveProductInMongo) {
+            $this->getProductsBus()->dispatch($adtractionDataRow);
+        }
     }
 
     /**
@@ -607,21 +614,24 @@ class HandleDownloadFileData
             $redisUniqKey
         );
         $adrecordDataRow->transform();
-        $this->getProductsBus()->dispatch($adrecordDataRow);
 
         /** @var AdrecordProductRepository $savingSku */
         $savingSku = $this->dm->getRepository(AdrecordProduct::class);
-        $this->saveProductInMongo(
+        $saveProductInMongo = $this->saveProductInMongo(
             $adrecordDataRow,
             $shop,
             $savingSku
         );
+        if ($saveProductInMongo) {
+            $this->getProductsBus()->dispatch($adrecordDataRow);
+        }
     }
 
     /**
      * @param ResourceProductQueues $productQueues
      * @param $shop
      * @param CarefulSavingSku $savingSku
+     * @return bool
      */
     private function saveProductInMongo(
         ResourceProductQueues $productQueues,
@@ -636,12 +646,23 @@ class HandleDownloadFileData
         if ($productMatch && $productMatch->getId()) {
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_HANDLE_MATCH_BY_SKU . $productQueues->getShop());
+                    Shop::PREFIX_HANDLE_MATCH_BY_IDENTITY_BY_UNIQ_DATA . $productQueues->getShop());
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $productQueues->getRedisUniqKey(),
-                    Shop::PREFIX_HANDLE_MATCH_BY_SKU . $productQueues->getFilePath());
+                    Shop::PREFIX_HANDLE_MATCH_BY_IDENTITY_BY_UNIQ_DATA . $productQueues->getFilePath());
+
+            return false;
         } else {
-            $savingSku->createProduct($productQueues, $shop);   
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_NEW_ONE . $productQueues->getShop());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $productQueues->getRedisUniqKey(),
+                    Shop::PREFIX_HANDLE_NEW_ONE . $productQueues->getFilePath());
+            
+            $savingSku->createProduct($productQueues, $shop);
+
+            return true;
         }
     }
 

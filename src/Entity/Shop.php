@@ -25,14 +25,17 @@ class Shop
 {
     const PREFIX_HASH = 'statistic:';
 
-    const PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL = 'shop:handle:analysis_product_successful:';
+    const PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL = 'shop:processing:analysis_product_successful:';
     const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL = 'shop:processing:successful:';
     const PREFIX_PROCESSING_DATA_SHOP_FAILED = 'shop:processing:failed:';
     const PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND = 'shop:processing:global_match_exception_brand:';
     const PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION = 'shop:processing:global_match_exception:';
     const PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION = 'shop:processing:admin_shop_rules_exception:';
 
-    const PREFIX_HANDLE_MATCH_BY_SKU = 'shop:handle:match_by_sku:';
+    const PREFIX_HANDLE_MATCH_BY_IDENTITY_BY_UNIQ_DATA = 'shop:handle:match_by_identityUniqData:';
+    const PREFIX_HANDLE_NEW_ONE = 'shop:handle:new_one:';
+    
+    const PREFIX_PROCESSING_MATCH_BY_IDENTITY_BY_UNIQ_DATA = 'shop:processing:match_by_identityUniqData:';
 
     const PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL = 'shop:handle:successful:';
     const PREFIX_HANDLE_DATA_SHOP_FAILED = 'shop:handle:failed:';

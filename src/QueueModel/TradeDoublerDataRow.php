@@ -139,9 +139,21 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
         if (isset($this->row['identityUniqData']) && strlen($this->row['identityUniqData'])) {
             return $this->row['identityUniqData'];
         }
-      
-        $implode = $this->getAttributeByName('identifiers');
-        
-        return $implode;
+
+        $prepare = [];
+
+        if ($this->getAttributeByName('identifiers') && strlen($this->getAttributeByName('identifiers'))) {
+            $prepare[] = $this->getAttributeByName('identifiers');
+        }
+
+        if ($this->getAttributeByName('tradeDoublerId') && strlen($this->getAttributeByName('tradeDoublerId'))) {
+            $prepare[] = $this->getAttributeByName('tradeDoublerId');
+        }
+
+        $implode = implode('_', $prepare);
+
+        $preg_replace = preg_replace('/[\s+,.]+/', '_', $implode);
+
+        return mb_strtolower($preg_replace);
     }
 }
