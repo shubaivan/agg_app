@@ -252,7 +252,6 @@ class HandleDownloadFileData
             }
 
             $this->dm->flush(array('safe'=>true));
-            $this->dm->close();
             
             if ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)) {
                 //ToDo don't forget rerun back
