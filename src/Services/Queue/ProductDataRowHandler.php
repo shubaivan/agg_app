@@ -318,6 +318,7 @@ class ProductDataRowHandler
 
         if ($adrecordDoc || $adtractionDoc || $awinDoc || $tradeDoublerProduct) {
             $this->dm->flush(array('safe'=>true));
+            $this->dm->close();
         }
     }
 

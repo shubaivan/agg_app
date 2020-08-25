@@ -31,6 +31,11 @@ interface ResourceDataRow extends LastProductInterface
      */
     public function setExistProductId(int $id);
 
+    /*
+     * 
+     */
+    public function unsetId();
+    
     /**
      * @return string
      */

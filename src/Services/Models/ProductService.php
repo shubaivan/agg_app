@@ -355,8 +355,9 @@ class ProductService extends AbstractModel
      */
     private function prepareDataForExistProduct(ResourceDataRow $adtractionDataRow)
     {
+        $adtractionDataRow->unsetId();
         $product = $this->matchExistProduct($adtractionDataRow->generateIdentityUniqData());
-
+        
         if ($product && $product->getId()) {
             $adtractionDataRow->setExistProductId($product->getId());
             $this->getRedisHelper()

@@ -779,7 +779,7 @@ class Product implements EntityValidatorException
                                 if (!$excludeOriginalValue) {
                                     array_push($result[$explode[0]], $explode[1]);
                                 }
-                                $result[$explode[0]] = array_unique($result[$explode[0]]);
+                                $result[$explode[0]] = array_values(array_unique($result[$explode[0]]));
                             } elseif ($explode[0] == self::COLOUR){
                                 $valueSite = $explode[1];
 
