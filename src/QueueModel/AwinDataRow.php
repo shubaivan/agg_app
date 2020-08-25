@@ -3,9 +3,12 @@
 
 namespace App\QueueModel;
 
+use App\Document\AwinProduct;
 
 class AwinDataRow extends ResourceProductQueues
 {
+    protected static $mongoClass = AwinProduct::class;
+    
     public function transform()
     {
         $rowData = $this->getRow();

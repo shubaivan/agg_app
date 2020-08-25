@@ -2,8 +2,12 @@
 
 namespace App\QueueModel;
 
+use App\Document\AdrecordProduct;
+
 class AdrecordDataRow extends ResourceProductQueues
 {
+    protected static $mongoClass = AdrecordProduct::class;
+
     public function transform()
     {
         $rowData = $this->getRow();

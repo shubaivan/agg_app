@@ -5,9 +5,12 @@ namespace App\QueueModel;
 
 
 use App\Document\MatchSameProducts;
+use App\Document\TradeDoublerProduct;
 
 abstract class ResourceProductQueues implements MatchSameProducts, ResourceDataRow
 {
+    protected static $mongoClass = '';
+    
     protected $categories = [];
     
     /**
@@ -99,16 +102,39 @@ abstract class ResourceProductQueues implements MatchSameProducts, ResourceDataR
     }
 
     /**
-     * @param int $id
+     * @param int|string $id
      * @return $this
      */
-    public function setExistProductId(int $id)
+    public function setExistProductId($id)
     {
         if ($this->getRow() && is_array($this->row)) {
             $this->row['id'] = $id;
         }
 
         return $this;
+    }
+
+    /**
+     * @param int|string $id
+     * @return $this
+     */
+    public function setExistMongoProductId($id)
+    {
+        if ($this->getRow() && is_array($this->row)) {
+            $this->row['mongoId'] = $id;
+        }
+
+        return $this;
+    }    
+    
+    public function unsetId()
+    {
+        if ($this->getRow() 
+            && is_array($this->row)
+            && isset($this->row['id'])
+        ) {
+            unset($this->row['id']);
+        }
     }
 
     /**
@@ -178,5 +204,13 @@ abstract class ResourceProductQueues implements MatchSameProducts, ResourceDataR
         $preg_replace = preg_replace('/[\s+,.]+/', '_', $implode);
 
         return mb_strtolower($preg_replace);
+    }
+
+    /**
+     * @return string
+     */
+    public static function getMongoClass(): string
+    {
+        return static::$mongoClass;
     }
 }

@@ -2,10 +2,13 @@
 
 namespace App\QueueModel;
 
+use App\Document\TradeDoublerProduct;
 use App\Entity\Product;
 
 class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataRow
 {
+    protected static $mongoClass = TradeDoublerProduct::class;
+    
     public function transform()
     {
         $rowData = $this->getRow();

@@ -146,9 +146,12 @@ class ProductDataRowHandler
     {
         try {
             $filePath = $dataRow->getFilePath();
+            $existProduct = false;
             
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
-
+            if ($product->getId()) {
+                $existProduct = true;
+            }
             $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
             $this->getCategoryService()->matchGlobalNegativeBrandWords($product);
             $this->getAdminShopRulesService()->executeShopRule($product);
@@ -174,14 +177,24 @@ class ProductDataRowHandler
                 }
             }
 
+            if (!$existProduct) {
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE . $filePath);
 
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL . $filePath);
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE . $dataRow->getShop());
+            } else {
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST . $filePath);
 
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL . $dataRow->getShop());
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST . $dataRow->getShop());
+            }
+
 
             if ($dataRow->getLastProduct()) {
                 $this->getCacheManager()->clearAllPoolsCache();

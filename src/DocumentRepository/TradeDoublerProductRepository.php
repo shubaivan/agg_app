@@ -17,7 +17,8 @@ use Doctrine\ODM\MongoDB\Query\Builder;
  *
  * @package App\DocumentRepository
  * @method int getCount(Builder $builder)
- * @method array getDataTableAggr ($collection, array $params)
+ * @method array getDataTableAggr (string $collection, array $params)
+ * @method string|null matchExistProductAllow (string $collection, array $match)
  */
 class TradeDoublerProductRepository extends ServiceDocumentRepository implements CarefulSavingSku
 {
@@ -37,17 +38,6 @@ class TradeDoublerProductRepository extends ServiceDocumentRepository implements
         return $this->getCount($this->createQueryBuilder());
     }
 
-    /**
-     * @param string $sku
-     * @return object|null
-     */
-    public function matchExistProduct(ResourceProductQueues $productQueues)
-    {
-        return $this->findOneBy([
-            'identityUniqData' => $productQueues->getAttributeByName('identityUniqData'),
-        ]);
-    }
-
     public function getListQuery()
     {
         $builder = $this->createQueryBuilder();
@@ -62,7 +52,18 @@ class TradeDoublerProductRepository extends ServiceDocumentRepository implements
 
         return $cursor;
     }
-    
+
+    /**
+     * @param ResourceProductQueues $productQueues
+     * @return mixed|string|null
+     */
+    public function matchExistProduct(ResourceProductQueues $productQueues)
+    {
+        return  $this->matchExistProductAllow('TradeDoublerProduct', [
+            'identityUniqData' => $productQueues->getAttributeByName('identityUniqData'),
+        ]);
+    }
+
     /**
      * @param array $params
      * @return array
@@ -145,7 +146,7 @@ class TradeDoublerProductRepository extends ServiceDocumentRepository implements
             'count' => $filterCount
         ];
     }
-    
+
     public function createProduct(ResourceProductQueues $productQueues, string $shop)
     {
         /**
@@ -197,17 +198,17 @@ class TradeDoublerProductRepository extends ServiceDocumentRepository implements
         extract($productQueues->getRow());
 
         $tradeDoublerProduct = new TradeDoublerProduct(
-            $name, $productImage, $productUrl, $imageUrl, $height, 
-            $width, $categories, $MerchantCategoryName, $TDCategoryName, 
-            $TDCategoryId, $TDProductId, $description, $feedId, 
-            $groupingId, $tradeDoublerId, $productLanguage, $modified, $price, 
-            $currency, $programName, $availability, $brand, $condition, 
-            $deliveryTime, $ean, $upc, $isbn, $mpn, $sku, 
-            $identifiers, $inStock, $manufacturer, $model, $programLogo, 
-            $promoText, $shippingCost, $shortDescription, $size, $fields, 
+            $name, $productImage, $productUrl, $imageUrl, $height,
+            $width, $categories, $MerchantCategoryName, $TDCategoryName,
+            $TDCategoryId, $TDProductId, $description, $feedId,
+            $groupingId, $tradeDoublerId, $productLanguage, $modified, $price,
+            $currency, $programName, $availability, $brand, $condition,
+            $deliveryTime, $ean, $upc, $isbn, $mpn, $sku,
+            $identifiers, $inStock, $manufacturer, $model, $programLogo,
+            $promoText, $shippingCost, $shortDescription, $size, $fields,
             $warranty, $weight, $techSpecs, $dateformat, $shop, $identityUniqData
         );
-        
+
         $this->dm->persist($tradeDoublerProduct);
     }
 }

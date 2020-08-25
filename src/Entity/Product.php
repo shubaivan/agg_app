@@ -22,6 +22,7 @@ use App\Validation\Constraints\CustomUrl;
  *    },
  *     indexes={
  *     @ORM\Index(name="sku_idx", columns={"sku"}),
+ *     @ORM\Index(name="mongo_id_idx", columns={"mongo_id"}),
  *     @ORM\Index(name="instock_idx", columns={"instock"}),
  *     @ORM\Index(name="group_identity", columns={"group_identity"}),
  *     @ORM\Index(name="created_desc_index", columns={"created_at"}),
@@ -77,6 +78,15 @@ class Product implements EntityValidatorException
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      */
     private $identityUniqData;
+
+    /**
+     * @ORM\Column(type="text", nullable=false)
+     * @Assert\NotBlank(
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $mongoId;
 
     /**
      * @ORM\Column(type="text", nullable=true)

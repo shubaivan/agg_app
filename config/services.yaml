@@ -139,9 +139,17 @@ services:
         $doctrine_system_cache_pool: '@doctrine.system_cache_pool'
       lazy: true
 
+    app_serialize.object_constructor:
+      class: App\Serializer\Construction\DoctrineObjectConstructor
+      public: false
+      arguments:
+        - "@doctrine"
+        - "@doctrine_mongodb"
+        - "@jms_serializer.unserialize_object_constructor"
+
     jms_serializer.object_constructor:
       public: false
-      alias: jms_serializer.doctrine_object_constructor
+      alias: app_serialize.object_constructor
 
     App\Services\Models\ProductService:
       lazy: true

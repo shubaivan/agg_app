@@ -42,7 +42,7 @@ abstract class AbstractModel
                     $matchData = preg_replace("/$ampersand/", str_replace('&', '-', $ampersand), $matchData);
                 }
             }
-            $pattern = '[a-zA-Z ¤æøĂéëäöåÉÄÖÅ™®«»©\-]+';
+            $pattern = '[a-zA-Z ¤æøĂÃãéëäöåÉÄÖÅ™®«»©\-]+';
         }
 
         $resultData = '';

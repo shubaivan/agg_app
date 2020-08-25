@@ -14,6 +14,7 @@ use Doctrine\ODM\MongoDB\Query\Builder;
  * @package App\DocumentRepository
  * @method int getCount(Builder $builder)
  * @method array getDataTableAggr ($collection, array $params)
+ * @method string|null matchExistProductAllow (string $collection, array $match)
  */
 class AdrecordProductRepository extends ServiceDocumentRepository implements CarefulSavingSku
 {
@@ -25,12 +26,12 @@ class AdrecordProductRepository extends ServiceDocumentRepository implements Car
     }
 
     /**
-     * @param string $sku
-     * @return object|null
+     * @param ResourceProductQueues $productQueues
+     * @return mixed|string|null
      */
     public function matchExistProduct(ResourceProductQueues $productQueues)
     {
-        return $this->findOneBy([
+        return  $this->matchExistProductAllow('AdrecordProduct',[
             'SKU' => $productQueues->getSku(),
             'brand' => $productQueues->getBrand(),
             'EAN' => $productQueues->getEan(),

@@ -18,6 +18,42 @@ trait CommonTrait
     }
 
     /**
+     * @param string $collection
+     * @param array $match
+     * @return string|null
+     */
+    public function matchExistProductAllow(
+        string $collection,
+        array $match
+    )
+    {
+        $client = $this->getDocumentManager()->getClient();
+
+        $collection = $client->symfony->$collection;
+
+        $cursor = $collection->aggregate(
+            [
+                ['$match' => $match],
+                ['$project' => ['_id' => 1]]
+            ],
+            ["allowDiskUse" => true]
+        );
+        
+        $toArray = $cursor->toArray();
+        if (count($toArray)) {
+            $array_shift = array_shift($toArray);
+            if (isset($array_shift['_id'])) {
+                $id1 = $array_shift['_id'];
+                $data = unserialize($id1->serialize());
+                if (isset($data['oid'])) {
+                    return $data['oid'];
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * @param array $params
      * @return array
      * @throws \MongoDB\Driver\Exception\Exception

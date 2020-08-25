@@ -26,7 +26,8 @@ class Shop
     const PREFIX_HASH = 'statistic:';
 
     const PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL = 'shop:processing:analysis_product_successful:';
-    const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL = 'shop:processing:successful:';
+    const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE = 'shop:processing:successful_new_one:';
+    const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST = 'shop:processing:successful_exist:';
     const PREFIX_PROCESSING_DATA_SHOP_FAILED = 'shop:processing:failed:';
     const PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND = 'shop:processing:global_match_exception_brand:';
     const PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION = 'shop:processing:global_match_exception:';

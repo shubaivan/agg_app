@@ -42,218 +42,261 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
 {
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $name;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $productImage;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $productUrl;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $imageUrl;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $height;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $width;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $categories;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $MerchantCategoryName;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $TDCategoryName;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $TDCategoryId;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $TDProductId;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $description;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $feedId;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $groupingId;
 
     /**
      * @MongoDB\Field(type="string")
      * @MongoDB\Index()
+     * @Annotation\Type("string")
      */
     private $tradeDoublerId;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $productLanguage;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $modified;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $price;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $currency;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $programName;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $availability;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $brand;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $condition;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $deliveryTime;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $ean;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $upc;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $isbn;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $mpn;
 
     /**
      * @MongoDB\Field(type="string")
      * @MongoDB\Index()
+     * @Annotation\Type("string")
      */
     private $sku;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $identifiers;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $inStock;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $manufacturer;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $model;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $programLogo;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $promoText;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $shippingCost;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $shortDescription;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $size;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $fields;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $warranty;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $weight;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $techSpecs;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $dateformat;
 

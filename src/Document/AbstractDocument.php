@@ -10,6 +10,7 @@ abstract class AbstractDocument implements DataTableInterface
 {
     /**
      * @MongoDB\Id
+     * @Annotation\Type("string")
      */
     protected $id;
     
@@ -26,12 +27,14 @@ abstract class AbstractDocument implements DataTableInterface
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $shop;
 
     /**
      * @MongoDB\Field(type="string")
      * @MongoDB\Index()
+     * @Annotation\Type("string")
      */
     protected $identityUniqData = '';
 

@@ -146,6 +146,11 @@ class HandleDownloadFileData
     private $dm;
 
     /**
+     * @var ObjectsHandler
+     */
+    private $objectsHandler;
+
+    /**
      * HandleDownloadFileData constructor.
      * @param MessageBusInterface $commandBus
      * @param MessageBusInterface $productsBus
@@ -159,6 +164,7 @@ class HandleDownloadFileData
      * @param CategoryService $categoryService
      * @param Helpers $helpers
      * @param DocumentManager $dm
+     * @param ObjectsHandler $objectsHandler
      */
     public function __construct(
         MessageBusInterface $commandBus,
@@ -172,7 +178,8 @@ class HandleDownloadFileData
         string $csvHandleStep,
         CategoryService $categoryService,
         Helpers $helpers,
-        DocumentManager $dm
+        DocumentManager $dm,
+        ObjectsHandler $objectsHandler
     )
     {
         $this->dm = $dm;
@@ -187,6 +194,7 @@ class HandleDownloadFileData
         $this->csvHandleStep = (int)$csvHandleStep;
         $this->categoryService = $categoryService;
         $this->helper = $helpers;
+        $this->objectsHandler = $objectsHandler;
     }
 
     /**
@@ -503,16 +511,15 @@ class HandleDownloadFileData
         $tradeDoublerDataRow->transform();
 
         /** @var TradeDoublerProductRepository $savingSku */
-        $savingSku = $this->dm->getRepository(TradeDoublerProduct::class);
+        $savingSku = $this->dm->getRepository($tradeDoublerDataRow::getMongoClass());
+        
         $saveProductInMongo = $this->saveProductInMongo(
             $tradeDoublerDataRow,
             $shop,
             $savingSku
         );
 
-        if ($saveProductInMongo) {
-            $this->getProductsBus()->dispatch($tradeDoublerDataRow);
-        }
+        $this->getProductsBus()->dispatch($tradeDoublerDataRow);
     }
     
     /**
@@ -542,16 +549,14 @@ class HandleDownloadFileData
         $awinDataRow->transform();
 
         /** @var AwinProductRepository $savingSku */
-        $savingSku = $this->dm->getRepository(AwinProduct::class);
+        $savingSku = $this->dm->getRepository($awinDataRow::getMongoClass());
         $saveProductInMongo = $this->saveProductInMongo(
             $awinDataRow,
             $shop,
             $savingSku
         );
 
-        if ($saveProductInMongo) {
-            $this->getProductsBus()->dispatch($awinDataRow);
-        }
+        $this->getProductsBus()->dispatch($awinDataRow);
     }
     
     /**
@@ -580,15 +585,14 @@ class HandleDownloadFileData
         $adtractionDataRow->transform();
 
         /** @var AdtractionProductRepository $savingSku */
-        $savingSku = $this->dm->getRepository(AdtractionProduct::class);
+        $savingSku = $this->dm->getRepository($adtractionDataRow::getMongoClass());
+        
         $saveProductInMongo = $this->saveProductInMongo(
             $adtractionDataRow,
             $shop,
             $savingSku
         );
-        if ($saveProductInMongo) {
-            $this->getProductsBus()->dispatch($adtractionDataRow);
-        }
+        $this->getProductsBus()->dispatch($adtractionDataRow);
     }
 
     /**
@@ -616,22 +620,22 @@ class HandleDownloadFileData
         $adrecordDataRow->transform();
 
         /** @var AdrecordProductRepository $savingSku */
-        $savingSku = $this->dm->getRepository(AdrecordProduct::class);
+        $savingSku = $this->dm->getRepository($adrecordDataRow::getMongoClass());
+
         $saveProductInMongo = $this->saveProductInMongo(
             $adrecordDataRow,
             $shop,
             $savingSku
         );
-        if ($saveProductInMongo) {
-            $this->getProductsBus()->dispatch($adrecordDataRow);
-        }
+        $this->getProductsBus()->dispatch($adrecordDataRow);
     }
 
     /**
      * @param ResourceProductQueues $productQueues
      * @param $shop
      * @param CarefulSavingSku $savingSku
-     * @return bool
+     * @return mixed
+     * @throws \App\Exception\ValidatorException
      */
     private function saveProductInMongo(
         ResourceProductQueues $productQueues,
@@ -642,28 +646,35 @@ class HandleDownloadFileData
         /** @var AbstractDocument $productMatch */
         $productMatch = $savingSku
             ->matchExistProduct($productQueues);
-
-        if ($productMatch && $productMatch->getId()) {
+        if ($productMatch) {
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_HANDLE_MATCH_BY_IDENTITY_BY_UNIQ_DATA . $productQueues->getShop());
+                    Shop::PREFIX_HANDLE_MATCH_BY_IDENTITY_BY_UNIQ_DATA . $shop);
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $productQueues->getRedisUniqKey(),
                     Shop::PREFIX_HANDLE_MATCH_BY_IDENTITY_BY_UNIQ_DATA . $productQueues->getFilePath());
 
-            return false;
+            $productQueues->setExistProductId($productMatch);
         } else {
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_HANDLE_NEW_ONE . $productQueues->getShop());
+                    Shop::PREFIX_HANDLE_NEW_ONE . $shop);
             $this->getRedisHelper()
                 ->hIncrBy(Shop::PREFIX_HASH . $productQueues->getRedisUniqKey(),
                     Shop::PREFIX_HANDLE_NEW_ONE . $productQueues->getFilePath());
-            
-            $savingSku->createProduct($productQueues, $shop);
-
-            return true;
         }
+        $handleObject = $this->objectsHandler->handleObject(
+            $productQueues->getRow(),
+            $productQueues::getMongoClass()
+        );
+        if (!$productMatch) {
+            $this->dm->persist($handleObject);
+        } else {
+            $productQueues->unsetId();
+        }
+        $productQueues->setExistMongoProductId($handleObject->getId());
+        
+        return $handleObject;
     }
 
     /**

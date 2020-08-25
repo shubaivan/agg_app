@@ -20,7 +20,7 @@ use JMS\Serializer\Annotation;
  * })
  *
  * @MongoDB\UniqueIndex(keys={"name"="asc", "SKU"="asc", "brand"="asc", "EAN"="asc", "shop"="asc"})
- * 
+ *
  * @Annotation\AccessorOrder("custom", custom = {
  *     "SKU",
  *     "graphicUrl",
@@ -37,87 +37,104 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
 {
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $name;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $category;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      * @MongoDB\Index()
      */
     private $SKU;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $EAN;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $description;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $model;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $brand;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $price;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $shippingPrice;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $currency;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $productUrl;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $graphicUrl;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $inStock;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $inStockQty;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $deliveryTime;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $regularPrice;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $gender;
 
@@ -496,28 +513,28 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
         return $this;
     }
 
-    public static function getImageColumns():array
+    public static function getImageColumns(): array
     {
         return [
             'graphicUrl'
         ];
     }
 
-    public static function getLinkColumns():array
+    public static function getLinkColumns(): array
     {
         return [
             'productUrl'
         ];
     }
 
-    public static function getShortPreviewText():array
+    public static function getShortPreviewText(): array
     {
         return [
             'id', 'SKU'
         ];
     }
-    
-    public static function convertToHtmColumns():array
+
+    public static function convertToHtmColumns(): array
     {
         return [
             'description'

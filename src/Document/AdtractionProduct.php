@@ -18,7 +18,7 @@ use JMS\Serializer\Annotation;
  *     "Brand"="text",
  *     "Ean"="text",
  *     "shop"="text",
- *     "identityUniqData"="text", 
+ *     "identityUniqData"="text",
  * })
  *
  * @MongoDB\UniqueIndex(keys={"Name"="asc", "SKU"="asc", "Brand"="asc", "Ean"="asc", "shop"="asc"})
@@ -41,67 +41,83 @@ class AdtractionProduct extends AbstractDocument
 {
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      * @MongoDB\Index()
      */
     private $SKU;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $Name;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $Description;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $Category;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $Price;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $Shipping;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $Currency;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $Instock;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $ProductUrl;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $ImageUrl;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $TrackingUrl;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $Brand;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $OriginalPrice;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $Ean;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $ManufacturerArticleNumber;
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     private $Extras;
 
@@ -127,9 +143,9 @@ class AdtractionProduct extends AbstractDocument
      * @param $identityUniqData
      */
     public function __construct(
-        $SKU, $Name, $Description, $Category, $Price, 
-        $Shipping, $Currency, $Instock, $ProductUrl, $ImageUrl, 
-        $TrackingUrl, $Brand, $OriginalPrice, $Ean, 
+        $SKU, $Name, $Description, $Category, $Price,
+        $Shipping, $Currency, $Instock, $ProductUrl, $ImageUrl,
+        $TrackingUrl, $Brand, $OriginalPrice, $Ean,
         $ManufacturerArticleNumber, $Extras, $shop, $identityUniqData
     )
     {
@@ -153,28 +169,28 @@ class AdtractionProduct extends AbstractDocument
         $this->identityUniqData = $identityUniqData;
     }
 
-    public static function getImageColumns():array
+    public static function getImageColumns(): array
     {
         return [
             'ImageUrl'
         ];
     }
 
-    public static function getLinkColumns():array
+    public static function getLinkColumns(): array
     {
         return [
             'ProductUrl', 'TrackingUrl'
         ];
     }
 
-    public static function getShortPreviewText():array
+    public static function getShortPreviewText(): array
     {
         return [
             'id', 'SKU'
         ];
     }
-    
-    public static function convertToHtmColumns():array
+
+    public static function convertToHtmColumns(): array
     {
         return [
             'Description'
