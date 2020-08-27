@@ -27,7 +27,7 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="{{ asset('build/index/js/adtraction.min.js') }}"></script>
+    {{ encore_entry_script_tags('index/js/adtraction.min') }}
 
     <script>
         function getJSonObject(value) {

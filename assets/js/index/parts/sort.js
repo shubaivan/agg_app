@@ -12,6 +12,9 @@ export default function list() {
             console.log(result.responseJSON.status);
         },
         success: (data) => {
+            if (!data.length) {
+                return;
+            }
             const awinproductcollection = window.Routing
                 .generate('app_rest_awinproductcollection_postproducts');
             var common_defs = [];

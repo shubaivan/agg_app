@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile!{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+
+    <!-- Table -->
+    <table id='empTable' class='display dataTable'>
+
+        <thead>
+        <tr>
+            {% for column in th_keys %}
+                <th scope="col">{{ column }}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tfoot>
+        {% for column in th_keys %}
+            <th scope="col">{{ column }}</th>
+        {% endfor %}
+        </tfoot>
+
+    </table>
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="container-fluid">
+
+                        <form id="editCateory">
+                            <div class="row">
+                                <div class="col-md-6 ml-auto">
+                                    <div class="form-group">
+                                        <label for="pkw" class="col-form-label">pkw:</label>
+                                        <textarea name="pkw" class="form-control" id="pkw" rows="10"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 ml-auto">
+                                    <div class="form-group">
+                                        <label for="nkw" class="col-form-label">nkw:</label>
+                                        <textarea name="nkw" class="form-control" id="nkw" rows="10"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="category_id" name="category_id" value="">
+                        </form>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('index/js/hover_menu.min') }}
+
+{#    <script src="{{ asset('build/index/js/hover_menu.min.js') }}"></script>#}
+
+{#    <script>#}
+
+{#        let th_keys = getJSonObject("{{ dataTbaleKeys ? dataTbaleKeys|json_encode() : "{}" }}");#}
+
+{#    </script>#}
+
+
+{% endblock %}

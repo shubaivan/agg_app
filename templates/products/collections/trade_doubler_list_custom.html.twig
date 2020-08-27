@@ -27,7 +27,7 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="{{ asset('build/index/js/tradeDoubler.min.js') }}"></script>
+    {{ encore_entry_script_tags('index/js/tradeDoubler.min') }}
 
     <script>
         function getJSonObject(value) {
