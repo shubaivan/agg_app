@@ -3,11 +3,12 @@
 
 namespace App\QueueModel;
 
+use App\Document\AwinProduct;
 
-class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
+class AwinDataRow extends ResourceProductQueues
 {
-    private $categories = [];
-
+    protected static $mongoClass = AwinProduct::class;
+    
     public function transform()
     {
         $rowData = $this->getRow();
@@ -23,7 +24,7 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
         }
         
         $rowData['price'] = $rowData['search_price'];
-//        $rowData['shop'] = $rowData['merchant_name'];
+        $rowData['manufacturerArticleNumber'] = $rowData['mpn'];
 
         if (isset($rowData['category_name']) && $rowData['category_name']) {
             $this->categories[] = $rowData['category_name'];
@@ -160,15 +161,23 @@ class AwinDataRow extends ResourceProductQueues implements ResourceDataRow
         $this->postTransform();
     }
 
-    private function postTransform()
+    public function getName()
     {
-        if (count($this->categories)) {
-            $this->row['category'] = implode(' - ', array_unique($this->categories));
-        }
+        return $this->row['product_name'] ?? null;
     }
-
+    
     public function getSku()
     {
-        return $this->row['sku'] ?? null;
+        return $this->row['aw_product_id'] ?? null;
+    }
+
+    public function getBrand()
+    {
+        return $this->row['brand_name'] ?? null;    
+    }
+
+    public function getEan()
+    {
+        return $this->row['ean'] ?? null;
     }
 }

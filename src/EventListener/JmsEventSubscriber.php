@@ -52,7 +52,7 @@ class JmsEventSubscriber implements EventSubscriberInterface
         /** @var Product $object */
         $object = $event->getObject();
         if (!$object->getGroupIdentity()) {
-            $object->setGroupIdentity($object->getSku());
+            $object->setGroupIdentity($object->getIdentityUniqData());
         }
 
         if ($object->getShop() == 'COS') {

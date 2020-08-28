@@ -3,15 +3,26 @@
 namespace App\Services;
 
 use App\Cache\CacheManager;
+use App\Document\AbstractDocument;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
+use App\Document\TradeDoublerProduct;
+use App\DocumentRepository\AdrecordProductRepository;
+use App\DocumentRepository\AdtractionProductRepository;
+use App\DocumentRepository\AwinProductRepository;
+use App\DocumentRepository\CarefulSavingSku;
+use App\DocumentRepository\TradeDoublerProductRepository;
+use App\Entity\Product;
 use App\Entity\Shop;
 use App\QueueModel\AdrecordDataRow;
 use App\QueueModel\AdtractionDataRow;
 use App\QueueModel\AwinDataRow;
 use App\QueueModel\CarriageShop;
 use App\QueueModel\FileReadyDownloaded;
+use App\QueueModel\ResourceDataRow;
+use App\QueueModel\ResourceProductQueues;
+use App\QueueModel\TradeDoublerDataRow;
 use App\Services\Models\CategoryService;
 use App\Util\RedisHelper;
 use Doctrine\ODM\MongoDB\DocumentManager;
@@ -110,6 +121,11 @@ class HandleDownloadFileData
     private $awinDownloadUrls;
 
     /**
+     * @var
+     */
+    private $tradedoublerDownloadUrls;
+
+    /**
      * @var int
      */
     private $csvHandleStep;
@@ -130,6 +146,11 @@ class HandleDownloadFileData
     private $dm;
 
     /**
+     * @var ObjectsHandler
+     */
+    private $objectsHandler;
+
+    /**
      * HandleDownloadFileData constructor.
      * @param MessageBusInterface $commandBus
      * @param MessageBusInterface $productsBus
@@ -138,10 +159,12 @@ class HandleDownloadFileData
      * @param array $adtractionDownloadUrls
      * @param array $adrecordDownloadUrls
      * @param array $awinDownloadUrls
+     * @param array $tradedoublerDownloadUrls
      * @param string $csvHandleStep
      * @param CategoryService $categoryService
      * @param Helpers $helpers
      * @param DocumentManager $dm
+     * @param ObjectsHandler $objectsHandler
      */
     public function __construct(
         MessageBusInterface $commandBus,
@@ -151,16 +174,19 @@ class HandleDownloadFileData
         array $adtractionDownloadUrls,
         array $adrecordDownloadUrls,
         array $awinDownloadUrls,
+        array $tradedoublerDownloadUrls,
         string $csvHandleStep,
         CategoryService $categoryService,
         Helpers $helpers,
-        DocumentManager $dm
+        DocumentManager $dm,
+        ObjectsHandler $objectsHandler
     )
     {
         $this->dm = $dm;
         $this->awinDownloadUrls = $awinDownloadUrls;
         $this->adrecordDownloadUrls = $adrecordDownloadUrls;
         $this->adtractionDownloadUrls = $adtractionDownloadUrls;
+        $this->tradedoublerDownloadUrls = $tradedoublerDownloadUrls;
         $this->commandBus = $commandBus;
         $this->productsBus = $productsBus;
         $this->logger = $adtractionFileHandlerLogger;
@@ -168,6 +194,7 @@ class HandleDownloadFileData
         $this->csvHandleStep = (int)$csvHandleStep;
         $this->categoryService = $categoryService;
         $this->helper = $helpers;
+        $this->objectsHandler = $objectsHandler;
     }
 
     /**
@@ -223,18 +250,34 @@ class HandleDownloadFileData
                     $filePath
                 );
             }
+
             $this->dm->flush(array('safe'=>true));
             
             if ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)) {
                 //ToDo don't forget rerun back
-                unlink($filePath);
+//                unlink($filePath);
                 $this->getLogger()->info(
                     'file ' . $filePath . ' was removed'
                 );
             }
         } catch (\Exception $e) {
-            echo $e->getMessage();
+            $this->getLogger()->error($e->getMessage());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
             throw $e;
+        } catch (\Throwable $exception) {
+            $this->getLogger()->error($exception->getMessage());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+            throw $exception;
         }
     }
 
@@ -247,53 +290,73 @@ class HandleDownloadFileData
     public function creatingCarriageShop(
         string $filePath, string $shop, string $redisUniqKey)
     {
-        if (!$this->checkExistResourceWithShop($shop)) {
-            $this->getLogger()->error('shop ' . $shop . ' not present on resources');
-        }
-
-
-        if (!$this->getRedisHelper()->hExists(self::COUNT_PRODUCTS_SHOP . $redisUniqKey, $filePath)) {
-            if (!file_exists($filePath)) {
-                $this->getLogger()->error('file ' . $filePath . ' no exist');
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
-                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
-                throw new \Exception('file ' . $filePath . ' no exist');
+        try {
+            if (!$this->checkExistResourceWithShop($shop)) {
+                $this->getLogger()->error('shop ' . $shop . ' not present on resources');
             }
-        }
 
-        $count = $this->getCount($filePath, $redisUniqKey);
-        if (!$count) {
-            $csv = $this->generateCsvReader($filePath, $shop);
-            $count = (int)$csv->count();
 
-            $this->getRedisHelper()
-                ->hMSet(self::TIME_SPEND_PRODUCTS_SHOP_START . $redisUniqKey,
-                    [$filePath => (new \DateTime())->getTimestamp()]
+            if (!$this->getRedisHelper()->hExists(self::COUNT_PRODUCTS_SHOP . $redisUniqKey, $filePath)) {
+                if (!file_exists($filePath)) {
+                    $this->getLogger()->error('file ' . $filePath . ' no exist');
+                    $this->getRedisHelper()
+                        ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                            Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+                    $this->getRedisHelper()
+                        ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                            Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+                    throw new \Exception('file ' . $filePath . ' no exist');
+                }
+            }
+
+            $count = $this->getCount($filePath, $redisUniqKey);
+            if (!$count) {
+                $csv = $this->generateCsvReader($filePath, $shop);
+                $count = (int)$csv->count();
+
+                $this->getRedisHelper()
+                    ->hMSet(self::TIME_SPEND_PRODUCTS_SHOP_START . $redisUniqKey,
+                        [$filePath => (new \DateTime())->getTimestamp()]
+                    );
+
+                $this->getRedisHelper()
+                    ->hMSet(self::COUNT_PRODUCTS_SHOP . $redisUniqKey,
+                        [$filePath => $count]
+                    );
+            }
+            if (!(int)$count) {
+                return;
+            }
+            for ($i = 0; $i <= $count; $i = $i + $this->csvHandleStep) {
+                $this->getCommandBus()->dispatch(
+                    new CarriageShop(
+                        $i,
+                        ($i + $this->csvHandleStep >= $count
+                            ? $count - $i : $this->csvHandleStep),
+                        $filePath,
+                        $shop,
+                        $redisUniqKey
+                    )
                 );
-
+            }
+        } catch (\Exception $e) {
+            $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->hMSet(self::COUNT_PRODUCTS_SHOP . $redisUniqKey,
-                    [$filePath => $count]
-                );
-        }
-        if (!(int)$count) {
-            return;
-        }
-        for ($i = 0; $i <= $count; $i = $i + $this->csvHandleStep) {
-            $this->getCommandBus()->dispatch(
-                new CarriageShop(
-                    $i,
-                    ($i + $this->csvHandleStep >= $count
-                        ? $count - $i : $this->csvHandleStep),
-                    $filePath,
-                    $shop,
-                    $redisUniqKey
-                )
-            );
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+            throw $e;
+        } catch (\Throwable $exception) {
+            $this->getLogger()->error($exception->getMessage());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+            throw $exception;
         }
     }
 
@@ -306,6 +369,7 @@ class HandleDownloadFileData
         if (isset($this->adtractionDownloadUrls[$shop])
             || isset($this->adrecordDownloadUrls[$shop])
             || isset($this->awinDownloadUrls[$shop])
+            || isset($this->tradedoublerDownloadUrls[$shop])
         ) {
             return true;
         }
@@ -372,6 +436,16 @@ class HandleDownloadFileData
                 $filePath
             );
         }
+
+        if (isset($this->tradedoublerDownloadUrls[$shop])) {
+            $this->createTradeDoublerJob(
+                $shop,
+                $offsetRecord,
+                $record,
+                $redisUniqKey,
+                $filePath
+            );
+        }
         
         if (isset($this->adtractionDownloadUrls[$shop])) {
             $this->createAdtractionDataJob(
@@ -420,6 +494,44 @@ class HandleDownloadFileData
      * @return array
      * @throws \Throwable
      */
+    private function createTradeDoublerJob(
+        ?string $shop,
+        $offsetRecord,
+        $record,
+        string $redisUniqKey,
+        string $filePath
+    ) :void
+    {
+        $tradeDoublerDataRow = new TradeDoublerDataRow(
+            $record,
+            ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)),
+            $filePath,
+            $redisUniqKey
+        );
+        $tradeDoublerDataRow->transform();
+
+        /** @var TradeDoublerProductRepository $savingSku */
+        $savingSku = $this->dm->getRepository($tradeDoublerDataRow::getMongoClass());
+        
+        $saveProductInMongo = $this->saveProductInMongo(
+            $tradeDoublerDataRow,
+            $shop,
+            $savingSku
+        );
+
+        $this->getProductsBus()->dispatch($tradeDoublerDataRow);
+    }
+    
+    /**
+     * @param string|null $shop
+     * @param $offsetRecord
+     * @param $record
+     * @param string $redisUniqKey
+     * @param string $filePath
+     *
+     * @return array
+     * @throws \Throwable
+     */
     private function createAwinJob(
         ?string $shop,
         $offsetRecord,
@@ -435,117 +547,16 @@ class HandleDownloadFileData
             $redisUniqKey
         );
         $awinDataRow->transform();
+
+        /** @var AwinProductRepository $savingSku */
+        $savingSku = $this->dm->getRepository($awinDataRow::getMongoClass());
+        $saveProductInMongo = $this->saveProductInMongo(
+            $awinDataRow,
+            $shop,
+            $savingSku
+        );
+
         $this->getProductsBus()->dispatch($awinDataRow);
-
-        $existProduct = $this->dm->getRepository(AwinProduct::class)
-            ->findOneBy(['aw_product_id' => $awinDataRow->getSku()]);
-
-        if (!$existProduct) {
-            /**
-             * @var $aw_deep_link
-             * @var $product_name
-             * @var $aw_product_id
-             * @var $merchant_product_id
-             * @var $merchant_image_url
-             * @var $description
-             * @var $merchant_category
-             * @var $search_price
-             * @var $merchant_name
-             * @var $merchant_id
-             * @var $category_name
-             * @var $category_id
-             * @var $aw_image_url
-             * @var $currency
-             * @var $store_price
-             * @var $delivery_cost
-             * @var $merchant_deep_link
-             * @var $language
-             * @var $last_updated
-             * @var $display_price
-             * @var $data_feed_id
-             * @var $brand_name
-             * @var $brand_id
-             * @var $colour
-             * @var $product_short_description
-             * @var $specifications
-             * @var $condition
-             * @var $product_model
-             * @var $model_number
-             * @var $dimensions
-             * @var $keywords
-             * @var $promotional_text
-             * @var $product_type
-             * @var $commission_group
-             * @var $merchant_product_category_path
-             * @var $merchant_product_second_category
-             * @var $merchant_product_third_category
-             * @var $rrp_price
-             * @var $saving
-             * @var $savings_percent
-             * @var $base_price
-             * @var $base_price_amount
-             * @var $base_price_text
-             * @var $product_price_old
-             * @var $delivery_restrictions
-             * @var $delivery_weight
-             * @var $warranty
-             * @var $terms_of_contract
-             * @var $delivery_time
-             * @var $in_stock
-             * @var $stock_quantity
-             * @var $valid_from
-             * @var $valid_to
-             * @var $is_for_sale
-             * @var $web_offer
-             * @var $pre_order
-             * @var $stock_status
-             * @var $size_stock_status
-             * @var $size_stock_amount
-             * @var $merchant_thumb_url
-             * @var $large_image
-             * @var $alternate_image
-             * @var $aw_thumb_url
-             * @var $alternate_image_two
-             * @var $alternate_image_three
-             * @var $alternate_image_four
-             * @var $ean
-             * @var $isbn
-             * @var $upc
-             * @var $mpn
-             * @var $parent_product_id
-             * @var $product_GTIN
-             * @var $basket_link
-             * @var $Fashion_suitable_for
-             * @var $Fashion_category
-             * @var $Fashion_size
-             * @var $Fashion_material
-             * @var $Fashion_pattern
-             * @var $Fashion_swatch
-             */
-            extract($awinDataRow->getRow());
-
-            $adrecordProduct = new AwinProduct(
-                $aw_deep_link, $product_name, $aw_product_id, $merchant_product_id,
-                $merchant_image_url, $description, $merchant_category, $search_price,
-                $merchant_name, $merchant_id, $category_name, $category_id, $aw_image_url,
-                $currency, $store_price, $delivery_cost, $merchant_deep_link, $language,
-                $last_updated, $display_price, $data_feed_id, $brand_name, $brand_id,
-                $colour, $product_short_description, $specifications, $condition,
-                $product_model, $model_number, $dimensions, $keywords, $promotional_text,
-                $product_type, $commission_group, $merchant_product_category_path,
-                $merchant_product_second_category, $merchant_product_third_category, $rrp_price,
-                $saving, $savings_percent, $base_price, $base_price_amount, $base_price_text,
-                $product_price_old, $delivery_restrictions, $delivery_weight, $warranty,
-                $terms_of_contract, $delivery_time, $in_stock, $stock_quantity, $valid_from,
-                $valid_to, $is_for_sale, $web_offer, $pre_order, $stock_status,
-                $size_stock_status, $size_stock_amount, $merchant_thumb_url, $large_image,
-                $alternate_image, $aw_thumb_url, $alternate_image_two, $alternate_image_three,
-                $alternate_image_four, $ean, $isbn, $upc, $mpn, $parent_product_id,
-                $product_GTIN, $basket_link, $Fashion_suitable_for, $Fashion_category,
-                $Fashion_size, $Fashion_material, $Fashion_pattern, $Fashion_swatch, $shop
-            );
-            $this->dm->persist($adrecordProduct);
-        };
     }
     
     /**
@@ -571,41 +582,17 @@ class HandleDownloadFileData
             $filePath,
             $redisUniqKey
         );
+        $adtractionDataRow->transform();
+
+        /** @var AdtractionProductRepository $savingSku */
+        $savingSku = $this->dm->getRepository($adtractionDataRow::getMongoClass());
+        
+        $saveProductInMongo = $this->saveProductInMongo(
+            $adtractionDataRow,
+            $shop,
+            $savingSku
+        );
         $this->getProductsBus()->dispatch($adtractionDataRow);
-
-        $existProduct = $this->dm->getRepository(AdtractionProduct::class)
-            ->findOneBy(['SKU' => $adtractionDataRow->getSku()]);
-
-        if (!$existProduct) {
-            /**
-             * @var $SKU
-             * @var $Name
-             * @var $Description
-             * @var $Category
-             * @var $Price
-             * @var $Shipping
-             * @var $Currency
-             * @var $Instock
-             * @var $ProductUrl
-             * @var $ImageUrl
-             * @var $TrackingUrl
-             * @var $Brand
-             * @var $OriginalPrice
-             * @var $Ean
-             * @var $ManufacturerArticleNumber
-             * @var $Extras
-             * @var $shop
-             */
-            extract($adtractionDataRow->getRow());
-
-            $adrecordProduct = new AdtractionProduct(
-                $SKU, $Name, $Description, $Category, $Price,
-                $Shipping, $Currency, $Instock, $ProductUrl, $ImageUrl,
-                $TrackingUrl, $Brand, $OriginalPrice, $Ean,
-                $ManufacturerArticleNumber, $Extras, $shop
-            );
-            $this->dm->persist($adrecordProduct);
-        };
     }
 
     /**
@@ -631,42 +618,64 @@ class HandleDownloadFileData
             $redisUniqKey
         );
         $adrecordDataRow->transform();
-        $this->getProductsBus()->dispatch($adrecordDataRow);
-        $existProduct = $this->dm->getRepository(AdrecordProduct::class)
-            ->findOneBy(['SKU' => $adrecordDataRow->getSku()]);
-        if (!$existProduct) {
-            /**
-             * @var $name
-             * @var $category
-             * @var $SKU
-             * @var $EAN
-             * @var $description
-             * @var $model
-             * @var $brand
-             * @var $price
-             * @var $shippingPrice
-             * @var $currency
-             * @var $productUrl
-             * @var $graphicUrl
-             * @var $inStock
-             * @var $inStockQty
-             * @var $deliveryTime
-             * @var $regularPrice
-             * @var $gender
-             * @var $shop
-             */
-            extract($adrecordDataRow->getRow());
 
-            $adrecordProduct = new AdrecordProduct(
-                $name, $category, $SKU, $EAN, $description,
-                $model, $brand, $price, $shippingPrice, $currency,
-                $productUrl, $graphicUrl, $inStock, $inStockQty, $deliveryTime,
-                $regularPrice, $gender, $shop
-            );
-            $this->dm->persist($adrecordProduct);
-        }
+        /** @var AdrecordProductRepository $savingSku */
+        $savingSku = $this->dm->getRepository($adrecordDataRow::getMongoClass());
+
+        $saveProductInMongo = $this->saveProductInMongo(
+            $adrecordDataRow,
+            $shop,
+            $savingSku
+        );
+        $this->getProductsBus()->dispatch($adrecordDataRow);
     }
 
+    /**
+     * @param ResourceProductQueues $productQueues
+     * @param $shop
+     * @param CarefulSavingSku $savingSku
+     * @return mixed
+     * @throws \App\Exception\ValidatorException
+     */
+    private function saveProductInMongo(
+        ResourceProductQueues $productQueues,
+        $shop,
+        CarefulSavingSku $savingSku
+    )
+    {
+        /** @var AbstractDocument $productMatch */
+        $productMatch = $savingSku
+            ->matchExistProduct($productQueues);
+        if ($productMatch) {
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_MATCH_BY_IDENTITY_BY_UNIQ_DATA . $shop);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $productQueues->getRedisUniqKey(),
+                    Shop::PREFIX_HANDLE_MATCH_BY_IDENTITY_BY_UNIQ_DATA . $productQueues->getFilePath());
+
+            $productQueues->setExistProductId($productMatch);
+        } else {
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_NEW_ONE . $shop);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $productQueues->getRedisUniqKey(),
+                    Shop::PREFIX_HANDLE_NEW_ONE . $productQueues->getFilePath());
+        }
+        $handleObject = $this->objectsHandler->handleObject(
+            $productQueues->getRow(),
+            $productQueues::getMongoClass()
+        );
+        if (!$productMatch) {
+            $this->dm->persist($handleObject);
+        } else {
+            $productQueues->unsetId();
+        }
+        $productQueues->setExistMongoProductId($handleObject->getId());
+        
+        return $handleObject;
+    }
 
     /**
      * @return TraceableMessageBus

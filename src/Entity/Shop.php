@@ -25,12 +25,18 @@ class Shop
 {
     const PREFIX_HASH = 'statistic:';
 
-    const PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL = 'shop:handle:analysis_product_successful:';
-    const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL = 'shop:processing:successful:';
+    const PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL = 'shop:processing:analysis_product_successful:';
+    const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE = 'shop:processing:successful_new_one:';
+    const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST = 'shop:processing:successful_exist:';
     const PREFIX_PROCESSING_DATA_SHOP_FAILED = 'shop:processing:failed:';
     const PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND = 'shop:processing:global_match_exception_brand:';
     const PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION = 'shop:processing:global_match_exception:';
     const PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION = 'shop:processing:admin_shop_rules_exception:';
+
+    const PREFIX_HANDLE_MATCH_BY_IDENTITY_BY_UNIQ_DATA = 'shop:handle:match_by_identityUniqData:';
+    const PREFIX_HANDLE_NEW_ONE = 'shop:handle:new_one:';
+    
+    const PREFIX_PROCESSING_MATCH_BY_IDENTITY_BY_UNIQ_DATA = 'shop:processing:match_by_identityUniqData:';
 
     const PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL = 'shop:handle:successful:';
     const PREFIX_HANDLE_DATA_SHOP_FAILED = 'shop:handle:failed:';
@@ -38,9 +44,7 @@ class Shop
     const SERIALIZED_GROUP_LIST = 'shop_group_list';
 
     private static $shopNamesMapping = [
-        'vegaoo' => 'Vegaoo',
-        'nike' => 'Nike',
-        'nordic_nest' => 'Nordic Nest',
+        //Adtraction
         'babyland' => 'Babyland',
         'babyV' => 'BabyV',
         'elodi' => 'Elodi',
@@ -54,6 +58,8 @@ class Shop
         'sneakersPoint' => 'SneakersPoint',
         'stor_and_liten' => 'Stor & Liten',
         'polarn_pyret' => 'Polarn O. Pyret',
+
+        //Adrecord
         'baby_bjorn' => 'Baby Björn',
         'cardoonia' => 'Cardoonia',
         'ebbeKids' => 'EbbeKids',
@@ -67,7 +73,24 @@ class Shop
         'spelexperten' => 'Spelexperten',
         'sportshopen' => 'Sportshopen',
         'stigaSports' => 'StigaSports',
-        'twar' => 'Twar'
+        'twar' => 'Twar',
+
+        //Awin
+        'vegaoo' => 'Vegaoo',
+        'nike' => 'Nike',
+        'nordic_nest' => 'Nordic Nest',
+        'nepiece_nordic' => 'Onepiece Nordic',
+        'blue_tomato' => 'Blue Tomato',
+        'ellos_se' => 'Ellos SE',
+        'jd_sports' => 'JD Sports',
+
+        //TradeDoubler
+        'sportamore' => 'Sportamore',
+        'bonprix' => 'Bonprix',
+        'cdon_barn_and_baby' => 'CDON Barn and Baby',
+        'cdon_shoes' => 'CDON Shoes',
+        'geggamoja' => 'Geggamoja',
+        'gina_tricot' => 'Gina Tricot'
     ];
 
     use TimestampableEntity;

@@ -4,13 +4,16 @@ namespace App\Services\Models;
 
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
+use App\Entity\Category;
 use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\Search\SearchShopsCollection;
 use App\Entity\Collection\ShopsCollection;
 use App\Entity\Product;
 use App\Entity\Shop;
+use App\Exception\ValidatorException;
 use App\Repository\ProductRepository;
 use App\Repository\ShopRepository;
+use App\Services\ObjectsHandler;
 use Doctrine\DBAL\Cache\CacheException;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -24,6 +27,11 @@ class ShopService
     private $shopRepository;
 
     /**
+     * @var ObjectsHandler
+     */
+    private $objecHandler;
+
+    /**
      * @var TagAwareQueryResultCacheProduct
      */
     private $tagAwareQueryResultCacheProduct;
@@ -32,33 +40,48 @@ class ShopService
      * ShopService constructor.
      * @param ShopRepository $shopRepository
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
+     * @param ObjectsHandler $objecHandler
      */
     public function __construct(
         ShopRepository $shopRepository,
-        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
+        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
+        ObjectsHandler $objecHandler
     )
     {
         $this->shopRepository = $shopRepository;
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
+        $this->objecHandler = $objecHandler;
     }
 
     /**
      * @param Product $product
-     * @return Shop|object|null
-     * @throws \Doctrine\ORM\ORMException
+     * @return Shop|mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function createShopFromProduct(Product $product)
     {
         if (strlen($product->getShop()) < 1) {
             throw new BadRequestHttpException('product id:' . $product->getId() . ' shop is empty');
         }
-        $shop = $this->matchExistShop($product->getShop());
-        if (!($shop instanceof Shop)) {
-            $shop = new Shop();
-            $shop
-                ->setShopName($product->getShop());
+
+        try {
+
+            $shop = $this->matchExistShop($product->getShop());
+            if (!($shop instanceof Shop)) {
+                $shop = new Shop();
+                $shop
+                    ->setShopName($product->getShop());
+            }
+
+            $this->getObjecHandler()
+                ->validateEntity($shop);
+        } catch (ValidatorException $e) {
+            $shop = $this->matchExistShop($product->getShop());
         }
-        $product->setShopRelation($shop);
+        
+        if ($shop instanceof Shop) {
+            $product->setShopRelation($shop);   
+        }
 
         return $shop;
     }
@@ -167,12 +190,13 @@ class ShopService
 
     /**
      * @param string $name
-     * @return Shop|object|null
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     private function matchExistShop(string $name)
     {
         return $this->getShopRepository()
-            ->findOneBy(['shopName' => $name]);
+            ->matchExistByName($name);
     }
 
     /**
@@ -189,5 +213,13 @@ class ShopService
     public function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
     {
         return $this->tagAwareQueryResultCacheProduct;
+    }
+
+    /**
+     * @return ObjectsHandler
+     */
+    public function getObjecHandler(): ObjectsHandler
+    {
+        return $this->objecHandler;
     }
 }

@@ -11,7 +11,21 @@ parameters:
         'nike': '%env(AWIN_DOWNLOAD_URL_Nike)%'
         'nordic_nest': '%env(AWIN_DOWNLOAD_URL_Nordic_Nest)%'
 
+        'nepiece_nordic': '%env(AWIN_DOWNLOAD_URL_Onepiece_Nordic)%'
+        'blue_tomato': '%env(AWIN_DOWNLOAD_URL_Blue_Tomato)%'
+        'ellos_se': '%env(AWIN_DOWNLOAD_URL_Ellos_SE)%'
+        'jd_sports': '%env(AWIN_DOWNLOAD_URL_JD_Sports)%'
+
     awin_download_file_path: '%env(AWIN_DOWNLOAD_FILE_PATH)%'
+
+    tradedoubler_download_urls:
+        'sportamore': '%env(TRADEDOUBLER_DOWNLOAD_URL_Sportamore)%'
+        'bonprix': '%env(TRADEDOUBLER_DOWNLOAD_URL_Bonprix)%'
+
+        'geggamoja': '%env(TRADEDOUBLER_DOWNLOAD_URL_Geggamoja)%'
+        'gina_tricot': '%env(TRADEDOUBLER_DOWNLOAD_URL_Gina_Tricot)%'
+
+    tradedoubler_download_file_path: '%env(TRADEDOUBLER_DOWNLOAD_FILE_PATH)%'
 
     adtraction_download_urls:
         'babyland': '%env(ANDRACTION_DOWNLOAD_URL_Babyland)%'
@@ -93,6 +107,11 @@ services:
       public: true
       lazy: true
 
+    App\Cache\TagAwareQueryResultCacheCategoryConf:
+      arguments: ['@pdo_category_conf_cache_pool']
+      public: true
+      lazy: true
+
     App\Cache\TagAwareQueryResultCacheBrand:
       arguments: ['@pdo_brand_cache_pool']
       public: true
@@ -124,9 +143,17 @@ services:
         $doctrine_system_cache_pool: '@doctrine.system_cache_pool'
       lazy: true
 
+    app_serialize.object_constructor:
+      class: App\Serializer\Construction\DoctrineObjectConstructor
+      public: false
+      arguments:
+        - "@doctrine"
+        - "@doctrine_mongodb"
+        - "@jms_serializer.unserialize_object_constructor"
+
     jms_serializer.object_constructor:
       public: false
-      alias: jms_serializer.doctrine_object_constructor
+      alias: app_serialize.object_constructor
 
     App\Services\Models\ProductService:
       lazy: true
@@ -156,6 +183,7 @@ services:
         $awinDownloadUrls: '%awin_download_urls%'
         $adtractionDownloadUrls: '%adtraction_download_urls%'
         $adrecordDownloadUrls: '%adrecord_download_urls%'
+        $tradedoublerDownloadUrls: '%tradedoubler_download_urls%'
         $csvHandleStep: '%csv_handle_step%'
         $productsBus: '@products.bus'
         $commandBus: '@command.bus'
@@ -211,6 +239,12 @@ services:
       autoconfigure: false
 
     App\QueueModelHandlers\AwinDataRowHandler:
+      tags: [{ name: messenger.message_handler, bus: products.bus }]
+      # prevent handlers from being registered twice (or you can remove
+      # the MessageHandlerInterface that autoconfigure uses to find handlers)
+      autoconfigure: false
+
+    App\QueueModelHandlers\TradeDoublerDataRowHandler:
       tags: [{ name: messenger.message_handler, bus: products.bus }]
       # prevent handlers from being registered twice (or you can remove
       # the MessageHandlerInterface that autoconfigure uses to find handlers)

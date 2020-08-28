@@ -171,6 +171,11 @@ class ResourceDownloadFile extends Command
         }
 
         foreach ($this->getUrl() as $key => $url) {
+            $files = glob($this->getDirForFiles($key) . '/*'); // get all file names
+            foreach ($files as $file) { // iterate files
+                if (is_file($file))
+                    unlink($file); // delete file
+            }
             $this->guzzleStreamWay($key, $url);
         }
     }
@@ -196,10 +201,9 @@ class ResourceDownloadFile extends Command
             if ($exception->getCode() === 403
                 || $exception->getCode() === 404
                 || $exception->getCode() === 400
-            )
-            {
+            ) {
                 $this->getOutput()->writeln(
-                    '<fg=red>' . date('H:i:s') . 'shop: ' . $key .' error code: ' . $exception->getCode() . 'message: ' .$exception->getMessage() . '</>'
+                    '<fg=red>' . date('H:i:s') . 'shop: ' . $key . ' error code: ' . $exception->getCode() . 'message: ' . $exception->getMessage() . '</>'
                 );
                 return;
             } else {
@@ -222,10 +226,10 @@ class ResourceDownloadFile extends Command
             '<fg=green>' . date('H:i:s') . ' guzzle stream way get body' . '</>'
         );
         $date = date('YmdHis');
-        $fileRelativePath = $this->getDirForFiles($key) . '/' . $date . '.csv' .((isset($zipExt) && $zipExt) ? '.zip' : '');
+        $fileRelativePath = $this->getDirForFiles($key) . '/' . $date . '.csv' . ((isset($zipExt) && $zipExt) ? '.zip' : '');
         // Read bytes off of the stream until the end of the stream is reached
         while (!feof($phpStream)) {
-            $read = fread($phpStream, 1024);
+            $read = fread($phpStream, 2048);
 
             file_put_contents(
                 $fileRelativePath,
@@ -238,14 +242,14 @@ class ResourceDownloadFile extends Command
         );
         $file_parts = pathinfo($fileRelativePath);
 
-        switch($file_parts['extension']) {
+        switch ($file_parts['extension']) {
             case 'zip':
                 $zip = new \ZipArchive();
                 if ($zip->open($fileRelativePath) === TRUE) {
-                    for($i = 0; $i < $zip->numFiles; $i++) {
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
                         $filename = $zip->getNameIndex($i);
                         $filePatWithIter = $this->getDirForFiles($key) . '/' . $date . '.csv';
-                        copy("zip://".$fileRelativePath."#".$filename, $filePatWithIter);
+                        copy("zip://" . $fileRelativePath . "#" . $filename, $filePatWithIter);
                     }
                     $zip->close();
                     unlink($fileRelativePath);
@@ -261,7 +265,6 @@ class ResourceDownloadFile extends Command
                 );
                 break;
         }
-
 
 
         $this->getOutput()->writeln(

@@ -80,7 +80,12 @@ class Helpers
      * @param bool $strict
      * @return string
      */
-    public function handleSearchValue($searchField, bool $strict, bool $combineWordWithSpace = false): string
+    public function handleSearchValue(
+        $searchField,
+        bool $strict,
+        bool $combineWordWithSpace = false,
+        ?string $delimiter = null
+    ): string
     {
         $result = str_replace('.', ',', $searchField);
         $result = str_replace('&', ' ', $result);
@@ -97,17 +102,14 @@ class Helpers
         }
 
         $result = str_replace(',,', ',', $result);
-
-        $delimiter = ($strict !== true ? ':*|' : '|');
-
-        if (preg_match_all('/[,]/', $result, $matches) > 0) {
-            $search = str_replace(',', $delimiter, $result) . ($strict !== true ? ':*' : '');
-        } else {
-            $search = $result . ($strict !== true ? ':*' : '');
+        if (!$delimiter) {
+            $delimiter = ($strict !== true ? ':*|' : '|');
         }
 
+        $search = str_replace(',', $delimiter, $result) . ($strict !== true ? ':*' : '');
+        
         $search = str_replace(':*|:*|', ':*|', $search);
-        $search = str_replace('", "', '|', $search);
+//        $search = str_replace('", "', '|', $search);
 //        if (preg_match_all("/\(.*?\):\*/", $search, $m)) {
 //            $matchResults = array_shift($m);
 //            foreach ($matchResults as $matchResult) {

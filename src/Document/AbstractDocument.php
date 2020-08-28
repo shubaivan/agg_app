@@ -10,6 +10,7 @@ abstract class AbstractDocument implements DataTableInterface
 {
     /**
      * @MongoDB\Id
+     * @Annotation\Type("string")
      */
     protected $id;
     
@@ -26,8 +27,16 @@ abstract class AbstractDocument implements DataTableInterface
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $shop;
+
+    /**
+     * @MongoDB\Field(type="string")
+     * @MongoDB\Index()
+     * @Annotation\Type("string")
+     */
+    protected $identityUniqData = '';
 
     /**
      * @return bool
@@ -65,9 +74,33 @@ abstract class AbstractDocument implements DataTableInterface
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getShop()
+    {
+        return $this->shop;
+    }
+
     public function getDeclineAccessor()
     {
         return $this->decline ? 'true' : 'false';
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIdentityUniqData()
+    {
+        return $this->identityUniqData;
     }
 
     public static function getDeclineReasonKey()

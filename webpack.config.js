@@ -28,6 +28,8 @@ Encore
     .addEntry('index/js/awin.min', './assets/js/index/awin.js')
     .addEntry('index/js/adtraction.min', './assets/js/index/adtraction.js')
     .addEntry('index/js/adrecord.min', './assets/js/index/adrecord.js')
+    .addEntry('index/js/tradeDoubler.min', './assets/js/index/tradeDoubler.js')
+    .addEntry('index/js/hover_menu.min', './assets/js/index/hover_menu.js')
 
     //.addEntry('page1', './assets/js/page1.js')
     //.addEntry('page2', './assets/js/page2.js')

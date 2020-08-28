@@ -31,6 +31,11 @@ interface ResourceDataRow extends LastProductInterface
      */
     public function setExistProductId(int $id);
 
+    /*
+     * 
+     */
+    public function unsetId();
+    
     /**
      * @return string
      */
@@ -40,4 +45,9 @@ interface ResourceDataRow extends LastProductInterface
      * @return string
      */
     public function getRedisUniqKey(): string;
+
+    /**
+     * @return mixed
+     */
+    public function generateIdentityUniqData();
 }

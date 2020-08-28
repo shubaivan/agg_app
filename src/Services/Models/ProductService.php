@@ -15,6 +15,7 @@ use App\Entity\Collection\SearchProducts\GroupAdjacent;
 use App\Entity\Collection\SearchProducts\GroupProductEntity;
 use App\Entity\Collection\Search\SearchProductCollection;
 use App\Entity\Product;
+use App\Entity\Shop;
 use App\Entity\UserIp;
 use App\Entity\UserIpProduct;
 use App\Exception\ValidatorException;
@@ -23,6 +24,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserIpProductRepository;
 use App\Services\ObjectsHandler;
+use App\Util\RedisHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Cache\CacheException;
@@ -76,19 +78,26 @@ class ProductService extends AbstractModel
     private $managerShopsService;
 
     /**
+     * @var RedisHelper
+     */
+    private $redisHelper;
+
+    /**
      * ProductService constructor.
      * @param LoggerInterface $logger
      * @param ObjectsHandler $objectHandler
      * @param EntityManagerInterface $em
      * @param RequestStack $requestStack
      * @param ManagerShopsService $managerShopsService
+     * @param RedisHelper $redisHelper
      */
     public function __construct(
         LoggerInterface $logger,
         ObjectsHandler $objectHandler,
         EntityManagerInterface $em,
         RequestStack $requestStack,
-        ManagerShopsService $managerShopsService
+        ManagerShopsService $managerShopsService,
+        RedisHelper $redisHelper
     )
     {
         $this->logger = $logger;
@@ -96,6 +105,7 @@ class ProductService extends AbstractModel
         $this->em = $em;
         $this->requestStack = $requestStack;
         $this->managerShopsService = $managerShopsService;
+        $this->redisHelper = $redisHelper;
     }
 
     /**
@@ -146,7 +156,7 @@ class ProductService extends AbstractModel
      * @param ResourceDataRow $adtractionDataRow
      * @return Product
      * @throws ValidatorException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws \Exception
      */
     public function createProductFromCsvRow(ResourceDataRow $adtractionDataRow)
     {
@@ -341,50 +351,33 @@ class ProductService extends AbstractModel
     /**
      * @param ResourceDataRow $adtractionDataRow
      * @return ResourceDataRow
+     * @throws \Exception
      */
     private function prepareDataForExistProduct(ResourceDataRow $adtractionDataRow)
     {
-        $product = $this->matchExistProduct($adtractionDataRow->getSku());
-
+        $adtractionDataRow->unsetId();
+        $product = $this->matchExistProduct($adtractionDataRow->generateIdentityUniqData());
+        
         if ($product && $product->getId()) {
-            if ($product->getShop() == $adtractionDataRow->getShop()) {
-                $adtractionDataRow->setExistProductId($product->getId());
-            } else {
-                $this->modifyToUniqSku($adtractionDataRow);
-            }
+            $adtractionDataRow->setExistProductId($product->getId());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_PROCESSING_MATCH_BY_IDENTITY_BY_UNIQ_DATA . $adtractionDataRow->getShop());
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $adtractionDataRow->getRedisUniqKey(),
+                    Shop::PREFIX_PROCESSING_MATCH_BY_IDENTITY_BY_UNIQ_DATA . $adtractionDataRow->getFilePath());
         }
 
         return $adtractionDataRow;
     }
-
+    
     /**
-     * @param ResourceDataRow $adtractionDataRow
-     */
-    private function modifyToUniqSku(ResourceDataRow $adtractionDataRow)
-    {
-        $modifySku = $adtractionDataRow->getSku() . '_1';
-        $matchSku = $this->getProductRepository()
-            ->findOneBy(['sku' => $modifySku]);
-        $adtractionDataRow->setSkuValueToRow($modifySku);
-        while ($matchSku instanceof Product) {
-            if ($matchSku->getShop() == $adtractionDataRow->getShop()) {
-                $adtractionDataRow->setExistProductId($matchSku->getId());
-                break;
-            }
-            $modifySku = $modifySku . '1';
-            $matchSku = $this->getProductRepository()
-                ->findOneBy(['sku' => $modifySku]);
-            $adtractionDataRow->setSkuValueToRow($modifySku);
-        }
-    }
-
-    /**
-     * @param string $sku
+     * @param string $data
      * @return Product|object|null
      */
-    private function matchExistProduct(string $sku)
+    private function matchExistProduct(string $data)
     {
-        return $this->getProductRepository()->findOneBy(['sku' => $sku]);
+        return $this->getProductRepository()->findOneBy(['identityUniqData' => $data]);
     }
 
     private function setGroupIdentity(Product $product)
@@ -621,5 +614,13 @@ class ProductService extends AbstractModel
     private function getManagerShopsService(): ManagerShopsService
     {
         return $this->managerShopsService;
+    }
+
+    /**
+     * @return RedisHelper
+     */
+    private function getRedisHelper(): RedisHelper
+    {
+        return $this->redisHelper;
     }
 }

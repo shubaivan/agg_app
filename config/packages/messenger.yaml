@@ -8,12 +8,13 @@ framework:
       default_bus: command.bus
       buses:
         command.bus:
-          middleware: ~
+          middleware:
+            - doctrine_ping_connection
+            - doctrine_close_connection
         products.bus:
           middleware:
             - doctrine_ping_connection
             - doctrine_close_connection
-            - doctrine_transaction
         vacuum.bus:
           middleware:
             - doctrine_ping_connection
@@ -67,6 +68,18 @@ framework:
               awin_parse_row:
                 binding_keys: [awin_parse_row]
 
+        trade_doubler_parse_row:
+          dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+          serializer: App\Messenger\ExternalJsonMessageSerializer
+          options:
+            exchange:
+              type: direct
+              name: trade_doubler_parse_row
+              default_publish_routing_key: trade_doubler_parse_row
+            queues:
+              trade_doubler_parse_row:
+                binding_keys: [trade_doubler_parse_row]
+
         vacuum_row:
           dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
           serializer: App\Messenger\ExternalJsonMessageSerializer
@@ -100,4 +113,5 @@ framework:
         'App\QueueModel\CarriageShop': carriage_shop
         'App\QueueModel\VacuumJob': vacuum_row
         'App\QueueModel\AwinDataRow': awin_parse_row
+        'App\QueueModel\TradeDoublerDataRow': trade_doubler_parse_row
 

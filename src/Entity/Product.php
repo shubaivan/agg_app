@@ -16,9 +16,13 @@ use App\Validation\Constraints\CustomUrl;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  * @ORM\Table(name="products",
- *     uniqueConstraints={@UniqueConstraint(name="uniq_sku_index", columns={"sku"})},
+ *    uniqueConstraints={
+ *        @UniqueConstraint(name="identityUniqData_uniq_idx",
+ *            columns={"identity_uniq_data"})
+ *    },
  *     indexes={
  *     @ORM\Index(name="sku_idx", columns={"sku"}),
+ *     @ORM\Index(name="mongo_id_idx", columns={"mongo_id"}),
  *     @ORM\Index(name="instock_idx", columns={"instock"}),
  *     @ORM\Index(name="group_identity", columns={"group_identity"}),
  *     @ORM\Index(name="created_desc_index", columns={"created_at"}),
@@ -38,9 +42,9 @@ use App\Validation\Constraints\CustomUrl;
  *     "extras", "createdAt"
  *      }
  * )
+ * @UniqueEntity(fields={"identityUniqData"}, groups={Product::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache("NONSTRICT_READ_WRITE")
  * @ORM\HasLifecycleCallbacks()
- * @UniqueEntity(fields={"sku"}, groups={Product::SERIALIZED_GROUP_CREATE})
  */
 class Product implements EntityValidatorException
 {
@@ -67,16 +71,31 @@ class Product implements EntityValidatorException
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="text")
      * @Assert\NotBlank(
      *     groups={Product::SERIALIZED_GROUP_CREATE}
      * )
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      */
+    private $identityUniqData;
+
+    /**
+     * @ORM\Column(type="text", nullable=false)
+     * @Assert\NotBlank(
+     *     groups={Product::SERIALIZED_GROUP_CREATE}
+     * )
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
+    private $mongoId;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     */
     private $sku;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=false)
+     * @ORM\Column(type="text", nullable=false)
      * @Assert\NotBlank(
      *     groups={Product::SERIALIZED_GROUP_CREATE_IDENTITY}
      * )
@@ -85,7 +104,7 @@ class Product implements EntityValidatorException
     private $groupIdentity;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
      * @Assert\Length(
      *      min = 1,
@@ -407,6 +426,22 @@ class Product implements EntityValidatorException
     public function getCategory()
     {
         return $this->category;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCategoryWithShop()
+    {
+        $result = [];
+        if ($this->category) {
+            $result[] = $this->category;    
+        }
+
+        if ($this->shop) {
+            $result[] = $this->shop;
+        }
+        return implode(',', $result);
     }
 
     /**
@@ -744,7 +779,7 @@ class Product implements EntityValidatorException
                                 if (!$excludeOriginalValue) {
                                     array_push($result[$explode[0]], $explode[1]);
                                 }
-                                $result[$explode[0]] = array_unique($result[$explode[0]]);
+                                $result[$explode[0]] = array_values(array_unique($result[$explode[0]]));
                             } elseif ($explode[0] == self::COLOUR){
                                 $valueSite = $explode[1];
 
@@ -979,6 +1014,14 @@ class Product implements EntityValidatorException
         $price = preg_replace('/.00/', '', $this->price);
 
         return $price;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIdentityUniqData()
+    {
+        return $this->identityUniqData;
     }
 
     /**

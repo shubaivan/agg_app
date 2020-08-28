@@ -2,11 +2,13 @@
 
 namespace App\Repository;
 
+use App\Cache\TagAwareQueryResultCacheCategoryConf;
 use App\Entity\CategoryConfigurations;
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\DBAL\Cache\ResultCacheStatement;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * @method CategoryConfigurations|null find($id, $lockMode = null, $lockVersion = null)
@@ -16,9 +18,162 @@ use Doctrine\DBAL\Cache\ResultCacheStatement;
  */
 class CategoryConfigurationsRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    /**
+     * @var TagAwareQueryResultCacheCategoryConf
+     */
+    private $tagAwareQueryResultCacheCategoryConf;
+
+    /**
+     * CategoryConfigurationsRepository constructor.
+     * @param ManagerRegistry $registry
+     * @param TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf
+     */
+    public function __construct(
+        ManagerRegistry $registry,
+        TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf
+    )
     {
+        $this->tagAwareQueryResultCacheCategoryConf = $tagAwareQueryResultCacheCategoryConf;
         parent::__construct($registry, CategoryConfigurations::class);
+    }
+
+    public function getHoverMenuCategoryConf(
+        array $params,
+        bool $count = false,
+        bool $total = false
+    )
+    {
+        $parameterBag = new ParameterBag();
+
+        $columnIndex = $params['order'][0]['column']; // Column index
+        $columnName = $params['columns'][$columnIndex]['data']; // Column name
+        $columnSortOrder = $params['order'][0]['dir']; // asc or desc
+        $columnSortOrder = ($columnSortOrder == 'desc' ? -1 : 1);
+
+        if (isset($params['search']['value']) && strlen($params['search']['value'])) {
+            $search = $params['search']['value'];
+            $parameterBag->set('search', $search);
+        }
+
+
+        if (isset($params['draw'])) {
+            $draw = $params['draw'];
+            $parameterBag->set('page', $draw);
+        }
+
+        if (isset($params['start'])) {
+            $offset = $params['start'];
+            $parameterBag->set('offset', $offset);
+        }
+
+        if (isset($params['length'])) {
+            $limit = $params['length'];
+            $parameterBag->set('limit', $limit);
+        }
+
+        return $this->getCategoryConfNative($parameterBag, $count, $total);
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param bool $count
+     * @param bool $total
+     * @return int|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function getCategoryConfNative(
+        ParameterBag $parameterBag,
+        bool $count = false,
+        bool $total = false
+    )
+    {
+        $sort_by = isset($_REQUEST['sort_by']);
+        $connection = $this->getEntityManager()->getConnection();
+        $limit = (int)$parameterBag->get('count');
+        $offset = $limit * ((int)$parameterBag->get('page') - 1);
+
+        $search = $parameterBag->get('search');
+
+        $query = '';
+        $params = [];
+        $types = [];
+        if ($count) {
+            $query .= '
+                        SELECT COUNT(DISTINCT category_alias.id)
+                    ';
+        } else {
+            $query .= '
+                    SELECT                         
+                        category_alias.id,
+                        category_alias.category_name as "CategoryName",
+                        c_conf.key_words as "PositiveKeyWords",
+                        c_conf.negative_key_words as "NegativeKeyWords",
+                        \'action\' as "Action"
+            ';
+        }
+
+        $query .= '
+                FROM category_configurations AS c_conf
+                INNER JOIN category AS category_alias ON category_alias.id = c_conf.category_id_id
+                WHERE category_alias.custome_category = :custome_category 
+        ';
+        $params[':custome_category'] = true;
+        $types[':custome_category'] = \PDO::PARAM_BOOL;
+        if ($search && !$total) {
+            $query .= '
+                AND category_alias.category_name ILIKE :search
+            ';
+            $params[':search'] = '%' . $search . '%';
+            $types[':search'] = \PDO::PARAM_STR;
+        }
+
+        if (!$count) {
+
+            if ($parameterBag->get('limit')) {
+                $query .= '
+                    LIMIT :limit
+                ';
+                $params[':limit'] = $parameterBag->get('limit');
+                $types[':limit'] = \PDO::PARAM_INT;
+            }
+
+            if ($parameterBag->get('offset') !== null) {
+                $query .= '
+                    OFFSET :offset
+                ';
+                $params[':offset'] = $parameterBag->get('offset');
+                $types[':offset'] = \PDO::PARAM_INT;
+            }
+        }
+
+        $this->getTagAwareQueryResultCacheCategoryConf()->setQueryCacheTags(
+            $query,
+            $params,
+            $types,
+            ['category_conf_search'],
+            0, $count ? "category_conf_search_cont" : "category_conf_search"
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategoryConf()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+
+        if ($count) {
+            $brands = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $brands = isset($brands[0]['count']) ? (int)$brands[0]['count'] : 0;
+        } else {
+            $brands = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        }
+        $statement->closeCursor();
+
+        return $brands;
+
     }
 
     /**
@@ -84,5 +239,24 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
         $idsCategorySize = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
         return $idsCategorySize;
+    }
+
+    /**
+     * @param $object
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function save($object)
+    {
+        $this->getEntityManager()->persist($object);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheCategoryConf
+     */
+    public function getTagAwareQueryResultCacheCategoryConf(): TagAwareQueryResultCacheCategoryConf
+    {
+        return $this->tagAwareQueryResultCacheCategoryConf;
     }
 }

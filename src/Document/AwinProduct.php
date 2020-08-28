@@ -23,8 +23,12 @@ use JMS\Serializer\Annotation;
  *     "Fashion_category"="text",
  *     "Fashion_size"="text",
  *     "declineReasonClass"="text",
- *     "shop"="text"
+ *     "shop"="text",
+ *     "identityUniqData"="text",
  * })
+ *
+ * @MongoDB\UniqueIndex(keys={"product_name"="asc", "aw_product_id"="asc", "brand_name"="asc", "ean"="asc", "shop"="asc"})
+ *
  * @Annotation\AccessorOrder("custom", custom = {
  *     "aw_product_id",
  *     "merchant_image_url",
@@ -41,404 +45,483 @@ class AwinProduct extends AbstractDocument
 {
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $aw_deep_link;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $product_name;
-    
+
     /**
      * @MongoDB\Field(type="string")
-     * @MongoDB\UniqueIndex(order="asc")
+     * @Annotation\Type("string")
+     * @MongoDB\Index()
      */
     protected $aw_product_id;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $merchant_product_id;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $merchant_image_url;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $description;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $merchant_category;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $search_price;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $merchant_name;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $merchant_id;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $category_name;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $category_id;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $aw_image_url;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $currency;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $store_price;
 
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $delivery_cost;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $merchant_deep_link;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $product_language;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $last_updated;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $display_price;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $data_feed_id;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $brand_name;
 
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $brand_id;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $colour;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $product_short_description;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $specifications;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $condition;
 
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $product_model;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $model_number;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $dimensions;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $keywords;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $promotional_text;
 
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $product_type;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $commission_group;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $merchant_product_category_path;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $merchant_product_second_category;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $merchant_product_third_category;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $rrp_price;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $saving;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $savings_percent;
 
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $base_price;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $base_price_amount;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $base_price_text;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $product_price_old;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $delivery_restrictions;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $delivery_weight;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $warranty;
 
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $terms_of_contract;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $delivery_time;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $in_stock;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $stock_quantity;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $valid_from;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $valid_to;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $is_for_sale;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $web_offer;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $pre_order;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $stock_status;
 
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $size_stock_status;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $size_stock_amount;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $merchant_thumb_url;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $large_image;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $alternate_image;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $aw_thumb_url;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $alternate_image_two;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $alternate_image_three;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $alternate_image_four;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $ean;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $isbn;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $upc;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $mpn;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $parent_product_id;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $product_GTIN;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $basket_link;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $Fashion_suitable_for;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $Fashion_category;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $Fashion_size;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $Fashion_material;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $Fashion_pattern;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Type("string")
      */
     protected $Fashion_swatch;
 
@@ -523,8 +606,31 @@ class AwinProduct extends AbstractDocument
      * @param $Fashion_material
      * @param $Fashion_pattern
      * @param $Fashion_swatch
+     * @param $shop
+     * @param $identityUniqData
      */
-    public function __construct($aw_deep_link, $product_name, $aw_product_id, $merchant_product_id, $merchant_image_url, $description, $merchant_category, $search_price, $merchant_name, $merchant_id, $category_name, $category_id, $aw_image_url, $currency, $store_price, $delivery_cost, $merchant_deep_link, $language, $last_updated, $display_price, $data_feed_id, $brand_name, $brand_id, $colour, $product_short_description, $specifications, $condition, $product_model, $model_number, $dimensions, $keywords, $promotional_text, $product_type, $commission_group, $merchant_product_category_path, $merchant_product_second_category, $merchant_product_third_category, $rrp_price, $saving, $savings_percent, $base_price, $base_price_amount, $base_price_text, $product_price_old, $delivery_restrictions, $delivery_weight, $warranty, $terms_of_contract, $delivery_time, $in_stock, $stock_quantity, $valid_from, $valid_to, $is_for_sale, $web_offer, $pre_order, $stock_status, $size_stock_status, $size_stock_amount, $merchant_thumb_url, $large_image, $alternate_image, $aw_thumb_url, $alternate_image_two, $alternate_image_three, $alternate_image_four, $ean, $isbn, $upc, $mpn, $parent_product_id, $product_GTIN, $basket_link, $Fashion_suitable_for, $Fashion_category, $Fashion_size, $Fashion_material, $Fashion_pattern, $Fashion_swatch, $shop)
+    public function __construct(
+        $aw_deep_link, $product_name, $aw_product_id, $merchant_product_id,
+        $merchant_image_url, $description, $merchant_category, $search_price,
+        $merchant_name, $merchant_id, $category_name, $category_id,
+        $aw_image_url, $currency, $store_price, $delivery_cost,
+        $merchant_deep_link, $language, $last_updated, $display_price,
+        $data_feed_id, $brand_name, $brand_id, $colour, $product_short_description,
+        $specifications, $condition, $product_model, $model_number,
+        $dimensions, $keywords, $promotional_text, $product_type,
+        $commission_group, $merchant_product_category_path,
+        $merchant_product_second_category, $merchant_product_third_category,
+        $rrp_price, $saving, $savings_percent, $base_price,
+        $base_price_amount, $base_price_text, $product_price_old, $delivery_restrictions,
+        $delivery_weight, $warranty, $terms_of_contract, $delivery_time, $in_stock,
+        $stock_quantity, $valid_from, $valid_to, $is_for_sale, $web_offer,
+        $pre_order, $stock_status, $size_stock_status, $size_stock_amount,
+        $merchant_thumb_url, $large_image, $alternate_image, $aw_thumb_url,
+        $alternate_image_two, $alternate_image_three, $alternate_image_four,
+        $ean, $isbn, $upc, $mpn, $parent_product_id, $product_GTIN, $basket_link,
+        $Fashion_suitable_for, $Fashion_category, $Fashion_size,
+        $Fashion_material, $Fashion_pattern, $Fashion_swatch, $shop, $identityUniqData
+    )
     {
         $this->aw_deep_link = $aw_deep_link;
         $this->product_name = $product_name;
@@ -606,6 +712,7 @@ class AwinProduct extends AbstractDocument
         $this->Fashion_pattern = $Fashion_pattern;
         $this->Fashion_swatch = $Fashion_swatch;
         $this->shop = $shop;
+        $this->identityUniqData = $identityUniqData;
     }
 
     /**
@@ -1240,7 +1347,7 @@ class AwinProduct extends AbstractDocument
         return $this->Fashion_swatch;
     }
 
-    public static function getImageColumns():array 
+    public static function getImageColumns(): array
     {
         return [
             'alternate_image_four', 'alternate_image_three', 'alternate_image_three',
@@ -1249,21 +1356,21 @@ class AwinProduct extends AbstractDocument
         ];
     }
 
-    public static function getLinkColumns():array
+    public static function getLinkColumns(): array
     {
         return [
             'aw_deep_link', 'merchant_deep_link'
         ];
     }
-    
-    public static function getShortPreviewText():array
+
+    public static function getShortPreviewText(): array
     {
         return [
-            'id', 'SKU'
+            'id', 'aw_product_id'
         ];
     }
 
-    public static function convertToHtmColumns():array
+    public static function convertToHtmColumns(): array
     {
         return [
             'description'

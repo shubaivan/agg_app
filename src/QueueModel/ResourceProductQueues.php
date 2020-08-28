@@ -4,8 +4,15 @@
 namespace App\QueueModel;
 
 
-abstract class ResourceProductQueues
+use App\Document\MatchSameProducts;
+use App\Document\TradeDoublerProduct;
+
+abstract class ResourceProductQueues implements MatchSameProducts, ResourceDataRow
 {
+    protected static $mongoClass = '';
+    
+    protected $categories = [];
+    
     /**
      * @var array
      */
@@ -87,16 +94,47 @@ abstract class ResourceProductQueues
     }
 
     /**
-     * @param int $id
+     * @return string|null
+     */
+    public function getAttributeByName(string $name)
+    {
+        return $this->row[$name] ?? null;
+    }
+
+    /**
+     * @param int|string $id
      * @return $this
      */
-    public function setExistProductId(int $id)
+    public function setExistProductId($id)
     {
         if ($this->getRow() && is_array($this->row)) {
             $this->row['id'] = $id;
         }
 
         return $this;
+    }
+
+    /**
+     * @param int|string $id
+     * @return $this
+     */
+    public function setExistMongoProductId($id)
+    {
+        if ($this->getRow() && is_array($this->row)) {
+            $this->row['mongoId'] = $id;
+        }
+
+        return $this;
+    }    
+    
+    public function unsetId()
+    {
+        if ($this->getRow() 
+            && is_array($this->row)
+            && isset($this->row['id'])
+        ) {
+            unset($this->row['id']);
+        }
     }
 
     /**
@@ -122,5 +160,57 @@ abstract class ResourceProductQueues
     public function getFilePath()
     {
         return $this->filePath;
+    }
+
+    public function transform()
+    {
+        $this->postTransform();
+    }
+    
+    protected function postTransform()
+    {
+        if (count($this->categories)) {
+            $this->row['category'] = implode(' - ', array_unique($this->categories));
+        }
+
+        $this->row['identityUniqData'] = $this->generateIdentityUniqData();
+    }
+    
+    /**
+     * @return false|mixed|string|string[]|null
+     */
+    public function generateIdentityUniqData()
+    {
+        if (isset($this->row['identityUniqData']) && strlen($this->row['identityUniqData'])) {
+            return $this->row['identityUniqData'];
+        }
+
+        $prepare = [];
+
+        if ($this->getSku() && strlen($this->getSku())) {
+            $prepare[] = $this->getSku();
+        }
+        if ($this->getBrand() && strlen($this->getBrand())) {
+            $prepare[] = $this->getBrand();
+        }
+        if ($this->getEan() && strlen($this->getEan())) {
+            $prepare[] = $this->getEan();
+        }
+        if ($this->getShop() && strlen($this->getShop())) {
+            $prepare[] = $this->getShop();
+        }
+        $implode = implode('_', $prepare);
+        
+        $preg_replace = preg_replace('/[\s+,.]+/', '_', $implode);
+
+        return mb_strtolower($preg_replace);
+    }
+
+    /**
+     * @return string
+     */
+    public static function getMongoClass(): string
+    {
+        return static::$mongoClass;
     }
 }

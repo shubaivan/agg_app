@@ -29,6 +29,7 @@ use App\Services\Models\Shops\JollyRoomService;
 use App\Services\Models\Shops\LekmerService;
 use App\Services\Models\Shops\LindexService;
 use App\Services\Models\Shops\LitenlekermerService;
+use App\Services\Models\Shops\NikeService;
 use App\Services\Models\Shops\PyretService;
 use App\Services\Models\Shops\ReimaService;
 
@@ -44,6 +45,11 @@ class ManagerShopsService
 //'litenleker'
 //'sneakersPoint'
 //'stor_and_liten'
+//
+//'nepiece_nordic'
+//'blue_tomato'
+//'ellos_se' 
+//'jd_sports' 
 
     /**
      * @var PyretService
@@ -183,6 +189,11 @@ class ManagerShopsService
     private $twar;
 
     /**
+     * @var NikeService
+     */
+    private $nike;
+
+    /**
      * ManagerShopsService constructor.
      * @param PyretService $polarn_pyret
      * @param BabyShopService $babyshop
@@ -211,8 +222,9 @@ class ManagerShopsService
      * @param StigaSportsService $stigaSports
      * @param StrumpgalenService $strumpgalen
      * @param TwarService $twar
+     * @param NikeService $nike
      */
-    public function __construct(PyretService $polarn_pyret, BabyShopService $babyshop, JollyRoomService $jollyroom, ReimaService $reima, LekmerService $lekmer, BabyLandService $babyland, BabyVService $babyV, ElodiService $elodi, LindexService $lindex, LitenlekermerService $litenlekermer, CykloteketService $cykloteket, AhlensService $ahlens, BabyBjornService $baby_bjorn, CardooniaService $cardoonia, EbbeKids $ebbeKids, FrankDandy $frankDandy, Jultroja $jultroja, GusTextil $gus_rextil, LeksakscityService $leksakscity, NallerietService $nalleriet, NamnbandService $namnband, ShirtstoreService $shirtstore, SpelexpertenService $spelexperten, SportshopenService $sportshopen, StigaSportsService $stigaSports, StrumpgalenService $strumpgalen, TwarService $twar)
+    public function __construct(PyretService $polarn_pyret, BabyShopService $babyshop, JollyRoomService $jollyroom, ReimaService $reima, LekmerService $lekmer, BabyLandService $babyland, BabyVService $babyV, ElodiService $elodi, LindexService $lindex, LitenlekermerService $litenlekermer, CykloteketService $cykloteket, AhlensService $ahlens, BabyBjornService $baby_bjorn, CardooniaService $cardoonia, EbbeKids $ebbeKids, FrankDandy $frankDandy, Jultroja $jultroja, GusTextil $gus_rextil, LeksakscityService $leksakscity, NallerietService $nalleriet, NamnbandService $namnband, ShirtstoreService $shirtstore, SpelexpertenService $spelexperten, SportshopenService $sportshopen, StigaSportsService $stigaSports, StrumpgalenService $strumpgalen, TwarService $twar, NikeService $nike)
     {
         $this->polarn_pyret = $polarn_pyret;
         $this->babyshop = $babyshop;
@@ -241,6 +253,7 @@ class ManagerShopsService
         $this->stigaSports = $stigaSports;
         $this->strumpgalen = $strumpgalen;
         $this->twar = $twar;
+        $this->nike = $nike;
     }
 
 

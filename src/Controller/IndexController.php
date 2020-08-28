@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
+use App\Document\TradeDoublerProduct;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -48,6 +49,11 @@ class IndexController extends AbstractController
                 'name' => 'Adtraction',
                 'count' => $dm->getRepository(AdtractionProduct::class)->getCountDoc(),
                 'path' => $obj->generate('product_collection_adtraction')
+            ],
+            [
+                'name' => 'TradeDoubler',
+                'count' => $dm->getRepository(TradeDoublerProduct::class)->getCountDoc(),
+                'path' => $obj->generate('product_collection_trade_doubler')
             ],
         ];
         

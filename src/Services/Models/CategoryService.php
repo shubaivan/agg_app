@@ -14,6 +14,7 @@ use App\Entity\Product;
 use App\Entity\Shop;
 use App\Exception\GlobalMatchException;
 use App\Exception\GlobalMatchExceptionBrand;
+use App\Exception\ValidatorException;
 use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
@@ -189,28 +190,35 @@ class CategoryService extends AbstractModel
 //        if (!strlen($prepareCategoryDataForGINSearch)) {
 //            return [];
 //        }
-//        $isMatchToMainCategory = $this->getCategoryRepository()
-//            ->isMatchToMainCategory($prepareCategoryDataForGINSearch);
+        
+        $isMatchToMainCategory = $this->getCategoryRepository()
+            ->isMatchToMainCategory($product->getCategoryWithShop());
 
-
-        $mainCategoryWords = $this->getCategoryRepository()
-            ->getMainSubCategoryIds();
-
-        if (!count($mainCategoryWords)) {
+        if (!$isMatchToMainCategory) {
             return [];
         }
+//        $mainCategoryWords = $this->getCategoryRepository()
+//            ->getMainSubCategoryIds();
+//
+//        if (!count($mainCategoryWords)) {
+//            return [];
+//        }
 
-        $mainCategoryIds = $this->getCategoryRepository()
-            ->isMatchPlainCategoriesString($product->getCategory() .','.$product->getShop(), $mainCategoryWords, true);
+//        $mainCategoryIds = $this->getCategoryRepository()
+//            ->isMatchPlainCategoriesString(
+//                $product->getCategory() .','.$product->getShop(),
+//                $mainCategoryWords,
+//                true
+//        );
 
 
         
-//        $mainCategoryIds = [];
-//        array_map(function ($v) use (&$mainCategoryIds){
-//            if (isset($v['id'])) {
-//                $mainCategoryIds[] = $v['id'];
-//            }
-//        }, $isMatchToMainCategory);
+        $mainCategoryIds = [];
+        array_map(function ($v) use (&$mainCategoryIds){
+            if (isset($v['id'])) {
+                $mainCategoryIds[] = $v['id'];
+            }
+        }, $isMatchToMainCategory);
 
         if (!$mainCategoryIds) {
             return [];
@@ -343,6 +351,7 @@ class CategoryService extends AbstractModel
      * @param Product $product
      * @return array|bool
      * @throws \App\Exception\ValidatorException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function createCategoriesFromProduct(Product $product)
     {
@@ -425,29 +434,36 @@ class CategoryService extends AbstractModel
      * @param Product $product
      * @return array
      * @throws \App\Exception\ValidatorException
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     private function createArrayModelCategory(array $arrayCategories, Product $product)
     {
         $arrayModelsCategory = [];
         foreach ($arrayCategories as $category) {
-            $categoryModel = $this->matchExistCategory($category);
-            if (!($categoryModel instanceof Category)) {
-                $categoryModel = new Category();
-                $categoryModel
-                    ->setCategoryName($category);
 
-                $this->getObjecHandler()
-                    ->validateEntity($categoryModel, [Category::SERIALIZED_GROUP_CREATE]);
+            try {
+                $categoryModel = $this->matchExistCategory($category);
+                if (!($categoryModel instanceof Category)) {
+                    $categoryModel = new Category();
+                    $categoryModel
+                        ->setCategoryName($category);
+
+                    $this->getObjecHandler()
+                        ->validateEntity($categoryModel, [Category::SERIALIZED_GROUP_CREATE]);
+                }
+            } catch (ValidatorException $e) {
+                $categoryModel = $this->matchExistCategory($category);
             }
-            if ($categoryModel->getSubCategoryRelations()->count()) {
-                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
-                    /** @var $categoryRelation CategoryRelations */
-                    if ($categoryRelation->getMainCategory()) {
-                        $product->addCategoryRelation($categoryRelation->getMainCategory());
+            
+            if ($categoryModel instanceof Category) {
+                if ($categoryModel->getSubCategoryRelations()->count()) {
+                    foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
+                        /** @var $categoryRelation CategoryRelations */
+                        if ($categoryRelation->getMainCategory()) {
+                            $product->addCategoryRelation($categoryRelation->getMainCategory());
+                        }
                     }
                 }
-            }
 //            if ($categoryModel->getSubCategoryRelations()->count()) {
 //                $mainCategoryChallengerIds = [];
 //                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
@@ -474,8 +490,10 @@ class CategoryService extends AbstractModel
 //                    }
 //                }
 //            }
-            $product->addCategoryRelation($categoryModel);
-            array_push($arrayModelsCategory, $categoryModel);
+                
+                $product->addCategoryRelation($categoryModel);
+                array_push($arrayModelsCategory, $categoryModel);   
+            }
         }
 
         return $arrayModelsCategory;
@@ -498,7 +516,9 @@ class CategoryService extends AbstractModel
         if (!strlen($productComparingData)) {
             return false;
         }
-        $prepareDataForGINSearch = $this->prepareProductDataForMatching($productComparingData, false, 3);
+        $prepareDataForGINSearch = $this->prepareProductDataForMatching(
+            $productComparingData, false, 3
+        );
         if (!strlen($prepareDataForGINSearch)) {
             return false;
         }
@@ -557,12 +577,13 @@ class CategoryService extends AbstractModel
 
     /**
      * @param string $name
-     * @return Category|object|null
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     private function matchExistCategory(string $name)
     {
         return $this->getCategoryRepository()
-            ->findOneBy(['categoryName' => $name]);
+            ->matchExistByName($name);
     }
 
     /**
