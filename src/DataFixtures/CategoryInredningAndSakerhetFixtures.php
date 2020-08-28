@@ -131,7 +131,7 @@ class CategoryInredningAndSakerhetFixtures extends AbstractFixtures implements D
                 ',
             ],
             [
-                'name' => 'Reflexer',
+                'name' => 'InredningAndSakerhet Reflexer',
                 'key_word' => '
                     reflektor, märkbar, reflektion, Reflexer,
                     reflector            

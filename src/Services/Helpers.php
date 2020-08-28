@@ -89,7 +89,7 @@ class Helpers
     {
         $result = str_replace('.', ',', $searchField);
         $result = str_replace('&', ' ', $result);
-        $result = strip_tags( $result);
+        $result = strip_tags($result);
 
         if (!$combineWordWithSpace) {
             $result = preg_replace('!\s+!', ' ', $result);
@@ -107,7 +107,7 @@ class Helpers
         }
 
         $search = str_replace(',', $delimiter, $result) . ($strict !== true ? ':*' : '');
-        
+
         $search = str_replace(':*|:*|', ':*|', $search);
 //        $search = str_replace('", "', '|', $search);
 //        if (preg_match_all("/\(.*?\):\*/", $search, $m)) {
@@ -128,7 +128,7 @@ class Helpers
      */
     public function getExpiresHttpCache()
     {
-        $expiresTime = (int) $this->redisHelper
+        $expiresTime = (int)$this->redisHelper
             ->get(CacheManager::HTTP_CACHE_EXPIRES_TIME);
         $expiresTimeDateTime = new \DateTime();
         if ($expiresTime) {
@@ -205,12 +205,12 @@ class Helpers
                     }
                 }
             }, $explode);
-            $arrayMap = array_filter($arrayMap, function($value) {
+            $arrayMap = array_filter($arrayMap, function ($value) {
                 return !is_null($value) && $value !== '';
-                }
+            }
             );
             $arrayMap = array_map(function ($v) {
-                return '\b'.trim($v).'\b';
+                return '\b' . trim($v) . '\b';
             }, $arrayMap);
             $arrayMap = array_unique($arrayMap);
             $implode = implode('|', $arrayMap);
@@ -226,5 +226,127 @@ class Helpers
             'match' => $mt,
             'result' => $result
         ];
+    }
+
+    /**
+     * @param string $word
+     */
+    public function fillHoverMenuData(
+        string $categoryName,
+        string $type,
+        string $word)
+    {
+        $categoryName = $this->transCategoryName($categoryName);
+
+        if (!is_dir($this->kernel->getProjectDir() . '/hover_menu_categories_words')) {
+            mkdir($this->kernel->getProjectDir() . '/hover_menu_categories_words');
+        }
+
+        if (!is_dir($this->kernel->getProjectDir() . '/hover_menu_categories_words/' . $categoryName)) {
+            mkdir($this->kernel->getProjectDir() . '/hover_menu_categories_words/' . $categoryName);
+        }
+
+        $this->setDataInFile(
+            $this->kernel->getProjectDir() . '/hover_menu_categories_words/' . $categoryName . '/' . $type,
+            $word . ', '
+        );
+    }
+
+    /**
+     * @param string $categoryName
+     * @param string $type
+     * @return false|string
+     */
+    public function checkExistCategoryFile(string $categoryName, string $type)
+    {
+        $categoryName = $this->transCategoryName($categoryName);
+        $filename = $this->kernel->getProjectDir() . '/hover_menu_categories_words/' . $categoryName . '/' . $type;
+        if (file_exists($filename)) {
+            $contents = file_get_contents($filename);
+
+            return $contents;
+        }
+
+        return '';
+    }
+
+    /**
+     * @param string $keyWords
+     * @param string|null $categoryName
+     * @param string|null $typeWord
+     */
+    public function handleKeyWords(
+        string $keyWords, 
+        ?string $categoryName = '', 
+        ?string $typeWord = ''
+    )
+    {
+        //        $keyWords = preg_replace('/\s+/', '', $keyWords);
+        $keyWords = trim($keyWords);
+        $keyWords = trim($keyWords, ',');
+        $keyWords = preg_replace('/\n/', '', $keyWords);
+        $keyWords = preg_replace('!\s+!', '', $keyWords);
+
+        $words = explode(',', $keyWords);
+        if ($categoryName && $typeWord) {
+            $this->reCreateHoverMenuData($categoryName, $typeWord);
+        }
+        foreach ($words as $key => $word) {
+            $word = trim($word);
+            
+            if (!strlen($word)) {
+                unset($words[$key]);
+                continue;
+            }
+
+            if ($categoryName && $typeWord) {
+                $this->fillHoverMenuData($categoryName, $typeWord, $word);
+            }
+        }
+    }
+
+    /**
+     * @param string $categoryName
+     * @param string $type
+     */
+    public function reCreateHoverMenuData(
+        string $categoryName,
+        string $type)
+    {
+        $categoryName = $this->transCategoryName($categoryName);
+        if (file_exists($this->kernel->getProjectDir() . '/hover_menu_categories_words/' . $categoryName .'/'.$type)) {
+            unlink($this->kernel->getProjectDir(). '/hover_menu_categories_words/' . $categoryName .'/'.$type);
+        }
+    }
+
+    /**
+     * @param string $path
+     * @param string $data
+     */
+    private function setDataInFile(string $path, string $data): void
+    {
+        if (file_exists($path) && $data !== PHP_EOL) {
+            if( exec('grep '.escapeshellarg(preg_replace('/\R/', '', $data)).' ' . $path)) {
+                return;
+            }
+        }
+
+        file_put_contents(
+            $path,
+            $data,
+            FILE_APPEND
+        );
+    }
+
+    /**
+     * @param string $categoryName
+     * @return mixed|string|string[]|null
+     */
+    private function transCategoryName(string $categoryName)
+    {
+        $categoryName = str_replace('&', '_', mb_strtolower($categoryName));
+        $categoryName = preg_replace('!\s+!', '_', $categoryName);
+
+        return $categoryName;
     }
 }

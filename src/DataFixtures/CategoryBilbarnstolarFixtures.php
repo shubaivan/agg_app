@@ -58,7 +58,7 @@ class CategoryBilbarnstolarFixtures extends AbstractFixtures implements Dependen
         ],
         'TILLBEHÖR' => [
             [
-                'name' => 'Adapter',
+                'name' => 'Bilbarnstolar Adapter',
                 'key_word' => '
                     Adapter  
                 ',
@@ -70,7 +70,7 @@ class CategoryBilbarnstolarFixtures extends AbstractFixtures implements Dependen
                 ',
             ],
             [
-                'name' => 'Åkpåsar',
+                'name' => 'Bilbarnstolar Åkpåsar',
                 'key_word' => '
                     kuvertet, Åkpåse, vinter kuvert, sovsäck, Åkpåsar,
                     Wholesuits, winter envelope, envelope, sleeping bag  
@@ -119,7 +119,7 @@ class CategoryBilbarnstolarFixtures extends AbstractFixtures implements Dependen
                 ',
             ],
             [
-                'name' => 'Väderskydd',
+                'name' => 'Bilbarnstolar Väderskydd',
                 'key_word' => '
                     parkering, läger, militärliv, lägerliv, tältläger, Väderskydd,
                     parking, stand, stay, camp, quarter                     

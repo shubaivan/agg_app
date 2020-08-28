@@ -92,15 +92,7 @@ class CategoryLeksakerFixtures extends AbstractFixtures implements DependentFixt
             [
                 'name' => 'Minihem och Rollspel',
                 'key_word' => '
-                    Minihem, Rollspel,
-                    role-playing games                     
-                ',
-            ],
-
-            [
-                'name' => 'Minihem och Rollspel',
-                'key_word' => '
-                    Minihem, Rollspel,
+                    Minihem, Rollspel, role-playing games                     
                 ',
             ],
             [
