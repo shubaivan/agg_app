@@ -24,3 +24,6 @@
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
+
+
+/hover_menu_categories_words/

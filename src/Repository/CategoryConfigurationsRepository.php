@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  */
 class CategoryConfigurationsRepository extends ServiceEntityRepository
 {
+    const CATEGORY_CONF_SEARCH = 'category_conf_search';
     /**
      * @var TagAwareQueryResultCacheCategoryConf
      */
@@ -37,6 +38,13 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
         parent::__construct($registry, CategoryConfigurations::class);
     }
 
+    /**
+     * @param array $params
+     * @param bool $count
+     * @param bool $total
+     * @return int|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
     public function getHoverMenuCategoryConf(
         array $params,
         bool $count = false,
@@ -150,8 +158,8 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
             $query,
             $params,
             $types,
-            ['category_conf_search'],
-            0, $count ? "category_conf_search_cont" : "category_conf_search"
+            [self::CATEGORY_CONF_SEARCH],
+            0, $count ? "category_conf_search_cont" : self::CATEGORY_CONF_SEARCH
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategoryConf()
             ->prepareParamsForExecuteCacheQuery();

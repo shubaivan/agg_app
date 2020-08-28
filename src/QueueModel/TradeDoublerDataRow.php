@@ -11,14 +11,16 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
     
     public function transform()
     {
+        $imgCounter = 1;
         $rowData = $this->getRow();
 
         if (isset($rowData['id'])) {
             $rowData['tradeDoublerId'] = $rowData['id'];
             unset($rowData['id']);
         }
-
+        
         $rowData['productLanguage'] = $rowData['language'];
+        $rowData['trackingUrl'] = $rowData['productUrl'];
         $rowData['productShortDescription'] = $rowData['shortDescription'];
         $rowData['productModel'] = $rowData['model'];
         $rowData['instock'] = $rowData['inStock'];
@@ -49,8 +51,16 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
         $clearImagePath = preg_replace('/;;/', '', $rowData['productImage']);
         $rowData['productImage'] = $clearImagePath;
 
+        $result = filter_var($rowData['shortDescription'], FILTER_VALIDATE_URL);
+        if ($result) {
+            $rowData['productImage'] = $rowData['shortDescription'];
+            $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_'.$imgCounter.'#' . $clearImagePath . '}';
+            $imgCounter++;
+        }
+
         if ($rowData['imageUrl'] != $clearImagePath) {
-            $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_1#' . $clearImagePath . '}';
+            $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_'.$imgCounter.'#' . $clearImagePath . '}';
+            $imgCounter++;
         }
 
         if (isset($rowData['TDCategoryName']) && strlen($rowData['TDCategoryName'])) {
@@ -88,7 +98,9 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
                 $i = 1;
                 foreach ($imgs as $key => $img) {
                     $i += 1;
-                    $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_' . $i . '#' . $img . '}';
+//                    $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_' . $i . '#' . $img . '}';
+                    $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_'.$imgCounter.'#' . $img . '}';
+                    $imgCounter++;
                 }
             } else {
                 $explodeFields = explode(':', $field);

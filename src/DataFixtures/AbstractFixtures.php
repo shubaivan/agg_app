@@ -10,6 +10,7 @@ use App\Entity\CategorySection;
 use App\Kernel;
 use App\Repository\CategoryRelationsRepository;
 use App\Repository\CategoryRepository;
+use App\Services\Helpers;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -33,6 +34,11 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
      * @var Kernel
      */
     private $kernel;
+
+    /**
+     * @var Helpers
+     */
+    private $helper;
 
     /**
      * @var bool
@@ -164,10 +170,12 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
     /**
      * CategoryBarnFixtures constructor.
      * @param KernelInterface $kernel
+     * @param Helpers $helpers
      */
-    public function __construct(KernelInterface $kernel)
+    public function __construct(KernelInterface $kernel, Helpers $helpers)
     {
         $this->kernel = $kernel;
+        $this->helper = $helpers;
     }
 
     protected function processSizeCategories($configurationsSize, Category $m)
@@ -182,6 +190,7 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
                 if (!$category instanceof Category) {
                     $category = new Category();
                     $category->setCategoryName($name);
+                    $category->setCustomeCategory(true);
                     $this->getManager()->persist($category);
                 }
 
@@ -290,13 +299,13 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
         ?string $negativeKeyWords = null
     ): Category
     {
-        $keyWords = $this->processingKeyWords($keyWords);
-        $category = $this->checkExistCategory($categoryName);
+        $keyWords = $this->processingKeyWords(
+            $keyWords, false, true, $categoryName, 'positive'
+        );
+//        $category = $this->checkExistCategory($categoryName);
 
-        if (!$category instanceof Category) {
-            $category = new Category();
-            $category->setCategoryName($categoryName);
-        }
+        $category = new Category();
+        $category->setCategoryName($categoryName);
 
         $category
             ->setCustomeCategory(true);
@@ -315,13 +324,23 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
         $categoryConfigurations
             ->setKeyWords($keyWords);
         if ($negativeKeyWords) {
+            if ($categoryName) {
+                $checkExistCategoryFile = $this->helper
+                    ->checkExistCategoryFile($categoryName, 'negative');
+                if ($checkExistCategoryFile) {
+                    $negativeKeyWords = $checkExistCategoryFile;
+                }
+            }
+
 //            $negativeKeyWords = preg_replace('/\s+/', '', $negativeKeyWords);
 
             $negativeKeyWords = preg_replace('/\n/', '', $negativeKeyWords);
             $negativeKeyWords = preg_replace('!\s+!', ' ', $negativeKeyWords);
 
             $negativeKeyWords = explode(', ', $negativeKeyWords);
-
+            if ($categoryName) {
+                $this->helper->reCreateHoverMenuData($categoryName, 'negative');
+            }
             foreach ($negativeKeyWords as $key => $nword) {
                 $nword = trim($nword);
                 if (!strlen($nword) || array_search($nword, $this->bufferPositiveKeyWords)) {
@@ -331,6 +350,9 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
 
                 if (preg_match_all('!\s+!', $nword, $match)) {
                     $this->fillDictionary($nword);
+                }
+                if ($categoryName) {
+                    $this->helper->fillHoverMenuData($categoryName, 'negative', $nword);
                 }
             }
 
@@ -342,6 +364,7 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
         $category->setCategoryConfigurations($categoryConfigurations);
 
         $this->getManager()->persist($categoryConfigurations);
+        $this->getManager()->flush();
 
         return $category;
     }
@@ -389,10 +412,20 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
     protected function processingKeyWords(
         string $keyWords,
         bool $withNewLine = false,
-        bool $setInDictionary = true
+        bool $setInDictionary = true,
+        ?string $categoryName = '',
+        ?string $typeWord = ''
     ): string
     {
         $this->bufferPositiveKeyWords = [];
+
+        if ($categoryName && $typeWord) {
+            $checkExistCategoryFile = $this->helper->checkExistCategoryFile($categoryName, $typeWord);
+            if ($checkExistCategoryFile) {
+                $keyWords = $checkExistCategoryFile;
+            }
+        }
+
         //        $keyWords = preg_replace('/\s+/', '', $keyWords);
         $keyWords = trim($keyWords);
         $keyWords = trim($keyWords, ',');
@@ -400,7 +433,9 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
         $keyWords = preg_replace('!\s+!', ' ', $keyWords);
 
         $words = explode(', ', $keyWords);
-
+        if ($categoryName && $typeWord) {
+            $this->helper->reCreateHoverMenuData($categoryName, $typeWord);
+        }
         foreach ($words as $key => $word) {
             $word = trim($word);
             $strlen = strlen($word);
@@ -418,6 +453,9 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
                     $this->minLen = $strlen;
                 }
             }
+            if ($categoryName && $typeWord) {
+                $this->helper->fillHoverMenuData($categoryName, $typeWord, $word);
+            }
         }
         $words = array_unique($words);
         $words = array_filter($words, function ($v) {
@@ -433,7 +471,7 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
         }
         return $keyWords;
     }
-
+    
     /**
      * @param string $word
      */

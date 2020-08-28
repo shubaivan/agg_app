@@ -4,6 +4,7 @@
 namespace App\DocumentRepository;
 
 use Doctrine\ODM\MongoDB\Query\Builder;
+use MongoDB\BSON\Regex;
 
 trait CommonTrait
 {
@@ -99,10 +100,13 @@ trait CommonTrait
                     && isset($column['data'])
                     && strlen($column['search']['value'])
                 ) {
+                    $v = $column['search']['value'];
                     $match = ['$match' => [
-                        $column['data'] => $column['data'] == 'decline'
+                        $column['data'] => ($column['data'] == 'decline')
                             ? ($column['search']['value'] == 'true' ? true : false)
-                            : $column['search']['value']]
+                            : new Regex($v, 'i')
+
+                    ]
                     ];
                     array_push($filter, $match);
                     array_push($filterQuantity, $match);

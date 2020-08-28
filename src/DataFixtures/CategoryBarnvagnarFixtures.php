@@ -83,7 +83,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                 ',
             ],
             [
-                'name' => 'Åkpåsar',
+                'name' => 'Barnvagnar Åkpåsar',
                 'key_word' => '
                     kuvertet, Åkpåsar, vinter kuvert, sovsäck,
                     Wholesuits, winter envelope, envelope, sleeping bag                     
@@ -106,7 +106,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                 ',
             ],
             [
-                'name' => 'Adapter',
+                'name' => 'Barnvagnar Adapter',
                 'key_word' => '
                     adapter, click
                 ',
@@ -216,14 +216,14 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                 ',
             ],
             [
-                'name' => 'Reflexer',
+                'name' => 'Barnvagnar Reflexer',
                 'key_word' => '
                     reflektor, märkbar, reflektion, Reflexer,
                     reflector
                 ',
             ],
             [
-                'name' => 'Väderskydd',
+                'name' => 'Barnvagnar Väderskydd',
                 'key_word' => '
                     parkering, läger, militärliv, lägerliv, tältläger, Väderskydd,
                     parking, stand, stay, camp, quarter

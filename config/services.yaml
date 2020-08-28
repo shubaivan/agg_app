@@ -21,7 +21,8 @@ parameters:
     tradedoubler_download_urls:
         'sportamore': '%env(TRADEDOUBLER_DOWNLOAD_URL_Sportamore)%'
         'bonprix': '%env(TRADEDOUBLER_DOWNLOAD_URL_Bonprix)%'
-
+        'cdon_barn_and_baby': '%env(TRADEDOUBLER_DOWNLOAD_URL_CDON_Barn_and_Baby)%'
+        'cdon_shoes': '%env(TRADEDOUBLER_DOWNLOAD_URL_CDON_Shoes)%'
         'geggamoja': '%env(TRADEDOUBLER_DOWNLOAD_URL_Geggamoja)%'
         'gina_tricot': '%env(TRADEDOUBLER_DOWNLOAD_URL_Gina_Tricot)%'
 
@@ -141,6 +142,7 @@ services:
         $pdo_brand_cache_pool: '@pdo_brand_cache_pool'
         $doctrine_result_cache_pool: '@doctrine.result_cache_pool'
         $doctrine_system_cache_pool: '@doctrine.system_cache_pool'
+        $pdo_category_conf_cache_pool: '@pdo_category_conf_cache_pool'
       lazy: true
 
     app_serialize.object_constructor:

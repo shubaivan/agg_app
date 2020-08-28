@@ -28,9 +28,9 @@ class CategoryBarnFixtures extends AbstractFixtures
                     'Capes' => 'Cape, Capes',
                     'Duffelkappor' => 'Duffeljacka, Duffeljackor, Duffel jacket',
                     'Fleece set' => 'Fleece set',
-                    'Fleecetröjor' => 'Fleecetröja, Fleece tröja, Fleecetröjor, Fleece tröjor, Fleece sweaters, Fleece sweater, Fleece sweater',
+                    'Barn Ytterkläder Fleecetröjor' => 'Fleecetröja, Fleece tröja, Fleecetröjor, Fleece tröjor, Fleece sweaters, Fleece sweater, Fleece sweater',
                     'Fleecebyxor' => 'Fleecebyxa, Fleece byxa, Fleece byxor, Fleecebyxor,  Fleece trousers, Fleece pant, Fleece pants',
-                    'Fleecejackor' => 'Fleecejackor, Fleecejacka, Fleece jacka, Fleece jackor',
+                    'Ytterkläder Fleecejackor' => 'Fleecejackor, Fleecejacka, Fleece jacka, Fleece jackor',
                     'Fleeceoveraller' => 'Fleeceoveraller, Fleece overalls',
                     'Fleecevantar' => 'Fleecevantar, Fleece vantar',
                     'Fuskpäls och shearling' => 'Fuskpäls, Shearling,  Faux fur, shearling',
@@ -38,9 +38,9 @@ class CategoryBarnFixtures extends AbstractFixtures
                     'Läderhandskar' => 'Läderhandskar, Leather gloves,
                         Läderjackor, Läderjacka, Läder jacka, Läderjackor, Leather jacket, Leatherjacket, Leather jackets, Leatherjackets, MC-jacka, MC-jackor',
                     'Militärjackor' => 'Militärjacka, Militärjackor, Militär jacka, Militär jackor, Military jacket, Military jackets',
-                    'Mössor' => 'Mössa med öronlappar, Mössa, Mössor, Ear wrap cap, Hat',
-                    'Halsdukar' => 'Halsduk, Halsduk och vantar, Neck scarf, Neckscarf, Stickade halsdukar, Stickad halsduk',
-                    'Vantar' => 'Vantar, Mitts, Mittens, Rain gloves, Handskar, Regnhandskar',
+                    'Barn Ytterkläder Mössor' => 'Mössa med öronlappar, Mössa, Mössor, Ear wrap cap, Hat',
+                    'Barn Ytterkläder Halsdukar' => 'Halsduk, Halsduk och vantar, Neck scarf, Neckscarf, Stickade halsdukar, Stickad halsduk',
+                    'Barn Ytterkläder Vantar' => 'Vantar, Mitts, Mittens, Rain gloves, Handskar, Regnhandskar',
                     'Parkas' => 'Parkas',
                     'Regnhattar' => 'Regnhattar, Regnhatt, Rainhat, Rain hat',
                     'Regnjackor' => 'Regnjacka, Regnjackor, Raincoat, Rain coat, Raincoats, Rain coats',
@@ -57,10 +57,10 @@ class CategoryBarnFixtures extends AbstractFixtures
                     'Vindjackor' => 'Wind jacket, Windjacket, Vindjacka, Vind jacka',
                     'Vinterjackor' => 'Vinterjacka, Vinter jacka, Winter jacket, Winterjacket',
                     'Vinteroveraller' => 'Vinteroverall, Winter overall, Winteroverall',
-                    'Västar' => 'Väst, Vest',
+                    'Barn Ytterkläder Västar' => 'Väst, Vest',
                     'Jeansjackor' => 'Jeansjacka, Jeans jacka, Jeans jacket',
                     'Dunjackor' => 'Dunjacka, Downjacket, Down jacket',
-                    'Löparjackor' => 'Löparskor, Löpar skor, Running shoes, Running shoe, Joggingskor, Jogging skor, Joging shoes',
+                    'Barn Ytterkläder Löparjackor' => 'Löparskor, Löpar skor, Running shoes, Running shoe, Joggingskor, Jogging skor, Joging shoes',
                     'Outdoor Jackor' => 'Outdoor jacka, Outdoorjacka',
                     'Seglarjacka' => 'Seglarjacka, Sail jacket, Sailjacket',
                     'Streetjackor' => 'Streatjacka, Streat jacka, Streatjacket, Streat jacket',
@@ -114,16 +114,16 @@ class CategoryBarnFixtures extends AbstractFixtures
                 ',
             ],
             [
-                'name' => 'Klänningar & Kjolar',
+                'name' => 'Barn Klänningar & Kjolar',
                 'key_word' => '
                     Klänning, Klänningar, Tunik, Tunikor, Tröjklänning, kjol, kjolar, tunika,
                     dress, dresses, skirt, skirts, tunic, tunics, Sweater dress, Sweaterdress                     
                 ',
                 'sub_key_word' => [
-                    'Klänningar' => 'Klänning, Klänningar, Dress, Dresses, Tyllklänningar, Tulle dresses, vardagsklänning, vardagsklänningar, Casual dresses, casualdress',
-                    'Tunikor' => 'Tunik, Tunikor, Tunic, Tunics',
-                    'Tröjklänningar' => 'Tröjklänning, Sweater dress, Sweaterdress',
-                    'Kjolar' => 'kjol, kjolar, skirt, skirts, jeanskjol, denimskirt, jeans skirt, korta kjolar, miniskirt, mini skirt, short skirt, maxikjolar, maxikjol maxidresses, maxidress, midikjolar, midikjol, midiskirts, midiskirt, tyllkjol, tyllkjolar, tulle skirts, tulleskirt, veckade kjolar, veckad kjol, pleated skirts, pleated skirt'
+                    'Barn Klänningar' => 'Klänning, Klänningar, Dress, Dresses, Tyllklänningar, Tulle dresses, vardagsklänning, vardagsklänningar, Casual dresses, casualdress',
+                    'Barn Tunikor' => 'Tunik, Tunikor, Tunic, Tunics',
+                    'Barn Tröjklänningar' => 'Tröjklänning, Sweater dress, Sweaterdress',
+                    'Barn Kjolar' => 'kjol, kjolar, skirt, skirts, jeanskjol, denimskirt, jeans skirt, korta kjolar, miniskirt, mini skirt, short skirt, maxikjolar, maxikjol maxidresses, maxidress, midikjolar, midikjol, midiskirts, midiskirt, tyllkjol, tyllkjolar, tulle skirts, tulleskirt, veckade kjolar, veckad kjol, pleated skirts, pleated skirt'
                 ],
                 'negative_key_words' => '
                     bloomers
@@ -159,20 +159,20 @@ class CategoryBarnFixtures extends AbstractFixtures
                     tröja, väggkrok, barnvagnar
                 ',
                 'sub_key_word' => [
-                    'Chinos' => 'Chinos',
-                    'Jeans' => 'Jeans',
-                    'Mjukisbyxor' => 'Mjukisbyxa, Mjukisbyxor, Sweatpants, Sweatshorts',
-                    'Leggings' => 'Leggings',
-                    'Jeggings' => 'Jeggings',
-                    'Jeansshorts' => 'Jeansshorts, Jeans shorts',
-                    'Cargobyxor' => 'Cargopants, Cargobyxor',
-                    'Termobyxor' => 'Thermobyxa, Thermobyxor, Thermopants, Thermopants',
-                    'Skalbyxor' => 'Skalbyxa, Skalbyxor, Shell-pants, Shell pants, Shellpants',
-                    'Haremsbyxor' => 'Harembyxa, Harembyxor, Haremtrousers, Harem trousers',
-                    'Regnbyxor' => 'Regnbyxa, Regnbyxor, Rainpants, Rain pants',
-                    'Trekvartsbyxor' => 'Trekvartsbyxor, Three Quarter Pants',
-                    'Capribyxor' => 'Capribyxa, Capribyxor, Capripants, Capri pants',
-                    'Träningsbyxor' => 'Träningsbyxa, Träningsbyxor, Workoutpants, Workout pants, Training pants, Exercisepants, Exercise pants'
+                    'Byxor & shorts Chinos' => 'Chinos',
+                    'Byxor & shorts Jeans' => 'Jeans',
+                    'Byxor & shorts Mjukisbyxor' => 'Mjukisbyxa, Mjukisbyxor, Sweatpants, Sweatshorts',
+                    'Byxor & shorts Leggings' => 'Leggings',
+                    'Byxor & shorts Jeggings' => 'Jeggings',
+                    'Byxor & shorts Jeansshorts' => 'Jeansshorts, Jeans shorts',
+                    'Byxor & shorts Cargobyxor' => 'Cargopants, Cargobyxor',
+                    'Byxor & shorts Termobyxor' => 'Thermobyxa, Thermobyxor, Thermopants, Thermopants',
+                    'Byxor & shorts Skalbyxor' => 'Skalbyxa, Skalbyxor, Shell-pants, Shell pants, Shellpants',
+                    'Byxor & shorts Haremsbyxor' => 'Harembyxa, Harembyxor, Haremtrousers, Harem trousers',
+                    'Byxor & shorts Regnbyxor' => 'Regnbyxa, Regnbyxor, Rainpants, Rain pants',
+                    'Byxor & shorts Trekvartsbyxor' => 'Trekvartsbyxor, Three Quarter Pants',
+                    'Byxor & shorts Capribyxor' => 'Capribyxa, Capribyxor, Capripants, Capri pants',
+                    'Byxor & shorts Träningsbyxor' => 'Träningsbyxa, Träningsbyxor, Workoutpants, Workout pants, Training pants, Exercisepants, Exercise pants'
                 ]
             ],
             [
@@ -207,13 +207,13 @@ class CategoryBarnFixtures extends AbstractFixtures
                 ',
                 'sub_key_word' => [
                     'Träningsjackor' => 'Träningsjacka',
-                    'Träningsbyxor' => 'Träningsbyxa, Träningsbyxor, Sportpants',
+                    'Träningskläder Träningsbyxor' => 'Träningsbyxa, Träningsbyxor, Sportpants',
                     'Löparbyxor' => 'Löparbyxor, Löparbyxa, Joggingbyxa, Joggingbyxor, Runningpants, Running pants, Jogging pants, Joggingpants',
                     'Träningsshorts' => 'Träningsshorts, Gymshorts, Gym shorts, Exerciseshorts, Exercise shorts',
                     'Träningstoppar' => 'Träningstopp, Gym topp, Gymtopp',
-                    'Löparjackor' => 'Löparjacka, Runnin jacket, Jogging jacket',
+                    'Träningskläder Löparjackor' => 'Löparjacka, Runnin jacket, Jogging jacket',
                     'Löparkläder' => 'Löparbyxor, Löparbyxa, Joggingbyxa, Joggingbyxor, Löparjacka, Runnin jacket, Jogging jacket, Running clothes',
-                    'Sporttoppar' => 'Sporttopp, Sport topp, Sportstop, Sportsbra, Sports bra',
+                    'Träningskläder Sporttoppar' => 'Sporttopp, Sport topp, Sportstop, Sportsbra, Sports bra',
                     'Flytvästar' => 'Lifevest, Life vest, Lifejacket, Life jacket, Flytväst, Livväst',
                     'Byxkjolar' => 'Byxkjol, Pantsuit, Pant suit',
                     'Träningströjor' => 'Sweatwear, Sweat-wear, Sweat wear, Exercise sweater, Exercisesweater',
@@ -228,7 +228,7 @@ class CategoryBarnFixtures extends AbstractFixtures
                 ',
                 'sub_key_word' => [
                     'Kavajer' => 'Blazers, Blazer, Kavaj, Kavajer',
-                    'Västar' => 'Vest, Vests, Väst'
+                    'Kavajer & västar Västar' => 'Vest, Vests, Väst'
                 ],
                 'negative_key_words' => 'träpussel, Bok, bilderbok'
             ],
@@ -240,7 +240,7 @@ class CategoryBarnFixtures extends AbstractFixtures
                 ',
                 'sub_key_word' => [
                     'sub Jumpsuits' => 'Jumpsuit, Jumpsuits, overall, overalls',
-                    'Sparkdräkter' => 'Sparkdräkt, Sparkdräkter, Spark suit',
+                    'Jumpsuits Sparkdräkter' => 'Sparkdräkt, Sparkdräkter, Spark suit',
                     'Bodysuits' => 'Bodysuit, Bodysuits'
                 ]
             ],
@@ -286,12 +286,12 @@ class CategoryBarnFixtures extends AbstractFixtures
                 'sub_key_word' => [
                     'Balaclavas' => 'Balaclavas, Baclava',
                     'Barnklockor' => 'Barnklockor, Barnklocka, Children\'s Watches, Children\'s Watch',
-                    'Halsdukar' => 'Halsdukar, Halsduk',
+                    'Barn Accessoarer Halsdukar' => 'Halsdukar, Halsduk',
                     'Handskar' => 'Handskar, Handske, Gloves, Glove',
-                    'Vantar' => 'Vantar, Vante, Mittens, Mitten',
+                    'Barn Accessoarer Vantar' => 'Vantar, Vante, Mittens, Mitten',
                     'Hattar' => 'Hattar, Hatt, Hats, Hat',
                     'Kepsar' => 'Kepsar, Keps, Caps, Cap',
-                    'Mössor' => 'Mössor, Mössa',
+                    'Barn Accessoarer Mössor' => 'Mössor, Mössa',
                     'Paraplyer' => 'Paraplyer, Paraply, Umbrellas, Umbrella',
                     'Plånböcker' => 'Plånböcker, Plånbok, Wallets, Wallet',
                     'Scarfs' => 'Scarfs, Scarf, Drybibs, Drybib',

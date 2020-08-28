@@ -27,6 +27,17 @@ document.addEventListener("DOMContentLoaded", function(){
 
     const app_rest_hovermenumanagment_listthhovermenu = window.Routing
         .generate('app_rest_hovermenumanagment_listthhovermenu');
+    const body = $('body');
+    body.on('keydown keyup onblur', '#pkw, #nkw', function () {
+        let input = $(this);
+        // debug_log("get company from cims");
+        if (input.length) {
+            var regexp = /\s+/;
+            if(input.val().match(regexp)){
+                input.val( input.val().replace(regexp,'') );
+            }
+        }
+    });
 
     $.ajax({
         type: "GET",
@@ -51,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function(){
             .generate('app_rest_hovermenumanagment_listhovermenu');
 
         var table = $('#empTable').DataTable({
-
+            "autoWidth": false,
             'responsive': true,
             'fixedHeader': true,
             'processing': true,
@@ -63,30 +74,34 @@ document.addEventListener("DOMContentLoaded", function(){
             columns: columns,
             "columnDefs": [
                 {
+                    "width": "10%",
                     "targets": 0,
                     "data": 'CategoryName',
                     "render": function ( data, type, row, meta ) {
                         return type === 'display' ?
-                            '<span class="cn_'+row.id+'">'+data+'</span>' : ''
+                            '<p class="cn_'+row.id+'">'+data+'</p>' : ''
                     }
                 },
                 {
+                    "width": "40%",
                     "targets": 1,
                     "data": 'PositiveKeyWords',
                     "render": function ( data, type, row, meta ) {
                         return type === 'display' && data?
-                            '<span class="pkw_'+row.id+'">'+data+'</span>' : ''
+                            '<p class="pkw_'+row.id+'">'+data+'</p>' : ''
                     }
                 },
                 {
+                    "width": "40%",
                     "targets": 2,
                     "data": 'NegativeKeyWords',
                     "render": function ( data, type, row, meta ) {
                         return type === 'display' && data ?
-                            '<span class="nkw_'+row.id+'">'+data+'</span>' : ''
+                            '<p class="nkw_'+row.id+'">'+data+'</p>' : ''
                     }
                 },
                 {
+                    "width": "10%",
                     "targets": 3,
                     data: 'Action',
                     render: function ( data, type, row, meta ) {

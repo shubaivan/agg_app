@@ -428,4 +428,9 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
     {
         return ['description'];    
     }
+
+    public static function getSeparateFilterColumn(): array
+    {
+        return array_merge(['TDProductId'], parent::getSeparateFilterColumn());
+    }
 }

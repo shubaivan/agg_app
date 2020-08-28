@@ -2,6 +2,7 @@
 
 namespace App\Controller\Rest;
 
+use App\Cache\TagAwareQueryResultCacheCategoryConf;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
@@ -14,6 +15,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
@@ -31,16 +33,28 @@ class HoverMenuManagmentController extends AbstractRestController
     private $categoryRepo;
 
     /**
+     * @var TagAwareQueryResultCacheCategoryConf
+     */
+    private $tagAwareQueryResultCacheCategoryConf;
+
+    /**
      * HoverMenuManagmentController constructor.
      * @param CategoryConfigurationsRepository $categoryConfRepo
      * @param CategoryRepository $categoryRepo
+     * @param TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf
      */
-    public function __construct(CategoryConfigurationsRepository $categoryConfRepo, CategoryRepository $categoryRepo, Helpers $helpers)
+    public function __construct(
+        CategoryConfigurationsRepository $categoryConfRepo,
+        CategoryRepository $categoryRepo,
+        Helpers $helpers,
+        TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf
+    )
     {
         parent::__construct($helpers);
 
         $this->categoryConfRepo = $categoryConfRepo;
         $this->categoryRepo = $categoryRepo;
+        $this->tagAwareQueryResultCacheCategoryConf = $tagAwareQueryResultCacheCategoryConf;
     }
 
     /**
@@ -60,8 +74,9 @@ class HoverMenuManagmentController extends AbstractRestController
      * )
      *
      * @return \FOS\RestBundle\View\View
-     * @throws DBALException
-     * @throws ValidatorException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws InvalidArgumentException When $tags is not valid
      */
     public function editHoverMenuAction(Request $request)
     {
@@ -71,7 +86,24 @@ class HoverMenuManagmentController extends AbstractRestController
             ->setNegativeKeyWords($request->get('nkw'));
 
         $this->categoryConfRepo->save($categoryConfigurations);
-        
+
+        $this->getHelpers()
+            ->handleKeyWords(
+                $categoryConfigurations->getKeyWords(),
+                $categoryConfigurations->getCategoryId()->getCategoryName(),
+                'positive'
+            );
+
+        $this->getHelpers()
+            ->handleKeyWords(
+                $categoryConfigurations->getNegativeKeyWords(),
+                $categoryConfigurations->getCategoryId()->getCategoryName(),
+                'negative'
+            );
+
+        $this->getTagAwareQueryResultCacheCategoryConf()
+            ->getTagAwareAdapter()
+            ->invalidateTags([CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH]);
         $view = $this->createSuccessResponse(
             ['test' => 1]
         );
@@ -153,5 +185,13 @@ class HoverMenuManagmentController extends AbstractRestController
         );
 
         return $view;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheCategoryConf
+     */
+    public function getTagAwareQueryResultCacheCategoryConf(): TagAwareQueryResultCacheCategoryConf
+    {
+        return $this->tagAwareQueryResultCacheCategoryConf;
     }
 }
