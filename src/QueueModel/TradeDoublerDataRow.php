@@ -13,7 +13,7 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
     {
         $imgCounter = 1;
         $rowData = $this->getRow();
-
+        $rowData['Extras'] = '';
         if (isset($rowData['id'])) {
             $rowData['tradeDoublerId'] = $rowData['id'];
             unset($rowData['id']);
@@ -24,7 +24,6 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
         $rowData['productShortDescription'] = $rowData['shortDescription'];
         $rowData['productModel'] = $rowData['model'];
         $rowData['instock'] = $rowData['inStock'];
-
 
         $explodeMerchantProductCategoryPath = explode('>', $rowData['categories']);
         if (count($explodeMerchantProductCategoryPath)) {
@@ -68,7 +67,6 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
         }
         $rowData['manufacturerArticleNumber'] = $rowData['groupingId'];
 
-        $rowData['Extras'] = '';
         if (isset($rowData['size']) && strlen($rowData['size']) > 0) {
             $rowData['Extras'] .= '{SIZE#' . $rowData['size'] . '}';
         }

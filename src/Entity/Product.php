@@ -106,11 +106,6 @@ class Product implements EntityValidatorException
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     * @Assert\Length(
-     *      min = 1,
-     *      max = 255,
-     *     groups={Product::SERIALIZED_GROUP_CREATE}
-     * )
      */
     private $name;
 
