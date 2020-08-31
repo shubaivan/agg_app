@@ -285,7 +285,7 @@ class Helpers
         $keyWords = trim($keyWords);
         $keyWords = trim($keyWords, ',');
         $keyWords = preg_replace('/\n/', '', $keyWords);
-        $keyWords = preg_replace('!\s+!', '', $keyWords);
+//        $keyWords = preg_replace('!\s+!', '', $keyWords);
 
         $words = explode(',', $keyWords);
         if ($categoryName && $typeWord) {
