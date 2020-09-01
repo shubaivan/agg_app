@@ -155,7 +155,7 @@ class ProductRepository extends ServiceEntityRepository
                     $resultValues = [];
                     foreach ($explodeSizes as $size) {
                         $size = preg_replace('/\[|]| |"/','',$size);
-                        $size = substr($size, 1, -1);
+                        $size = mb_substr($size, 1, -1);
                         $resultValues[] = $size;
                     }
                     $resultValues = array_values(array_unique($resultValues));

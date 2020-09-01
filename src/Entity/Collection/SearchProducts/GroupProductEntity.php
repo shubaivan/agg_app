@@ -308,7 +308,7 @@ class GroupProductEntity extends CommonProduct
      */
     public function setExtrasAccessor(string $value)
     {
-        $substr = substr($value, 1, -1); //explode(',', $substr)
+        $substr = mb_substr($value, 1, -1); //explode(',', $substr)
         if (preg_match_all('#\{(.*?)\}#', $substr, $match) > 1) {
             $setExtra = array_shift($match);
             $setExtraResult = [];
@@ -354,7 +354,7 @@ class GroupProductEntity extends CommonProduct
                 if (mb_substr_count($trimExtra, self::NULL)) {
                     return;
                 }
-                if (substr($trimExtra, -1) !== '}' && substr($trimExtra, -2) !== '}"') {
+                if (mb_substr($trimExtra, -1) !== '}' && mb_substr($trimExtra, -2) !== '}"') {
                     $trimExtra .= '}';
                 }
                 $trimExtra = trim($trimExtra, "\"");

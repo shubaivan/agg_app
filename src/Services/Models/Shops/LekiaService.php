@@ -18,7 +18,13 @@ class LekiaService implements IdentityGroup
     public function identityGroupColumn(Product $product)
     {
         $sku = $product->getSku();
-        $cut = substr($sku, -2);
+
+        $preg_split = preg_split('/-/', $sku);
+        if (count($preg_split) > 1) {
+            $sku = array_shift($preg_split);
+        }
+
+        $cut = mb_substr($sku, -2);
         $gi = preg_replace('/' . $cut . '/', '', $sku);
         $product->setGroupIdentity($gi);
     }

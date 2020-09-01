@@ -39,6 +39,11 @@ class SportamoreService implements IdentityGroup
      */
     public function identityGroupColumn(Product $product)
     {
-        $product->setGroupIdentity($product->getSku());
+        $sku = $product->getSku();
+        if ($sku) {
+            $product->setGroupIdentity($sku);   
+        } else {
+            $product->setGroupIdentity($product->getIdentityUniqData());
+        }
     }
 }

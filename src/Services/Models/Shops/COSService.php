@@ -19,7 +19,7 @@ class COSService implements IdentityGroup
     public function identityGroupColumn(Product $product)
     {
         $sku = $product->getSku();
-        $cut = substr($sku, -3);
+        $cut = mb_substr($sku, -3);
         $gi = preg_replace('/' . $cut . '/', '', $sku);
         $product->setGroupIdentity($gi);
     }

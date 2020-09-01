@@ -768,7 +768,7 @@ class CategoryRepository extends ServiceEntityRepository
      * @return bool|mixed
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function matchGlobalNegativeKeyWords(string $productData, string $propertyName)
+    public function matchKeyWordsByProperty(string $productData, string $propertyName)
     {
         $connection = $this->getEntityManager()->getConnection();
 
@@ -776,7 +776,7 @@ class CategoryRepository extends ServiceEntityRepository
             select *
         	from admin_configuration as aconf
         	where aconf.property_name = :property_name
-        	and aconf.data_fts @@ to_tsquery(\'my_swedish\', :product_data)
+        	and aconf.data_fts @@ to_tsquery(\'my_swedish\', regexp_replace(:product_data, \'\', \'\'))
         ';
 
         $mainParams[':product_data'] = $productData;
@@ -813,9 +813,9 @@ class CategoryRepository extends ServiceEntityRepository
                 EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
                 AND
                 NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
-                AND to_tsvector(\'my_swedish\', :productCategoriesData) 
+                AND to_tsvector(\'my_swedish\', regexp_replace(:productCategoriesData, \'\', \'\')) 
                         @@ to_tsquery(\'my_swedish\', REGEXP_REPLACE(REGEXP_REPLACE(conf.key_words, \'\s+\', \'\', \'g\'), \',\', \':*|\', \'g\'))
-                AND to_tsvector(\'my_swedish\', :productCategoriesData) 
+                AND to_tsvector(\'my_swedish\', regexp_replace(:productCategoriesData, \'\', \'\')) 
                         @@ to_tsquery(\'my_swedish\', COALESCE (REGEXP_REPLACE(REGEXP_REPLACE(conf.negative_key_words, \'\s+\', \'\', \'g\'), \',\', \'|\', \'g\'), \'\')) = FALSE                        
             ';
 

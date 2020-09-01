@@ -782,9 +782,9 @@ class Product implements EntityValidatorException
                                 if ($countWords > 1) {
                                     $last_word_start = strrpos($valueSite, ' ') + 1; // +1 so we don't include the space in our result
                                     if ($last_word_start) {
-                                        $last_word = substr($valueSite, $last_word_start);
+                                        $last_word = mb_substr($valueSite, $last_word_start);
                                         if ($last_word) {
-                                            $valueSite = substr($valueSite, 0, $last_word_start) . ' ' . ucfirst($last_word);
+                                            $valueSite = mb_substr($valueSite, 0, $last_word_start) . ' ' . ucfirst($last_word);
                                         }
                                     }
                                     if ($countWords > 2 && isset($last_word)) {

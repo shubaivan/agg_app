@@ -170,7 +170,7 @@ class Helpers
 
         // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a
         // warning
-        $iv = substr(hash('sha256', $secret_iv), 0, 16);
+        $iv = mb_substr(hash('sha256', $secret_iv), 0, 16);
 
         if ($action == 'encrypt') {
             $output = openssl_encrypt($string, $encrypt_method, $key, 0, $iv);

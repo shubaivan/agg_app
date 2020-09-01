@@ -522,7 +522,7 @@ class CategoryService extends AbstractModel
         if (!strlen($prepareDataForGINSearch)) {
             return false;
         }
-        $matchGlobalNegativeKeyWords = $this->getCategoryRepository()->matchGlobalNegativeKeyWords(
+        $matchGlobalNegativeKeyWords = $this->getCategoryRepository()->matchKeyWordsByProperty(
             $prepareDataForGINSearch,
             AdminConfiguration::GLOBAL_NEGATIVE_KEY_WORDS
         );
@@ -548,7 +548,8 @@ class CategoryService extends AbstractModel
         if (!strlen($prepareDataForGINSearch)) {
             return false;
         }
-        $matchGlobalNegativeKeyWords = $this->getCategoryRepository()->matchGlobalNegativeKeyWords(
+        $matchGlobalNegativeKeyWords = $this->getCategoryRepository()
+            ->matchKeyWordsByProperty(
             $prepareDataForGINSearch,
             AdminConfiguration::GLOBAL_NEGATIVE_BRAND_KEY_WORDS
         );
@@ -641,8 +642,10 @@ class CategoryService extends AbstractModel
             $matchData = strip_tags($matchData);
 
             $prepareDataForGINSearch = $this->prepareDataForGINSearch($matchData, $limitations);
-            $prepareDataForGINSearch = $this->helper
-                ->handleSearchValue($prepareDataForGINSearch, $strict);            
+            if ($prepareDataForGINSearch) {
+                $prepareDataForGINSearch = $this->helper
+                    ->handleSearchValue($prepareDataForGINSearch, $strict);
+            }
         }
 
         if (isset($productData['match']) && count($productData['match'])) {
