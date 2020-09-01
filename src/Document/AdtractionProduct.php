@@ -186,7 +186,7 @@ class AdtractionProduct extends AbstractDocument
     public static function getShortPreviewText(): array
     {
         return [
-            'id', 'SKU'
+            'id'
         ];
     }
 
