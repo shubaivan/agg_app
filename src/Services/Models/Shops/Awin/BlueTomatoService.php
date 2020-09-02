@@ -12,7 +12,7 @@ class BlueTomatoService implements IdentityGroup
     public function identityGroupColumn(Product $product)
     {
         $ean = $product->getEan();
-        if (strlen($ean)) {
+        if (strlen($ean) > 3) {
             $cut = mb_substr($ean, -3);
             $gi = preg_replace('/' . $cut . '/', '', $ean);
             $product->setGroupIdentity($gi);

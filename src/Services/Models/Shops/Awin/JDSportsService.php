@@ -13,11 +13,11 @@ class JDSportsService implements IdentityGroup
     {
         $identity = [];
         $sku = $product->getSku();
-        if ($sku) {
+        if (strlen($sku) > 9) {
             $identity[] = mb_substr($sku, 0, 9);
         }
         $ean = $product->getEan();
-        if ($ean) {
+        if (strlen($ean) > 6) {
             $identity[] = mb_substr($ean, 0, 6);
         }
         if (count($identity)) {
