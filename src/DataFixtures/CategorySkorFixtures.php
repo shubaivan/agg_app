@@ -166,8 +166,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
 
         $main = $this->createCategoryWithConf(
             'Skor',
-            'skor, shoes, sandals, sandaler, sko, Toffla, Sneakers, Sneaker, Finskor, 
-            Gummistövlar, Boots, Stövlar, kängor, Espadrillos, Badskor',
+            'skor, shoes, sandals, sandaler, sko, Toffla, Sneakers, Sneaker, Finskor, Gummistövlar, Boots, Stövlar, kängor, Espadrillos, Badskor',
             'main'
         );
         $configurations = $this->configurations;
