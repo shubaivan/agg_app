@@ -11,6 +11,7 @@ use App\Kernel;
 use App\Repository\CategoryRelationsRepository;
 use App\Repository\CategoryRepository;
 use App\Services\Helpers;
+use App\Util\RedisHelper;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -39,6 +40,11 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
      * @var Helpers
      */
     private $helper;
+
+    /**
+     * @var RedisHelper
+     */
+    private $redisHelper;
 
     /**
      * @var bool
@@ -172,18 +178,22 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
      * @param KernelInterface $kernel
      * @param Helpers $helpers
      */
-    public function __construct(KernelInterface $kernel, Helpers $helpers)
+    public function __construct(
+        KernelInterface $kernel,
+        Helpers $helpers,
+        RedisHelper $redisHelper
+    )
     {
         $this->kernel = $kernel;
         $this->helper = $helpers;
+        $this->redisHelper = $redisHelper;
     }
 
     protected function processSizeCategories($configurationsSize, Category $m)
     {
-        foreach ($configurationsSize as $sectionName=>$sizes)
-        {
+        foreach ($configurationsSize as $sectionName => $sizes) {
             $categorySection = $this->createdCategorySection($sectionName);
-            foreach ($sizes as $prefixName=>$size) {
+            foreach ($sizes as $prefixName => $size) {
                 $name = $m->getCategoryName() . ' ' . $prefixName;
                 $category = $this->checkExistCategory($name);
 
@@ -228,7 +238,7 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
      */
     protected function processConfiguration(array $configurations, Category $main): void
     {
-        foreach ($configurations as $sectionName=>$section) {
+        foreach ($configurations as $sectionName => $section) {
             foreach ($section as $configuration) {
                 $subMain = $this->createCategoryWithConf(
                     $configuration['name'],
@@ -260,7 +270,6 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
         }
 
 
-
         $this->setDataInFile($this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths', PHP_EOL);
         $this->setDataInFile($this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths', PHP_EOL);
     }
@@ -275,7 +284,7 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
             ->getRepository(CategorySection::class)
             ->findOneBy(['sectionName' => $sectionName]);
 
-        if(!$categorySection) {
+        if (!$categorySection) {
             $categorySection = new CategorySection();
             $categorySection
                 ->setSectionName($sectionName);
@@ -471,7 +480,7 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
         }
         return $keyWords;
     }
-    
+
     /**
      * @param string $word
      */
@@ -479,7 +488,8 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
     {
         $this->wordWithSpace[] = $word;
 
-        if (!is_array($this->swStopWords)) {
+        $prepareRegex = $this->redisHelper->get('pg_stop_swStopWords');
+        if (!$prepareRegex) {
             $explode = explode(PHP_EOL, $this->swStopWords);
 
             $arrayFilter = array_filter($explode, function ($v) {
@@ -503,10 +513,10 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
                 return '\b' . trim($v) . '\b';
             }, $prepareStopArray);
 
-            $this->swStopWords = $prepareStopArray;
+                
+            $prepareRegex = implode('|', $prepareStopArray);
+            $this->redisHelper->set('pg_stop_swStopWords', $prepareRegex);
         }
-
-        $prepareRegex = implode('|', $this->swStopWords);
 
         if (preg_match_all("/$prepareRegex/u", $word, $mt)) {
             $result = preg_replace("/$prepareRegex/u", '?', $word);
@@ -581,7 +591,7 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
     private function setDataInFile(string $path, string $data): void
     {
         if (file_exists($path) && $data !== PHP_EOL) {
-            if( exec('grep '.escapeshellarg(preg_replace('/\R/', '', $data)).' ' . $path)) {
+            if (exec('grep ' . escapeshellarg(preg_replace('/\R/', '', $data)) . ' ' . $path)) {
                 return;
             }
         }

@@ -81,25 +81,26 @@ class HoverMenuManagmentController extends AbstractRestController
     public function editHoverMenuAction(Request $request)
     {
         $categoryConfigurations = $this->categoryConfRepo->findOneBy(['categoryId' => $request->get('category_id')]);
-        $categoryConfigurations
-            ->setKeyWords($request->get('pkw'))
-            ->setNegativeKeyWords($request->get('nkw'));
 
-        $this->categoryConfRepo->save($categoryConfigurations);
-
-        $this->getHelpers()
+        $pkw = $this->getHelpers()
             ->handleKeyWords(
-                $categoryConfigurations->getKeyWords(),
+                $request->get('pkw'),
                 $categoryConfigurations->getCategoryId()->getCategoryName(),
                 'positive'
             );
 
-        $this->getHelpers()
+        $nkw = $this->getHelpers()
             ->handleKeyWords(
-                $categoryConfigurations->getNegativeKeyWords(),
+                $request->get('nkw'),
                 $categoryConfigurations->getCategoryId()->getCategoryName(),
                 'negative'
             );
+
+        $categoryConfigurations
+            ->setKeyWords($pkw)
+            ->setNegativeKeyWords($nkw);
+
+        $this->categoryConfRepo->save($categoryConfigurations);
 
         $this->getTagAwareQueryResultCacheCategoryConf()
             ->getTagAwareAdapter()

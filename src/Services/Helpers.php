@@ -29,6 +29,123 @@ class Helpers
      */
     private $kernel;
 
+    private $swStopWords = '
+        och
+        det
+        att
+        i
+        en
+        jag
+        hon
+        som
+        han
+        på
+        den
+        med
+        var
+        sig
+        för
+        så
+        till
+        är
+        men
+        ett
+        om
+        hade
+        de
+        av
+        icke
+        mig
+        du
+        henne
+        då
+        sin
+        nu
+        har
+        inte
+        hans
+        honom
+        skulle
+        hennes
+        där
+        min
+        man
+        ej
+        vid
+        kunde
+        något
+        från
+        ut
+        när
+        efter
+        upp
+        vi
+        dem
+        vara
+        vad
+        över
+        än
+        dig
+        kan
+        sina
+        här
+        ha
+        mot
+        alla
+        under
+        någon
+        eller
+        allt
+        mycket
+        sedan
+        ju
+        denna
+        själv
+        detta
+        åt
+        utan
+        varit
+        hur
+        ingen
+        mitt
+        ni
+        bli
+        blev
+        oss
+        din
+        dessa
+        några
+        deras
+        blir
+        mina
+        samma
+        vilken
+        er
+        sådan
+        vår
+        blivit
+        dess
+        inom
+        mellan
+        sådant
+        varför
+        varje
+        vilka
+        ditt
+        vem
+        vilket
+        sitta
+        sådana
+        vart
+        dina
+        vars
+        vårt
+        våra
+        ert
+        era
+        vilkas
+    ';
+
     /**
      * Helpers constructor.
      * @param SerializerInterface $serilizer
@@ -281,11 +398,11 @@ class Helpers
         ?string $typeWord = ''
     )
     {
-        //        $keyWords = preg_replace('/\s+/', '', $keyWords);
         $keyWords = trim($keyWords);
         $keyWords = trim($keyWords, ',');
         $keyWords = preg_replace('/\n/', '', $keyWords);
-//        $keyWords = preg_replace('!\s+!', '', $keyWords);
+        $keyWords = preg_replace('!\s+!', ' ', $keyWords);
+        $keyWords = preg_replace('/\s*,\s*/', ',', $keyWords);
 
         $words = explode(',', $keyWords);
         if ($categoryName && $typeWord) {
@@ -299,10 +416,75 @@ class Helpers
                 continue;
             }
 
+            if (preg_match_all('!\s+!', $word, $match)) {
+                $this->fillDictionary($word);
+            }
+            
             if ($categoryName && $typeWord) {
                 $this->fillHoverMenuData($categoryName, $typeWord, $word);
             }
         }
+
+        $words = array_unique($words);
+        $words = array_filter($words, function ($v) {
+            if (strlen(trim($v))) {
+                return true;
+            }
+        });
+
+        $keyWords = implode(',', $words);
+        return $keyWords;
+    }
+
+    public function fillDictionary($word)
+    {
+        $prepareRegex = $this->redisHelper->get('pg_stop_swStopWords');
+
+        if (!$prepareRegex) {
+            $explode = explode(PHP_EOL, $this->swStopWords);
+
+            $arrayFilter = array_filter($explode, function ($v) {
+                if (strlen(trim($v))) {
+                    return true;
+                }
+            });
+
+            $arrayMap = array_map(function ($v) {
+                return trim($v);
+            }, $arrayFilter);
+
+            $arrayUnique = array_unique($arrayMap);
+            $prepareStopArray = [];
+            foreach ($arrayUnique as $uniq) {
+                $prepareStopArray[] = ucfirst($uniq);
+                $prepareStopArray[] = lcfirst($uniq);
+            }
+
+            $prepareStopArray = array_map(function ($v) {
+                return '\b' . trim($v) . '\b';
+            }, $prepareStopArray);
+
+
+            $prepareRegex = implode('|', $prepareStopArray);
+            $this->redisHelper->set('pg_stop_swStopWords', $prepareRegex);
+        }
+
+
+        if (preg_match_all("/$prepareRegex/u", $word, $mt)) {
+            $result = preg_replace("/$prepareRegex/u", '?', $word);
+        }
+
+        $modifyIndexWord = str_replace(' ', '', $word);
+
+        $this->setDataInFile(
+            $this->kernel->getProjectDir() . '/pg/prepare_thesaurus_my_swedish.ths',
+             PHP_EOL . (isset($result) ? $result : $word) . ' : ' . $modifyIndexWord
+        );
+
+        $this->setDataInFile(
+            $this->kernel->getProjectDir() . '/pg/thesaurus_my_swedish.ths',
+            PHP_EOL . $word . ' : ' . $modifyIndexWord
+        );
     }
 
     /**

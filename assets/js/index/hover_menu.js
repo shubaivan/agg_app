@@ -32,9 +32,9 @@ document.addEventListener("DOMContentLoaded", function(){
         let input = $(this);
         // debug_log("get company from cims");
         if (input.length) {
-            var regexp = /\s+/;
+            var regexp = /\s+/g;
             if(input.val().match(regexp)){
-                input.val( input.val().replace(regexp,'') );
+                input.val( input.val().replace(regexp,' ') );
             }
         }
     });
@@ -137,6 +137,11 @@ document.addEventListener("DOMContentLoaded", function(){
         })
 
         $('.btn.btn-primary').on('click', function () {
+            if ($('#editCateory textarea').length) {
+                $.each($('#editCateory textarea'), function (k, v) {
+                    $(v).val($.trim($(v).val()));
+                })
+            }
 
             let serialize = $('#editCateory').serialize();
             console.log(serialize);
