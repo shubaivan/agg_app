@@ -8,6 +8,10 @@ use JMS\Serializer\Annotation;
 
 abstract class AbstractDocument implements DataTableInterface
 {
+    /**
+     * @var array
+     * @Annotation\Exclude()
+     */
     private static $childs = [
         AdrecordProduct::class,
         AdtractionProduct::class,

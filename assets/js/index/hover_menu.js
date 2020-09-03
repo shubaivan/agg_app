@@ -62,6 +62,33 @@ document.addEventListener("DOMContentLoaded", function(){
             .generate('app_rest_hovermenumanagment_listhovermenu');
 
         var table = $('#empTable').DataTable({
+            initComplete: function () {
+                this.api().columns(0).every( function () {
+                    var column = this;
+
+                    var divTag = $('<div />').addClass('form-group col-md-4');
+
+                    var select = $('<select><option value="all">All</option></select>')
+                        .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search( val ? val : '', false, false )
+                                .draw();
+                        } );
+                    var labelTag = $('<label />').attr('for', 'inputState');
+                    labelTag.text('Hot');
+                    divTag.append(labelTag).append(select);
+
+                    divTag.appendTo( $(column.footer()).empty() );
+                    $.each([1, 0], function( key, value ) {
+                        // console.log(key, value);
+                        select.append( '<option value="'+value+'">'+(value === 1 ? 'yes' : 'no')+'</option>' )
+                    });
+                } );
+            },
             "autoWidth": false,
             'responsive': true,
             'fixedHeader': true,
@@ -78,10 +105,23 @@ document.addEventListener("DOMContentLoaded", function(){
                     "targets": 0,
                     "data": 'CategoryName',
                     "render": function ( data, type, row, meta ) {
+                        let hotCategory = row.HotCategory;
+                        var divTag = $('<div/>');
+                        var pTag = $('<p/>', {"class": 'cn_'+row.id});
+                        var span = $('<span />').addClass('hc_'+row.id);
+
+                        if (hotCategory === true) {
+                            span.append('<i class="fa fa-check" aria-hidden="true"></i>');
+                        } else {
+                            span.append('<i class="fas fa-ban"></i>');
+                        }
+                        pTag.append(data).append(span);
+                        divTag.append(pTag);
                         return type === 'display' ?
-                            '<p class="cn_'+row.id+'">'+data+'</p>' : ''
+                            divTag.html() : ''
                     }
                 },
+
                 {
                     "width": "40%",
                     "targets": 1,
@@ -100,6 +140,7 @@ document.addEventListener("DOMContentLoaded", function(){
                             '<p class="nkw_'+row.id+'">'+data+'</p>' : ''
                     }
                 },
+
                 {
                     "width": "10%",
                     "targets": 3,
@@ -114,26 +155,49 @@ document.addEventListener("DOMContentLoaded", function(){
             ],
         });
 
-
         $('#exampleModalLong').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget); // Button that triggered the modal
             var modal = $(this);
             let categoryId = button.data('categoryId');
             modal.find('.modal-title').text('Edit ' + $('.cn_' + categoryId).text() + ' category');
             let pkw_input = modal.find('.modal-body #pkw');
-            let pkw_value_data = $('.pkw_' + categoryId).text();
-            pkw_input.text(pkw_value_data);
-            pkw_input.val(pkw_value_data);
+            let pkw_value = $('.pkw_' + categoryId);
+
+            $.each(pkw_value, function (k, v) {
+                let pkw_value_data = $(v).text();
+                if (pkw_value_data) {
+                    pkw_input.text(pkw_value_data);
+                    pkw_input.val(pkw_value_data);
+                    return false;
+                }
+            });
 
             let nkw_input = modal.find('.modal-body #nkw');
-            let nkw_value_data = $('.nkw_' + categoryId).text();
-            nkw_input.text(nkw_value_data);
-            nkw_input.val(nkw_value_data);
+            let nkw_value = $('.nkw_' + categoryId);
+            $.each(nkw_value, function (k, v) {
+                let nkw_value_data = $(v).text();
+                if (nkw_value_data) {
+                    nkw_input.text(nkw_value_data);
+                    nkw_input.val(nkw_value_data);
+                    return false;
+                }
+            });
 
             let category_id_input = modal.find('.modal-body #category_id');
             category_id_input.text(categoryId);
             category_id_input.val(categoryId);
 
+            let hotCategory = modal.find('.modal-body #hotCatgory');
+            let hc_value = $('.hc_' + categoryId);
+            $.each(hc_value, function (k, v) {
+                let hc_value_data = $(v).text();
+                if (hc_value_data) {
+                    if (hc_value_data === 'true') {
+                        hotCategory.prop( "checked", true );
+                    }
+                    return false;
+                }
+            })
         })
 
         $('.btn.btn-primary').on('click', function () {
@@ -144,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function(){
             }
 
             let serialize = $('#editCateory').serialize();
-            console.log(serialize);
+
             const app_rest_hovermenumanagment_edithovermenu = window.Routing
                 .generate('app_rest_hovermenumanagment_edithovermenu');
 

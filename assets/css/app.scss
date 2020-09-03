@@ -26,4 +26,12 @@ body {
   word-wrap:break-word; // ***********and this
 }
 
+.fa-check{
+  color: green;
+}
+
+.fa-ban {
+  color: red;
+}
+
 @import "~bootstrap/scss/bootstrap";

@@ -3,6 +3,7 @@
 namespace App\Controller\Rest;
 
 use App\Cache\TagAwareQueryResultCacheCategoryConf;
+use App\Controller\HoverMenuController;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
@@ -82,24 +83,27 @@ class HoverMenuManagmentController extends AbstractRestController
     {
         $categoryConfigurations = $this->categoryConfRepo->findOneBy(['categoryId' => $request->get('category_id')]);
 
+        $category = $categoryConfigurations->getCategoryId();
         $pkw = $this->getHelpers()
             ->handleKeyWords(
                 $request->get('pkw'),
-                $categoryConfigurations->getCategoryId()->getCategoryName(),
+                $category->getCategoryName(),
                 'positive'
             );
 
         $nkw = $this->getHelpers()
             ->handleKeyWords(
                 $request->get('nkw'),
-                $categoryConfigurations->getCategoryId()->getCategoryName(),
+                $category->getCategoryName(),
                 'negative'
             );
 
         $categoryConfigurations
             ->setKeyWords($pkw)
             ->setNegativeKeyWords($nkw);
-
+        if ($request->get('hotCatgory')) {
+            $category->setHotCategory(true);
+        }
         $this->categoryConfRepo->save($categoryConfigurations);
 
         $this->getTagAwareQueryResultCacheCategoryConf()
@@ -134,12 +138,7 @@ class HoverMenuManagmentController extends AbstractRestController
      */
     public function listThHoverMenuAction(Request $request)
     {
-        $keys = [
-            'CategoryName',
-            'PositiveKeyWords',
-            'NegativeKeyWords',
-            'Action'
-        ];
+        $keys = HoverMenuController::getThHoverMenu();
         $view = $this->createSuccessResponse(
             $keys
         );
