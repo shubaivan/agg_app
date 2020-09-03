@@ -147,14 +147,14 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
             $types[':search'] = \PDO::PARAM_STR;
         }
 
-        if ($parameterBag->get('CategoryName')
+        if ($parameterBag->has('CategoryName')
             && $parameterBag->get('CategoryName') !== 'all'
         ) {
             $varCategoryName = (bool)$parameterBag->get('CategoryName');
             $query .= '
                 AND category_alias.hot_category = :hot_category
             ';
-            $params[':hot_category'] = $varCategoryName;
+            $params[':hot_category'] = $varCategoryName == true ? true : 0;
             $types[':search'] = \PDO::PARAM_BOOL;
         }
 

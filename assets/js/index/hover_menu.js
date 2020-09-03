@@ -23,7 +23,7 @@ require('@fortawesome/fontawesome-free/js/all.js');
 // import 'popper.js';
 require('bootstrap');
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", function () {
 
     const app_rest_hovermenumanagment_listthhovermenu = window.Routing
         .generate('app_rest_hovermenumanagment_listthhovermenu');
@@ -33,8 +33,8 @@ document.addEventListener("DOMContentLoaded", function(){
         // debug_log("get company from cims");
         if (input.length) {
             var regexp = /\s+/g;
-            if(input.val().match(regexp)){
-                input.val( input.val().replace(regexp,' ') );
+            if (input.val().match(regexp)) {
+                input.val(input.val().replace(regexp, ' '));
             }
         }
     });
@@ -63,31 +63,31 @@ document.addEventListener("DOMContentLoaded", function(){
 
         var table = $('#empTable').DataTable({
             initComplete: function () {
-                this.api().columns(0).every( function () {
+                this.api().columns(0).every(function () {
                     var column = this;
 
                     var divTag = $('<div />').addClass('form-group col-md-4');
 
                     var select = $('<select><option value="all">All</option></select>')
-                        .on( 'change', function () {
+                        .on('change', function () {
                             var val = $.fn.dataTable.util.escapeRegex(
                                 $(this).val()
                             );
 
                             column
-                                .search( val ? val : '', false, false )
+                                .search(val ? val : '', false, false)
                                 .draw();
-                        } );
+                        });
                     var labelTag = $('<label />').attr('for', 'inputState');
                     labelTag.text('Hot');
                     divTag.append(labelTag).append(select);
 
-                    divTag.appendTo( $(column.footer()).empty() );
-                    $.each([1, 0], function( key, value ) {
+                    divTag.appendTo($(column.footer()).empty());
+                    $.each([1, 0], function (key, value) {
                         // console.log(key, value);
-                        select.append( '<option value="'+value+'">'+(value === 1 ? 'yes' : 'no')+'</option>' )
+                        select.append('<option value="' + value + '">' + (value === 1 ? 'yes' : 'no') + '</option>')
                     });
-                } );
+                });
             },
             "autoWidth": false,
             'responsive': true,
@@ -104,11 +104,11 @@ document.addEventListener("DOMContentLoaded", function(){
                     "width": "10%",
                     "targets": 0,
                     "data": 'CategoryName',
-                    "render": function ( data, type, row, meta ) {
+                    "render": function (data, type, row, meta) {
                         let hotCategory = row.HotCategory;
                         var divTag = $('<div/>');
-                        var pTag = $('<p/>', {"class": 'cn_'+row.id});
-                        var span = $('<span />').addClass('hc_'+row.id);
+                        var pTag = $('<p/>', {"class": 'cn_' + row.id});
+                        var span = $('<span />').addClass('hc_' + row.id).attr('hc_val', hotCategory);
 
                         if (hotCategory === true) {
                             span.append('<i class="fa fa-check" aria-hidden="true"></i>');
@@ -126,18 +126,18 @@ document.addEventListener("DOMContentLoaded", function(){
                     "width": "40%",
                     "targets": 1,
                     "data": 'PositiveKeyWords',
-                    "render": function ( data, type, row, meta ) {
-                        return type === 'display' && data?
-                            '<p class="pkw_'+row.id+'">'+data+'</p>' : ''
+                    "render": function (data, type, row, meta) {
+                        return type === 'display' && data ?
+                            '<p class="pkw_' + row.id + '">' + data + '</p>' : ''
                     }
                 },
                 {
                     "width": "40%",
                     "targets": 2,
                     "data": 'NegativeKeyWords',
-                    "render": function ( data, type, row, meta ) {
+                    "render": function (data, type, row, meta) {
                         return type === 'display' && data ?
-                            '<p class="nkw_'+row.id+'">'+data+'</p>' : ''
+                            '<p class="nkw_' + row.id + '">' + data + '</p>' : ''
                     }
                 },
 
@@ -145,15 +145,22 @@ document.addEventListener("DOMContentLoaded", function(){
                     "width": "10%",
                     "targets": 3,
                     data: 'Action',
-                    render: function ( data, type, row, meta ) {
+                    render: function (data, type, row, meta) {
                         return '    <!-- Button trigger modal -->\n' +
-                            '    <button type="button" class="btn btn-primary" data-category-id="'+row.id+'" data-toggle="modal" data-target="#exampleModalLong">\n' +
+                            '    <button type="button" class="btn btn-primary" data-category-id="' + row.id + '" data-toggle="modal" data-target="#exampleModalLong">\n' +
                             '        Edit\n' +
                             '    </button>';
                     }
                 }
             ],
         });
+
+        $('#exampleModalLong').on('hide.bs.modal', function (event) {
+            var modal = $(this);
+            let hotCategory = modal.find('.modal-body #hotCatgory');
+            hotCategory.prop("checked", false);
+        });
+
 
         $('#exampleModalLong').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget); // Button that triggered the modal
@@ -190,10 +197,10 @@ document.addEventListener("DOMContentLoaded", function(){
             let hotCategory = modal.find('.modal-body #hotCatgory');
             let hc_value = $('.hc_' + categoryId);
             $.each(hc_value, function (k, v) {
-                let hc_value_data = $(v).text();
+                let hc_value_data = $(v).attr('hc_val');
                 if (hc_value_data) {
                     if (hc_value_data === 'true') {
-                        hotCategory.prop( "checked", true );
+                        hotCategory.prop("checked", true);
                     }
                     return false;
                 }
@@ -220,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function(){
                     console.log(result.responseJSON.status);
                 },
                 success: (data) => {
-                  console.log(data);
+                    console.log(data);
                     $('#exampleModalLong').modal('toggle');
                     table.ajax.reload();
                 }
