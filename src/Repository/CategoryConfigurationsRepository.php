@@ -79,6 +79,17 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
             $parameterBag->set('limit', $limit);
         }
 
+        if (isset($params['columns']) && is_array($params['columns'])) {
+            foreach ($params['columns'] as $column) {
+                if (isset($column['search']['value'])
+                    && isset($column['data'])
+                    && strlen($column['search']['value'])
+                ) {
+                    $parameterBag->set($column['data'], $column['search']['value']);
+                }
+            }
+        }
+        
         return $this->getCategoryConfNative($parameterBag, $count, $total);
     }
 
@@ -112,7 +123,8 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
         } else {
             $query .= '
                     SELECT                         
-                        category_alias.id,
+                        category_alias.id,                       
+                        category_alias.hot_category as "HotCategory",
                         category_alias.category_name as "CategoryName",
                         c_conf.key_words as "PositiveKeyWords",
                         c_conf.negative_key_words as "NegativeKeyWords",
@@ -133,6 +145,17 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
             ';
             $params[':search'] = '%' . $search . '%';
             $types[':search'] = \PDO::PARAM_STR;
+        }
+
+        if ($parameterBag->has('CategoryName')
+            && $parameterBag->get('CategoryName') !== 'all'
+        ) {
+            $varCategoryName = (bool)$parameterBag->get('CategoryName');
+            $query .= '
+                AND category_alias.hot_category = :hot_category
+            ';
+            $params[':hot_category'] = $varCategoryName == true ? true : 0;
+            $types[':search'] = \PDO::PARAM_BOOL;
         }
 
         if (!$count) {

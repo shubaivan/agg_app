@@ -123,15 +123,15 @@ class Category implements EntityValidatorException
     public function setCategoryName(string $categoryName): self
     {
         if ($categoryName) {
-            if ($categoryName == 'Sneakers'
-                || $categoryName == 'Gummistövlar'
-                || $categoryName == 'Tofflor & Sandaler'
-                || $categoryName == 'Babylek'
-                || $categoryName == 'T-shirts'
-                || $categoryName == 'Regnjackor'
-            ) {
-                $this->hotCategory = true;
-            }
+//            if ($categoryName == 'Sneakers'
+//                || $categoryName == 'Gummistövlar'
+//                || $categoryName == 'Tofflor & Sandaler'
+//                || $categoryName == 'Babylek'
+//                || $categoryName == 'T-shirts'
+//                || $categoryName == 'Regnjackor'
+//            ) {
+//                $this->hotCategory = true;
+//            }
             $this->categoryName = $categoryName;
         }
 
@@ -279,16 +279,25 @@ class Category implements EntityValidatorException
 
     public function getCategoryNameAccessor()
     {
-        $shop = preg_replace('/\bsub\b/u', '', $this->categoryName);
-        if (str_word_count($shop) > 1) {
-            $shop = preg_replace('/\bBaby\b/u', '', $shop);
+        $categoryName = $this->categoryName;
+        if (str_word_count($categoryName) > 1) {
+            $categoryName = preg_replace('/\bsub\b/u', '', $this->categoryName);
+            $categoryName = preg_replace('/\bBaby\b/u', '', $categoryName);
         }
         
-        return $shop;
+        return trim($categoryName);
     }
 
     public function setCategoryNameAccessor(?string $categoryName = null)
     {
         $this->setCategoryName($categoryName);
+    }
+
+    /**
+     * @param bool $hotCategory
+     */
+    public function setHotCategory(bool $hotCategory): void
+    {
+        $this->hotCategory = $hotCategory;
     }
 }

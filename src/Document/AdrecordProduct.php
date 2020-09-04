@@ -530,7 +530,7 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
     public static function getShortPreviewText(): array
     {
         return [
-            'id', 'SKU'
+            'id'
         ];
     }
 

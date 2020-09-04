@@ -20,7 +20,7 @@ class IndexController extends AbstractController
     {
         $r = 1;
         if ($this->isGranted('ROLE_USER') || $this->isGranted('ROLE_ADMIN')) {
-            return $this->render('index/index.html.twig', []);
+            return $this->redirectToRoute('index', []);
         }
 
         return $this->render('home/index.html.twig', []);

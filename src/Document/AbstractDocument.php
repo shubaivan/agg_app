@@ -9,6 +9,17 @@ use JMS\Serializer\Annotation;
 abstract class AbstractDocument implements DataTableInterface
 {
     /**
+     * @var array
+     * @Annotation\Exclude()
+     */
+    private static $childs = [
+        AdrecordProduct::class,
+        AdtractionProduct::class,
+        AwinProduct::class,
+        TradeDoublerProduct::class
+    ];
+
+    /**
      * @MongoDB\Id
      * @Annotation\Type("string")
      */
@@ -113,5 +124,13 @@ abstract class AbstractDocument implements DataTableInterface
         return [
             'shop', 'decline'
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function getChilds(): array
+    {
+        return self::$childs;
     }
 }

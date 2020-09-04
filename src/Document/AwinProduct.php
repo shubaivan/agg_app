@@ -1366,7 +1366,7 @@ class AwinProduct extends AbstractDocument
     public static function getShortPreviewText(): array
     {
         return [
-            'id', 'aw_product_id'
+            'id'
         ];
     }
 

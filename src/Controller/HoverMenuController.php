@@ -13,18 +13,20 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class HoverMenuController extends AbstractController
 {
+    private static $th_hover_menu = [
+        'CategoryName',
+        'PositiveKeyWords',
+        'NegativeKeyWords',
+        'Action'
+    ];
+    
     /**
      * @Route("/admin/hover_menu/categories", name="hover_menu_categories")
      */
     public function getHoverMenuCategories()
     {
         $dataTableColumnData = [];
-        $keys = [
-            'CategoryName',
-            'PositiveKeyWords',
-            'NegativeKeyWords',
-            'Action'
-        ];
+        $keys = self::$th_hover_menu;
         array_map(function ($k) use (&$dataTableColumnData) {
             $dataTableColumnData[] = ['data' => $k];
         }, $keys);
@@ -38,4 +40,14 @@ class HoverMenuController extends AbstractController
             ]
         );
     }
+
+    /**
+     * @return array
+     */
+    public static function getThHoverMenu(): array
+    {
+        return self::$th_hover_menu;
+    }
+    
+    
 }

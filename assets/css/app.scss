@@ -17,13 +17,12 @@ body {
   display: none;
 }
 
-.hover_menu_table {
-  margin: 0 auto;
-  width: 100%;
-  clear: both;
-  border-collapse: collapse;
-  table-layout: fixed; // ***********add this
-  word-wrap:break-word; // ***********and this
+.fa-check{
+  color: green;
+}
+
+.fa-ban {
+  color: red;
 }
 
 @import "~bootstrap/scss/bootstrap";

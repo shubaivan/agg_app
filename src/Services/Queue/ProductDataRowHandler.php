@@ -3,6 +3,7 @@
 namespace App\Services\Queue;
 
 use App\Cache\CacheManager;
+use App\Document\AbstractDocument;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
@@ -279,45 +280,19 @@ class ProductDataRowHandler
      */
     private function markDocumentProduct(ResourceProductQueues $dataRow, \Exception $exception)
     {
-        /** @var AdrecordProduct $adrecordDoc */
-        $adrecordDoc = $this->dm->getRepository(AdrecordProduct::class)
-            ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
+        $documents = AbstractDocument::getChilds();
         $declineReasonClass = (new \ReflectionClass($exception))->getShortName().':'.$exception->getMessage();
-        if ($adrecordDoc) {
-            $adrecordDoc
-                ->setDeclineReasonClass($declineReasonClass)
-                ->setDecline(true);
-        }
-        /** @var AdtractionProduct $adtractionDoc */
-        $adtractionDoc = $this->dm->getRepository(AdtractionProduct::class)
-            ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
-
-        if ($adtractionDoc) {
-            $adtractionDoc
-                ->setDeclineReasonClass($declineReasonClass)
-                ->setDecline(true);
-        }
-        /** @var AwinProduct $awinDoc */
-        $awinDoc = $this->dm->getRepository(AwinProduct::class)
-            ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
-
-        if ($awinDoc) {
-            $awinDoc
-                ->setDeclineReasonClass($declineReasonClass)
-                ->setDecline(true);
-        }
-        /** @var TradeDoublerProduct $tradeDoublerProduct */
-        $tradeDoublerProduct = $this->dm->getRepository(TradeDoublerProduct::class)
-            ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
-
-        if ($tradeDoublerProduct) {
-            $tradeDoublerProduct
-                ->setDeclineReasonClass($declineReasonClass)
-                ->setDecline(true);
-        }
-
-        if ($adrecordDoc || $adtractionDoc || $awinDoc || $tradeDoublerProduct) {
-            $this->dm->flush(array('safe'=>true));
+        
+        foreach ($documents as $document) {
+            $oneBy = $this->dm->getRepository($document)
+                ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
+            if ($oneBy) {
+                $oneBy
+                    ->setDeclineReasonClass($declineReasonClass)
+                    ->setDecline(true);
+                $this->dm->flush(array('safe'=>true));
+                break;
+            }
         }
     }
 

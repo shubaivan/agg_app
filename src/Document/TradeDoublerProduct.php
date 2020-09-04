@@ -420,7 +420,7 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
     public static function getShortPreviewText(): array
     {
         return [
-            'id', 'sku'
+            'id'
         ];
     }
 

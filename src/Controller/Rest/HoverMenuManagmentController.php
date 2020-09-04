@@ -3,6 +3,7 @@
 namespace App\Controller\Rest;
 
 use App\Cache\TagAwareQueryResultCacheCategoryConf;
+use App\Controller\HoverMenuController;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
@@ -81,25 +82,29 @@ class HoverMenuManagmentController extends AbstractRestController
     public function editHoverMenuAction(Request $request)
     {
         $categoryConfigurations = $this->categoryConfRepo->findOneBy(['categoryId' => $request->get('category_id')]);
-        $categoryConfigurations
-            ->setKeyWords($request->get('pkw'))
-            ->setNegativeKeyWords($request->get('nkw'));
 
-        $this->categoryConfRepo->save($categoryConfigurations);
-
-        $this->getHelpers()
+        $category = $categoryConfigurations->getCategoryId();
+        $pkw = $this->getHelpers()
             ->handleKeyWords(
-                $categoryConfigurations->getKeyWords(),
-                $categoryConfigurations->getCategoryId()->getCategoryName(),
+                $request->get('pkw'),
+                $category->getCategoryName(),
                 'positive'
             );
 
-        $this->getHelpers()
+        $nkw = $this->getHelpers()
             ->handleKeyWords(
-                $categoryConfigurations->getNegativeKeyWords(),
-                $categoryConfigurations->getCategoryId()->getCategoryName(),
+                $request->get('nkw'),
+                $category->getCategoryName(),
                 'negative'
             );
+
+        $categoryConfigurations
+            ->setKeyWords($pkw)
+            ->setNegativeKeyWords($nkw);
+        if ($request->get('hotCatgory')) {
+            $category->setHotCategory(true);
+        }
+        $this->categoryConfRepo->save($categoryConfigurations);
 
         $this->getTagAwareQueryResultCacheCategoryConf()
             ->getTagAwareAdapter()
@@ -133,12 +138,7 @@ class HoverMenuManagmentController extends AbstractRestController
      */
     public function listThHoverMenuAction(Request $request)
     {
-        $keys = [
-            'CategoryName',
-            'PositiveKeyWords',
-            'NegativeKeyWords',
-            'Action'
-        ];
+        $keys = HoverMenuController::getThHoverMenu();
         $view = $this->createSuccessResponse(
             $keys
         );

@@ -1,89 +1,36 @@
-bomber jackets : bomberjackets
-Bomber jacket : Bomberjacket
-Duffel jacket : Duffeljacket
-Fleece set : Fleeceset
-Fleece tröja : Fleecetröja
-Fleece tröjor : Fleecetröjor
-Fleece sweaters : Fleecesweaters
-Fleece sweater : Fleecesweater
-Fleece byxa : Fleecebyxa
-Fleece byxor : Fleecebyxor
-Fleece trousers : Fleecetrousers
-Fleece pant : Fleecepant
-Fleece pants : Fleecepants
-Fleece jacka : Fleecejacka
-Fleece jackor : Fleecejackor
-Fleece overalls : Fleeceoveralls
-Fleece vantar : Fleecevantar
-Faux fur : Fauxfur
-Leather gloves : Leathergloves
-Läder jacka : Läderjacka
-Leather jacket : Leatherjacket
-Leather jackets : Leatherjackets
-Militär jacka : Militärjacka
-Militär jackor : Militärjackor
-Military jacket : Militaryjacket
-Military jackets : Militaryjackets
-Mössa med öronlappar : Mössamedöronlappar
-Ear wrap cap : Earwrapcap
-Halsduk och vantar : Halsdukochvantar
-Neck scarf : Neckscarf
-Stickade halsdukar : Stickadehalsdukar
-Stickad halsduk : Stickadhalsduk
-Rain gloves : Raingloves
-Rain hat : Rainhat
-Rain coat : Raincoat
-Rain coats : Raincoats
-Rain overalls : Rainoveralls
-Rain overall : Rainoverall
-Shell jacket : Shelljacket
-Shell overalls : Shelloveralls
-Skid och thermobyxor : Skidochthermobyxor
-Thermo pants : Thermopants
-Skid jacka : Skidjacka
-Ski jacket : Skijacket
-Skid overaller : Skidoveraller
-Ski overalls : Skioveralls
-Ski overall : Skioverall
-Sun hat : Sunhat
-Vadderad jacka : Vadderadjacka
-Padded jacket : Paddedjacket
-Wadded jacket : Waddedjacket
-Woolen jacket : Woolenjacket
-Wind jacket : Windjacket
-Vind jacka : Vindjacka
-Vinter jacka : Vinterjacka
-Winter jacket : Winterjacket
-Winter overall : Winteroverall
-Jeans jacka : Jeansjacka
-Jeans jacket : Jeansjacket
-Down jacket : Downjacket
-Löpar skor : Löparskor
-Running shoes : Runningshoes
-Running shoe : Runningshoe
-Jogging skor : Joggingskor
-Joging shoes : Jogingshoes
-Outdoor jacka : Outdoorjacka
-Sail jacket : Sailjacket
-Streat jacka : Streatjacka
-Streat jacket : Streatjacket
-Everyday jacket : Everydayjacket
-Softschell jacka : Softschelljacka
-Soft-shell jacket : Soft-shelljacket
-Soft shell jacket : Softshelljacket
 långärmad t-shirt : långärmadt-shirt
 Rugby tröja : Rugbytröja
 long-sleeved t-shirt : long-sleevedt-shirt
 short sleeve : shortsleeve
 short sleeved : shortsleeved
 Långärmad t-shirt : Långärmadt-shirt
-Silver Cross : SilverCross
-Tank tops : Tanktops
-uv shirt : uvshirt
-uv shirts : uvshirts
 Zip jacket : Zipjacket
 Zip jacka : Zipjacka
 Zip jackor : Zipjackor
+Jeans shorts : Jeansshorts
+Shell pants : Shellpants
+Pull up chinos : Pullupchinos
+Pull up chino : Pullupchino
+Linne chinos : Linnechinos
+Shorts chinos : Shortschinos
+Harem trousers : Haremtrousers
+Three Quarter Pants : ThreeQuarterPants
+Capri pants : Capripants
+Workout pants : Workoutpants
+Training pants : Trainingpants
+Exercise pants : Exercisepants
+Long johns : Longjohns
+Underbyxa Underklädsset : UnderbyxaUnderklädsset
+leg warmers : legwarmers
+boxer shorts : boxershorts
+long johns : longjohns
+sports tops : sportstops
+Pantyhose Underwear set : PantyhoseUnderwearset
+Leg warmer : Legwarmer
+Leg warmers : Legwarmers
+Underwear set : Underwearset
+Silver Cross : SilverCross
+Tank tops : Tanktops
 Sweater dress : Sweaterdress
 Tulle dresses : Tulledresses
 Casual dresses : Casualdresses
@@ -97,26 +44,20 @@ veckade kjolar : veckadekjolar
 veckad kjol : veckadkjol
 pleated skirts : pleatedskirts
 pleated skirt : pleatedskirt
-Jeans shorts : Jeansshorts
-Shell pants : Shellpants
-Harem trousers : Haremtrousers
-Rain pants : Rainpants
-Three Quarter Pants : ThreeQuarterPants
-Capri pants : Capripants
-Workout pants : Workoutpants
-Training pants : Trainingpants
-Exercise pants : Exercisepants
-Long johns : Longjohns
-Underbyxa Underklädsset : UnderbyxaUnderklädsset
-leg warmers : legwarmers
-boxer shorts : boxershorts
-long johns : longjohns
-sports tops : sportstops
-Socks Panty : SocksPanty
-Pantyhose Underwear set : PantyhoseUnderwearset
-Leg warmer : Legwarmer
-Leg warmers : Legwarmers
-Underwear set : Underwearset
+Fleece jacka : Fleecejacka
+Vind fleece : Vindfleece
+Fleece tröja : Fleecetröja
+Fleece byxa : Fleecebyxa
+Fleece set : Fleeceset
+Fleece jacket : Fleecejacket
+Wind fleece : Windfleece
+Fleece pant : Fleecepant
+Fleece byxor : Fleecebyxor
+Fleece pants : Fleecepants
+Fleece trousers : Fleecetrousers
+Vadderad jacka : Vadderadjacka
+Softshell jacka : Softshelljacka
+Trench coat : Trenchcoat
 Tennis T-shirt : TennisT-shirt
 Running pants : Runningpants
 Jogging pants : Joggingpants
@@ -138,34 +79,14 @@ Sports Tshirt : SportsTshirt
 Tränings T-shirt : TräningsT-shirt
 Gym Tshirt : GymTshirt
 Gym T-shirt : GymT-shirt
-Spark suit : Sparksuit
-Swim Suit : SwimSuit
-Swim Pants : SwimPants
-Swim Diapers : SwimDiapers
-UV Badshorts : UVBadshorts
-Bad tröja : Badtröja
-UV Apparel : UVApparel
-UV Pants : UVPants
-UV Sweater : UVSweater
-UV Sweatshirts : UVSweatshirts
-UV Sets : UVSets
-Diaper Tights : DiaperTights
-UV Bathing Suits : UVBathingSuits
-UV Bathing Shorts : UVBathingShorts
-Bathing Sweater : BathingSweater
-Bathing Suits : BathingSuits
-swim suit : swimsuit
-swim suites : swimsuites
-uv dräkter : uvdräkter
-uv dräkt : uvdräkt
-uv byxa : uvbyxa
-uv byxor : uvbyxor
 Children's Watches : Children'sWatches
 Children's Watch : Children'sWatch
 Keychain Lamp : KeychainLamp
 Basketball Sneakers : BasketballSneakers
 Basketball Sneaker : BasketballSneaker
-Slipp-on sneaker : Slipp-onsneaker
+Slip-on sneaker : Slip-onsneaker
+basketball sneaker : basketballsneaker
+flip flop : flipflop
 Rubber boots : Rubberboots
 Rain boots : Rainboots
 Rain boot : Rainboot
@@ -179,6 +100,7 @@ Vinter Sko : VinterSko
 Vinter Stövlar : VinterStövlar
 Vinter Stövel : VinterStövel
 BTS stövlar : BTSstövlar
+Dolce & Gabbana : Dolce&Gabbana
 Easy Peasy : EasyPeasy
 Fest sko : Festsko
 Fest skor : Festskor
@@ -220,6 +142,7 @@ fest skor : festskor
 beach shoes : beachshoes
 Ballerina skor : Ballerinaskor
 Ballerina sko : Ballerinasko
+vans skor : vansskor
 soccer shoes : soccershoes
 Baby sko : Babysko
 Baby skor : Babyskor
@@ -245,83 +168,35 @@ lära gå sko : läragåsko
 baby shoes : babyshoes
 baby sko : babysko
 baby shoe : babyshoe
-
-Vind fleece : Vindfleece
-Fleece jacket : Fleecejacket
-Wind fleece : Windfleece
-Piké tröja : Pikétröja
-Långärmad Pikétröja : LångärmadPikétröja
-jeans shorts : jeansshorts
-Pull up chinos : Pullupchinos
-Linne chinos : Linnechinos
-Sjhorts Chinos : SjhortsChinos
-Cargo Pants : CargoPants
-Harem Pants : HaremPants
-Soft Pants : SoftPants
-Rain Pants : RainPants
-Shell Pants : ShellPants
-Capri Pants : CapriPants
-Linnen chinos : Linnenchinos
-Pull-up chinos : Pull-upchinos
-Shorts chinos : Shortschinos
-Linne Chinos : LinneChinos
-Jeans pants : Jeanspants
-Shell pant : Shellpant
-Cargo pants : Cargopants
-Tre kvart byxa : Trekvartbyxa
-Pull-upp byxor : Pull-uppbyxor
-Pull upp byxor : Pulluppbyxor
-Pull-up pants : Pull-uppants
-Pull upp pants : Pullupppants
-Linnen pants : Linnenpants
-Manchester pants : Manchesterpants
-halsduk och vantar : halsdukochvantar
-Skidhandskar och vantar : Skidhandskarochvantar
-Vår och höst jackor : Vårochhöstjackor
-Vadderade jackor : Vadderadejackor
-Utomhus Jacka : UtomhusJacka
-Mössor med öronlappar : Mössormedöronlappar
-Skidbyxor och thermobyxor : Skidbyxorochthermobyxor
-Utomhus Jackor : UtomhusJackor
-UV shirt : UVshirt
-UV skjortor : UVskjortor
-Beuty Bag : BeutyBag
-Changing Bag : ChangingBag
-Changing Mat : ChangingMat
-Nursing Pillow : NursingPillow
-Changing Cushion : ChangingCushion
-Långärmade Haklappar : LångärmadeHaklappar
-Cooler Bag : CoolerBag
-Ice Packs : IcePacks
-Squeeze Bags : SqueezeBags
-Straw Cup : StrawCup
-Straw Bottle : StrawBottle
-Baby Scarf : BabyScarf
-Flexi Bath : FlexiBath
-Mammoth Väska : MammothVäska
-Back carrier : Backcarrier
+activity play mat : activityplaymat
 Baby Watch : BabyWatch
-Matnings set : Matningsset
 Stroller Parts : StrollerParts
 pram hook : pramhook
-oavsett årstid : oavsettårstid
+bumper bar : bumperbar
+2ME slang : 2MEslang
+svängbara hjul : svängbarahjul
+Extra delar : Extradelar
+Skid & Cykelvagnar : Skid&Cykelvagnar
+Resevagnar & Paraplyvagnar : Resevagnar&Paraplyvagnar
 barnvagn för två : barnvagnförtvå
 dubbla barnvagn : dubblabarnvagn
 double stroller : doublestroller
-vinter kuvert : vinterkuvert
-winter envelope : winterenvelope
-sleeping bag : sleepingbag
+sibling stroller : siblingstroller
 färg kappa : färgkappa
 color cloak : colorcloak
 portable crib : portablecrib
 Mobiler för barnvagnen : Mobilerförbarnvagnen
 cup holder : cupholder
+winter envelope : winterenvelope
+sleeping bag : sleepingbag
 standing board : standingboard
 convertible top : convertibletop
+väder kitt : väderkitt
 rombiskt mönster : rombisktmönster
 Babyskydd baby Safety : BabyskyddbabySafety
 car seat : carseat
 Booster Cushions : BoosterCushions
+vinter kuvert : vinterkuvert
 kraftigt slag : kraftigtslag
 Mobiler för bilstolen : Mobilerförbilstolen
 Bebis och småbarn : Bebisochsmåbarn

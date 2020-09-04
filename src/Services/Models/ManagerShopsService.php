@@ -19,33 +19,36 @@ use App\Services\Models\Shops\Adrecord\StigaSportsService;
 use App\Services\Models\Shops\Adrecord\StrumpgalenService;
 use App\Services\Models\Shops\Adrecord\TwarService;
 use App\Services\Models\Shops\AhlensService;
+use App\Services\Models\Shops\Awin\EllosSEService;
+use App\Services\Models\Shops\Awin\JDSportsService;
 use App\Services\Models\Shops\BabyLandService;
 use App\Services\Models\Shops\BabyShopService;
 use App\Services\Models\Shops\BabyVService;
+use App\Services\Models\Shops\BjornBorgService;
+use App\Services\Models\Shops\COSService;
 use App\Services\Models\Shops\CykloteketService;
 use App\Services\Models\Shops\ElodiService;
 use App\Services\Models\Shops\IdentityGroup;
 use App\Services\Models\Shops\JollyRoomService;
+use App\Services\Models\Shops\LekiaService;
 use App\Services\Models\Shops\LekmerService;
 use App\Services\Models\Shops\LindexService;
 use App\Services\Models\Shops\LitenlekermerService;
+use App\Services\Models\Shops\LitenlekerService;
 use App\Services\Models\Shops\NikeService;
 use App\Services\Models\Shops\PyretService;
 use App\Services\Models\Shops\ReimaService;
+use App\Services\Models\Shops\SneakersPointService;
+use App\Services\Models\Shops\StorAndLitenService;
+use App\Services\Models\Shops\TradeDoubler\BonprixService;
+use App\Services\Models\Shops\TradeDoubler\SportamoreService;
 
 class ManagerShopsService
 {
 //Todo grouping waiting 
 //'vegaoo'
-//'nike'
 //'nordic_nest'
-//'cos'
-//'bjorn_borg'
-//'lekia'
-//'litenleker'
-//'sneakersPoint'
-//'stor_and_liten'
-//
+
 //'nepiece_nordic'
 //'blue_tomato'
 //'ellos_se' 
@@ -194,6 +197,61 @@ class ManagerShopsService
     private $nike;
 
     /**
+     * @var LitenlekerService
+     */
+    private $litenleker;
+
+    /**
+     * @var COSService
+     */
+    private $cos;
+
+    /**
+     * @var BjornBorgService
+     */
+    private $bjorn_borg;
+
+    /**
+     * @var LekiaService
+     */
+    private $lekia;
+    
+    /**
+     * @var SneakersPointService
+     */
+    private $sneakersPoint;
+
+    /**
+     * @var StorAndLitenService
+     */
+    private $stor_and_liten;
+
+    /**
+     * @var SportamoreService
+     */
+    private $sportamore;
+
+    /**
+     * @var BonprixService
+     */
+    private $bonprix;
+    
+    /**
+     * @var JDSportsService
+     */
+    private $jd_sports;
+
+    /**
+     * @var EllosSEService
+     */
+    private $ellos_se;
+
+    /**
+     * @var JDSportsService
+     */
+    private $blue_tomato;
+
+    /**
      * ManagerShopsService constructor.
      * @param PyretService $polarn_pyret
      * @param BabyShopService $babyshop
@@ -223,8 +281,19 @@ class ManagerShopsService
      * @param StrumpgalenService $strumpgalen
      * @param TwarService $twar
      * @param NikeService $nike
+     * @param LitenlekerService $litenleker
+     * @param COSService $cos
+     * @param BjornBorgService $bjorn_borg
+     * @param LekiaService $lekia
+     * @param SneakersPointService $sneakersPoint
+     * @param StorAndLitenService $stor_and_liten
+     * @param SportamoreService $sportamore
+     * @param BonprixService $bonprix
+     * @param JDSportsService $jd_sports
+     * @param EllosSEService $ellos_se
+     * @param JDSportsService $blue_tomato
      */
-    public function __construct(PyretService $polarn_pyret, BabyShopService $babyshop, JollyRoomService $jollyroom, ReimaService $reima, LekmerService $lekmer, BabyLandService $babyland, BabyVService $babyV, ElodiService $elodi, LindexService $lindex, LitenlekermerService $litenlekermer, CykloteketService $cykloteket, AhlensService $ahlens, BabyBjornService $baby_bjorn, CardooniaService $cardoonia, EbbeKids $ebbeKids, FrankDandy $frankDandy, Jultroja $jultroja, GusTextil $gus_rextil, LeksakscityService $leksakscity, NallerietService $nalleriet, NamnbandService $namnband, ShirtstoreService $shirtstore, SpelexpertenService $spelexperten, SportshopenService $sportshopen, StigaSportsService $stigaSports, StrumpgalenService $strumpgalen, TwarService $twar, NikeService $nike)
+    public function __construct(PyretService $polarn_pyret, BabyShopService $babyshop, JollyRoomService $jollyroom, ReimaService $reima, LekmerService $lekmer, BabyLandService $babyland, BabyVService $babyV, ElodiService $elodi, LindexService $lindex, LitenlekermerService $litenlekermer, CykloteketService $cykloteket, AhlensService $ahlens, BabyBjornService $baby_bjorn, CardooniaService $cardoonia, EbbeKids $ebbeKids, FrankDandy $frankDandy, Jultroja $jultroja, GusTextil $gus_rextil, LeksakscityService $leksakscity, NallerietService $nalleriet, NamnbandService $namnband, ShirtstoreService $shirtstore, SpelexpertenService $spelexperten, SportshopenService $sportshopen, StigaSportsService $stigaSports, StrumpgalenService $strumpgalen, TwarService $twar, NikeService $nike, LitenlekerService $litenleker, COSService $cos, BjornBorgService $bjorn_borg, LekiaService $lekia, SneakersPointService $sneakersPoint, StorAndLitenService $stor_and_liten, SportamoreService $sportamore, BonprixService $bonprix, JDSportsService $jd_sports, EllosSEService $ellos_se, JDSportsService $blue_tomato)
     {
         $this->polarn_pyret = $polarn_pyret;
         $this->babyshop = $babyshop;
@@ -254,6 +323,17 @@ class ManagerShopsService
         $this->strumpgalen = $strumpgalen;
         $this->twar = $twar;
         $this->nike = $nike;
+        $this->litenleker = $litenleker;
+        $this->cos = $cos;
+        $this->bjorn_borg = $bjorn_borg;
+        $this->lekia = $lekia;
+        $this->sneakersPoint = $sneakersPoint;
+        $this->stor_and_liten = $stor_and_liten;
+        $this->sportamore = $sportamore;
+        $this->bonprix = $bonprix;
+        $this->jd_sports = $jd_sports;
+        $this->ellos_se = $ellos_se;
+        $this->blue_tomato = $blue_tomato;
     }
 
 
