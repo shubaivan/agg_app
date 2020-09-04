@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
                 });
             },
-            "autoWidth": false,
+
             'responsive': true,
             'fixedHeader': true,
             'processing': true,
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
             columns: columns,
             "columnDefs": [
                 {
-                    "width": "10%",
+
                     "targets": 0,
                     "data": 'CategoryName',
                     "render": function (data, type, row, meta) {
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
 
                 {
-                    "width": "40%",
+
                     "targets": 1,
                     "data": 'PositiveKeyWords',
                     "render": function (data, type, row, meta) {
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 },
                 {
-                    "width": "40%",
+
                     "targets": 2,
                     "data": 'NegativeKeyWords',
                     "render": function (data, type, row, meta) {
@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
 
                 {
-                    "width": "10%",
+
                     "targets": 3,
                     data: 'Action',
                     render: function (data, type, row, meta) {
