@@ -22,10 +22,13 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * @method Brand|null findOneBy(array $criteria, array $orderBy = null)
  * @method Brand[]    findAll()
  * @method Brand[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- * @method Brand[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false)
+ * @method Brand[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false, string $cacheId = '')
+ * @method Brand[]|int getListParameterBag(ResultCacheDriver $cache, QueryBuilder $qb, ParameterBag $param, bool $count = false, string $cacheId = '')
  */
 class BrandRepository extends ServiceEntityRepository
 {
+    const CACHE_HOT_BRAND_IDS = 'cache_hot_brand_ids';
+    
     use PaginationRepository;
 
     /**
@@ -360,6 +363,122 @@ class BrandRepository extends ServiceEntityRepository
         } else {
             throw new BadRequestHttpException($ids . ' not valid');
         }
+    }
+
+    /**
+     * @param array $params
+     * @param bool $count
+     * @param bool $total
+     * @return int|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function getDataTablesData(
+        array $params,
+        bool $count = false,
+        bool $total = false
+    )
+    {
+        $parameterBag = new ParameterBag();
+
+        $columnIndex = $params['order'][0]['column']; // Column index
+        $columnName = $params['columns'][$columnIndex]['data']; // Column name
+        $columnSortOrder = $params['order'][0]['dir']; // asc or desc
+
+        $parameterBag->set('sort_by', $columnName);
+        $parameterBag->set('sort_order', $columnSortOrder);
+
+        if (isset($params['search']['value']) && strlen($params['search']['value'])) {
+            $search = $params['search']['value'];
+            $parameterBag->set('search', $search);
+        }
+
+
+        if (isset($params['draw'])) {
+            $draw = $params['draw'];
+            $parameterBag->set('page', $draw);
+        }
+
+        if (isset($params['start'])) {
+            $offset = $params['start'];
+            $parameterBag->set('offset', $offset);
+        }
+
+        if (isset($params['length'])) {
+            $limit = $params['length'];
+            $parameterBag->set('limit', $limit);
+        }
+
+
+        $limit = $parameterBag->get('limit');
+        $offset = $parameterBag->get('offset');
+        $sortBy = $parameterBag->get('sort_by');
+        $sortOrder = $parameterBag->get('sort_order');
+        $sortBy = $this->getHelpers()->white_list($sortBy,
+            ["id", "brandName", "top"], "Invalid field name " . $sortBy);
+
+        if ($count) {
+            $dql = '
+                SELECT COUNT(b)
+                FROM App\Entity\Brand b
+            ';
+        } else {
+            $dql = '
+                SELECT b
+                FROM App\Entity\Brand b
+            ';
+        }
+        $bindParams = [];
+        if (!$total) {
+            if (isset($params['columns']) && is_array($params['columns'])) {
+                $condition = ' WHERE ';
+                $conditions = [];
+                foreach ($params['columns'] as $column) {
+                    if (isset($column['search']['value'])
+                        && isset($column['data'])
+                        && strlen($column['search']['value'])
+                    ) {
+                        $conditions[] = '
+                            ILIKE('.'b.'.$column['data'].', :'.'var_'.$column['data'].') = TRUE
+                        ';
+
+                        $bindParams['var_'.$column['data']] = '%'.$column['search']['value'].'%';
+                    }
+                }
+
+                if (count($conditions)) {
+                    $dql .= $condition . implode(' AND ', $conditions);
+                }
+            }
+        }
+
+
+        if (!$count) {
+            $dql .= ' 
+                ORDER BY b.' . $sortBy . ' ' . $sortOrder;
+        }
+
+        $query = $this->getEntityManager()
+            ->createQuery($dql);
+        if (!$count) {
+            $query
+                ->setMaxResults($limit)
+                ->setFirstResult($offset);
+        }
+        $query
+            ->enableResultCache(0, self::CACHE_HOT_BRAND_IDS)
+            ->useQueryCache(true);
+
+        if ($bindParams) {
+            $query
+                ->setParameters($bindParams);
+        }
+        if ($count) {
+            $result = $query->getSingleScalarResult();
+        } else {
+            $result = $query->getResult();
+        }
+
+        return $result;
     }
 
     /**
