@@ -16,13 +16,16 @@ trait PaginationRepository
      * @param QueryBuilder $qb
      * @param ParamFetcher $paramFetcher
      * @param bool $count
+     * @param string $cacheId
      * @return array|int|mixed
      */
     final public function getList(
         ResultCacheDriver $cache,
         QueryBuilder $qb,
         ParamFetcher $paramFetcher,
-        $count = false)
+        $count = false,
+        string $cacheId = ''
+    )
     {
         if ($count) {
             $query = $qb
@@ -43,10 +46,18 @@ trait PaginationRepository
                 ->setFirstResult($paramFetcher->get('count') * ($paramFetcher->get('page') - 1))
                 ->setMaxResults($paramFetcher->get('count'));
 
-            $query =
-                $qb->getQuery()
-                    ->enableResultCache()
+            $query =$qb->getQuery();
+            
+            if ($cacheId) {
+                $query
+                    ->enableResultCache(0, $cacheId);
+            } else {
+                $query
+                    ->enableResultCache();                
+            }
+                $query
                     ->useQueryCache(true);
+            
             $result = $query->getResult();
         }
 

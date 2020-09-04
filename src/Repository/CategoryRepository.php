@@ -26,13 +26,15 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * @method Category|null findOneBy(array $criteria, array $orderBy = null)
  * @method Category[]    findAll()
  * @method Category[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- * @method Category[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false)
+ * @method Category[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false, string $cacheId = '')
  */
 class CategoryRepository extends ServiceEntityRepository
 {
     use PaginationRepository;
     const STRICT = 'strict';
     const MAIN_CATEGORY_IDS_DATA = 'main_category_ids_data';
+    const CACHE_HOT_CATEGORY_ID = 'cache_hot_category_id';
+    
     /**
      * @var Helpers
      */
@@ -82,7 +84,8 @@ class CategoryRepository extends ServiceEntityRepository
             $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
             $queryBuilder,
             $paramFetcher,
-            $count
+            $count,
+            self::CACHE_HOT_CATEGORY_ID
         );
     }
 
