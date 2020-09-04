@@ -31,7 +31,7 @@ trait PaginationRepository
             $query = $qb
                 ->select('COUNT(s.id) as count')
                 ->getQuery()
-                ->setHydrationCacheProfile(new QueryCacheProfile(0, null, $cache))
+                ->setHydrationCacheProfile(new QueryCacheProfile(0, ($cacheId ? $cacheId : null), $cache))
                 ->useQueryCache(true);
 
             $result = $query->getArrayResult();
