@@ -42,7 +42,7 @@ class TradeDoublerCollectionController extends AbstractRestController
      *
      * @View(statusCode=Response::HTTP_OK)
      *
-     * @SWG\Tag(name="Products")
+     * @SWG\Tag(name="Admin")
      *
      * @SWG\Response(
      *     response=200,

@@ -11,12 +11,15 @@ use App\Exception\ValidatorException;
 use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
 use App\Services\Helpers;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ORM\Configuration;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
@@ -103,8 +106,18 @@ class HoverMenuManagmentController extends AbstractRestController
             ->setNegativeKeyWords($nkw);
         if ($request->get('hotCatgory')) {
             $category->setHotCategory(true);
+        } else {
+            $category->setHotCategory(false);
         }
         $this->categoryConfRepo->save($categoryConfigurations);
+        /** @var Registry $resultCacheImpl */
+        $resultCacheImpl = $this->get('doctrine');
+        $objectManager = $resultCacheImpl->getManager();
+        /** @var Configuration $configuration */
+        $configuration = $objectManager->getConfiguration();
+        /** @var DoctrineProvider $resultCacheImpl1 */
+        $resultCacheImpl1 = $configuration->getResultCacheImpl();
+        $resultCacheImpl1->delete(CategoryRepository::CACHE_HOT_CATEGORY_ID);
 
         $this->getTagAwareQueryResultCacheCategoryConf()
             ->getTagAwareAdapter()

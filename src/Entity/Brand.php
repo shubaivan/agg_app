@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Document\DataTableInterface;
 use App\Exception\EntityValidatorException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -23,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @UniqueEntity(fields={"brandName"}, groups={Brand::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
  */
-class Brand implements EntityValidatorException
+class Brand implements EntityValidatorException, DataTableInterface
 {
     const SERIALIZED_GROUP_LIST = 'brand_group_list';
     const SERIALIZED_GROUP_CREATE = 'brand_group_crete';
@@ -60,6 +61,7 @@ class Brand implements EntityValidatorException
     /**
      * @var boolean
      * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
      */
     private $top = false;
 
@@ -123,5 +125,30 @@ class Brand implements EntityValidatorException
         }
 
         return $this;
+    }
+
+    public static function getImageColumns(): array
+    {
+        return [];
+    }
+
+    public static function getLinkColumns(): array
+    {
+        return [];
+    }
+
+    public static function getSeparateFilterColumn(): array
+    {
+        return ['brandName'];
+    }
+
+    public static function getShortPreviewText(): array
+    {
+        return [];
+    }
+
+    public static function convertToHtmColumns(): array
+    {
+        return [];
     }
 }
