@@ -23,10 +23,15 @@ use Symfony\Component\Validator\Constraints as Assert;
  * )
  * @UniqueEntity(fields={"brandName"}, groups={Brand::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
+ * @Annotation\AccessorOrder("custom", custom = {
+ *     "id",
+ *     "brandName"
+ * })
  */
 class Brand implements EntityValidatorException, DataTableInterface
 {
     const SERIALIZED_GROUP_LIST = 'brand_group_list';
+    const SERIALIZED_GROUP_LIST_TH = 'th_brand_group_list';
     const SERIALIZED_GROUP_CREATE = 'brand_group_crete';
 
     use TimestampableEntity;
@@ -40,13 +45,14 @@ class Brand implements EntityValidatorException, DataTableInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST,
+     *      Product::SERIALIZED_GROUP_LIST, Brand::SERIALIZED_GROUP_LIST_TH})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST, Brand::SERIALIZED_GROUP_LIST_TH})
      * @Assert\NotBlank(groups={Brand::SERIALIZED_GROUP_CREATE})
      */
     private $brandName;
@@ -82,15 +88,15 @@ class Brand implements EntityValidatorException, DataTableInterface
 
     public function setBrandName(string $brandName): self
     {
-        if ($brandName == 'Mini Rodini'
-            || $brandName == 'Adidas'
-            || $brandName == 'Lindex'
-            || $brandName == 'Reima'
-            || $brandName == 'Jack & Jones'
-            || $brandName == 'Polarn O. Pyret'
-        ) {
-            $this->top = true;
-        }
+//        if ($brandName == 'Mini Rodini'
+//            || $brandName == 'Adidas'
+//            || $brandName == 'Lindex'
+//            || $brandName == 'Reima'
+//            || $brandName == 'Jack & Jones'
+//            || $brandName == 'Polarn O. Pyret'
+//        ) {
+//            $this->top = true;
+//        }
         $this->brandName = $brandName;
 
         return $this;
@@ -139,7 +145,7 @@ class Brand implements EntityValidatorException, DataTableInterface
 
     public static function getSeparateFilterColumn(): array
     {
-        return ['brandName'];
+        return [];
     }
 
     public static function getShortPreviewText(): array
@@ -150,5 +156,37 @@ class Brand implements EntityValidatorException, DataTableInterface
     public static function convertToHtmColumns(): array
     {
         return [];
+    }
+
+    /**
+     * @return int
+     * @Annotation\VirtualProperty()
+     * @Annotation\SerializedName("quantityProducts")
+     * @Annotation\Type("integer")
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST_TH})
+     */
+    public function getQuantityProductsValue()
+    {
+        return $this->products->count();
+    }
+
+    /**
+     * @return int
+     * @Annotation\VirtualProperty()
+     * @Annotation\SerializedName("Action")
+     * @Annotation\Type("string")
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST_TH})
+     */
+    public function getActionValue()
+    {
+        return 'edit';
+    }
+
+    /**
+     * @param bool $top
+     */
+    public function setTop(bool $top): void
+    {
+        $this->top = $top;
     }
 }

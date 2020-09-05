@@ -2,15 +2,22 @@
 
 namespace App\Controller\Rest\Admin;
 
+use App\Cache\TagAwareQueryResultCacheBrand;
+use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
+use App\Repository\CategoryConfigurationsRepository;
+use App\Repository\CategoryRepository;
+use App\Repository\ProductRepository;
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\ORM\Configuration;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Controller\Rest\AbstractRestController;
-use App\Document\TradeDoublerProduct;
-use App\Exception\ValidatorException;
 use App\Repository\BrandRepository;
 use App\Services\Helpers;
-use Doctrine\DBAL\DBALException;
-use FOS\RestBundle\Request\ParamFetcher;
+use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations\View;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,24 +31,37 @@ class BrandController extends AbstractRestController
     private $brandRepository;
 
     /**
-     * BrandController constructor.
-     * @param BrandRepository $brandRepository
-     * @param Helpers $helpers
+     * @var TagAwareQueryResultCacheBrand
      */
-    public function __construct(BrandRepository $brandRepository, Helpers $helpers)
+    private $tagAwareQueryResultCacheBrand;
+
+    /**
+     * @var TagAwareQueryResultCacheProduct
+     */
+    private $tagAwareQueryResultCacheProduct;
+
+    /**
+     * BrandController constructor.
+     * @param Helpers $helpers
+     * @param BrandRepository $brandRepository
+     * @param TagAwareQueryResultCacheBrand $tagAwareQueryResultCacheBrand
+     * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
+     */
+    public function __construct(Helpers $helpers, BrandRepository $brandRepository, TagAwareQueryResultCacheBrand $tagAwareQueryResultCacheBrand, TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct)
     {
         parent::__construct($helpers);
-
         $this->brandRepository = $brandRepository;
+        $this->tagAwareQueryResultCacheBrand = $tagAwareQueryResultCacheBrand;
+        $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
     }
-    
+
+
     /**
      * get Brands.
      *
      * @Rest\Post("/admin/api/brand_list", options={"expose": true})
      *
      * @param Request $request
-     * @param ParamFetcher $paramFetcher
      *
      * @View(statusCode=Response::HTTP_OK)
      *
@@ -53,12 +73,11 @@ class BrandController extends AbstractRestController
      * )
      *
      * @return \FOS\RestBundle\View\View
-     * @throws DBALException
-     * @throws ValidatorException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
-    public function postBrandListAction(Request $request, ParamFetcher $paramFetcher)
+    public function postBrandListAction(Request $request)
     {
-        $t = 1;
         $dataTable = $this->brandRepository
             ->getDataTablesData($request->request->all());
 
@@ -72,10 +91,90 @@ class BrandController extends AbstractRestController
                         ->getDataTablesData($request->request->all(), true)
                 ],
                 ['data' => $dataTable]
-            ),
-            [Brand::SERIALIZED_GROUP_LIST]
+            )
         );
 
         return $view;
+    }
+
+
+    /**
+     * edit Brand.
+     *
+     * @Rest\Post("/admin/api/brand/edit", options={"expose": true})
+     *
+     * @param Request $request
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Admin")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object",
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws InvalidArgumentException When $tags is not valid
+     */
+    public function editBrandAction(Request $request)
+    {
+        $brand = $this->brandRepository
+            ->findOneBy(['id' => $request->get('brand_id')]);
+
+        $brand
+            ->setBrandName($request->get('bn'));
+
+        if ($request->get('topBrand')) {
+            $brand->setTop(true);
+        } else {
+            $brand->setTop(false);
+        }
+        $this->brandRepository->save($brand);
+        /** @var Registry $resultCacheImpl */
+        $resultCacheImpl = $this->get('doctrine');
+        $objectManager = $resultCacheImpl->getManager();
+        /** @var Configuration $configuration */
+        $configuration = $objectManager->getConfiguration();
+        /** @var DoctrineProvider $resultCacheImpl1 */
+        $resultCacheImpl1 = $configuration->getResultCacheImpl();
+        $resultCacheImpl1->delete(BrandRepository::CACHE_HOT_BRAND_IDS);
+
+        $this->getTagAwareQueryResultCacheBrand()
+            ->getTagAwareAdapter()
+            ->invalidateTags([
+                BrandRepository::BRAND_FULL_TEXT_SEARCH,
+            ]);
+
+        $this->getTagAwareQueryResultCacheProduct()
+            ->getTagAwareAdapter()
+            ->invalidateTags([
+                ProductRepository::PRODUCT_FULL_TEXT_SEARCH,
+            ]);
+
+
+        $view = $this->createSuccessResponse(
+            ['test' => 1]
+        );
+
+        return $view;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheBrand
+     */
+    public function getTagAwareQueryResultCacheBrand(): TagAwareQueryResultCacheBrand
+    {
+        return $this->tagAwareQueryResultCacheBrand;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheProduct
+     */
+    public function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
+    {
+        return $this->tagAwareQueryResultCacheProduct;
     }
 }

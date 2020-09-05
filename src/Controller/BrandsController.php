@@ -50,7 +50,7 @@ class BrandsController extends AbstractController
             $serialize = $this->serializer->serialize(
                 $oneProduct,
                 'json',
-                SerializationContext::create()->setGroups(Brand::SERIALIZED_GROUP_LIST)
+                SerializationContext::create()->setGroups(Brand::SERIALIZED_GROUP_LIST_TH)
             );
         }
         
@@ -60,6 +60,8 @@ class BrandsController extends AbstractController
         array_map(function ($k) use (&$dataTableColumnData) {
             $dataTableColumnData[] = ['data' => $k];
         }, $keys);
+        
+        
         // Render the twig view
         return $this->render('admin/brand_list.html.twig', [
             'th_keys' => $keys,
