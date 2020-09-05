@@ -45,6 +45,7 @@ class ProductRepository extends ServiceEntityRepository
     const PRICE = "price";
     const SORT_BY = 'sort_by';
     const SORT_ORDER = 'sort_order';
+    const PRODUCT_FULL_TEXT_SEARCH = 'product_full_text_search';
 
     private $mainQuery = '', $conditions = [], $variables = [], $params = [], $types = [], $queryMainCondition = '';
 
@@ -289,7 +290,7 @@ class ProductRepository extends ServiceEntityRepository
             $searchProductQuery,
             $this->params,
             $this->types,
-            ['product_full_text_search'],
+            [self::PRODUCT_FULL_TEXT_SEARCH],
             $lifeTime, $count ? "product_search_cont" : "product_search_collection"
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
@@ -740,7 +741,7 @@ class ProductRepository extends ServiceEntityRepository
                 ,(array_agg(DISTINCT products_alias.shop_relation_id))[1]::INTEGER AS "shopRelationId"
                 ,jsonb_agg(DISTINCT products_alias.extras) FILTER (WHERE products_alias.extras IS NOT NULL) AS extras
                 
-                ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.brand::text)) AS "storeBrand"
+                ,hstore(array_agg(products_alias.id::text), array_agg(b.brand_name::text)) AS "storeBrand"
                 
                 ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.price::text)) AS "storePrice"
                 ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.image_url)) AS "storeImageUrl"
@@ -780,7 +781,8 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         $query .= '
-                FROM products products_alias 
+                FROM products products_alias
+                LEFT JOIN brand AS b ON products_alias.brand_relation_id = b.id   
         ';
 
         $this->prepareMainCondition($parameterBag, $query, $count, $sortBy);

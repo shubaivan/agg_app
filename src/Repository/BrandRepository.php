@@ -28,7 +28,10 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class BrandRepository extends ServiceEntityRepository
 {
     const CACHE_HOT_BRAND_IDS = 'cache_hot_brand_ids';
-    
+    const BRAND_SEARCH_CONT = "brand_search_cont";
+    const BRAND_SEARCH_COLLECTION = "brand_search_collection";
+    const BRAND_FULL_TEXT_SEARCH = 'brand_full_text_search';
+
     use PaginationRepository;
 
     /**
@@ -213,8 +216,8 @@ class BrandRepository extends ServiceEntityRepository
             $query,
             $params,
             $types,
-            ['brand_full_text_search'],
-            0, $count ? "brand_search_cont" : "brand_search_collection"
+            [self::BRAND_FULL_TEXT_SEARCH],
+            0, $count ? self::BRAND_SEARCH_CONT : self::BRAND_SEARCH_COLLECTION
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheBrand()
             ->prepareParamsForExecuteCacheQuery();
@@ -369,8 +372,9 @@ class BrandRepository extends ServiceEntityRepository
      * @param array $params
      * @param bool $count
      * @param bool $total
-     * @return int|mixed[]
-     * @throws \Doctrine\DBAL\Cache\CacheException
+     * @return mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getDataTablesData(
         array $params,
@@ -408,13 +412,23 @@ class BrandRepository extends ServiceEntityRepository
             $parameterBag->set('limit', $limit);
         }
 
-
+        if (isset($params['columns']) && is_array($params['columns'])) {
+            foreach ($params['columns'] as $column) {
+                if (isset($column['search']['value'])
+                    && isset($column['data'])
+                    && strlen($column['search']['value'])
+                ) {
+                    $parameterBag->set($column['data'], $column['search']['value']);
+                }
+            }
+        }
+        
         $limit = $parameterBag->get('limit');
         $offset = $parameterBag->get('offset');
         $sortBy = $parameterBag->get('sort_by');
         $sortOrder = $parameterBag->get('sort_order');
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "brandName", "top"], "Invalid field name " . $sortBy);
+            ["id", "brandName", "quantityProducts"], "Invalid field name " . $sortBy);
 
         if ($count) {
             $dql = '
@@ -423,38 +437,46 @@ class BrandRepository extends ServiceEntityRepository
             ';
         } else {
             $dql = '
-                SELECT b
+                SELECT b.id, b.brandName, COUNT(DISTINCT p) as quantityProducts, b.top, \'edit\' as Action
                 FROM App\Entity\Brand b
+                INNER JOIN b.products p
             ';
         }
         $bindParams = [];
-        if (!$total) {
-            if (isset($params['columns']) && is_array($params['columns'])) {
-                $condition = ' WHERE ';
-                $conditions = [];
-                foreach ($params['columns'] as $column) {
-                    if (isset($column['search']['value'])
-                        && isset($column['data'])
-                        && strlen($column['search']['value'])
-                    ) {
-                        $conditions[] = '
-                            ILIKE('.'b.'.$column['data'].', :'.'var_'.$column['data'].') = TRUE
+        $condition = ' WHERE ';
+        $conditions = [];
+        if ($parameterBag->get('search')) {
+            $conditions[] = '
+                            ILIKE(b.brandName, :var_'.$parameterBag->get('search').') = TRUE
                         ';
+            $bindParams['var_'.$parameterBag->get('search')] = '%'.$parameterBag->get('search').'%';
 
-                        $bindParams['var_'.$column['data']] = '%'.$column['search']['value'].'%';
-                    }
-                }
-
-                if (count($conditions)) {
-                    $dql .= $condition . implode(' AND ', $conditions);
-                }
-            }
         }
 
+        if ($parameterBag->has('brandName')
+            && $parameterBag->get('brandName') !== 'all'
+        ) {
+            $varBrandName = (bool)$parameterBag->get('brandName');
+
+            $conditions[] = '
+                b.top = :var_top_brand
+            ';
+            $bindParams['var_top_brand'] = $varBrandName;
+        }
+
+        if (count($conditions)) {
+            $conditions = array_unique($conditions);
+            $dql .= $condition . implode(' AND ', $conditions);
+        }
 
         if (!$count) {
-            $dql .= ' 
-                ORDER BY b.' . $sortBy . ' ' . $sortOrder;
+            $dql .= '
+                GROUP BY b.id';
+            if ($sortBy !== 'quantityProducts') {
+                $sortBy = 'b.'.$sortBy;
+            }
+            $dql .= '
+                ORDER BY ' . $sortBy . ' ' . $sortOrder;
         }
 
         $query = $this->getEntityManager()
@@ -469,6 +491,7 @@ class BrandRepository extends ServiceEntityRepository
             ->useQueryCache(true);
 
         if ($bindParams) {
+            $bindParams = array_unique($bindParams);
             $query
                 ->setParameters($bindParams);
         }
@@ -481,6 +504,17 @@ class BrandRepository extends ServiceEntityRepository
         return $result;
     }
 
+    /**
+     * @param $object
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function save($object)
+    {
+        $this->getEntityManager()->persist($object);
+        $this->getEntityManager()->flush();
+    }
+    
     /**
      * @return Helpers
      */

@@ -154,8 +154,8 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
             $query .= '
                 AND category_alias.hot_category = :hot_category
             ';
-            $params[':hot_category'] = $varCategoryName == true ? true : 0;
-            $types[':search'] = \PDO::PARAM_BOOL;
+            $params[':hot_category'] = $varCategoryName;
+            $types[':hot_category'] = \PDO::PARAM_BOOL;
         }
 
         if (!$count) {
