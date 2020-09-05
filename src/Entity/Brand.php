@@ -167,7 +167,7 @@ class Brand implements EntityValidatorException, DataTableInterface
      */
     public function getQuantityProductsValue()
     {
-        return $this->products->count();
+        return 0;
     }
 
     /**
