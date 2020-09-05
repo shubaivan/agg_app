@@ -445,7 +445,7 @@ class BrandRepository extends ServiceEntityRepository
         $bindParams = [];
         $condition = ' WHERE ';
         $conditions = [];
-        if ($parameterBag->get('search')) {
+        if ($parameterBag->get('search') && !$total) {
             $conditions[] = '
                             ILIKE(b.brandName, :var_'.$parameterBag->get('search').') = TRUE
                         ';
@@ -455,6 +455,7 @@ class BrandRepository extends ServiceEntityRepository
 
         if ($parameterBag->has('brandName')
             && $parameterBag->get('brandName') !== 'all'
+            && !$total
         ) {
             $varBrandName = (bool)$parameterBag->get('brandName');
 
