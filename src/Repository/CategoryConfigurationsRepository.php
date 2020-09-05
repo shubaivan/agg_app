@@ -149,6 +149,7 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
 
         if ($parameterBag->has('CategoryName')
             && $parameterBag->get('CategoryName') !== 'all'
+            && !$total
         ) {
             $varCategoryName = (bool)$parameterBag->get('CategoryName');
             $query .= '
