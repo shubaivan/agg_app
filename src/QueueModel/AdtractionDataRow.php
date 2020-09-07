@@ -22,4 +22,13 @@ class AdtractionDataRow extends ResourceProductQueues
     {
         return $this->row['Ean'] ?? null;
     }
+
+    public function generateIdentityUniqData()
+    {
+        if (isset($this->row['identityUniqData']) && strlen($this->row['identityUniqData'])) {
+            return $this->row['identityUniqData'];
+        }
+
+        return $this->getSku();
+    }
 }
