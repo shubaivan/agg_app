@@ -19,6 +19,7 @@ use App\Services\Models\Shops\Adrecord\StigaSportsService;
 use App\Services\Models\Shops\Adrecord\StrumpgalenService;
 use App\Services\Models\Shops\Adrecord\TwarService;
 use App\Services\Models\Shops\AhlensService;
+use App\Services\Models\Shops\Awin\BlueTomatoService;
 use App\Services\Models\Shops\Awin\EllosSEService;
 use App\Services\Models\Shops\Awin\JDSportsService;
 use App\Services\Models\Shops\BabyLandService;
@@ -247,7 +248,7 @@ class ManagerShopsService
     private $ellos_se;
 
     /**
-     * @var JDSportsService
+     * @var BlueTomatoService
      */
     private $blue_tomato;
 
