@@ -36,8 +36,5 @@ class ShirtstoreService implements IdentityGroup
                 }
             }
         }
-        if (!$product->getGroupIdentity()) {
-            $product->setGroupIdentity($product->getSku());
-        }
     }
 }

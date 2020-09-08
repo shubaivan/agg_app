@@ -16,8 +16,6 @@ class BlueTomatoService implements IdentityGroup
             $cut = mb_substr($ean, -3);
             $gi = preg_replace('/' . $cut . '/', '', $ean);
             $product->setGroupIdentity($gi);
-        } else {
-            $product->setGroupIdentity($product->getIdentityUniqData());
         }
     }
 }

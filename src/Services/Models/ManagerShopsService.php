@@ -292,9 +292,9 @@ class ManagerShopsService
      * @param BonprixService $bonprix
      * @param JDSportsService $jd_sports
      * @param EllosSEService $ellos_se
-     * @param JDSportsService $blue_tomato
+     * @param BlueTomatoService $blue_tomato
      */
-    public function __construct(PyretService $polarn_pyret, BabyShopService $babyshop, JollyRoomService $jollyroom, ReimaService $reima, LekmerService $lekmer, BabyLandService $babyland, BabyVService $babyV, ElodiService $elodi, LindexService $lindex, LitenlekermerService $litenlekermer, CykloteketService $cykloteket, AhlensService $ahlens, BabyBjornService $baby_bjorn, CardooniaService $cardoonia, EbbeKids $ebbeKids, FrankDandy $frankDandy, Jultroja $jultroja, GusTextil $gus_rextil, LeksakscityService $leksakscity, NallerietService $nalleriet, NamnbandService $namnband, ShirtstoreService $shirtstore, SpelexpertenService $spelexperten, SportshopenService $sportshopen, StigaSportsService $stigaSports, StrumpgalenService $strumpgalen, TwarService $twar, NikeService $nike, LitenlekerService $litenleker, COSService $cos, BjornBorgService $bjorn_borg, LekiaService $lekia, SneakersPointService $sneakersPoint, StorAndLitenService $stor_and_liten, SportamoreService $sportamore, BonprixService $bonprix, JDSportsService $jd_sports, EllosSEService $ellos_se, JDSportsService $blue_tomato)
+    public function __construct(PyretService $polarn_pyret, BabyShopService $babyshop, JollyRoomService $jollyroom, ReimaService $reima, LekmerService $lekmer, BabyLandService $babyland, BabyVService $babyV, ElodiService $elodi, LindexService $lindex, LitenlekermerService $litenlekermer, CykloteketService $cykloteket, AhlensService $ahlens, BabyBjornService $baby_bjorn, CardooniaService $cardoonia, EbbeKids $ebbeKids, FrankDandy $frankDandy, Jultroja $jultroja, GusTextil $gus_rextil, LeksakscityService $leksakscity, NallerietService $nalleriet, NamnbandService $namnband, ShirtstoreService $shirtstore, SpelexpertenService $spelexperten, SportshopenService $sportshopen, StigaSportsService $stigaSports, StrumpgalenService $strumpgalen, TwarService $twar, NikeService $nike, LitenlekerService $litenleker, COSService $cos, BjornBorgService $bjorn_borg, LekiaService $lekia, SneakersPointService $sneakersPoint, StorAndLitenService $stor_and_liten, SportamoreService $sportamore, BonprixService $bonprix, JDSportsService $jd_sports, EllosSEService $ellos_se, BlueTomatoService $blue_tomato)
     {
         $this->polarn_pyret = $polarn_pyret;
         $this->babyshop = $babyshop;
@@ -336,7 +336,6 @@ class ManagerShopsService
         $this->ellos_se = $ellos_se;
         $this->blue_tomato = $blue_tomato;
     }
-
 
     public function __call($name, $arguments)
     {

@@ -29,8 +29,5 @@ class NamnbandService implements IdentityGroup
                 }
             }
         }
-        if (!$product->getGroupIdentity()) {
-            $product->setGroupIdentity($product->getSku());
-        }
     }
 }

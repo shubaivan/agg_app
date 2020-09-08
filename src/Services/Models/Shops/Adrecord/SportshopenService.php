@@ -33,9 +33,6 @@ class SportshopenService implements IdentityGroup
                 }
             }
         }
-        if (!$product->getGroupIdentity()) {
-            $product->setGroupIdentity($product->getSku());
-        }
     }
 
 }

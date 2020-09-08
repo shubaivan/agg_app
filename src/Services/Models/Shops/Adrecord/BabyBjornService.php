@@ -70,19 +70,13 @@ class BabyBjornService implements IdentityGroup
         $identity = [];
         $sku = $product->getSku();
         if (strlen($sku)) {
-            $cut = mb_substr($sku, 0, -2);
-            $identity[]= preg_replace('/' . $cut . '/', '', $sku);
+            $identity[]= mb_substr($sku, 0, -2);
             
         }
         $ean = $product->getEan();
         if (strlen($ean)) {
-            $cut = mb_substr($ean, 0, -2);
-            $identity[]= preg_replace('/' . $cut . '/', '', $ean);
+            $identity[]= mb_substr($ean, 0, -2);
         }
-        if (count($identity)) {
-            $product->setGroupIdentity(implode('_', $identity));
-        } else {
-            $product->setGroupIdentity($product->getIdentityUniqData());
-        }
+        $product->setGroupIdentity(implode('_', $identity));
     }
 }
