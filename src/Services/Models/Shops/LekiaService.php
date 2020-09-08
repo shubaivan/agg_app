@@ -24,7 +24,7 @@ class LekiaService implements IdentityGroup
             $sku = array_shift($preg_split);
         }
 
-        $groupIdentity = mb_substr($sku, -2);
+        $groupIdentity = mb_substr($sku, 0, -2);
         if (strlen($groupIdentity)) {
             $product->setGroupIdentity($groupIdentity);
         }

@@ -26,6 +26,21 @@ require('bootstrap');
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log("brand list!");
+    const body = $('body');
+    body.on('keydown keyup onblur', '#bn', function () {
+        let input = $(this);
+        if (input.length) {
+            var regexp_clear_space = /\s+/g;
+            if (input.val().match(regexp_clear_space)) {
+                let clearValue = input.val().replace(regexp_clear_space, ' ');
+                input.val(clearValue);
+                var regexp = /[^a-z, ¤æøĂéëäöåÉÄÖÅ™®«»©]+/gi;
+                if (clearValue.match(regexp)) {
+                    input.val(clearValue.replace(regexp, ''));
+                }
+            }
+        }
+    });
 
     const collectionData = window.Routing
         .generate('app_rest_admin_brand_postbrandlist');
