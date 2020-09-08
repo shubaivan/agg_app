@@ -30,11 +30,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const body = $('body');
     body.on('keydown keyup onblur', '#pkw, #nkw', function () {
         let input = $(this);
-        // debug_log("get company from cims");
         if (input.length) {
-            var regexp = /\s+/g;
-            if (input.val().match(regexp)) {
-                input.val(input.val().replace(regexp, ' '));
+            var regexp_clear_space = /\s+/g;
+            if (input.val().match(regexp_clear_space)) {
+                let clearValue = input.val().replace(regexp_clear_space, ' ');
+                input.val(clearValue);
+                var regexp = /[^a-z, ¤æøĂéëäöåÉÄÖÅ™®«»©]+/gi;
+                if (clearValue.match(regexp)) {
+                    input.val(clearValue.replace(regexp, ''));
+                }
             }
         }
     });
