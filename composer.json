@@ -8,7 +8,6 @@
         "ext-iconv": "*",
         "ext-json": "*",
         "ext-mongodb": "*",
-        "ext-mongo": "*",
         "ext-openssl": "*",
         "ext-pdo": "*",
         "ext-redis": "*",
