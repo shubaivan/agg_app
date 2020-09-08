@@ -42,8 +42,6 @@ class SportamoreService implements IdentityGroup
         $sku = $product->getSku();
         if ($sku) {
             $product->setGroupIdentity($sku);   
-        } else {
-            $product->setGroupIdentity($product->getIdentityUniqData());
         }
     }
 }

@@ -386,6 +386,9 @@ class ProductService extends AbstractModel
         if ($shop) {
             call_user_func_array([$this->getManagerShopsService(), $shop], [$product]);
         }
+        if (!$product->getGroupIdentity()) {
+            $product->setGroupIdentity($product->getIdentityUniqData());
+        }
     }
 
     /**

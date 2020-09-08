@@ -4,25 +4,25 @@
 
 {% block body %}
     {{ parent() }}
+    {% if th_keys|length %}
+        <!-- Table -->
+        <table id='empTable' class='display dataTable'>
 
-    <!-- Table -->
-    <table id='empTable' class='display dataTable'>
-
-        <thead>
-        <tr>
+            <thead>
+            <tr>
+                {% for columnProduct in th_keys %}
+                    <th scope="col">{{ columnProduct }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tfoot>
             {% for columnProduct in th_keys %}
                 <th scope="col">{{ columnProduct }}</th>
             {% endfor %}
-        </tr>
-        </thead>
-        <tfoot>
-        {% for columnProduct in th_keys %}
-            <th scope="col">{{ columnProduct }}</th>
-        {% endfor %}
-        </tfoot>
+            </tfoot>
 
-    </table>
-
+        </table>
+    {% endif %}
 
     <!-- Modal -->
     <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">

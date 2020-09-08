@@ -18,9 +18,6 @@ class StigaSportsService implements IdentityGroup
     {
         $this->hyphenRule($product);
         $this->dotRule($product);
-        if (!$product->getGroupIdentity()) {
-            $product->setGroupIdentity($product->getSku());
-        }
     }
 
     public function hyphenRule(Product $product)

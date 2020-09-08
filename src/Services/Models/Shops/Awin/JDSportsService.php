@@ -22,8 +22,6 @@ class JDSportsService implements IdentityGroup
         }
         if (count($identity)) {
             $product->setGroupIdentity(implode('_', $identity));
-        } else {
-            $product->setGroupIdentity($product->getIdentityUniqData());
         }
     }
 }

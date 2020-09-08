@@ -36,9 +36,7 @@ class BabyLandService extends AbstractShop implements IdentityGroup
 
         $ean = $product->getEan();
         if (strlen($ean)) {
-            $cut = mb_substr($ean, -4);
-            $gi = preg_replace('/' . $cut . '/', '', $ean);
-            $groupIdentity[] = $gi;
+            $groupIdentity[] = mb_substr($ean, -4);
         }
 
         if (count($groupIdentity)) {

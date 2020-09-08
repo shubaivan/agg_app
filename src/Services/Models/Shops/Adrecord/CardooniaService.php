@@ -18,9 +18,6 @@ class CardooniaService implements IdentityGroup
     {
         $this->underscoreRule($product);
         $this->hyphenRule($product);
-        if (!$product->getGroupIdentity()) {
-            $product->setGroupIdentity($product->getSku());
-        }
     }
 
     public function underscoreRule(Product $product)
