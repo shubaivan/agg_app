@@ -13,7 +13,7 @@ class EllosSEService implements IdentityGroup
     {
         $sku = $product->getSku();
         if (strlen($sku)) {
-            $product->setGroupIdentity(mb_substr($sku, -2));
+            $product->setGroupIdentity(mb_substr($sku, 0, -2));
         }
     }
 }

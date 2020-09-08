@@ -13,9 +13,7 @@ class BlueTomatoService implements IdentityGroup
     {
         $ean = $product->getEan();
         if (strlen($ean) > 3) {
-            $cut = mb_substr($ean, -3);
-            $gi = preg_replace('/' . $cut . '/', '', $ean);
-            $product->setGroupIdentity($gi);
+            $product->setGroupIdentity(mb_substr($ean, 0, -3));
         }
     }
 }

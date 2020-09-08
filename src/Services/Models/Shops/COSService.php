@@ -20,7 +20,7 @@ class COSService implements IdentityGroup
     {
         $sku = $product->getSku();
         if (strlen($sku) > 3) {
-            $product->setGroupIdentity(mb_substr($sku, -3));   
+            $product->setGroupIdentity(mb_substr($sku, 0, -3));   
         }
     }
 }
