@@ -12,8 +12,16 @@ class EllosSEService implements IdentityGroup
     public function identityGroupColumn(Product $product)
     {
         $sku = $product->getSku();
+        $identity = [];
         if (strlen($sku)) {
-            $product->setGroupIdentity(mb_substr($sku, 0, -2));
+            $identity[] = mb_substr($sku, 0, -3);
+        }
+        $ean = $product->getEan();
+        if (strlen($ean)) {
+            $identity[] = mb_substr($ean, 0, -2);
+        }
+        if (count($identity)) {
+            $product->setGroupIdentity(implode('_', $identity));
         }
     }
 }
