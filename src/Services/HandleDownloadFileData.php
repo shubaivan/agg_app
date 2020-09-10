@@ -738,6 +738,8 @@ class HandleDownloadFileData
         }
 
         $downloadPath = $this->kernel->getProjectDir() . $filePath;
+        $downloadPathDirs = preg_replace("/[^\/]+$/", '', $downloadPath);
+        $this->createPath($downloadPathDirs);
         if (!file_exists($downloadPath)) {
             $readStream = $this->do->getStorage()->readStream($filePath);
             while (!feof($readStream)) {
@@ -751,5 +753,12 @@ class HandleDownloadFileData
             }
         }
         return $downloadPath;
+    }
+
+    private function createPath($path) {
+        if (is_dir($path)) return true;
+        $prev_path = substr($path, 0, strrpos($path, '/', -2) + 1 );
+        $return = $this->createPath($prev_path);
+        return ($return && is_writable($prev_path)) ? mkdir($path) : false;
     }
 }
