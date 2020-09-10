@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Cache\CacheManager;
 use App\Kernel;
 use App\QueueModel\FileReadyDownloaded;
+use App\Services\Storage\DigitalOceanStorage;
 use App\Util\RedisHelper;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
@@ -28,6 +29,7 @@ class AdtractionResourceDownloadFile extends ResourceDownloadFile
      * @param ContainerBagInterface $params
      * @param CacheManager $cacheManager
      * @param RedisHelper $redisHelper
+     * @param DigitalOceanStorage $do
      */
     public function __construct(
         KernelInterface $kernel,
@@ -35,7 +37,8 @@ class AdtractionResourceDownloadFile extends ResourceDownloadFile
         LoggerInterface $adtractionLogLogger,
         ContainerBagInterface $params,
         CacheManager $cacheManager,
-        RedisHelper $redisHelper
+        RedisHelper $redisHelper,
+        DigitalOceanStorage $do
     )
     {
 
@@ -48,6 +51,7 @@ class AdtractionResourceDownloadFile extends ResourceDownloadFile
             $adtractionLogLogger,
             $cacheManager,
             $redisHelper,
+            $do,
             $filePath,
             $urls
         );

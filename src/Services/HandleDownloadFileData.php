@@ -15,6 +15,7 @@ use App\DocumentRepository\CarefulSavingSku;
 use App\DocumentRepository\TradeDoublerProductRepository;
 use App\Entity\Product;
 use App\Entity\Shop;
+use App\Kernel;
 use App\QueueModel\AdrecordDataRow;
 use App\QueueModel\AdtractionDataRow;
 use App\QueueModel\AwinDataRow;
@@ -24,6 +25,7 @@ use App\QueueModel\ResourceDataRow;
 use App\QueueModel\ResourceProductQueues;
 use App\QueueModel\TradeDoublerDataRow;
 use App\Services\Models\CategoryService;
+use App\Services\Storage\DigitalOceanStorage;
 use App\Util\RedisHelper;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use League\Csv\Reader;
@@ -32,6 +34,7 @@ use League\Csv\Statement;
 use Monolog\Logger;
 use phpDocumentor\Reflection\Types\Self_;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\TraceableMessageBus;
 use function League\Csv\delimiter_detect;
@@ -151,6 +154,16 @@ class HandleDownloadFileData
     private $objectsHandler;
 
     /**
+     * @var DigitalOceanStorage
+     */
+    private $do;
+
+    /**
+     * @var Kernel
+     */
+    private $kernel;
+
+    /**
      * HandleDownloadFileData constructor.
      * @param MessageBusInterface $commandBus
      * @param MessageBusInterface $productsBus
@@ -165,6 +178,8 @@ class HandleDownloadFileData
      * @param Helpers $helpers
      * @param DocumentManager $dm
      * @param ObjectsHandler $objectsHandler
+     * @param DigitalOceanStorage $do
+     * @param KernelInterface $kernel
      */
     public function __construct(
         MessageBusInterface $commandBus,
@@ -179,9 +194,13 @@ class HandleDownloadFileData
         CategoryService $categoryService,
         Helpers $helpers,
         DocumentManager $dm,
-        ObjectsHandler $objectsHandler
+        ObjectsHandler $objectsHandler,
+        DigitalOceanStorage $do,
+        KernelInterface $kernel
     )
     {
+        $this->kernel = $kernel;
+        $this->do = $do;
         $this->dm = $dm;
         $this->awinDownloadUrls = $awinDownloadUrls;
         $this->adrecordDownloadUrls = $adrecordDownloadUrls;
@@ -216,18 +235,33 @@ class HandleDownloadFileData
                 throw new \Exception('shop ' . $shop . ' not present on resources');
             }
 
-            if (!file_exists($filePath)) {
-                $this->getLogger()->error('file ' . $filePath . ' no exist');
+            if (!$this->do->getStorage()->has($filePath)) {
+                $errmsg = 'file ' . $filePath . ' no exist in digital ocean storage';
+                $this->getLogger()->error($errmsg);
                 $this->getRedisHelper()
                     ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
                         Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
                 $this->getRedisHelper()
                     ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
                         Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
-                throw new \Exception('file ' . $filePath . ' no exist');
+                throw new \Exception($errmsg);
             }
 
-            $csv = $this->generateCsvReader($filePath, $shop);
+            $downloadPath = $this->kernel->getProjectDir() . $filePath;
+            if (!file_exists($downloadPath)) {
+                $readStream = $this->do->getStorage()->readStream($filePath);
+                while (!feof($readStream)) {
+                    $read = fread($readStream, 2048);
+
+                    file_put_contents(
+                        $downloadPath,
+                        $read,
+                        FILE_APPEND
+                    );
+                }
+            }
+
+            $csv = $this->generateCsvReader($downloadPath, $shop);
 
             //build a statement
             $stmt = (new Statement())
@@ -295,23 +329,35 @@ class HandleDownloadFileData
                 $this->getLogger()->error('shop ' . $shop . ' not present on resources');
             }
 
-
-            if (!$this->getRedisHelper()->hExists(self::COUNT_PRODUCTS_SHOP . $redisUniqKey, $filePath)) {
-                if (!file_exists($filePath)) {
-                    $this->getLogger()->error('file ' . $filePath . ' no exist');
-                    $this->getRedisHelper()
-                        ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
-                            Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
-                    $this->getRedisHelper()
-                        ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                            Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
-                    throw new \Exception('file ' . $filePath . ' no exist');
-                }
+            if (!$this->do->getStorage()->has($filePath)) {
+                $errmsg = 'file ' . $filePath . ' no exist in digital ocean storage';
+                $this->getLogger()->error($errmsg);
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+                throw new \Exception($errmsg);
             }
 
+            $downloadPath = $this->kernel->getProjectDir() . $filePath;
+            if (!file_exists($downloadPath)) {
+                $readStream = $this->do->getStorage()->readStream($filePath);
+                while (!feof($readStream)) {
+                    $read = fread($readStream, 2048);
+
+                    file_put_contents(
+                        $downloadPath,
+                        $read,
+                        FILE_APPEND
+                    );
+                }
+            }
             $count = $this->getCount($filePath, $redisUniqKey);
+
             if (!$count) {
-                $csv = $this->generateCsvReader($filePath, $shop);
+                $csv = $this->generateCsvReader($downloadPath, $shop);
                 $count = (int)$csv->count();
 
                 $this->getRedisHelper()

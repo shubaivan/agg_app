@@ -5,9 +5,12 @@ namespace App\Command;
 use App\Cache\CacheManager;
 use App\Kernel;
 use App\QueueModel\FileReadyDownloaded;
+use App\Services\Storage\DigitalOceanStorage;
 use App\Util\RedisHelper;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use League\Csv\Reader;
+use League\Csv\Statement;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,6 +19,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\TraceableMessageBus;
+use GuzzleHttp\Psr7;
 
 class ResourceDownloadFile extends Command
 {
@@ -69,14 +73,20 @@ class ResourceDownloadFile extends Command
     protected $redisUniqKey;
 
     /**
+     * @var DigitalOceanStorage
+     */
+    private $do;
+
+    /**
      * ResourceDownloadFile constructor.
      * @param KernelInterface $kernel
      * @param MessageBusInterface $bus
      * @param LoggerInterface $logger
      * @param CacheManager $cacheManager
      * @param RedisHelper $redisHelper
-     * @param string $filePath
-     * @param array $urls
+     * @param DigitalOceanStorage $do
+     * @param string|null $filePath
+     * @param array|null $urls
      */
     public function __construct(
         KernelInterface $kernel,
@@ -84,10 +94,12 @@ class ResourceDownloadFile extends Command
         LoggerInterface $logger,
         CacheManager $cacheManager,
         RedisHelper $redisHelper,
+        DigitalOceanStorage $do,
         ?string $filePath,
         ?array $urls
     )
     {
+        $this->do = $do;
         $this->cacheManager = $cacheManager;
         $this->url = $urls;
         $this->dirForFiles = $filePath;
@@ -210,62 +222,67 @@ class ResourceDownloadFile extends Command
                 throw $exception;
             }
         }
+        $date = date('YmdHis');
+
+        // Read bytes off of the stream until the end of the stream is reached
+        $doPath = $this->getRelativeDirForFiles($key) . '/' . $date . '.csv';
+
         $metadata = $response->getMetadata();
-        if (isset($metadata['wrapper_data']) && is_array($metadata['wrapper_data'])) {
-            foreach ($metadata['wrapper_data'] as $meta) {
-                if ($meta == 'Content-Type: application/zip') {
-                    $zipExt = true;
-                }
-            }
-        }
+
         $phpStream = $response->detach();
         unset($client);
         unset($response);
-
         $this->getOutput()->writeln(
-            '<fg=green>' . date('H:i:s') . ' guzzle stream way get body' . '</>'
+            '<fg=green>' . date('H:i:s') . ' guzzle phpStream detach, unset' . '</>'
         );
-        $date = date('YmdHis');
-        $fileRelativePath = $this->getDirForFiles($key) . '/' . $date . '.csv' . ((isset($zipExt) && $zipExt) ? '.zip' : '');
-        // Read bytes off of the stream until the end of the stream is reached
-        while (!feof($phpStream)) {
-            $read = fread($phpStream, 2048);
+        if (isset($metadata['wrapper_data']) && is_array($metadata['wrapper_data'])) {
+            foreach ($metadata['wrapper_data'] as $meta) {
+                if ($meta == 'Content-Type: application/zip') {
+                    $this->getOutput()->writeln(
+                        '<fg=green>' . date('H:i:s') . ' awin zop' . '</>'
+                    );
 
-            file_put_contents(
-                $fileRelativePath,
-                $read,
-                FILE_APPEND
-            );
-        }
-        $this->getOutput()->writeln(
-            '<fg=green>' . date('H:i:s') . ' finish download file: ' . $fileRelativePath . '</>'
-        );
-        $file_parts = pathinfo($fileRelativePath);
+                    $fileRelativePath = $this->getDirForFiles($key) . '/' . $date . '.csv.zip';
 
-        switch ($file_parts['extension']) {
-            case 'zip':
-                $zip = new \ZipArchive();
-                if ($zip->open($fileRelativePath) === TRUE) {
-                    for ($i = 0; $i < $zip->numFiles; $i++) {
-                        $filename = $zip->getNameIndex($i);
-                        $filePatWithIter = $this->getDirForFiles($key) . '/' . $date . '.csv';
-                        copy("zip://" . $fileRelativePath . "#" . $filename, $filePatWithIter);
+                    while (!feof($phpStream)) {
+                        $read = fread($phpStream, 2048);
+
+                        file_put_contents(
+                            $fileRelativePath,
+                            $read,
+                            FILE_APPEND
+                        );
                     }
-                    $zip->close();
-                    unlink($fileRelativePath);
-                    $this->dispatchFileReadyDownload($key, $filePatWithIter);
+                    $this->getOutput()->writeln(
+                        '<fg=green>' . date('H:i:s') . ' finish download file: ' . $fileRelativePath . '</>'
+                    );
+                    $zip = new \ZipArchive();
+                    if ($zip->open($fileRelativePath) === TRUE) {
+                        for ($i = 0; $i < $zip->numFiles; $i++) {
+                            $filename = $zip->getNameIndex($i);
+                            $filePatWithIter = $this->getDirForFiles($key) . '/' . $date . '.csv';
+                            copy("zip://" . $fileRelativePath . "#" . $filename, $filePatWithIter);
+                        }
+                        $zip->close();
+                        unlink($fileRelativePath);
+                        $this->getOutput()->writeln(
+                            '<fg=green>' . date('H:i:s') . ' finish unzip file: ' . $filePatWithIter . '</>'
+                        );
+                    }
+
+
+                    $phpStream = fopen($filePatWithIter, 'r');
                 }
-                break;
-            case 'csv':
-                $this->dispatchFileReadyDownload($key, $fileRelativePath);
-                break;
-            default:
-                $this->getOutput()->writeln(
-                    '<fg=red>' . date('H:i:s') . 'shop: ' . $key . 'message: inaccessible extension' . '</>'
-                );
-                break;
+            }
         }
 
+        $this->do->getStorage()->writeStream($doPath, $phpStream);
+
+        $this->getOutput()->writeln(
+            '<fg=green>' . date('H:i:s') . ' finish writeStream doPath: ' . $doPath . '</>'
+        );
+
+        $this->dispatchFileReadyDownload($key, $doPath);
 
         $this->getOutput()->writeln(
             '<bg=yellow;options=bold>' . date('H:i:s') . ' success' . '</>'
@@ -294,7 +311,17 @@ class ResourceDownloadFile extends Command
      */
     protected function getDirForFiles($key = null): string
     {
-        return $this->getKernel()->getProjectDir() . $this->dirForFiles . ($key ?? '');
+        $str = $this->getRelativeDirForFiles($key);
+        return $this->getKernel()->getProjectDir() . $str;
+    }
+
+    /**
+     * @param null $key
+     * @return string
+     */
+    protected function getRelativeDirForFiles($key = null): string
+    {
+        return $this->dirForFiles . ($key ?? '');
     }
 
     /**

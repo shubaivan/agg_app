@@ -8,6 +8,9 @@
             "ref": "6c1ceb662f8997085f739cd089bfbef67f245983"
         }
     },
+    "aws/aws-sdk-php": {
+        "version": "3.152.1"
+    },
     "behat/transliterator": {
         "version": "v1.3.0"
     },
@@ -228,6 +231,12 @@
             "ref": "384cec52df45f3bfd46a09930d6960a58872b268"
         }
     },
+    "keven/append-stream": {
+        "version": "1.0.5"
+    },
+    "keven/flysystem-concatenate": {
+        "version": "dev-master"
+    },
     "knplabs/knp-components": {
         "version": "2.5.0-dev"
     },
@@ -237,6 +246,24 @@
     "league/csv": {
         "version": "8.2.3"
     },
+    "league/flysystem": {
+        "version": "1.x-dev"
+    },
+    "league/flysystem-aws-s3-v3": {
+        "version": "1.0-dev"
+    },
+    "league/flysystem-bundle": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "8ad3ded1f39fedce098e43259741f42092a1010e"
+        }
+    },
+    "league/mime-type-detection": {
+        "version": "1.4.0"
+    },
     "martin-georgiev/postgresql-for-doctrine": {
         "version": "dev-master"
     },
@@ -245,6 +272,9 @@
     },
     "monolog/monolog": {
         "version": "2.0.2"
+    },
+    "mtdowling/jmespath.php": {
+        "version": "2.5.x-dev"
     },
     "nelmio/api-doc-bundle": {
         "version": "3.0",
