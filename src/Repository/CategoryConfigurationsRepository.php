@@ -125,9 +125,10 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
                     SELECT                         
                         category_alias.id,                       
                         category_alias.hot_category as "HotCategory",
-                        category_alias.category_name as "CategoryName",
+                        category_alias.category_name as "CategoryName",                       
                         c_conf.key_words as "PositiveKeyWords",
                         c_conf.negative_key_words as "NegativeKeyWords",
+                        category_alias.position as "CategoryPosition",
                         \'action\' as "Action"
             ';
         }

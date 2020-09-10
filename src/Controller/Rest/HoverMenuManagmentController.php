@@ -104,6 +104,9 @@ class HoverMenuManagmentController extends AbstractRestController
         $categoryConfigurations
             ->setKeyWords($pkw)
             ->setNegativeKeyWords($nkw);
+        if ($request->get('position')) {
+            $category->setPosition($request->get('position'));
+        }
         if ($request->get('hotCatgory')) {
             $category->setHotCategory(true);
         } else {

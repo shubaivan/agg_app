@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Exception\EntityValidatorException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -18,7 +19,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  *    uniqueConstraints={
  *        @UniqueConstraint(name="category_name_idx",
  *            columns={"category_name"})
- *    }
+ *    },
+ *     indexes={
+ *     @ORM\Index(name="position_desc_index", columns={"position"}),
+ *     @ORM\Index(name="position_asc_index", columns={"position"}),
+ * }
  * )
  * @UniqueEntity(fields={"categoryName"}, groups={Category::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
@@ -102,6 +107,13 @@ class Category implements EntityValidatorException
      * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
      */
     private $sectionRelation;
+
+    /**
+     * @var integer
+     * @ORM\Column(type="integer", nullable=true, options={"default": "0"})
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
+     */
+    private $position;
     
     public function __construct()
     {
@@ -299,5 +311,21 @@ class Category implements EntityValidatorException
     public function setHotCategory(bool $hotCategory): void
     {
         $this->hotCategory = $hotCategory;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPosition(): int
+    {
+        return $this->position;
+    }
+
+    /**
+     * @param int $position
+     */
+    public function setPosition(int $position): void
+    {
+        $this->position = $position;
     }
 }

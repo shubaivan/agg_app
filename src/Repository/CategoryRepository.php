@@ -80,6 +80,21 @@ class CategoryRepository extends ServiceEntityRepository
         $queryBuilder
             ->where('s.hotCategory = :hotCategory')
             ->setParameter('hotCategory', true);
+
+        $sortBy = $paramFetcher->get(ProductRepository::SORT_BY);
+        $sortOrder = $paramFetcher->get(ProductRepository::SORT_ORDER);
+
+        $sortBy = $this->getHelpers()->white_list($sortBy,
+            ['position', 'createdAt', 'categoryName', 'id'],
+            "Invalid ORDER field name " . $sortBy
+        );
+
+        $sortOrder = $this->getHelpers()->white_list(
+            $sortOrder,
+            [Criteria::DESC, Criteria::ASC],
+            "Invalid ORDER BY direction " . $sortOrder
+        );
+
         return $this->getList(
             $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
             $queryBuilder,
@@ -122,8 +137,14 @@ class CategoryRepository extends ServiceEntityRepository
         $offset = $limit * ((int)$parameterBag->get('page') - 1);
         $sortBy = $parameterBag->get('sort_by');
         $sortOrder = $parameterBag->get('sort_order');
+        $sortOrder = $this->getHelpers()->white_list(
+            $sortOrder,
+            [Criteria::DESC, Criteria::ASC],
+            "Invalid ORDER BY direction " . $sortOrder
+        );
+
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "categoryName", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "categoryName", "createdAt", "position"], "Invalid field name " . $sortBy);
 
         $dql = '
                 SELECT DISTINCT c
