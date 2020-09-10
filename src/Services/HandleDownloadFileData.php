@@ -235,30 +235,10 @@ class HandleDownloadFileData
                 throw new \Exception('shop ' . $shop . ' not present on resources');
             }
 
-            if (!$this->do->getStorage()->has($filePath)) {
-                $errmsg = 'file ' . $filePath . ' no exist in digital ocean storage';
-                $this->getLogger()->error($errmsg);
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
-                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
-                throw new \Exception($errmsg);
-            }
-
-            $downloadPath = $this->kernel->getProjectDir() . $filePath;
-            if (!file_exists($downloadPath)) {
-                $readStream = $this->do->getStorage()->readStream($filePath);
-                while (!feof($readStream)) {
-                    $read = fread($readStream, 2048);
-
-                    file_put_contents(
-                        $downloadPath,
-                        $read,
-                        FILE_APPEND
-                    );
-                }
+            if (!file_exists($filePath)) {
+                $downloadPath = $this->saveFileFromDoINConsumer($filePath, $shop, $redisUniqKey);
+            } else {
+                $downloadPath = $filePath;
             }
 
             $csv = $this->generateCsvReader($downloadPath, $shop);
@@ -329,31 +309,12 @@ class HandleDownloadFileData
                 $this->getLogger()->error('shop ' . $shop . ' not present on resources');
             }
 
-            if (!$this->do->getStorage()->has($filePath)) {
-                $errmsg = 'file ' . $filePath . ' no exist in digital ocean storage';
-                $this->getLogger()->error($errmsg);
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
-                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
-                throw new \Exception($errmsg);
+            if (!file_exists($filePath)) {
+                $downloadPath = $this->saveFileFromDoINConsumer($filePath, $shop, $redisUniqKey);
+            } else {
+                $downloadPath = $filePath;
             }
 
-            $downloadPath = $this->kernel->getProjectDir() . $filePath;
-            if (!file_exists($downloadPath)) {
-                $readStream = $this->do->getStorage()->readStream($filePath);
-                while (!feof($readStream)) {
-                    $read = fread($readStream, 2048);
-
-                    file_put_contents(
-                        $downloadPath,
-                        $read,
-                        FILE_APPEND
-                    );
-                }
-            }
             $count = $this->getCount($filePath, $redisUniqKey);
 
             if (!$count) {
@@ -753,5 +714,42 @@ class HandleDownloadFileData
     public function getProductsBus(): TraceableMessageBus
     {
         return $this->productsBus;
+    }
+
+    /**
+     * @param string $filePath
+     * @param string $shop
+     * @param string $redisUniqKey
+     * @return string
+     * @throws \League\Flysystem\FileNotFoundException
+     */
+    private function saveFileFromDoINConsumer(string $filePath, string $shop, string $redisUniqKey): string
+    {
+        if (!$this->do->getStorage()->has($filePath)) {
+            $errmsg = 'file ' . $filePath . ' no exist in digital ocean storage';
+            $this->getLogger()->error($errmsg);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+            $this->getRedisHelper()
+                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+            throw new \Exception($errmsg);
+        }
+
+        $downloadPath = $this->kernel->getProjectDir() . $filePath;
+        if (!file_exists($downloadPath)) {
+            $readStream = $this->do->getStorage()->readStream($filePath);
+            while (!feof($readStream)) {
+                $read = fread($readStream, 2048);
+
+                file_put_contents(
+                    $downloadPath,
+                    $read,
+                    FILE_APPEND
+                );
+            }
+        }
+        return $downloadPath;
     }
 }

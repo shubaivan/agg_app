@@ -270,7 +270,6 @@ class ResourceDownloadFile extends Command
                         );
                     }
 
-
                     $phpStream = fopen($filePatWithIter, 'r');
                 }
             }
