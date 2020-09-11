@@ -121,6 +121,7 @@ class HoverMenuManagmentController extends AbstractRestController
         /** @var DoctrineProvider $resultCacheImpl1 */
         $resultCacheImpl1 = $configuration->getResultCacheImpl();
         $resultCacheImpl1->delete(CategoryRepository::CACHE_HOT_CATEGORY_ID);
+        $resultCacheImpl1->delete(CategoryRepository::CACHE_CUSTOM_CATEGORY_ID);
 
         $this->getTagAwareQueryResultCacheCategoryConf()
             ->getTagAwareAdapter()

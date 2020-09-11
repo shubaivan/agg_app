@@ -34,7 +34,8 @@ class CategoryRepository extends ServiceEntityRepository
     const STRICT = 'strict';
     const MAIN_CATEGORY_IDS_DATA = 'main_category_ids_data';
     const CACHE_HOT_CATEGORY_ID = 'cache_hot_category_id';
-    
+    const CACHE_CUSTOM_CATEGORY_ID = 'cache_custom_category_id';
+
     /**
      * @var Helpers
      */
@@ -171,7 +172,7 @@ class CategoryRepository extends ServiceEntityRepository
             ->createQuery($dql)
             ->setMaxResults($limit)
             ->setFirstResult($offset)
-            ->enableResultCache()
+            ->enableResultCache(0, self::CACHE_CUSTOM_CATEGORY_ID)
             ->useQueryCache(true);
 
         if ($parameterBag->get('search')) {
