@@ -281,19 +281,19 @@ class ProductDataRowHandler
     private function markDocumentProduct(ResourceProductQueues $dataRow, \Exception $exception)
     {
         $documents = AbstractDocument::getChilds();
-        $declineReasonClass = (new \ReflectionClass($exception))->getShortName().':'.$exception->getMessage();
-        
-        foreach ($documents as $document) {
-            $oneBy = $this->dm->getRepository($document)
-                ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
-            if ($oneBy) {
-                $oneBy
-                    ->setDeclineReasonClass($declineReasonClass)
-                    ->setDecline(true);
-                $this->dm->flush(array('safe'=>true));
-                break;
-            }
-        }
+//        $declineReasonClass = (new \ReflectionClass($exception))->getShortName().':'.$exception->getMessage();
+//
+//        foreach ($documents as $document) {
+//            $oneBy = $this->dm->getRepository($document)
+//                ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);
+//            if ($oneBy) {
+//                $oneBy
+//                    ->setDeclineReasonClass($declineReasonClass)
+//                    ->setDecline(true);
+//                $this->dm->flush(array('safe'=>true));
+//                break;
+//            }
+//        }
     }
 
     /**
