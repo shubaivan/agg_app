@@ -15,6 +15,7 @@ parameters:
         'blue_tomato': '%env(AWIN_DOWNLOAD_URL_Blue_Tomato)%'
         'ellos_se': '%env(AWIN_DOWNLOAD_URL_Ellos_SE)%'
         'jd_sports': '%env(AWIN_DOWNLOAD_URL_JD_Sports)%'
+        'cubus': '%env(AWIN_DOWNLOAD_URL_Cubus)%'
 
     awin_download_file_path: '%env(AWIN_DOWNLOAD_FILE_PATH)%'
 
@@ -24,6 +25,12 @@ parameters:
 
         'geggamoja': '%env(TRADEDOUBLER_DOWNLOAD_URL_Geggamoja)%'
         'gina_tricot': '%env(TRADEDOUBLER_DOWNLOAD_URL_Gina_Tricot)%'
+        'eskor': '%env(TRADEDOUBLER_DOWNLOAD_URL_Eskor)%'
+        'pinkorblue': '%env(TRADEDOUBLER_DOWNLOAD_URL_Pinkorblue)%'
+        'boozt':  '%env(TRADEDOUBLER_DOWNLOAD_URL_Boozt)%'
+        'desigual': '%env(TRADEDOUBLER_DOWNLOAD_URL_Desigual)%'
+        'coolshop': '%env(TRADEDOUBLER_DOWNLOAD_URL_Coolshop)%'
+        'teddymania': '%env(TRADEDOUBLER_DOWNLOAD_URL_Teddymania)%'
 
     tradedoubler_download_file_path: '%env(TRADEDOUBLER_DOWNLOAD_FILE_PATH)%'
 
@@ -41,6 +48,7 @@ parameters:
         'sneakersPoint': '%env(ANDRACTION_DOWNLOAD_URL_SneakersPoint)%'
         'stor_and_liten': '%env(ANDRACTION_DOWNLOAD_URL_Stor_and_Liten)%'
         'polarn_pyret': '%env(ANDRACTION_DOWNLOAD_URL_Pyret)%'
+        'adlibris':  '%env(ANDRACTION_DOWNLOAD_URL_Adlibris)%'
     adtraction_download_file_path: '%env(ANDRACTION_DOWNLOAD_FILE_PATH)%'
 
     adrecord_download_urls:

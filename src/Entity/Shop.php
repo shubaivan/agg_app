@@ -58,6 +58,7 @@ class Shop
         'sneakersPoint' => 'SneakersPoint',
         'stor_and_liten' => 'Stor & Liten',
         'polarn_pyret' => 'Polarn O. Pyret',
+        'adlibris' => 'Adlibris',
 
         //Adrecord
         'baby_bjorn' => 'Baby Björn',
@@ -83,6 +84,7 @@ class Shop
         'blue_tomato' => 'Blue Tomato',
         'ellos_se' => 'Ellos SE',
         'jd_sports' => 'JD Sports',
+        'cubus' => 'Cubus',
 
         //TradeDoubler
         'sportamore' => 'Sportamore',
@@ -90,7 +92,13 @@ class Shop
         'cdon_barn_and_baby' => 'CDON Barn and Baby',
         'cdon_shoes' => 'CDON Shoes',
         'geggamoja' => 'Geggamoja',
-        'gina_tricot' => 'Gina Tricot'
+        'gina_tricot' => 'Gina Tricot',
+        'eskor' => 'Eskor',
+        'pinkorblue' => 'Pinkorblue',
+        'boozt' => 'Boozt',
+        'desigual' => 'Desigual',
+        'coolshop' => 'Coolshop',
+        'teddymania' => 'Teddymania'
     ];
 
     use TimestampableEntity;
