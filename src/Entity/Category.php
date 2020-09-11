@@ -77,6 +77,7 @@ class Category implements EntityValidatorException
     /**
      * @ORM\OneToMany(targetEntity="CategoryRelations", mappedBy="mainCategory")
      * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
+     * @Annotation\Accessor(getter="getAccessorMainCategoryRelations")
      * @ORM\Cache("NONSTRICT_READ_WRITE")
      */
     private $mainCategoryRelations;
@@ -327,5 +328,29 @@ class Category implements EntityValidatorException
     public function setPosition(int $position): void
     {
         $this->position = $position;
+    }
+
+    /**
+     * @return CategoryRelations[]|ArrayCollection|Collection
+     */
+    public function getAccessorMainCategoryRelations()
+    {
+        $cond = Criteria::ASC;
+        if (isset($_GET["sort_order"])) {
+            $cond = $_GET["sort_order"];
+        }
+        $collection = $this->getMainCategoryRelations();
+        $iterator = $collection->getIterator();
+        $iterator->uasort(function ($a, $b) use ($cond) {
+            /**
+             * @var $a CategoryRelations
+             * @var $b CategoryRelations
+             */
+            return ($a->getSubCategory()->getPosition() < $b->getSubCategory()->getPosition())
+                ? ($cond === Criteria::DESC ? 1 : -1) : ($cond === Criteria::DESC ? -1 : 1);
+        });
+        $collection = new ArrayCollection(iterator_to_array($iterator));
+
+        return $collection;
     }
 }
