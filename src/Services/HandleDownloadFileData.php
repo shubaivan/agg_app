@@ -555,13 +555,13 @@ class HandleDownloadFileData
         );
         $awinDataRow->transform();
 
-//        /** @var AwinProductRepository $savingSku */
-//        $savingSku = $this->dm->getRepository($awinDataRow::getMongoClass());
-//        $saveProductInMongo = $this->saveProductInMongo(
-//            $awinDataRow,
-//            $shop,
-//            $savingSku
-//        );
+        /** @var AwinProductRepository $savingSku */
+        $savingSku = $this->dm->getRepository($awinDataRow::getMongoClass());
+        $saveProductInMongo = $this->saveProductInMongo(
+            $awinDataRow,
+            $shop,
+            $savingSku
+        );
 
         $this->getProductsBus()->dispatch($awinDataRow);
     }
