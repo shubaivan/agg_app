@@ -319,7 +319,7 @@ class Category implements EntityValidatorException
      */
     public function getPosition(): int
     {
-        return $this->position;
+        return $this->position ?? 0;
     }
 
     /**
