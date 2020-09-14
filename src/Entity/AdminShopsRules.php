@@ -20,6 +20,12 @@ use JMS\Serializer\Annotation;
  * )
  * @UniqueEntity(fields={"store"})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
+ * @Annotation\AccessorOrder("custom", custom = {
+ *     "quantityRules",
+ *     "store",
+ *     "columnsKeywords",
+ *     "Action"
+ * })
  */
 class AdminShopsRules implements DataTableInterface
 {
@@ -51,7 +57,7 @@ class AdminShopsRules implements DataTableInterface
      */
     public static function availableActions(): string
     {
-        return 'create, edit';
+        return 'edit';
     }
 
     public function getId(): ?int
