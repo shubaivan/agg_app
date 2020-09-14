@@ -46,6 +46,14 @@ class AdminShopsRules implements DataTableInterface
      */
     private $columnsKeywords;
 
+    /**
+     * @return string
+     */
+    public static function availableActions(): string
+    {
+        return 'create, edit';
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -113,15 +121,14 @@ class AdminShopsRules implements DataTableInterface
     }
 
     /**
-     * @return array
+     * @return string
      * @Annotation\VirtualProperty()
      * @Annotation\SerializedName("Action")
-     * @Annotation\Type("array")
+     * @Annotation\Type("string")
      * @Annotation\Groups({AdminShopsRules::GROUP_LIST_TH})
      */
     public function getActionValue()
     {
-        return ['create', 'edit'];
+        return self::availableActions();
     }
-
 }

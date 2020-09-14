@@ -124,7 +124,7 @@ class AdminShopsRulesRepository extends ServiceEntityRepository
                 asr.store,                
                 (SELECT COUNT(*) FROM jsonb_object_keys(asr.columns_keywords)) as "quantityRules",
                 asr.columns_keywords as "columnsKeywords",
-                 \'action\' as "Action"
+                 '.'\''.AdminShopsRules::availableActions().'\''.' as "Action"
                 FROM admin_shops_rules asr
             ';
         }
