@@ -6,6 +6,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use App\DocumentRepository\AwinProductRepository;
 use JMS\Serializer\Annotation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @MongoDB\Document(repositoryClass=AwinProductRepository::class)
@@ -46,6 +47,7 @@ class AwinProduct extends AbstractDocument
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Assert\NotBlank()
      */
     protected $aw_deep_link;
 
@@ -59,6 +61,7 @@ class AwinProduct extends AbstractDocument
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
      * @MongoDB\Index()
+     * @Assert\NotBlank()
      */
     protected $aw_product_id;
 

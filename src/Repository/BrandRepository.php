@@ -24,6 +24,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * @method Brand[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  * @method Brand[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false, string $cacheId = '')
  * @method Brand[]|int getListParameterBag(ResultCacheDriver $cache, QueryBuilder $qb, ParameterBag $param, bool $count = false, string $cacheId = '')
+ * @method ParameterBag handleDataTablesRequest(array $params)
  */
 class BrandRepository extends ServiceEntityRepository
 {
@@ -33,6 +34,7 @@ class BrandRepository extends ServiceEntityRepository
     const BRAND_FULL_TEXT_SEARCH = 'brand_full_text_search';
 
     use PaginationRepository;
+    use DataTablesApproachRepository;
 
     /**
      * @var Helpers
@@ -382,46 +384,7 @@ class BrandRepository extends ServiceEntityRepository
         bool $total = false
     )
     {
-        $parameterBag = new ParameterBag();
-
-        $columnIndex = $params['order'][0]['column']; // Column index
-        $columnName = $params['columns'][$columnIndex]['data']; // Column name
-        $columnSortOrder = $params['order'][0]['dir']; // asc or desc
-
-        $parameterBag->set('sort_by', $columnName);
-        $parameterBag->set('sort_order', $columnSortOrder);
-
-        if (isset($params['search']['value']) && strlen($params['search']['value'])) {
-            $search = $params['search']['value'];
-            $parameterBag->set('search', $search);
-        }
-
-
-        if (isset($params['draw'])) {
-            $draw = $params['draw'];
-            $parameterBag->set('page', $draw);
-        }
-
-        if (isset($params['start'])) {
-            $offset = $params['start'];
-            $parameterBag->set('offset', $offset);
-        }
-
-        if (isset($params['length'])) {
-            $limit = $params['length'];
-            $parameterBag->set('limit', $limit);
-        }
-
-        if (isset($params['columns']) && is_array($params['columns'])) {
-            foreach ($params['columns'] as $column) {
-                if (isset($column['search']['value'])
-                    && isset($column['data'])
-                    && strlen($column['search']['value'])
-                ) {
-                    $parameterBag->set($column['data'], $column['search']['value']);
-                }
-            }
-        }
+        $parameterBag = $this->handleDataTablesRequest($params);
         
         $limit = $parameterBag->get('limit');
         $offset = $parameterBag->get('offset');

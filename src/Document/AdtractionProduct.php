@@ -6,6 +6,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use App\DocumentRepository\AdtractionProductRepository;
 use JMS\Serializer\Annotation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @MongoDB\Document(repositoryClass=AdtractionProductRepository::class)
@@ -43,6 +44,7 @@ class AdtractionProduct extends AbstractDocument
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
      * @MongoDB\Index()
+     * @Assert\NotBlank()
      */
     private $SKU;
     /**

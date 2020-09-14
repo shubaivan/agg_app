@@ -31,6 +31,7 @@ Encore
     .addEntry('index/js/tradeDoubler.min', './assets/js/index/tradeDoubler.js')
     .addEntry('index/js/hover_menu.min', './assets/js/index/hover_menu.js')
     .addEntry('index/js/brand_list.min', './assets/js/index/brand_list.js')
+    .addEntry('index/js/admin_shop_rule_list.min', './assets/js/index/admin_shop_rule_list.js')
 
     //.addEntry('page1', './assets/js/page1.js')
     //.addEntry('page2', './assets/js/page2.js')

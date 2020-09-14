@@ -6,6 +6,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use App\DocumentRepository\AdrecordProductRepository;
 use JMS\Serializer\Annotation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @MongoDB\Document(repositoryClass=AdrecordProductRepository::class)
@@ -51,6 +52,7 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
      * @MongoDB\Index()
+     * @Assert\NotBlank()
      */
     private $SKU;
 

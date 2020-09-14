@@ -6,6 +6,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use JMS\Serializer\Annotation;
 use App\DocumentRepository\TradeDoublerProductRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @MongoDB\Document(repositoryClass=TradeDoublerProductRepository::class)
@@ -55,6 +56,7 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Assert\NotBlank()
      */
     private $productUrl;
 
@@ -219,6 +221,7 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Assert\NotBlank()
      */
     private $identifiers;
 

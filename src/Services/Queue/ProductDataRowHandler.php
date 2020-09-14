@@ -169,31 +169,30 @@ class ProductDataRowHandler
                 if (count($handleAnalysisProductByMainCategory)) {
                     $product->setMatchForCategories(true);
                     $this->getEm()->flush();
+
                     $this->getRedisHelper()
-                        ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $filePath);
-                    $this->getRedisHelper()
-                        ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $dataRow->getShop());
+                        ->setStatisticsInRedis(
+                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL, $dataRow, $filePath
+                        );
                 }
+            } else {
+                $this->getRedisHelper()
+                    ->setStatisticsInRedis(
+                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_EXIST, $dataRow, $filePath
+                    );
             }
 
             if (!$existProduct) {
                 $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE . $filePath);
+                    ->setStatisticsInRedis(
+                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE, $dataRow, $filePath
+                    );
 
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE . $dataRow->getShop());
             } else {
                 $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST . $filePath);
-
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST . $dataRow->getShop());
+                    ->setStatisticsInRedis(
+                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST, $dataRow, $filePath
+                    );
             }
 
 
@@ -208,64 +207,55 @@ class ProductDataRowHandler
             }
         } catch (AdminShopRulesException $adminShopRulesException) {
             $this->markDocumentProduct($dataRow, $adminShopRulesException);
+
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION, $dataRow, $filePath
+                );
         } catch (GlobalMatchExceptionBrand $globalMatchException) {
             $this->markDocumentProduct($dataRow, $globalMatchException);
+
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND, $dataRow, $filePath
+                );
         } catch (GlobalMatchException $globalMatchException) {
             $this->markDocumentProduct($dataRow, $globalMatchException);
+
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION, $dataRow, $filePath
+                );
         } catch (ValidatorException $e) {
             $this->markDocumentProduct($dataRow, $e);
             $this->getLogger()->error($e->getMessage());
+
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED, $dataRow, $filePath
+                );
             throw $e;
         } catch (BadRequestHttpException $e) {
             $this->getLogger()->error($e->getMessage());
+
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED, $dataRow, $filePath
+                );
             throw $e;
         } catch (\Exception $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED, $dataRow, $filePath
+                );
             throw $e;
         } catch (\Throwable $exception) {
             $this->getLogger()->error($exception->getMessage());
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED, $dataRow, $filePath
+                );
             throw $exception;
         }
 

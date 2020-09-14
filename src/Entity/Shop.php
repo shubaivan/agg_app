@@ -26,6 +26,7 @@ class Shop
     const PREFIX_HASH = 'statistic:';
 
     const PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL = 'shop:processing:analysis_product_successful:';
+    const PREFIX_HANDLE_ANALYSIS_PRODUCT_EXIST = 'shop:processing:analysis_product_exist:';
     const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE = 'shop:processing:successful_new_one:';
     const PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST = 'shop:processing:successful_exist:';
     const PREFIX_PROCESSING_DATA_SHOP_FAILED = 'shop:processing:failed:';
