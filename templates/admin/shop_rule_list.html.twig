@@ -33,7 +33,7 @@
 
     <!-- Modal -->
     <div class="modal fade" id="newShopRules" tabindex="-1" role="dialog" aria-labelledby="newShopRulesTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="newShopRulesTitle">Create new rules</h5>
@@ -49,8 +49,13 @@
                             <div class="col-sm-10">
                                 <select id="select-shop" class="selectpicker select-shop" data-live-search="true">
                                     <option value="" selected disabled>Please select Shop</option>
-                                    {% for key, shop in prepareSelectShopName %}
-                                        <option value="{{ key }}">{{ shop }}</option>
+                                    {% for key, groupShop in prepareSelectShopName %}
+                                    <optgroup label="{{ key }}">
+                                        {% for keyShopName, shopName in groupShop %}
+                                            <option value="{{ shopName }}">{{ shopName }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+
                                     {% endfor %}
                                 </select>
                             </div>

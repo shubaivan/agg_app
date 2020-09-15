@@ -269,13 +269,13 @@ document.addEventListener("DOMContentLoaded", function () {
         newShopRulesForm.empty();
 
         let hInput = $('<input type="hidden">');
-        hInput.attr('id', 'shopId');
-        hInput.attr('name', 'shopId');
+        hInput.attr('id', 'shopName');
+        hInput.attr('name', 'shopName');
         hInput.val(selectedEl.val());
         newShopRulesForm.append(hInput);
 
         columnsSelect.show();
-    })
+    });
 
     modalEditShopRules.on('hide.bs.modal', function (event) {
         var modal = $(this);

@@ -4,6 +4,7 @@ namespace App\Controller\Rest\Admin;
 
 use App\Cache\TagAwareQueryResultCacheBrand;
 use App\Cache\TagAwareQueryResultCacheProduct;
+use App\Entity\AdminShopsRules;
 use App\Entity\Brand;
 use App\Entity\Collection\Admin\ShopRules\CreateShopRules;
 use App\Entity\Collection\Admin\ShopRules\EditShopRules;
@@ -185,7 +186,7 @@ class AdminShopRuleController extends AbstractRestController
         $configuration = $objectManager->getConfiguration();
         /** @var DoctrineProvider $resultCacheImpl1 */
         $resultCacheImpl1 = $configuration->getResultCacheImpl();
-        $resultCacheImpl1->delete(ShopRepository::CACHE_ID_AVAILABLE_SHOP_FOR_RULE_LIST);
+        $resultCacheImpl1->delete(AdminShopsRulesRepository::CACHE_ID_EXCLUDE_SHOP_FOR_RULE_LIST);
 
         $view = $this->createSuccessResponse(
             ['test' => 1]

@@ -7,6 +7,7 @@ namespace App\Services\Admin;
 use App\Entity\AdminShopsRules;
 use App\Entity\Collection\Admin\ShopRules\CreateShopRules;
 use App\Entity\Collection\Admin\ShopRules\EditShopRules;
+use App\Entity\Shop;
 use App\Repository\AdminShopsRulesRepository;
 use App\Repository\ShopRepository;
 
@@ -56,20 +57,20 @@ class AdminShopRules
     }
 
     /**
-     * @param CreateShopRules $editShopRules
+     * @param CreateShopRules $createShopRules
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Exception
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function createShopRule(CreateShopRules $editShopRules)
+    public function createShopRule(CreateShopRules $createShopRules)
     {
-        $shop = $this->sr->findOneBy(['id' => $editShopRules->getShopId()]);
+        $shop = Shop::getMapShopKeyByOriginalName($createShopRules->getShopName());
         if (!$shop) {
-            throw new \Exception('shop was not found, id:' . $editShopRules->getShopId());
+            throw new \Exception('shop was not found, name:' . $createShopRules->getShopName());
         }
 
-        $adminShopsRules = $this->srr->findOneBy(['store' => $shop->getShopName()]);
+        $adminShopsRules = $this->srr->findOneBy(['store' => $createShopRules->getShopName()]);
 
         if ($adminShopsRules) {
             throw new \Exception('admin shop rule exist, id:' . $adminShopsRules->getId());
@@ -78,8 +79,8 @@ class AdminShopRules
         $adminShopsRulesNew = new AdminShopsRules();
 
         $adminShopsRulesNew
-            ->setStore($shop->getShopName())
-            ->setColumnsKeywords($editShopRules->generateColumnsKeywords());
+            ->setStore($createShopRules->getShopName())
+            ->setColumnsKeywords($createShopRules->generateColumnsKeywords());
 
         $this->srr->save($adminShopsRulesNew);
         $this->srr

@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\AdminShopsRules;
 use App\Entity\Brand;
+use App\Entity\Shop;
 use App\Repository\AdminShopsRulesRepository;
 use App\Repository\BrandRepository;
 use App\Repository\ShopRepository;
@@ -73,15 +74,29 @@ class ShopRulesController extends AbstractController
             $dataTableColumnData[] = ['data' => $k];
         }, $keys);
 
-        $parameterBag = new ParameterBag();
-        $shopNames = $this->shopRepository
-            ->getAvailableShoForCreatingRule($parameterBag, ['shopName', 'id']);
-        $prepareSelectShopName = [];
-        array_walk($shopNames, function ($v) use (&$prepareSelectShopName) {
-           if (isset($v['shopName']) && isset($v['id'])) {
-               $prepareSelectShopName[$v['id']] = $v['shopName'];
-           }
+        $availableStoreNames = $this->adminShopsRulesRepository
+            ->getAvailableStoreNames();
+        $prepareExcludeShopNames = [];
+        array_walk($availableStoreNames, function ($v) use (&$prepareExcludeShopNames) {
+            if (isset($v['store'])) {
+                $prepareExcludeShopNames[] = $v['store'];
+            }
         });
+        $prepareSelectShopName = [];
+        foreach (Shop::getGroupShopNamesMapping() as $key=>$resourceGroup)
+        {
+            $filters = array_filter($resourceGroup, function ($v) use (&$prepareExcludeShopNames) {
+                if (array_search($v, $prepareExcludeShopNames)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+            if (count($filters)) {
+                $prepareSelectShopName[$key] = $filters;
+            }
+        }
+
         // Render the twig view
         return $this->render('admin/shop_rule_list.html.twig', [
             'th_keys' => $keys,

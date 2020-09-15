@@ -373,10 +373,7 @@ class HandleDownloadFileData
      */
     private function checkExistResourceWithShop(string $shop)
     {
-        if (isset($this->adtractionDownloadUrls[$shop])
-            || isset($this->adrecordDownloadUrls[$shop])
-            || isset($this->awinDownloadUrls[$shop])
-            || isset($this->tradedoublerDownloadUrls[$shop])
+        if (isset(Shop::getShopNamesMapping()[$shop])
         ) {
             return true;
         }

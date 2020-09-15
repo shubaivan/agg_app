@@ -10,17 +10,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 class CreateShopRules extends ShopRules
 {
     /**
-     * @var int
-     * @Annotation\Type("int")
+     * @var string
+     * @Annotation\Type("string")
      * @Assert\NotBlank()
      */
-    private $shopId;
+    private $shopName;
 
     /**
-     * @return int
+     * @return string
      */
-    public function getShopId(): int
+    public function getShopName(): string
     {
-        return $this->shopId;
+        return $this->shopName;
     }
 }

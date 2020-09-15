@@ -44,8 +44,7 @@ class Shop
 
     const SERIALIZED_GROUP_LIST = 'shop_group_list';
 
-    private static $shopNamesMapping = [
-        //Adtraction
+    private static $shopNamesAdtractionMapping = [
         'babyland' => 'Babyland',
         'babyV' => 'BabyV',
         'elodi' => 'Elodi',
@@ -60,8 +59,9 @@ class Shop
         'stor_and_liten' => 'Stor & Liten',
         'polarn_pyret' => 'Polarn O. Pyret',
         'adlibris' => 'Adlibris',
+    ];
 
-        //Adrecord
+    private static $shopNamesAdrecordMapping = [
         'baby_bjorn' => 'Baby Björn',
         'cardoonia' => 'Cardoonia',
         'ebbeKids' => 'EbbeKids',
@@ -76,8 +76,9 @@ class Shop
         'sportshopen' => 'Sportshopen',
         'stigaSports' => 'StigaSports',
         'twar' => 'Twar',
+    ];
 
-        //Awin
+    private static $shopNamesAwinMapping = [
         'vegaoo' => 'Vegaoo',
         'nike' => 'Nike',
         'nordic_nest' => 'Nordic Nest',
@@ -86,8 +87,9 @@ class Shop
         'ellos_se' => 'Ellos SE',
         'jd_sports' => 'JD Sports',
         'cubus' => 'Cubus',
+    ];
 
-        //TradeDoubler
+    private static $shopNamesTradeDoublerMapping = [
         'sportamore' => 'Sportamore',
         'bonprix' => 'Bonprix',
         'cdon_barn_and_baby' => 'CDON Barn and Baby',
@@ -187,7 +189,25 @@ class Shop
      */
     public static function getShopNamesMapping(): array
     {
-        return self::$shopNamesMapping;
+        return array_merge(
+            self::$shopNamesAdrecordMapping,
+            self::$shopNamesAdtractionMapping,
+            self::$shopNamesAwinMapping,
+            self::$shopNamesTradeDoublerMapping
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public static function getGroupShopNamesMapping(): array
+    {
+        return array_merge(
+            ['Adrecord' => self::$shopNamesAdrecordMapping],
+            ['Adtraction' => self::$shopNamesAdtractionMapping],
+            ['Awin' => self::$shopNamesAwinMapping],
+            ['TradeDoubler' => self::$shopNamesTradeDoublerMapping]
+        );
     }
     
     public static function getRealShopNameByKey(string $name)
@@ -199,8 +219,8 @@ class Shop
         }
     }
 
-    public static function getMapShopNameByKey(string $name)
+    public static function getMapShopKeyByOriginalName(string $name)
     {
-        return array_search($name, self::$shopNamesMapping);
+        return array_search($name, self::getShopNamesMapping());
     }
 }

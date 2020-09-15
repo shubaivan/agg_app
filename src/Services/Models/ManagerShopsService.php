@@ -352,7 +352,7 @@ class ManagerShopsService
 
     public function __call($name, $arguments)
     {
-        $prepareProperty = Shop::getMapShopNameByKey($name);
+        $prepareProperty = Shop::getMapShopKeyByOriginalName($name);
 
         if (property_exists($this, $prepareProperty)) {
             $this->getProprtyObject($prepareProperty)

@@ -24,6 +24,7 @@ class AdminShopsRulesRepository extends ServiceEntityRepository
     use DataTablesApproachRepository;
 
     const DATA_TABLES = 'admin_shop_rule_data_tables';
+    const CACHE_ID_EXCLUDE_SHOP_FOR_RULE_LIST = 'cache_id_exclude_shop_for_rule_list';
 
     /**
      * @var Helpers
@@ -216,6 +217,8 @@ class AdminShopsRulesRepository extends ServiceEntityRepository
         return $queryBuilder
             ->select('s.store')
             ->getQuery()
+            ->enableResultCache(0, self::CACHE_ID_EXCLUDE_SHOP_FOR_RULE_LIST)
+            ->useQueryCache(true)
             ->getResult();
     }
 
