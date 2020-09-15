@@ -207,6 +207,19 @@ class AdminShopsRulesRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return mixed
+     */
+    public function getAvailableStoreNames()
+    {
+        $queryBuilder = $this->createQueryBuilder('s');
+
+        return $queryBuilder
+            ->select('s.store')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * @param AdminShopsRules $adminShopsRules
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException

@@ -16,12 +16,12 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
     private $configuration = [
         'Lindex' =>
             [
-                'category' => 'Kids wear'
+                'category' => ['Kids wear']
             ]
         ,
         'Åhlens' =>
             [
-                'category' => 'Barn & ungdom'
+                'category' => ['Barn & ungdom']
             ]
         ,
         'Sportshopen' =>

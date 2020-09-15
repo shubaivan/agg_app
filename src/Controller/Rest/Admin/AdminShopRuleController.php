@@ -5,12 +5,14 @@ namespace App\Controller\Rest\Admin;
 use App\Cache\TagAwareQueryResultCacheBrand;
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
+use App\Entity\Collection\Admin\ShopRules\CreateShopRules;
 use App\Entity\Collection\Admin\ShopRules\EditShopRules;
 use App\Exception\ValidatorException;
 use App\Repository\AdminShopsRulesRepository;
 use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
+use App\Repository\ShopRepository;
 use App\Services\Admin\AdminShopRules;
 use App\Services\ObjectsHandler;
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -135,6 +137,56 @@ class AdminShopRuleController extends AbstractRestController
                 EditShopRules::class
             );
         $this->getAsr()->updateShopRule($handleObject);
+
+        $view = $this->createSuccessResponse(
+            ['test' => 1]
+        );
+
+        return $view;
+    }
+
+    /**
+     * edit Shop Rule for some Shop.
+     *
+     * @Rest\Post("/admin/api/shop_rules/create", options={"expose": true})
+     *
+     * @param Request $request
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Admin")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object",
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws ValidatorException
+     * @throws \Exception
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function createShopRulesAction(Request $request)
+    {
+        $t =1;
+        $handleObject = $this->getOh()
+            ->handleObject(
+                $request->request->all(),
+                CreateShopRules::class
+            );
+        $this->getAsr()->createShopRule($handleObject);
+
+        /** @var Registry $resultCacheImpl */
+        $resultCacheImpl = $this->get('doctrine');
+        $objectManager = $resultCacheImpl->getManager();
+        /** @var Configuration $configuration */
+        $configuration = $objectManager->getConfiguration();
+        /** @var DoctrineProvider $resultCacheImpl1 */
+        $resultCacheImpl1 = $configuration->getResultCacheImpl();
+        $resultCacheImpl1->delete(ShopRepository::CACHE_ID_AVAILABLE_SHOP_FOR_RULE_LIST);
+
         $view = $this->createSuccessResponse(
             ['test' => 1]
         );

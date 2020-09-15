@@ -10,11 +10,13 @@ import '../../css/app.scss';
 import * as dt_bs4 from 'datatables.net-bs4'
 import * as fh_bs from 'datatables.net-fixedheader-bs4';
 import * as r_bs from 'datatables.net-responsive-bs4';
+import * as b_bs from 'datatables.net-buttons-bs4';
 
 require('@fortawesome/fontawesome-free/css/all.min.css');
 require('datatables.net-dt/css/jquery.dataTables.min.css');
 require('datatables.net-fixedheader-bs4/css/fixedHeader.bootstrap4.min.css');
 require('datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css');
+require('datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css');
 
 require('@fortawesome/fontawesome-free/js/all.js');
 
@@ -22,6 +24,7 @@ const $ = require('jquery');
 global.$ = global.jQuery = $;
 // import 'popper.js';
 require('bootstrap');
+require('bootstrap-select');
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -214,7 +217,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     var table = $('#empTable').DataTable({
-
         'responsive': true,
         'fixedHeader': true,
         'processing': true,
@@ -228,6 +230,53 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     let modalEditShopRules = $('#editShopRules');
+    let modalNewShopRules = $('#newShopRules');
+    let newShopRulesForm = modalNewShopRules.find('#newShopRulesForm');
+    let shopNamesSelect = modalNewShopRules.find('.select-shop');
+    let columnsSelect = modalNewShopRules.find('.block-for-select-column');
+
+
+    $('.add-new-shop').on('click', function () {
+        modalNewShopRules.modal('toggle');
+    });
+
+    modalNewShopRules.on('show.bs.modal', function (event) {
+        var modal = $(this);
+        let columnsSelect = modal.find('.block-for-select-column');
+        columnsSelect.hide();
+    });
+
+    modalNewShopRules.on('hide.bs.modal', function (event) {
+        var modal = $(this);
+        newShopRulesForm.empty();
+        let columnsSelectBlock = modal.find('.block-for-select-column');
+        let columnsSelect = columnsSelectBlock.find('.select-column');
+        columnsSelect.find('option:first').prop('selected',true);
+        columnsSelect.selectpicker('val', '');
+        columnsSelect.selectpicker('refresh');
+
+        columnsSelectBlock.hide();
+
+        shopNamesSelect.find('option:first').prop('selected',true);
+        shopNamesSelect.selectpicker('val', '');
+        shopNamesSelect.selectpicker('refresh');
+    });
+
+    shopNamesSelect.on('change', function () {
+        let current = $(this);
+        let selectedEl = current.find('option').filter(':selected');
+
+        newShopRulesForm.empty();
+
+        let hInput = $('<input type="hidden">');
+        hInput.attr('id', 'shopId');
+        hInput.attr('name', 'shopId');
+        hInput.val(selectedEl.val());
+        newShopRulesForm.append(hInput);
+
+        columnsSelect.show();
+    })
+
     modalEditShopRules.on('hide.bs.modal', function (event) {
         var modal = $(this);
         let editShopRules = modal.find('.modal-body #editShopRulesForm');
@@ -265,13 +314,29 @@ document.addEventListener("DOMContentLoaded", function () {
     })
 
     $('.shop-rules-edit-select').on('change', function () {
-        let form = $('#editShopRulesForm');
+        let current = $(this);
+        let form = current.closest('.modal-body').find('form');
         var selectedVal = $(this).children('option:selected').val();
         prepareRuleBlockForm(selectedVal, null, form);
     });
 
-    $('.btn.btn-primary').on('click', function () {
-        let form = $('#editShopRulesForm');
+    modalNewShopRules.find('.btn.btn-primary').on('click', function () {
+        let selectVal = shopNamesSelect.children('option:selected').val();
+        shopNamesSelect.find('[value=' + selectVal + ']').remove();
+        shopNamesSelect.selectpicker('refresh');
+        const apiPoint = window.Routing
+            .generate('app_rest_admin_adminshoprule_createshoprules');
+        sendRequest($(this), apiPoint, modalNewShopRules);
+    });
+
+    modalEditShopRules.find('.btn.btn-primary').on('click', function () {
+        const apiPoint = window.Routing
+            .generate('app_rest_admin_adminshoprule_editshoprules');
+        sendRequest($(this), apiPoint, modalEditShopRules);
+    });
+
+    function sendRequest(current, apiPoint, modalObject) {
+        let form = current.closest('.modal-content').find('form');
         let formTextAreas = form.find('textarea');
         if (formTextAreas.length) {
             $.each(formTextAreas, function (k, v) {
@@ -280,9 +345,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         let serialize = form.serialize();
-
-        const apiPoint = window.Routing
-            .generate('app_rest_admin_adminshoprule_editshoprules');
 
         $.ajax({
             type: "POST",
@@ -293,12 +355,11 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             success: (data) => {
                 console.log(data);
-                $('#editShopRules').modal('toggle');
+                modalObject.modal('toggle');
                 table.ajax.reload();
             }
         });
-    });
-
+    }
 
     /**
      *

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Cache\TagAwareQueryResultCacheShop;
+use App\Entity\AdminShopsRules;
 use App\Entity\Category;
 use App\Entity\Shop;
 use App\Services\Helpers;
@@ -21,11 +22,15 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * @method Shop|null findOneBy(array $criteria, array $orderBy = null)
  * @method Shop[]    findAll()
  * @method Shop[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- * @method Shop[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false)
+ * @method Shop[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false, string $cacheId = '')
+ * @method Shop[]|int getListParameterBag(ResultCacheDriver $cache, QueryBuilder $qb, ParameterBag $param, bool $count = false, string $cacheId = '')
  */
 class ShopRepository extends ServiceEntityRepository
 {
     use PaginationRepository;
+
+    const CACHE_ID_SHOP_LIST = 'cache_id_shop_list';
+    const CACHE_ID_AVAILABLE_SHOP_FOR_RULE_LIST = 'cache_id_available_shop_for_rule_list';
 
     /**
      * @var Helpers
@@ -56,20 +61,62 @@ class ShopRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param ParameterBag $parameterBag
+     * @param array $properties
+     * @return Shop[]|int
+     */
+    public function getAvailableShoForCreatingRule(
+        ParameterBag $parameterBag,
+        array $properties = []
+    )
+    {
+        $availableStoreNames = $this->getEntityManager()->getRepository(AdminShopsRules::class)
+            ->getAvailableStoreNames();
+        $prepareExcludeShopNames = [];
+        array_walk($availableStoreNames, function ($v) use (&$prepareExcludeShopNames) {
+            if (isset($v['store'])) {
+                $prepareExcludeShopNames[] = $v['store'];
+            }
+        });
+
+        $qb = $this->createQueryBuilder('s');
+        if ($properties) {
+            $array_map = array_map(function ($v) {
+                return 's.'.$v;
+            }, $properties);
+            $implode = implode(', ', $array_map);
+            $qb->select($implode);
+        }
+
+        $qb->where($qb->expr()->notIn('s.shopName', $prepareExcludeShopNames));
+
+        return $this->getListParameterBag(
+            $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
+            $qb,
+            $parameterBag,
+            false,
+            self::CACHE_ID_AVAILABLE_SHOP_FOR_RULE_LIST
+        );
+    }
+
+    /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
      * @return Shop[]|int
      */
     public function getEntityList(
         ParamFetcher $paramFetcher,
-        $count = false)
+        $count = false
+    )
     {
         $qb = $this->createQueryBuilder('s');
+
         return $this->getList(
             $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
             $qb,
             $paramFetcher,
-            $count
+            $count,
+            self::CACHE_ID_SHOP_LIST
         );
     }
 

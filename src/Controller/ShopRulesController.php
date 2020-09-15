@@ -9,8 +9,10 @@ use App\Repository\AdminShopsRulesRepository;
 use App\Repository\BrandRepository;
 use App\Repository\ShopRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use FOS\RestBundle\Request\ParamFetcher;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -27,14 +29,25 @@ class ShopRulesController extends AbstractController
     private $serializer;
 
     /**
+     * @var ShopRepository
+     */
+    private $shopRepository;
+
+    /**
      * ShopRulesController constructor.
      * @param AdminShopsRulesRepository $adminShopsRulesRepository
      * @param SerializerInterface $serializer
+     * @param ShopRepository $shopRepository
      */
-    public function __construct(AdminShopsRulesRepository $adminShopsRulesRepository, SerializerInterface $serializer)
+    public function __construct(
+        AdminShopsRulesRepository $adminShopsRulesRepository,
+        SerializerInterface $serializer,
+        ShopRepository $shopRepository
+    )
     {
         $this->adminShopsRulesRepository = $adminShopsRulesRepository;
         $this->serializer = $serializer;
+        $this->shopRepository = $shopRepository;
     }
 
     /**
@@ -60,7 +73,15 @@ class ShopRulesController extends AbstractController
             $dataTableColumnData[] = ['data' => $k];
         }, $keys);
 
-
+        $parameterBag = new ParameterBag();
+        $shopNames = $this->shopRepository
+            ->getAvailableShoForCreatingRule($parameterBag, ['shopName', 'id']);
+        $prepareSelectShopName = [];
+        array_walk($shopNames, function ($v) use (&$prepareSelectShopName) {
+           if (isset($v['shopName']) && isset($v['id'])) {
+               $prepareSelectShopName[$v['id']] = $v['shopName'];
+           }
+        });
         // Render the twig view
         return $this->render('admin/shop_rule_list.html.twig', [
             'th_keys' => $keys,
@@ -69,8 +90,8 @@ class ShopRulesController extends AbstractController
             'link_columns' => AdminShopsRules::getLinkColumns(),
             'short_preview_columns' => AdminShopsRules::getShortPreviewText(),
             'separate_filter_column' => AdminShopsRules::getSeparateFilterColumn(),
-
-            'convert_to_html_columns' => AdminShopsRules::convertToHtmColumns()
+            'convert_to_html_columns' => AdminShopsRules::convertToHtmColumns(),
+            'prepareSelectShopName' => $prepareSelectShopName
         ]);
     }
 }
