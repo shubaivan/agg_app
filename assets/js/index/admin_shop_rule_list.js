@@ -28,6 +28,36 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("admin shop rule list!");
     const body = $('body');
 
+    body.on('keydown keyup onblur', 'textarea', function () {
+        let input = $(this);
+        if (input.length) {
+            var regexp_clear_space = /\s+/g;
+            if (input.val().match(regexp_clear_space)) {
+                let clearValue = input.val().replace(regexp_clear_space, ' ');
+                input.val(clearValue);
+                var regexp = /[^a-z, ¤æøĂéëäöåÉÄÖÅ™®«»©]+/gi;
+                if (clearValue.match(regexp)) {
+                    input.val(clearValue.replace(regexp, ''));
+                }
+            }
+        }
+    });
+
+    body.on('click', '.remove_block .fa-minus-square', function () {
+        let current = $(this);
+        let block = current.closest('.form-group');
+        block.remove();
+    });
+
+    body.on('click', 'label', function () {
+        let current = $(this);
+        $.each(['positive', 'negative'], function (k, v) {
+            if (current.hasClass(v)) {
+                changeBlockType(current, v);
+                return false;
+            }
+        });
+    });
 
     const collectionData = window.Routing
         .generate('app_rest_admin_adminshoprule_postshoprulelist');
@@ -197,23 +227,24 @@ document.addEventListener("DOMContentLoaded", function () {
         "columnDefs": common_defs
     });
 
-    $('#editShopRules').on('hide.bs.modal', function (event) {
+    let modalEditShopRules = $('#editShopRules');
+    modalEditShopRules.on('hide.bs.modal', function (event) {
         var modal = $(this);
         let editShopRules = modal.find('.modal-body #editShopRulesForm');
         editShopRules.empty();
     });
 
-    $('#editShopRules').on('show.bs.modal', function (event) {
+    modalEditShopRules.on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var modal = $(this);
 
         let shopRuleId = button.data('shopRuleId');
         modal.find('.modal-title').text('Edit ' + $('.srs_' + shopRuleId).text() + ' rules');
         let form = modal.find('#editShopRulesForm');
-        let hInput = $('<input type="hidden">', {
-            id: 'shop_rule_id',
-            'name': 'shop_rule_id'
-        }).val(shopRuleId);
+        let hInput = $('<input type="hidden">');
+        hInput.attr('id', 'shopRuleId');
+        hInput.attr('name', 'shopRuleId');
+        hInput.val(shopRuleId);
         form.append(hInput);
         let pure = $('.pure-result-sr_' + shopRuleId);
         if (pure) {
@@ -222,81 +253,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 let arrayRules = JSON.parse(pureData);
                 $.each(arrayRules, function (k, v) {
                     if ($.isArray(v)) {
-                        var divTag = $('<div/>', {'class': "form-group"});
-                        let smallText = 'Fill words';
-                        let iTag = $('<i/>');
-                        if (~k.indexOf("!")) {
-                            k = k.replace('!', '');
-                            iTag.addClass('fas fa-search-minus');
-                            smallText = smallText + ' for exclude';
-                        } else {
-                            iTag.addClass('fas fa-search-plus');
-                            smallText = smallText + ' for match'
-                        }
-
-                        let columnName = ucfirst(k,true);
-                        smallText = smallText + ' in ' + columnName + ' column';
-                        let label = $("<label>", {'for': k + '_input'}).text(columnName);
-                        label.append(iTag);
-                        divTag.append(label);
-
-                        let input = $('<input type="text">', {
-                            id: k + '_input',
-                            'name': k,
-                            'class': "form-control",
-                            'aria-describedby': k + '_kwHelp'
-                        });
-                        input.val(v.join(','));
-                        input.text(v.join(','));
-                        divTag.append(input);
-                        let small = $("<small>", {
-                            'id': k + '_kwHelp',
-                            'class': 'form-text text-muted'
-                        }).text(smallText);
-                        divTag.append(small);
-
-                        form.append(divTag);
+                        prepareRuleBlockForm(k, v, form);
                     } else {
                         $.each(v, function (subK, subV) {
-                            var divTag = $('<div/>', {'class': "form-group"});
-                            let smallText = 'Fill words';
-                            let iTag = $('<i/>');
-                            if (~subK.indexOf("!")) {
-                                subK = subK.replace('!', '');
-                                iTag.addClass('fas fa-search-minus');
-                                smallText = smallText + ' for exclude';
-                            } else {
-                                iTag.addClass('fas fa-search-plus');
-                                smallText = smallText + ' for match'
-                            }
-                            let span = $("<span>");
-
-                            let columnName = ucfirst(subK,true);
-                            span
-                                .append(ucfirst(k,true))
-                                .append('<i class="fa fa-arrow-right" aria-hidden="true"></i>')
-                                .append(columnName);
-                            smallText = smallText + ' in ' + ucfirst(k,true) + ' column in ' + columnName + ' key';
-                            let label = $("<label>", {'for': k + '_' + subK + '_input'}).append(span);
-                            label.append(iTag);
-                            divTag.append(label);
-
-                            let input = $('<input type="text">', {
-                                id: k + '_' + subK + '_input',
-                                'name': subK,
-                                'class': "form-control",
-                                'aria-describedby': subK + '_kwHelp'
-                            });
-                            input.val(subV.join(','));
-                            input.text(subV.join(','));
-                            divTag.append(input);
-                            let small = $("<small>", {
-                                'id': subK + '_kwHelp',
-                                'class': 'form-text text-muted'
-                            }).text(smallText);
-                            divTag.append(small);
-
-                            form.append(divTag);
+                            prepareRuleBlockForm(subK, subV, form, k);
                         });
                     }
                 })
@@ -307,42 +267,182 @@ document.addEventListener("DOMContentLoaded", function () {
     $('.shop-rules-edit-select').on('change', function () {
         let form = $('#editShopRulesForm');
         var selectedVal = $(this).children('option:selected').val();
-        var selectedText = $(this).children('option:selected').text();
-
+        prepareRuleBlockForm(selectedVal, null, form);
     });
 
     $('.btn.btn-primary').on('click', function () {
-        if ($('#editBrand input').length) {
-            $.each($('#editBrand input'), function (k, v) {
+        let form = $('#editShopRulesForm');
+        let formTextAreas = form.find('textarea');
+        if (formTextAreas.length) {
+            $.each(formTextAreas, function (k, v) {
                 $(v).val($.trim($(v).val()));
             })
         }
 
-        let serialize = $('#editBrand').serialize();
+        let serialize = form.serialize();
 
-        const app_rest_admin_brand_editbrand = window.Routing
-            .generate('app_rest_admin_brand_editbrand');
+        const apiPoint = window.Routing
+            .generate('app_rest_admin_adminshoprule_editshoprules');
 
         $.ajax({
             type: "POST",
-            url: app_rest_admin_brand_editbrand,
+            url: apiPoint,
             data: serialize,
             error: (result) => {
                 console.log(result.responseJSON.status);
             },
             success: (data) => {
                 console.log(data);
-                $('#exampleModalLong').modal('toggle');
+                $('#editShopRules').modal('toggle');
                 table.ajax.reload();
             }
         });
-    })
+    });
 
+
+    /**
+     *
+     * @param str
+     * @param force
+     * @returns {string}
+     */
     function ucfirst(str,force){
         str=force ? str.toLowerCase() : str;
         return str.replace(/(\b)([a-zA-Z])/,
             function(firstLetter){
                 return   firstLetter.toUpperCase();
             });
+    }
+
+    /**
+     *
+     * @param current
+     * @param oldClassName
+     * @param newClassName
+     */
+    function changeBlockType(current, oldClassName, newClassName = 'positive') {
+        let iTag = $('<i/>');
+        if (oldClassName === 'positive') {
+            newClassName = 'negative';
+        }
+        current.removeClass(oldClassName);
+        current.addClass(newClassName);
+        current.find('svg').remove();
+        if (newClassName === 'positive') {
+            iTag.addClass('fas fa-search-plus');
+        } else {
+            iTag.addClass('fas fa-search-minus');
+        }
+
+        current.append(iTag);
+
+        let block = current.closest('.form-group');
+        let inputTextArea = block.find('textarea');
+        if (inputTextArea) {
+            let textAreaName = inputTextArea.attr('name');
+            inputTextArea.attr('name', textAreaName.replace(oldClassName, newClassName));
+        }
+    }
+
+    /**
+     *
+     * @param k
+     * @param v
+     * @param form
+     * @param parentK
+     */
+    function prepareRuleBlockForm(k, v, form, parentK) {
+        var divTag = $('<div/>', {'class': "form-group"});
+        let smallText = 'Fill words';
+        let iTag = $('<i/>');
+        let negative = false;
+        if (~k.indexOf("!")) {
+            k = k.replace('!', '');
+            iTag.addClass('fas fa-search-minus');
+            smallText = smallText + ' for exclude';
+            negative = true;
+        } else {
+            iTag.addClass('fas fa-search-plus');
+            smallText = smallText + ' for match'
+        }
+        let identityData = '';
+        if (parentK) {
+            identityData = k + '_' + parentK + '_input';
+        } else {
+            identityData = k + '_input';
+        }
+
+        let checkIdentityDataElements = $('.' + identityData);
+        let identityDataId = identityData + '_' + checkIdentityDataElements.length;
+
+        let columnName = ucfirst(k, true);
+
+        // prepare label with minus\plus opportunity
+        var divTagRow = $('<div/>', {'class': "row"});
+        var divTagColLabel = $('<div/>', {'class': "col"});
+        var divTagColMinus = $('<div/>', {'class': "col text-right remove_block"});
+
+        divTagColMinus.append('<i>Remove rule </i>').append('<i class="fas fa-minus-square"></i>');
+        let label = $("<label>").addClass(negative ? 'negative' : 'positive');
+
+        if (parentK) {
+            let span = $("<span>");
+            span
+                .append(ucfirst(parentK,true))
+                .append('<i class="fa fa-arrow-right" aria-hidden="true"></i>')
+                .append(columnName);
+
+            smallText = smallText + ' in ' + ucfirst(parentK,true) + ' column in ' + columnName + ' key';
+            label.attr({'for': identityDataId}).append(span);
+        } else {
+            label.attr({'for': identityDataId}).text(columnName);
+            smallText = smallText + ' in ' + columnName + ' column';
+        }
+
+        label.append(iTag);
+        divTagColLabel.append(label);
+
+        divTagRow.append(divTagColLabel).append(divTagColMinus);
+        // finish
+
+        //append block with label and minus\plus opportunity
+        divTag.append(divTagRow);
+
+
+        // create input
+        let input = $('<textarea>', {
+            id: identityDataId,
+            'class': 'form-control ' + identityData,
+            'aria-describedby': identityDataId + '_kwHelp',
+            'rows': '3'
+        });
+        let inputName = 'positive';
+        if (negative) {
+            inputName = 'negative'
+        }
+        let generateInputName = inputName;
+        if(parentK) {
+            generateInputName = generateInputName + '[' + k + ']' + '[' + parentK + ']';
+        } else {
+            generateInputName = generateInputName + '[' + k + '][]';
+        }
+
+        input.attr({
+            'name': generateInputName,
+        });
+
+        if (v) {
+            input.val(v.join(','));
+            input.text(v.join(','));
+        }
+
+        divTag.append(input);
+        let small = $("<small>", {
+            'id': identityDataId + '_kwHelp',
+            'class': 'form-text text-muted'
+        }).text(smallText);
+        divTag.append(small);
+
+        form.append(divTag);
     }
 });

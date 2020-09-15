@@ -207,6 +207,17 @@ class AdminShopsRulesRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param AdminShopsRules $adminShopsRules
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function save(AdminShopsRules $adminShopsRules)
+    {
+        $this->getEntityManager()->persist($adminShopsRules);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
      * @return TagAwareQueryResultCacheShop
      */
     public function getTagAwareQueryResultCacheShop(): TagAwareQueryResultCacheShop
