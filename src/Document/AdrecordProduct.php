@@ -33,6 +33,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     "category",
  *     "price"
  * })
+ * @MongoDB\HasLifecycleCallbacks()
  */
 class AdrecordProduct extends AbstractDocument implements DataTableInterface
 {

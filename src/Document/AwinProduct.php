@@ -41,6 +41,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     "product_name",
  *     "search_price"
  * })
+ *
+ * @MongoDB\HasLifecycleCallbacks()
  */
 class AwinProduct extends AbstractDocument
 {

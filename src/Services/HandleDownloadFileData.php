@@ -31,6 +31,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use League\Csv\Reader;
 use League\Csv\ResultSet;
 use League\Csv\Statement;
+use MongoDB\Driver\Exception\BulkWriteException;
 use Monolog\Logger;
 use phpDocumentor\Reflection\Types\Self_;
 use Psr\Log\LoggerInterface;
@@ -265,7 +266,10 @@ class HandleDownloadFileData
                 );
             }
 
-            $this->dm->flush(array('safe'=>true));
+            $this->dm->flush([
+                'safe' => true,
+                'continueOnError' => true
+            ]);
             
             if ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)) {
                 //ToDo don't forget rerun back
@@ -273,6 +277,11 @@ class HandleDownloadFileData
                 $this->getLogger()->info(
                     'file ' . $filePath . ' was removed'
                 );
+            }
+        } catch (BulkWriteException $exception) {
+            // ignore duplicate key errors
+            if (false === strpos($exception->getMessage(), 'E11000 duplicate key error')) {
+                throw $exception;
             }
         } catch (\Exception $e) {
             $this->getLogger()->error($e->getMessage());
@@ -722,22 +731,21 @@ class HandleDownloadFileData
      */
     private function saveFileFromDoINConsumer(string $filePath, string $shop, string $redisUniqKey): string
     {
-        if (!$this->do->getStorage()->has($filePath)) {
-            $errmsg = 'file ' . $filePath . ' no exist in digital ocean storage';
-            $this->getLogger()->error($errmsg);
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
-                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
-            throw new \Exception($errmsg);
-        }
-
         $downloadPath = $this->kernel->getProjectDir() . $filePath;
         $downloadPathDirs = preg_replace("/[^\/]+$/", '', $downloadPath);
         $this->createPath($downloadPathDirs);
         if (!file_exists($downloadPath)) {
+            if (!$this->do->getStorage()->has($filePath)) {
+                $errmsg = 'file ' . $filePath . ' no exist in digital ocean storage';
+                $this->getLogger()->error($errmsg);
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . $redisUniqKey,
+                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $filePath);
+                $this->getRedisHelper()
+                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                        Shop::PREFIX_HANDLE_DATA_SHOP_FAILED . $shop);
+                throw new \Exception($errmsg);
+            }
             $readStream = $this->do->getStorage()->readStream($filePath);
             while (!feof($readStream)) {
                 $read = fread($readStream, 2048);

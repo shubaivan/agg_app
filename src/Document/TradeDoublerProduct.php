@@ -38,6 +38,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     "MerchantCategoryName",
  *     "price"
  * })
+ *
+ * @MongoDB\HasLifecycleCallbacks()
  */
 class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
 {

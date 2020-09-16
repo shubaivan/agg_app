@@ -44,8 +44,8 @@ abstract class AbstractDocument implements DataTableInterface
 
     /**
      * @MongoDB\Field(type="string")
-     * @MongoDB\Index()
      * @Annotation\Type("string")
+     * @MongoDB\UniqueIndex(order="asc")
      */
     protected $identityUniqData = '';
 

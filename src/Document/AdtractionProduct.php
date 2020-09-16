@@ -37,6 +37,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     "Currency",
  *     "Instock"
  * })
+ *
+ * @MongoDB\HasLifecycleCallbacks()
  */
 class AdtractionProduct extends AbstractDocument
 {
