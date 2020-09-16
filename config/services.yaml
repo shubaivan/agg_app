@@ -35,9 +35,20 @@ parameters:
     tradedoubler_download_file_path: '%env(TRADEDOUBLER_DOWNLOAD_FILE_PATH)%'
 
     adtraction_download_urls:
-
+        'babyland': '%env(ANDRACTION_DOWNLOAD_URL_Babyland)%'
+        'babyV': '%env(ANDRACTION_DOWNLOAD_URL_BabyV)%'
+        'elodi': '%env(ANDRACTION_DOWNLOAD_URL_Elodi)%'
+        'lindex': '%env(ANDRACTION_DOWNLOAD_URL_Lindex)%'
+        'ahlens': '%env(ANDRACTION_DOWNLOAD_URL_Ahlens)%'
+        'cykloteket': '%env(ANDRACTION_DOWNLOAD_URL_Cykloteket)%'
         'cos': '%env(ANDRACTION_DOWNLOAD_URL_COS)%'
-
+        'bjorn_borg': '%env(ANDRACTION_DOWNLOAD_URL_Bjorn_Borg)%'
+        'lekia': '%env(ANDRACTION_DOWNLOAD_URL_Lekia)%'
+        'litenleker': '%env(ANDRACTION_DOWNLOAD_URL_Litenleker)%'
+        'sneakersPoint': '%env(ANDRACTION_DOWNLOAD_URL_SneakersPoint)%'
+        'stor_and_liten': '%env(ANDRACTION_DOWNLOAD_URL_Stor_and_Liten)%'
+        'polarn_pyret': '%env(ANDRACTION_DOWNLOAD_URL_Pyret)%'
+        'adlibris':  '%env(ANDRACTION_DOWNLOAD_URL_Adlibris)%'
     adtraction_download_file_path: '%env(ANDRACTION_DOWNLOAD_FILE_PATH)%'
 
     adrecord_download_urls:
