@@ -151,6 +151,18 @@ class CategoryKladerFixtures extends AbstractFixtures
                 ]
             ],
             [
+                'name' => 'Pyjamas & Nattlinnen',
+                'key_word' => '
+                    Pyjamas, Nattlinne, Nattlinnen, Nattklänning, Nattklänningar,
+                    Pajamas, Nightdress, Nightgown, Nightgowns 
+                ',
+                'sub_key_word' => [
+                    'Pyjamas' => 'pyjamas, pyjamasar',
+                    'Nattlinnen' => 'Nattlinne, Nattlinnen, Nightgown, Nightgowns',
+                    'Nattklänningar' => 'Nattklänning, Nattklänningar, Nightdress'
+                ]
+            ],
+            [
                 'name' => 'Regnkläder',
                 'key_word' => '
                     Regnhandskar, Regnhatt, Regnhattar, Regnoveraller, Regnoverall, Regnställ, 
