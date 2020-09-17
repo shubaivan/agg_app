@@ -4,7 +4,7 @@ namespace App\Services\Models\Shops\Strategies;
 
 use App\Entity\Product;
 
-class CutLastSomeDigitFromSkuAndEanAndFirstWordFromName extends CutLastSomeDigitFromSkuAndSomeFromEan
+class CutLastSomeDigitFromSkuAndEanAndFirstWordFromName extends CutSomeDigitFromSkuAndSomeFromEan
 {
 
     /**

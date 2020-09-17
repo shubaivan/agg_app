@@ -4,12 +4,12 @@ namespace App\Services\Models\Shops\Strategies;
 
 use App\Entity\Product;
 
-class CutLastSomeDigitFromSkuAndSomeFromEan extends CutLastSomeDigitFromEan
+class CutSomeDigitFromSkuAndSomeFromEan extends CutSomeDigitFromEan
 {
     protected $cutFromSku;
 
     /**
-     * CutLastSomeDigitFromSkuAndSomeFromEan constructor.
+     * CutSomeDigitFromSkuAndSomeFromEan constructor.
      * @param $cutFromEan
      * @param $cutFromSku
      */

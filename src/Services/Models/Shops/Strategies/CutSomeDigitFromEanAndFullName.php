@@ -4,10 +4,10 @@ namespace App\Services\Models\Shops\Strategies;
 
 use App\Entity\Product;
 
-class CutLastSomeDigitFromEanAndFullName extends CutLastSomeDigitFromEan
+class CutSomeDigitFromEanAndFullName extends CutSomeDigitFromEan
 {
     /**
-     * CutLastSomeDigitFromEanAndFullName constructor.
+     * CutSomeDigitFromEanAndFullName constructor.
      * @param int $cut
      */
     public function __construct(int $cut)

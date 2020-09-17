@@ -4,13 +4,13 @@ namespace App\Services\Models\Shops\Strategies;
 
 use App\Entity\Product;
 
-class CutLastSomeDigitFromEan
+class CutSomeDigitFromEan
 {
 
     protected $cutFromEan;
 
     /**
-     * CutLastSomeDigitFromEan constructor.
+     * CutSomeDigitFromEan constructor.
      * @param $cutFromEan
      */
     public function __construct($cutFromEan)
