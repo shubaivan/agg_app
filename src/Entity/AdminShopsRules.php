@@ -137,4 +137,9 @@ class AdminShopsRules implements DataTableInterface
     {
         return self::availableActions();
     }
+
+    public static function arrayColumns(): array
+    {
+        return [];
+    }
 }

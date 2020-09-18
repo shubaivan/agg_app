@@ -104,6 +104,19 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     })
                 }
+
+                if ($.inArray(value.data, array_columns ) !== -1) {
+                    decline_reason_key.push(key);
+                    common_defs.push({
+                        "targets": key,
+                        "data": value.data,
+                        "render": function ( data, type, row, meta ) {
+                            return type === 'display' ?
+                                JSON.stringify(data) :
+                                '';
+                        }
+                    })
+                }
             });
 
 // Setup - add a text input to each footer cell

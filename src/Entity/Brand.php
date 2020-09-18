@@ -189,4 +189,9 @@ class Brand implements EntityValidatorException, DataTableInterface
     {
         $this->top = $top;
     }
+
+    public static function arrayColumns(): array
+    {
+        return [];
+    }
 }
