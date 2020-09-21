@@ -478,6 +478,48 @@ class ProductRepository extends ServiceEntityRepository
         return $statement->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    public function getCountGroupedProductsByShop(string $shopName)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $bindParams = [];
+        $bindParamsType = [];
+        $query = '
+            SELECT COUNT(*) FROM (
+                SELECT COUNT(DISTINCT p.id) FROM products as p
+                WHERE p.shop = :shopName
+                GROUP BY p.group_identity
+            ) as count
+        ';
+
+        $bindParams[':shopName'] = $shopName;
+        $bindParamsType[':shopName'] = \PDO::PARAM_STR;
+        $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
+            $query,
+            $bindParams,
+            $bindParamsType,
+            ['CountGroupedProductsByShopTag'],
+            0,
+            'CountGroupedProductsByShop'
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+        $fetch = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $count = isset($fetch[0]['count']) ? (int)$fetch[0]['count'] : 0;
+
+        $statement->closeCursor();
+
+        return $count;
+    }
+
     /**
      * @param ParameterBag $parameterBag
      * @param string $query

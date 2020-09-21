@@ -43,6 +43,10 @@ class Shop
     const PREFIX_HANDLE_DATA_SHOP_FAILED = 'shop:handle:failed:';
 
     const SERIALIZED_GROUP_LIST = 'shop_group_list';
+    const ADRECORD = 'Adrecord';
+    const ADTRACTION = 'Adtraction';
+    const AWIN = 'Awin';
+    const TRADE_DOUBLER = 'TradeDoubler';
 
     private static $shopNamesAdtractionMapping = [
         'babyland' => 'Babyland',
@@ -203,11 +207,21 @@ class Shop
     public static function getGroupShopNamesMapping(): array
     {
         return array_merge(
-            ['Adrecord' => self::$shopNamesAdrecordMapping],
-            ['Adtraction' => self::$shopNamesAdtractionMapping],
-            ['Awin' => self::$shopNamesAwinMapping],
-            ['TradeDoubler' => self::$shopNamesTradeDoublerMapping]
+            [self::ADRECORD => self::$shopNamesAdrecordMapping],
+            [self::ADTRACTION => self::$shopNamesAdtractionMapping],
+            [self::AWIN => self::$shopNamesAwinMapping],
+            [self::TRADE_DOUBLER => self::$shopNamesTradeDoublerMapping]
         );
+    }
+
+    public static function queueListName(): array
+    {
+        return [
+            'adrecord_parse_row' => self::ADRECORD,
+            'andraction_parse_row' => self::ADTRACTION,
+            'awin_parse_row' => self::AWIN,
+            'trade_doubler_parse_row' => self::TRADE_DOUBLER,
+        ];
     }
     
     public static function getRealShopNameByKey(string $name)

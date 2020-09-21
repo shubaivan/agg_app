@@ -24,10 +24,12 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * @method Shop[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  * @method Shop[]|int getList(ResultCacheDriver $cache, QueryBuilder $qb, ParamFetcher $paramFetcher, bool $count = false, string $cacheId = '')
  * @method Shop[]|int getListParameterBag(ResultCacheDriver $cache, QueryBuilder $qb, ParameterBag $param, bool $count = false, string $cacheId = '')
+ * @method ParameterBag handleDataTablesRequest(array $params)
  */
 class ShopRepository extends ServiceEntityRepository
 {
     use PaginationRepository;
+    use DataTablesApproachRepository;
 
     const CACHE_ID_SHOP_LIST = 'cache_id_shop_list';
     const CACHE_ID_AVAILABLE_SHOP_FOR_RULE_LIST = 'cache_id_available_shop_for_rule_list';

@@ -22,7 +22,8 @@ parameters:
     tradedoubler_download_urls:
         'sportamore': '%env(TRADEDOUBLER_DOWNLOAD_URL_Sportamore)%'
         'bonprix': '%env(TRADEDOUBLER_DOWNLOAD_URL_Bonprix)%'
-
+        'cdon_barn_and_baby': '%env(TRADEDOUBLER_DOWNLOAD_URL_CDON_Barn_and_Baby)%'
+        'cdon_shoes': '%env(TRADEDOUBLER_DOWNLOAD_URL_CDON_Shoes)%'
         'geggamoja': '%env(TRADEDOUBLER_DOWNLOAD_URL_Geggamoja)%'
         'gina_tricot': '%env(TRADEDOUBLER_DOWNLOAD_URL_Gina_Tricot)%'
         'eskor': '%env(TRADEDOUBLER_DOWNLOAD_URL_Eskor)%'
@@ -79,6 +80,11 @@ parameters:
     redis_access: '%redis_host_cache%:%redis_port_cache%'
     csv_handle_step: '%env(CSV_HANDLE_STEP)%'
     force_analysis: '%env(FORCE_ANALYSIS)%'
+
+    dsn_host: '%env(DSN_HOST)%'
+    dsn_port: '%env(DSN_PORT)%'
+    dsn_name: '%env(DSN_NAME)%'
+    dsn_password: '%env(DSN_PASSWORD)%'
 #    jms_serializer.camel_case_naming_strategy.class: JMS\Serializer\Naming\IdenticalPropertyNamingStrategy
 #    jms_serializer.serialized_name_annotation_strategy.class: JMS\Serializer\Naming\SerializedNameAnnotationStrategy
 services:
@@ -270,6 +276,13 @@ services:
       # prevent handlers from being registered twice (or you can remove
       # the MessageHandlerInterface that autoconfigure uses to find handlers)
       autoconfigure: false
+
+    App\Util\AmqpHelper:
+      arguments:
+        - '%dsn_name%'
+        - '%dsn_password%'
+        - '%dsn_host%'
+        - '%dsn_port%'
 
     app.logout.listener:
       class: "%app.logout_listener.class%"

@@ -41,6 +41,22 @@ body {
   color: red;
 }
 
+#resource_statistics {
+  table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  th {
+    padding: 5px;
+    text-align: center;
+  }
+  td {
+    padding: 5px;
+    text-align: left;
+    vertical-align: top;
+  }
+}
+
 @import "~bootstrap/scss/bootstrap";
 @import "~bootstrap-select/sass/bootstrap-select";
 @import "~bootstrap-select/sass/variables";
