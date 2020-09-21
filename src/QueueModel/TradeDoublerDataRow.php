@@ -15,25 +15,28 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
         $rowData = $this->getRow();
         $rowData['Extras'] = '';
 
-
-        $fieldsData = array_intersect_key( $rowData, array_flip( preg_grep( '/\(field\)/iu', array_keys( $rowData ) ) ) );
-        $rowData['gFields'] = $fieldsData;
-        $rowData['gFieldsShow'] = $fieldsData;
-        foreach ($fieldsData as $key=>$fieldData) {
-            $modifyKey = preg_replace('/\(field\)g:|\(field\)/', '', $key);
-            if (strlen($modifyKey)) {
-                $modifyKey = mb_strtoupper($modifyKey);
-                if ($modifyKey == 'COLOR') {
-                    $modifyKey = Product::COLOUR;
-                }
-                if ($modifyKey == 'ADDITIONAL_IMAGE_LINK') {
-                    $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_'.$imgCounter.'#' . $fieldData . '}';
-                } else {
-                    $rowData['Extras'] .= '{'.$modifyKey.'#' . $fieldData . '}';
+        $pregFieldKeys = preg_grep('/\(field\)/iu', array_keys($rowData));
+        if (is_array($pregFieldKeys) && count($pregFieldKeys)) {
+            $fieldsData = array_intersect_key( $rowData, array_flip($pregFieldKeys) );
+            if (is_array($fieldsData) && count($fieldsData)) {
+                $rowData['gFields'] = $fieldsData;
+                $rowData['gFieldsShow'] = $fieldsData;
+                foreach ($fieldsData as $key=>$fieldData) {
+                    $modifyKey = preg_replace('/\(field\)g:|\(field\)/', '', $key);
+                    if (strlen($modifyKey)) {
+                        $modifyKey = mb_strtoupper($modifyKey);
+                        if ($modifyKey == 'COLOR') {
+                            $modifyKey = Product::COLOUR;
+                        }
+                        if ($modifyKey == 'ADDITIONAL_IMAGE_LINK') {
+                            $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_'.$imgCounter.'#' . $fieldData . '}';
+                        } else {
+                            $rowData['Extras'] .= '{'.$modifyKey.'#' . $fieldData . '}';
+                        }
+                    }
                 }
             }
         }
-
 
         if (isset($rowData['id'])) {
             $rowData['tradeDoublerId'] = $rowData['id'];
