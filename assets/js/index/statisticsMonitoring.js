@@ -41,16 +41,22 @@ document.addEventListener("DOMContentLoaded", function () {
             url: app_rest_admin_statisticsmonitoring_statisticslist,
 
             error: (result) => {
-                console.log(result.responseJSON.status);
+                const body = $('body');
+                let resource_statistics = body.find('#resource_statistics');
+                resource_statistics.empty();
+
+                setTimeout(function () {
+                    updateSatisticsData();
+                }, 5000);
             },
             success: (data) => {
                 const body = $('body');
                 let resource_statistics = body.find('#resource_statistics');
                 resource_statistics.empty();
                 resource_statistics.append(data.data);
-                setTimeout(function(){
+                setTimeout(function () {
                     updateSatisticsData();
-                }, 5000);
+                }, 20000);
             }
         })
     }

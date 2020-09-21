@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Cache\CacheManager;
 use App\Kernel;
 use App\QueueModel\FileReadyDownloaded;
+use App\Services\Admin\ResourceShopManagement;
 use App\Services\Storage\DigitalOceanStorage;
 use App\Util\RedisHelper;
 use GuzzleHttp\Client;
@@ -78,7 +79,13 @@ class ResourceDownloadFile extends Command
     private $do;
 
     /**
+     * @var ResourceShopManagement
+     */
+    private $resourceShopManagement;
+
+    /**
      * ResourceDownloadFile constructor.
+     * @param ResourceShopManagement $resourceShopManagement
      * @param KernelInterface $kernel
      * @param MessageBusInterface $bus
      * @param LoggerInterface $logger
@@ -89,6 +96,7 @@ class ResourceDownloadFile extends Command
      * @param array|null $urls
      */
     public function __construct(
+        ResourceShopManagement $resourceShopManagement,
         KernelInterface $kernel,
         MessageBusInterface $bus,
         LoggerInterface $logger,
@@ -99,6 +107,7 @@ class ResourceDownloadFile extends Command
         ?array $urls
     )
     {
+        $this->resourceShopManagement = $resourceShopManagement;
         $this->do = $do;
         $this->cacheManager = $cacheManager;
         $this->url = $urls;
@@ -199,92 +208,8 @@ class ResourceDownloadFile extends Command
      */
     protected function guzzleStreamWay(string $key, string $url)
     {
-        $client = new Client();
-        try {
-            $response = $client->request(
-                'GET',
-                $url,
-                [
-                    'stream' => true,
-                    'version' => '1.0'
-                ]
-            )->getBody();
-        } catch (ClientException $exception) {
-            if ($exception->getCode() === 403
-                || $exception->getCode() === 404
-                || $exception->getCode() === 400
-            ) {
-                $this->getOutput()->writeln(
-                    '<fg=red>' . date('H:i:s') . 'shop: ' . $key . ' error code: ' . $exception->getCode() . 'message: ' . $exception->getMessage() . '</>'
-                );
-                return;
-            } else {
-                throw $exception;
-            }
-        }
-        $date = date('YmdHis');
-
-        // Read bytes off of the stream until the end of the stream is reached
-        $doPath = $this->getRelativeDirForFiles($key) . '/' . $date . '.csv';
-
-        $metadata = $response->getMetadata();
-
-        $phpStream = $response->detach();
-        unset($client);
-        unset($response);
-        $this->getOutput()->writeln(
-            '<fg=green>' . date('H:i:s') . ' guzzle phpStream detach, unset' . '</>'
-        );
-        if (isset($metadata['wrapper_data']) && is_array($metadata['wrapper_data'])) {
-            foreach ($metadata['wrapper_data'] as $meta) {
-                if ($meta == 'Content-Type: application/zip') {
-                    $this->getOutput()->writeln(
-                        '<fg=green>' . date('H:i:s') . ' awin zop' . '</>'
-                    );
-
-                    $fileRelativePath = $this->getDirForFiles($key) . '/' . $date . '.csv.zip';
-
-                    while (!feof($phpStream)) {
-                        $read = fread($phpStream, 2048);
-
-                        file_put_contents(
-                            $fileRelativePath,
-                            $read,
-                            FILE_APPEND
-                        );
-                    }
-                    $this->getOutput()->writeln(
-                        '<fg=green>' . date('H:i:s') . ' finish download file: ' . $fileRelativePath . '</>'
-                    );
-                    $zip = new \ZipArchive();
-                    if ($zip->open($fileRelativePath) === TRUE) {
-                        for ($i = 0; $i < $zip->numFiles; $i++) {
-                            $filename = $zip->getNameIndex($i);
-                            $filePatWithIter = $this->getDirForFiles($key) . '/' . $date . '.csv';
-                            copy("zip://" . $fileRelativePath . "#" . $filename, $filePatWithIter);
-                        }
-                        $zip->close();
-                        unlink($fileRelativePath);
-                        $this->getOutput()->writeln(
-                            '<fg=green>' . date('H:i:s') . ' finish unzip file: ' . $filePatWithIter . '</>'
-                        );
-                    }
-
-                    $phpStream = fopen($filePatWithIter, 'r');
-                }
-            }
-        }
-
-        $this->do->getStorage()->writeStream($doPath, $phpStream);
-
-        $this->getOutput()->writeln(
-            '<fg=green>' . date('H:i:s') . ' finish writeStream doPath: ' . $doPath . '</>'
-        );
-
-        $this->dispatchFileReadyDownload($key, $doPath);
-
-        $this->getOutput()->writeln(
-            '<bg=yellow;options=bold>' . date('H:i:s') . ' success' . '</>'
+        $this->resourceShopManagement->guzzleStreamWay(
+            $key, $url, $this->dirForFiles, $this->redisUniqKey, $this->getOutput()
         );
     }
 

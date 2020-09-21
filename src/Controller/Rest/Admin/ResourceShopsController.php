@@ -6,12 +6,15 @@ use App\Controller\Admin\ResourceShopManagmentController;
 use App\Entity\Shop;
 use App\Repository\ProductRepository;
 use App\Repository\ShopRepository;
+use App\Services\Admin\ResourceShopManagement;
 use App\Util\AmqpHelper;
+use App\Util\RedisHelper;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Controller\Rest\AbstractRestController;
 use App\Services\Helpers;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations\View;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,22 +38,58 @@ class ResourceShopsController extends AbstractRestController
     private $amqpHelper;
 
     /**
+     * @var RedisHelper
+     */
+    private $redisHelper;
+
+    /**
+     * @var ResourceShopManagement
+     */
+    private $resourceShopManagement;
+
+    /**
+     * @var ContainerBagInterface
+     */
+    private $params;
+
+    /**
+     * @var array
+     */
+    private $urlsData = [];
+
+    /**
      * ResourceShopsController constructor.
      * @param ShopRepository $shopRepository
      * @param ProductRepository $productRepository
      * @param AmqpHelper $amqpHelper
+     * @param RedisHelper $redisHelper
+     * @param ResourceShopManagement $resourceShopManagement
+     * @param ContainerBagInterface $params
      */
     public function __construct(
         Helpers $helpers,
         ShopRepository $shopRepository,
         ProductRepository $productRepository,
-        AmqpHelper $amqpHelper
+        AmqpHelper $amqpHelper,
+        RedisHelper $redisHelper,
+        ResourceShopManagement $resourceShopManagement,
+        ContainerBagInterface $params
     )
     {
         parent::__construct($helpers);
+        $this->params = $params;
         $this->shopRepository = $shopRepository;
         $this->productRepository = $productRepository;
         $this->amqpHelper = $amqpHelper;
+        $this->redisHelper = $redisHelper;
+        $this->resourceShopManagement = $resourceShopManagement;
+
+        $this->urlsData = [
+            $params->get('adrecord_download_file_path') => $this->params->get('adrecord_download_urls'),
+            $params->get('adtraction_download_file_path') => $this->params->get('adtraction_download_urls'),
+            $params->get('awin_download_file_path') => $this->params->get('awin_download_urls'),
+            $params->get('tradedoubler_download_file_path') => $this->params->get('tradedoubler_download_urls')
+        ];
     }
 
     /**
@@ -101,6 +140,8 @@ class ResourceShopsController extends AbstractRestController
      *
      * @return \FOS\RestBundle\View\View
      * @throws \Exception
+     * @throws \League\Flysystem\FileExistsException
+     * @throws \Throwable
      */
     public function shopReloadingAction(Request $request)
     {
@@ -109,6 +150,38 @@ class ResourceShopsController extends AbstractRestController
         if (!$mapShopKeyByOriginalName) {
             throw new \Exception('shop not exist in resources map');
         }
+        $url = '';
+        $dirForFiles = '';
+        $urlsData = $this->getUrlsData();
+        $array_filter = array_filter($urlsData, function ($mv, $mk) use ($mapShopKeyByOriginalName, &$url, &$dirForFiles) {
+            $array_filter = array_filter($mv, function ($v, $k) use ($mapShopKeyByOriginalName, &$url) {
+                if($k == $mapShopKeyByOriginalName) {
+                    $url = $v;
+                    return true;
+                }
+                return false;
+            }, ARRAY_FILTER_USE_BOTH);
+            if (count($array_filter)) {
+                $dirForFiles = $mk;
+            }
+            return count($array_filter);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        if (!count($array_filter)) {
+            throw new \Exception('url was not found');
+        }
+
+        $this->redisHelper
+            ->hIncrBy('attempt', date('Ymd'));
+        $redisUniqKey = date('Ymd') . '_' . $this->redisHelper->hGet('attempt', date('Ymd'));
+
+        $this->resourceShopManagement
+            ->guzzleStreamWay(
+                $mapShopKeyByOriginalName,
+                $url,
+                $dirForFiles,
+                $redisUniqKey
+            );
 
         $view = $this->createSuccessResponse([$mapShopKeyByOriginalName]);
 
@@ -141,16 +214,14 @@ class ResourceShopsController extends AbstractRestController
         $th = ResourceShopManagmentController::DATA_TABLES_TH;
         $result = [];
         $shopNamesMapping = Shop::getGroupShopNamesMapping();
-        foreach ($shopNamesMapping as $resource=>$shopList) {
-            foreach ($shopList as $shop)
-            {
+        foreach ($shopNamesMapping as $resource => $shopList) {
+            foreach ($shopList as $shop) {
                 $shopThData = [];
 
                 $shopTh = [$resource, $shop, 0, 'reloading'];
-                  foreach ($shopTh as $key=>$tdData)
-                  {
-                      $shopThData[$th[$key]] = $tdData;
-                  }
+                foreach ($shopTh as $key => $tdData) {
+                    $shopThData[$th[$key]] = $tdData;
+                }
                 $result[] = $shopThData;
             }
         }
@@ -158,10 +229,10 @@ class ResourceShopsController extends AbstractRestController
         $count = count($result);
         if ($parameterBag->get('search')) {
             $search = $parameterBag->get('search');
-            $result = array_filter($result, function($a) use ($search) {
+            $result = array_filter($result, function ($a) use ($search) {
                 return preg_grep(
                     "/$search/iu", $a
-                    );
+                );
             });
             $count = count($result);
         }
@@ -174,7 +245,7 @@ class ResourceShopsController extends AbstractRestController
         }
 
         $quantityResult = [];
-        foreach (Shop::queueListName() as $queue=>$resourceName) {
+        foreach (Shop::queueListName() as $queue => $resourceName) {
             $quantityResult[$resourceName] = $this->amqpHelper
                 ->getQuantityJobsQueue($queue);
         }
@@ -192,7 +263,7 @@ class ResourceShopsController extends AbstractRestController
                 [
                     "draw" => $request->request->get('draw'),
                     "recordsTotal" => $commonCount,
-                    "recordsFiltered"=> $count
+                    "recordsFiltered" => $count
                 ],
                 ['data' => $result]
             )
@@ -201,12 +272,13 @@ class ResourceShopsController extends AbstractRestController
         return $view;
     }
 
-    private function arrayOrderBy(array &$arr, $order = null) {
+    private function arrayOrderBy(array &$arr, $order = null)
+    {
         if (is_null($order)) {
             return $arr;
         }
         $orders = explode(',', $order);
-        usort($arr, function($a, $b) use($orders) {
+        usort($arr, function ($a, $b) use ($orders) {
             $result = array();
             foreach ($orders as $value) {
                 list($field, $sort) = array_map('trim', explode(' ', trim($value)));
@@ -218,7 +290,7 @@ class ResourceShopsController extends AbstractRestController
                     $a = $b;
                     $b = $tmp;
                 }
-                if (is_numeric($a[$field]) && is_numeric($b[$field]) ) {
+                if (is_numeric($a[$field]) && is_numeric($b[$field])) {
                     $result[] = $a[$field] - $b[$field];
                 } else {
                     $result[] = strcmp($a[$field], $b[$field]);
@@ -227,5 +299,13 @@ class ResourceShopsController extends AbstractRestController
             return implode('', $result);
         });
         return $arr;
+    }
+
+    /**
+     * @return array
+     */
+    private function getUrlsData(): array
+    {
+        return $this->urlsData;
     }
 }

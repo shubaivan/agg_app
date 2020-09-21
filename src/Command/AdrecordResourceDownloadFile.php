@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Cache\CacheManager;
 use App\Kernel;
 use App\QueueModel\FileReadyDownloaded;
+use App\Services\Admin\ResourceShopManagement;
 use App\Services\Storage\DigitalOceanStorage;
 use App\Util\RedisHelper;
 use GuzzleHttp\Client;
@@ -30,6 +31,7 @@ class AdrecordResourceDownloadFile extends ResourceDownloadFile
      * @param CacheManager $cacheManager
      * @param RedisHelper $redisHelper
      * @param DigitalOceanStorage $do
+     * @param ResourceShopManagement $resourceShopManagement
      */
     public function __construct(
         KernelInterface $kernel,
@@ -38,13 +40,15 @@ class AdrecordResourceDownloadFile extends ResourceDownloadFile
         ContainerBagInterface $params,
         CacheManager $cacheManager,
         RedisHelper $redisHelper,
-        DigitalOceanStorage $do
+        DigitalOceanStorage $do,
+        ResourceShopManagement $resourceShopManagement
     )
     {
 
         $url = $params->get('adrecord_download_urls');
         $dirForFiles = $params->get('adrecord_download_file_path');
         parent::__construct(
+            $resourceShopManagement,
             $kernel,
             $bus,
             $adrecordLogLogger,
