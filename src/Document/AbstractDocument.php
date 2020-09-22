@@ -22,23 +22,27 @@ abstract class AbstractDocument implements DataTableInterface
     /**
      * @MongoDB\Id
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     protected $id;
     
     /**
      * @MongoDB\Field(type="boolean")
      * @Annotation\Accessor(getter="getDeclineAccessor")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     protected $decline = false;
 
     /**
      * @MongoDB\Field(type="string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     protected $declineReasonClass = '';
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     protected $shop;
 
@@ -46,6 +50,7 @@ abstract class AbstractDocument implements DataTableInterface
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
      * @MongoDB\UniqueIndex(order="asc")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     protected $identityUniqData = '';
 

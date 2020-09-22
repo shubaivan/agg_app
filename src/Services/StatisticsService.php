@@ -5,6 +5,7 @@ namespace App\Services;
 
 
 use App\Entity\Shop;
+use App\Util\AmqpHelper;
 use App\Util\RedisHelper;
 use Twig\Environment;
 
@@ -21,16 +22,22 @@ class StatisticsService
     private $twig;
 
     /**
+     * @var AmqpHelper
+     */
+    private $amqpHelper;
+
+    /**
      * StatisticsService constructor.
      * @param RedisHelper $redisHelper
      * @param Environment $twig
+     * @param AmqpHelper $amqpHelper
      */
-    public function __construct(RedisHelper $redisHelper, Environment $twig)
+    public function __construct(RedisHelper $redisHelper, Environment $twig, AmqpHelper $amqpHelper)
     {
         $this->redisHelper = $redisHelper;
         $this->twig = $twig;
+        $this->amqpHelper = $amqpHelper;
     }
-
 
     /**
      * @throws \Exception
@@ -89,9 +96,16 @@ class StatisticsService
             }
         }
 
+        $quantityResult = [];
+        foreach (Shop::queueListName() as $queue => $resourceName) {
+            $quantityResult[$resourceName] = $this->amqpHelper
+                ->getQuantityJobsQueue($queue);
+        }
+
         return [
             'prepareDataTh' => $prepareDataTh,
-            'resultData' => $resultData
+            'resultData' => $resultData,
+            'quantityResult' => $quantityResult
         ];
     }
 
@@ -107,7 +121,8 @@ class StatisticsService
         $allStatistics = $this->getAllStatistics();
         return $this->twig->render('partial/staistics_part.html.twig', [
             'prepareDataTh' => $allStatistics['prepareDataTh'],
-            'resultData' => $allStatistics['resultData']
+            'resultData' => $allStatistics['resultData'],
+            'quantityResult' => $allStatistics['quantityResult']
         ]);
     }
 

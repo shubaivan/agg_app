@@ -3,10 +3,15 @@
 namespace App\Controller\Rest\Admin;
 
 use App\Controller\Admin\ResourceShopManagmentController;
+use App\Entity\ManuallyResourceJob;
 use App\Entity\Shop;
+use App\Entity\User;
+use App\QueueModel\ManuallyResourceJobs;
+use App\Repository\ManuallyResourceJobRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ShopRepository;
 use App\Services\Admin\ResourceShopManagement;
+use App\Services\ObjectsHandler;
 use App\Util\AmqpHelper;
 use App\Util\RedisHelper;
 use Doctrine\ORM\NonUniqueResultException;
@@ -19,6 +24,8 @@ use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations\View;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\TraceableMessageBus;
 
 class ResourceShopsController extends AbstractRestController
 {
@@ -48,6 +55,11 @@ class ResourceShopsController extends AbstractRestController
     private $resourceShopManagement;
 
     /**
+     * @var ObjectsHandler
+     */
+    private $objectsHandler;
+
+    /**
      * @var ContainerBagInterface
      */
     private $params;
@@ -58,13 +70,28 @@ class ResourceShopsController extends AbstractRestController
     private $urlsData = [];
 
     /**
+     * @var ManuallyResourceJobRepository
+     */
+    private $manuallyResourceJobRepository;
+
+    /**
+     * @var TraceableMessageBus
+     */
+    private $bus;
+
+
+    /**
      * ResourceShopsController constructor.
+     * @param Helpers $helpers
      * @param ShopRepository $shopRepository
      * @param ProductRepository $productRepository
      * @param AmqpHelper $amqpHelper
      * @param RedisHelper $redisHelper
      * @param ResourceShopManagement $resourceShopManagement
      * @param ContainerBagInterface $params
+     * @param ManuallyResourceJobRepository $manuallyResourceJobRepository
+     * @param ObjectsHandler $objectsHandler
+     * @param MessageBusInterface $manuallyBus
      */
     public function __construct(
         Helpers $helpers,
@@ -73,7 +100,10 @@ class ResourceShopsController extends AbstractRestController
         AmqpHelper $amqpHelper,
         RedisHelper $redisHelper,
         ResourceShopManagement $resourceShopManagement,
-        ContainerBagInterface $params
+        ContainerBagInterface $params,
+        ManuallyResourceJobRepository $manuallyResourceJobRepository,
+        ObjectsHandler $objectsHandler,
+        MessageBusInterface $manuallyBus
     )
     {
         parent::__construct($helpers);
@@ -83,7 +113,10 @@ class ResourceShopsController extends AbstractRestController
         $this->amqpHelper = $amqpHelper;
         $this->redisHelper = $redisHelper;
         $this->resourceShopManagement = $resourceShopManagement;
-
+        $this->manuallyResourceJobRepository = $manuallyResourceJobRepository;
+        $this->objectsHandler = $objectsHandler;
+        $this->bus = $manuallyBus;
+        
         $this->urlsData = [
             $params->get('adrecord_download_file_path') => $this->params->get('adrecord_download_urls'),
             $params->get('adtraction_download_file_path') => $this->params->get('adtraction_download_urls'),
@@ -95,7 +128,7 @@ class ResourceShopsController extends AbstractRestController
     /**
      * get Shop list.
      *
-     * @Rest\Post("/admin/api/resource_list", options={"expose": true})
+     * @Rest\Post("/admin/api/resource/resource_list", options={"expose": true})
      *
      * @param Request $request
      *
@@ -125,7 +158,7 @@ class ResourceShopsController extends AbstractRestController
     /**
      * run Shop reloading product.
      *
-     * @Rest\Post("/admin/api/shop/reloading", options={"expose": true})
+     * @Rest\Post("/admin/api/resource/shop/reloading", options={"expose": true})
      *
      * @param Request $request
      *
@@ -175,13 +208,25 @@ class ResourceShopsController extends AbstractRestController
             ->hIncrBy('attempt', date('Ymd'));
         $redisUniqKey = date('Ymd') . '_' . $this->redisHelper->hGet('attempt', date('Ymd'));
 
-        $this->resourceShopManagement
-            ->guzzleStreamWay(
-                $mapShopKeyByOriginalName,
-                $url,
-                $dirForFiles,
-                $redisUniqKey
-            );
+        $manuallyResourceJob = new ManuallyResourceJob();
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $manuallyResourceJob->setCreatedAtAdmin($user);
+        }
+        $manuallyResourceJob
+            ->setShopKey($mapShopKeyByOriginalName)
+            ->setDirForFiles($dirForFiles)
+            ->setUrl($url)
+            ->setRedisUniqKey($redisUniqKey);
+    
+        $this->objectsHandler
+            ->validateEntity($manuallyResourceJob);
+
+        $this->manuallyResourceJobRepository
+            ->save($manuallyResourceJob);
+        $manuallyResourceJobs = new ManuallyResourceJobs($manuallyResourceJob->getId());
+        $this->bus
+            ->dispatch($manuallyResourceJobs);
 
         $view = $this->createSuccessResponse([$mapShopKeyByOriginalName]);
 
@@ -215,10 +260,13 @@ class ResourceShopsController extends AbstractRestController
         $result = [];
         $shopNamesMapping = Shop::getGroupShopNamesMapping();
         foreach ($shopNamesMapping as $resource => $shopList) {
+            if ($parameterBag->get('ResourceName') && $parameterBag->get('ResourceName') !== $resource) {
+                continue;
+            }
             foreach ($shopList as $shop) {
                 $shopThData = [];
 
-                $shopTh = [$resource, $shop, 0, 'reloading'];
+                $shopTh = [$resource, $shop, 0, '', 'reloading'];
                 foreach ($shopTh as $key => $tdData) {
                     $shopThData[$th[$key]] = $tdData;
                 }
@@ -251,9 +299,13 @@ class ResourceShopsController extends AbstractRestController
         }
         $result = array_map(function ($v) use ($quantityResult) {
             $v[ResourceShopManagmentController::PRODUCTS_QUANTITY] = $this->productRepository
-                ->getCountGroupedProductsByShop($v['ShopName']);
+                ->getCountGroupedProductsByShop($v[ResourceShopManagmentController::SHOP_NAME]);
             if (isset($quantityResult[$v[ResourceShopManagmentController::RESOURCE_NAME]])) {
                 $v['queue'] = $quantityResult[$v[ResourceShopManagmentController::RESOURCE_NAME]];
+                $shopKey = Shop::getMapShopKeyByOriginalName($v[ResourceShopManagmentController::SHOP_NAME]);
+                $manuallyResourceJob = $this->manuallyResourceJobRepository
+                    ->findBy(['shopKey' => $shopKey]);
+                $v[ResourceShopManagmentController::MANUALLY_JOBS] = $manuallyResourceJob;
             }
 
             return $v;

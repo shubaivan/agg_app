@@ -356,13 +356,13 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
      * @Annotation\Type("array")
      * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
-    private $gFieldsShow;
+    private $gFieldsShow = [];
 
     /**
      * @MongoDB\Field(type="collection")
      * @Annotation\Type("array")
      */
-    private $gFields;
+    private $gFields = [];
 
     public static function arrayColumns(): array
     {

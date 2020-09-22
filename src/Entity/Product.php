@@ -162,7 +162,11 @@ class Product implements EntityValidatorException
     /**
      * @var Collection|Category[]
      * @ORM\Cache("NONSTRICT_READ_WRITE")
-     * @ORM\ManyToMany(targetEntity="Category", inversedBy="products", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(targetEntity="Category",
+     *     inversedBy="products",
+     *      cascade={"persist", "remove"},
+     *      orphanRemoval=true,
+     *      fetch="EXTRA_LAZY")
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $categoryRelation;
@@ -247,7 +251,10 @@ class Product implements EntityValidatorException
     /**
      * @var Brand
      * @ORM\Cache("NONSTRICT_READ_WRITE")
-     * @ORM\ManyToOne(targetEntity="Brand", inversedBy="products", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="Brand",
+     *      inversedBy="products",
+     *      cascade={"persist", "remove"}
+     *     )
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $brandRelation;
@@ -292,7 +299,11 @@ class Product implements EntityValidatorException
 
     /**
      * @var Collection|UserIpProduct[]
-     * @ORM\OneToMany(targetEntity="UserIpProduct", mappedBy="products")
+     * @ORM\OneToMany(targetEntity="UserIpProduct",
+     *     mappedBy="products",
+     *     cascade={"remove"},
+     *     orphanRemoval=true
+     *     )
      */
     private $userIpProducts;
 
@@ -305,7 +316,8 @@ class Product implements EntityValidatorException
     /**
      * @var Shop
      * @ORM\Cache("NONSTRICT_READ_WRITE")
-     * @ORM\ManyToOne(targetEntity="Shop", inversedBy="products", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="Shop", inversedBy="products",
+     *     cascade={"persist", "remove"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $shopRelation;

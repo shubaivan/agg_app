@@ -10,13 +10,16 @@ class ResourceShopManagmentController extends AbstractController
 {
     const DATA_TABLES_TH = [
         self::RESOURCE_NAME,
-        'ShopName',
+        self::SHOP_NAME,
         self::PRODUCTS_QUANTITY,
+        self::MANUALLY_JOBS,
         self::ACTION
     ];
     const PRODUCTS_QUANTITY = 'GroupedProductsQuantity';
     const ACTION = 'Action';
     const RESOURCE_NAME = 'ResourceName';
+    const MANUALLY_JOBS = 'ManuallyJobs';
+    const SHOP_NAME = 'ShopName';
 
     /**
      * @Route("/admin/resource/shop/list", name="admin_resource_shop_list")

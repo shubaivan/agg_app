@@ -1,4 +1,17 @@
-<h1>Statistics</h1>
+<h1>Statistics (Information updating every 20 seconds)</h1>
+
+
+<ul>
+    {% for k, q in quantityResult %}
+        <li>
+            <b>{{ k }}</b>: jobs quantity {{ q.messageCount }}<br>
+{#            <b>consumerCount</b>: {{ q.consumerCount }}#}
+        </li>
+
+    {% endfor %}
+</ul>
+
+
 
 <table>
     <tr>

@@ -91,18 +91,20 @@
 
             </tr>
 
-            <tr>
-                <th scope="row">1</th>
-                <td>
-                    Resource shops management
-                </td>
-                <td>
-                    <a href="{{ path('admin_resource_shop_list') }}">
-                        List
-                    </a>
-                </td>
+            {% if is_granted(constant('App\\Entity\\User::ROLE_ADMIN')) %}
+                <tr>
+                    <th scope="row">1</th>
+                    <td>
+                        Resource shops management
+                    </td>
+                    <td>
+                        <a href="{{ path('admin_resource_shop_list') }}">
+                            List
+                        </a>
+                    </td>
 
-            </tr>
+                </tr>
+            {% endif %}
 
             <tr>
                 <th scope="row">1</th>

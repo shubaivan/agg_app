@@ -155,7 +155,7 @@ class ProductRepository extends ServiceEntityRepository
                     $explodeSizes = explode(',', $value['fields']);
                     $resultValues = [];
                     foreach ($explodeSizes as $size) {
-                        $size = preg_replace('/\[|]| |"/','',$size);
+                        $size = preg_replace('/\[|]| |"/', '', $size);
                         $size = mb_substr($size, 1, -1);
                         $resultValues[] = $size;
                     }
@@ -255,7 +255,7 @@ class ProductRepository extends ServiceEntityRepository
             if (preg_match_all('/[,]/', $parameterBag->get('search'), $matches) > 0) {
                 $delimiter = ':*|';
             }
-            
+
             $parameterBag->set(
                 'search',
                 $this->getHelpers()
@@ -329,13 +329,12 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function getAvailableTo(array $aft, int $shopId = null)
     {
-        if (!count($aft))
-        {
+        if (!count($aft)) {
             return [];
         }
         $connection = $this->getEntityManager()->getConnection();
         $preparedParams = [];
-        foreach ($aft as $key=>$column) {
+        foreach ($aft as $key => $column) {
             if (!$column) {
                 continue;
             }
@@ -371,30 +370,30 @@ class ProductRepository extends ServiceEntityRepository
                 
                  CASE';
 
-            if (isset($bindParams[':var_eancurrent'])) {
-                $query .= '
+        if (isset($bindParams[':var_eancurrent'])) {
+            $query .= '
                     WHEN ean = :var_eancurrent THEN \'ean\'
                 ';
-            }
+        }
 
-            if (isset($bindParams[':var_skucurrent'])) {
-                $query .= '
+        if (isset($bindParams[':var_skucurrent'])) {
+            $query .= '
                     WHEN sku = :var_skucurrent THEN \'sku\'
                 ';
-            }
+        }
 
-            if (isset($bindParams[':var_manufacturer_article_numbercurrent'])) {
-                $query .= '
+        if (isset($bindParams[':var_manufacturer_article_numbercurrent'])) {
+            $query .= '
                     WHEN ean = :var_manufacturer_article_numbercurrent THEN \'manufacturer_article_number\'
                 ';
-            }
-            $query .= '                    
+        }
+        $query .= '                    
                     ELSE \'not matched\'
                  END        
             FROM products AS p';
 
         $query .= '
-            WHERE ('.implode(' OR ', $conditions) .')';
+            WHERE (' . implode(' OR ', $conditions) . ')';
 
         if ($shopId) {
             $query .= '            
@@ -476,6 +475,37 @@ class ProductRepository extends ServiceEntityRepository
         );
 
         return $statement->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @param string $shopName
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function removeProductsByShop(string $shopName)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $bindParams = [];
+        $bindParamsType = [];
+        $query = '
+            DELETE FROM products p
+            WHERE p.shop_relation_id = 
+            (SELECT s.id FROM shop as s
+            WHERE s.shop_name = :shop_name)
+        ';
+        $bindParams[':shop_name'] = $shopName;
+        $bindParamsType[':shop_name'] = \PDO::PARAM_STR;
+
+        $statement = $connection->executeQuery(
+            $query,
+            $bindParams,
+            $bindParamsType
+        );
+
+        $all = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $all;
     }
 
     public function getCountGroupedProductsByShop(string $shopName)
@@ -913,7 +943,7 @@ class ProductRepository extends ServiceEntityRepository
             ';
         }
 
-            if (!$count) {
+        if (!$count) {
             $query .= '
                 ,COUNT(DISTINCT uip.id) as number_of_entries
             ';

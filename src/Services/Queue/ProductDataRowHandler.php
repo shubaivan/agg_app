@@ -8,6 +8,7 @@ use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
 use App\Document\TradeDoublerProduct;
+use App\Entity\ManuallyResourceJob;
 use App\Entity\Product;
 use App\Entity\Shop;
 use App\Exception\AdminShopRulesException;
@@ -194,17 +195,6 @@ class ProductDataRowHandler
                         Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST, $dataRow, $filePath
                     );
             }
-
-
-            if ($dataRow->getLastProduct()) {
-                $this->getCacheManager()->clearAllPoolsCache();
-//                $this->getProductService()->autoVACUUM();
-                $this->vacuumBus->dispatch(new VacuumJob(true));
-                $this->getRedisHelper()
-                    ->hMSet(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $dataRow->getRedisUniqKey(),
-                        [$filePath => (new \DateTime())->getTimestamp()]
-                    );
-            }
         } catch (AdminShopRulesException $adminShopRulesException) {
             $this->markDocumentProduct($dataRow, $adminShopRulesException);
 
@@ -257,9 +247,41 @@ class ProductDataRowHandler
                     Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED, $dataRow, $filePath
                 );
             throw $exception;
+        } finally {
+            $this->postExecutedJob($dataRow);
         }
 
         echo $dataRow->generateIdentityUniqData() . PHP_EOL;
+    }
+
+    /**
+     * @param ResourceProductQueues $dataRow
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Throwable
+     */
+    private function postExecutedJob(ResourceProductQueues $dataRow)
+    {
+        if ($dataRow->getLastProduct()) {
+            $this->getCacheManager()->clearAllPoolsCache();
+            /** @var ManuallyResourceJob $oneBy */
+            $oneBy = $this->em->getRepository(ManuallyResourceJob::class)
+                ->findOneBy(['redisUniqKey' => $dataRow->getRedisUniqKey()]);
+            echo 'last_product';
+            echo $oneBy ? $oneBy->getRedisUniqKey() . $oneBy->getId() : 'no';
+            if ($oneBy) {
+                echo 'match one by';
+                $oneBy
+                    ->setStatus(ManuallyResourceJob::STATUS_FINISHED);
+                $this->em->flush();
+            }
+//                $this->getProductService()->autoVACUUM();
+            $this->vacuumBus->dispatch(new VacuumJob(true));
+            $this->getRedisHelper()
+                ->hMSet(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $dataRow->getRedisUniqKey(),
+                    [$dataRow->getFilePath() => (new \DateTime())->getTimestamp()]
+                );
+        }
     }
 
     /**

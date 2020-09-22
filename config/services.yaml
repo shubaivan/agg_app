@@ -277,6 +277,12 @@ services:
       # the MessageHandlerInterface that autoconfigure uses to find handlers)
       autoconfigure: false
 
+    App\QueueModelHandlers\ManuallyResourceJobHandler:
+      tags: [{ name: messenger.message_handler, bus: manually.bus }]
+      # prevent handlers from being registered twice (or you can remove
+      # the MessageHandlerInterface that autoconfigure uses to find handlers)
+      autoconfigure: false
+
     App\Util\AmqpHelper:
       arguments:
         - '%dsn_name%'

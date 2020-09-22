@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -64,10 +65,17 @@ class User implements UserInterface
      */
     private $password;
 
+    /**
+     * @var ManuallyResourceJob[]|Collection
+     * @ORM\OneToMany(targetEntity="ManuallyResourceJob",
+     *      mappedBy="createdAtAdmin",fetch="LAZY")
+     */
+    private $resourceJobs;
 
     public function __construct()
     {
         $this->shippingAddress = new ArrayCollection();
+        $this->resourceJobs = new ArrayCollection();
     }
 
     /**
@@ -168,6 +176,37 @@ class User implements UserInterface
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ManuallyResourceJob[]
+     */
+    public function getResourceJobs(): Collection
+    {
+        return $this->resourceJobs;
+    }
+
+    public function addResourceJob(ManuallyResourceJob $resourceJob): self
+    {
+        if (!$this->resourceJobs->contains($resourceJob)) {
+            $this->resourceJobs[] = $resourceJob;
+            $resourceJob->setCreatedAtAdmin($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResourceJob(ManuallyResourceJob $resourceJob): self
+    {
+        if ($this->resourceJobs->contains($resourceJob)) {
+            $this->resourceJobs->removeElement($resourceJob);
+            // set the owning side to null (unless already changed)
+            if ($resourceJob->getCreatedAtAdmin() === $this) {
+                $resourceJob->setCreatedAtAdmin(null);
+            }
+        }
 
         return $this;
     }
