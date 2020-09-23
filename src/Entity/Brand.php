@@ -19,7 +19,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  *    uniqueConstraints={
  *        @UniqueConstraint(name="brand_name_idx",
  *            columns={"brand_name"})
- *    }
+ *    },
+ *    indexes={
+ *     @ORM\Index(name="brand_slug_index", columns={"slug"}),
+ *     }
  * )
  * @UniqueEntity(fields={"brandName"}, groups={Brand::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
@@ -27,8 +30,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     "id",
  *     "brandName"
  * })
+ * @ORM\HasLifecycleCallbacks()
  */
-class Brand implements EntityValidatorException, DataTableInterface
+class Brand extends SlugAbstract implements EntityValidatorException, DataTableInterface
 {
     const SERIALIZED_GROUP_LIST = 'brand_group_list';
     const SERIALIZED_GROUP_LIST_TH = 'th_brand_group_list';
@@ -193,5 +197,10 @@ class Brand implements EntityValidatorException, DataTableInterface
     public static function arrayColumns(): array
     {
         return [];
+    }
+
+    public function getDataFroSlug()
+    {
+        return $this->brandName;
     }
 }

@@ -13,6 +13,7 @@
         "ext-redis": "*",
         "ext-sockets": "*",
         "ext-zip": "*",
+        "cocur/slugify": "dev-master",
         "doctrine/dbal": "2.10.2",
         "doctrine/mongodb-odm-bundle": "4.2.0",
         "doctrine/reflection": "1.2.1",

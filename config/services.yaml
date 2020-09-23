@@ -226,6 +226,13 @@ services:
       tags:
         - {name: jms_serializer.subscribing_handler}
 
+    App\EventListener\Doctrine\PgDataBaseActivitySubscriber:
+      tags:
+        - { name: 'doctrine.event_subscriber' }
+
+    App\EventListener\SlugApproach:
+      lazy: true
+
     my_body_listener:
       class: App\EventListener\BodyListener
       tags:

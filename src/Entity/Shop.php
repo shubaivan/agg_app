@@ -16,12 +16,16 @@ use JMS\Serializer\Annotation;
  *    uniqueConstraints={
  *        @UniqueConstraint(name="shop_name_idx",
  *            columns={"shop_name"})
- *    }
+ *    },
+ *    indexes={
+ *     @ORM\Index(name="shop_slug_index", columns={"slug"}),
+ *     }
  * )
  * @UniqueEntity(fields={"shopName"})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
+ * @ORM\HasLifecycleCallbacks()
  */
-class Shop
+class Shop extends SlugAbstract
 {
     const PREFIX_HASH = 'statistic:';
 
@@ -236,5 +240,10 @@ class Shop
     public static function getMapShopKeyByOriginalName(string $name)
     {
         return array_search($name, self::getShopNamesMapping());
+    }
+
+    public function getDataFroSlug()
+    {
+        return $this->shopName;
     }
 }

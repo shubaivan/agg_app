@@ -23,12 +23,14 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     indexes={
  *     @ORM\Index(name="position_desc_index", columns={"position"}),
  *     @ORM\Index(name="position_asc_index", columns={"position"}),
+ *     @ORM\Index(name="category_slug_index", columns={"slug"})
  * }
  * )
  * @UniqueEntity(fields={"categoryName"}, groups={Category::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
+ * @ORM\HasLifecycleCallbacks()
  */
-class Category implements EntityValidatorException
+class Category extends SlugAbstract implements EntityValidatorException
 {
     const SERIALIZED_GROUP_LIST = 'category_group_list';
     const SERIALIZED_GROUP_RELATIONS_LIST = 'category_group_relations_list';
@@ -352,5 +354,10 @@ class Category implements EntityValidatorException
         $collection = new ArrayCollection(iterator_to_array($iterator));
 
         return $collection;
+    }
+
+    public function getDataFroSlug()
+    {
+        return $this->categoryName;
     }
 }
