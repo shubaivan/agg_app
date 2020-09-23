@@ -34,7 +34,7 @@ class CategoryBabyFixtures extends AbstractFixtures implements DependentFixtureI
                     'Flaskborstar' => 'flaskborste, flaskborstar',
                     'Sterilisatorer ' => 'flaskborste, flaskborstar',
                     'Vällingmaskin ' => 'vällingmaskin, vällingmaskiner ',
-                    'Nappflaskor ' => 'nappfalska, nappflaskor'
+                    'sub Nappflaskor' => 'nappfalska, nappflaskor'
                 ]
             ],
             [
