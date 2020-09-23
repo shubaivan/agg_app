@@ -7,14 +7,13 @@ use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Collection\SearchProducts\AdjacentProduct;
 use App\Entity\Product;
+use App\Entity\Shop;
 use App\Entity\SlugAbstract;
 use App\RepositoryMysql\ColoursRepository;
 use Cocur\Slugify\SlugifyInterface;
-use Doctrine\Persistence\ManagerRegistry;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\EventDispatcher\PreDeserializeEvent;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class JmsEventSubscriber extends SlugApproach implements EventSubscriberInterface
 {
@@ -46,27 +45,59 @@ class JmsEventSubscriber extends SlugApproach implements EventSubscriberInterfac
                 'class' => Product::class,
                 'method' => 'onPostDeserializeProduct',
             ),
-
             array(
                 'event' => 'serializer.pre_serialize',
                 'class' => Category::class,
-                'method' => 'onPreDeserializeCategory',
+                'method' => 'onPreSerializeCategory',
+            ),
+            array(
+                'event' => 'serializer.pre_serialize',
+                'class' => Shop::class,
+                'method' => 'onPreSerializeShop',
+            ),
+            array(
+                'event' => 'serializer.pre_serialize',
+                'class' => Brand::class,
+                'method' => 'onPreSerializeBrand',
+            ),
+            array(
+                'event' => 'serializer.pre_serialize',
+                'class' => Product::class,
+                'method' => 'onPreSerializeProduct',
             ),
             array(
                 'event' => 'serializer.pre_serialize',
                 'class' => AdjacentProduct::class,
-                'method' => 'onPreDeserializeAdjacentProduct',
+                'method' => 'onPreSerializeAdjacentProduct',
             ),
         );
     }
 
-    public function onPreDeserializeAdjacentProduct(ObjectEvent $event)
+    public function onPreSerializeShop(ObjectEvent $event)
     {
         $object = $event->getObject();
         $this->applySlug($object);
     }
 
-    public function onPreDeserializeCategory(ObjectEvent $event)
+    public function onPreSerializeBrand(ObjectEvent $event)
+    {
+        $object = $event->getObject();
+        $this->applySlug($object);
+    }
+
+    public function onPreSerializeProduct(ObjectEvent $event)
+    {
+        $object = $event->getObject();
+        $this->applySlug($object);
+    }
+
+    public function onPreSerializeAdjacentProduct(ObjectEvent $event)
+    {
+        $object = $event->getObject();
+        $this->applySlug($object);
+    }
+
+    public function onPreSerializeCategory(ObjectEvent $event)
     {
         $object = $event->getObject();
         $this->applySlug($object);

@@ -28,14 +28,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const app_rest_hovermenumanagment_listthhovermenu = window.Routing
         .generate('app_rest_hovermenumanagment_listthhovermenu');
     const body = $('body');
-    body.on('keydown keyup onblur', '#pkw, #nkw', function () {
+    body.on('keydown keyup onblur', '#pkw, #nkw, #category_name', function () {
         let input = $(this);
         if (input.length) {
             var regexp_clear_space = /\s+/g;
             if (input.val().match(regexp_clear_space)) {
                 let clearValue = input.val().replace(regexp_clear_space, ' ');
                 input.val(clearValue);
-                var regexp = /[^a-z, ¤æøĂéëäöåÉÄÖÅ™®«»©]+/gi;
+                var regexp = /[^a-z, ¤æøĂéëäöåÉÄÖÅ&™®«»©]+/gi;
                 if (clearValue.match(regexp)) {
                     input.val(clearValue.replace(regexp, ''));
                 }
@@ -175,6 +175,9 @@ document.addEventListener("DOMContentLoaded", function () {
             category_position.val('');
             category_position.text('');
 
+            let category_name_input = modal.find('.modal-body #category_name');
+            category_name_input.val('');
+            category_name_input.val('');
 
             let nkw = modal.find('.modal-body #nkw');
             nkw.val('');
@@ -192,6 +195,17 @@ document.addEventListener("DOMContentLoaded", function () {
             let categoryId = button.data('categoryId');
             modal.find('.modal-title').text('Edit ' + $('.cn_' + categoryId).text() + ' category');
 
+            let category_name_input = modal.find('.modal-body #category_name');
+            let cn_value = $('.cn_' + categoryId);
+
+            $.each(cn_value, function (k, v) {
+                let cn_value_data = $(v).text();
+                if (cn_value_data) {
+                    category_name_input.text(cn_value_data);
+                    category_name_input.val(cn_value_data);
+                    return false;
+                }
+            });
 
             let pkw_input = modal.find('.modal-body #pkw');
             let pkw_value = $('.pkw_' + categoryId);
