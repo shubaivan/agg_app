@@ -6,6 +6,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use JMS\Serializer\Annotation;
 use App\DocumentRepository\TradeDoublerProductRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @MongoDB\Document(repositoryClass=TradeDoublerProductRepository::class)
@@ -22,10 +23,11 @@ use App\DocumentRepository\TradeDoublerProductRepository;
  *     "declineReasonClass"="text",
  *     "shop"="text",
  *     "identityUniqData"="text",
+ *     "gFields"="text"
  * })
  *
  * @MongoDB\UniqueIndex(keys={"name"="asc", "sku"="asc", "brand"="asc", "ean"="asc", "shop"="asc", "tradeDoublerId"="asc"})
- * 
+ *
  * @Annotation\AccessorOrder("custom", custom = {
  *     "TDProductId",
  *     "imageUrl",
@@ -37,90 +39,109 @@ use App\DocumentRepository\TradeDoublerProductRepository;
  *     "MerchantCategoryName",
  *     "price"
  * })
+ *
+ * @MongoDB\HasLifecycleCallbacks()
  */
 class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
 {
+    const GROUP_GET_TH = 'trade_doubler_product_group_get_th';
+
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $name;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $productImage;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Assert\NotBlank()
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $productUrl;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $imageUrl;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $height;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $width;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $categories;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $MerchantCategoryName;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $TDCategoryName;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $TDCategoryId;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $TDProductId;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $description;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $feedId;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $groupingId;
 
@@ -128,84 +149,98 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
      * @MongoDB\Field(type="string")
      * @MongoDB\Index()
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $tradeDoublerId;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $productLanguage;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $modified;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $price;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $currency;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $programName;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $availability;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $brand;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $condition;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $deliveryTime;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $ean;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $upc;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $isbn;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $mpn;
 
@@ -213,198 +248,125 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
      * @MongoDB\Field(type="string")
      * @MongoDB\Index()
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $sku;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Assert\NotBlank()
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $identifiers;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $inStock;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $manufacturer;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $model;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $programLogo;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $promoText;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $shippingCost;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $shortDescription;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $size;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $fields;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $warranty;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $weight;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $techSpecs;
 
     /**
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
     private $dateformat;
 
     /**
-     * TradeDoublerProduct constructor.
-     * @param $name
-     * @param $productImage
-     * @param $productUrl
-     * @param $imageUrl
-     * @param $height
-     * @param $width
-     * @param $categories
-     * @param $MerchantCategoryName
-     * @param $TDCategoryName
-     * @param $TDCategoryId
-     * @param $TDProductId
-     * @param $description
-     * @param $feedId
-     * @param $groupingId
-     * @param $tradeDoublerId
-     * @param $productLanguage
-     * @param $modified
-     * @param $price
-     * @param $currency
-     * @param $programName
-     * @param $availability
-     * @param $brand
-     * @param $condition
-     * @param $deliveryTime
-     * @param $ean
-     * @param $upc
-     * @param $isbn
-     * @param $mpn
-     * @param $sku
-     * @param $identifiers
-     * @param $inStock
-     * @param $manufacturer
-     * @param $model
-     * @param $programLogo
-     * @param $promoText
-     * @param $shippingCost
-     * @param $shortDescription
-     * @param $size
-     * @param $fields
-     * @param $warranty
-     * @param $weight
-     * @param $techSpecs
-     * @param $dateformat
-     * @param $shop
-     * @param $identityUniqData
+     * @MongoDB\Field(type="hash")
+     * @Annotation\Type("array")
+     * @Annotation\Groups({TradeDoublerProduct::GROUP_GET_TH})
      */
-    public function __construct(
-        $name, $productImage, $productUrl, $imageUrl, $height, $width,
-        $categories, $MerchantCategoryName, $TDCategoryName, $TDCategoryId, 
-        $TDProductId, $description, $feedId, $groupingId,
-        $tradeDoublerId, $productLanguage, $modified, $price, 
-        $currency, $programName, $availability, $brand, $condition,
-        $deliveryTime, $ean, $upc, $isbn, $mpn, $sku, $identifiers,
-        $inStock, $manufacturer, $model, $programLogo, $promoText,
-        $shippingCost, $shortDescription, $size, $fields, $warranty,
-        $weight, $techSpecs, $dateformat, $shop, $identityUniqData
-    )
+    private $gFieldsShow = [];
+
+    /**
+     * @MongoDB\Field(type="collection")
+     * @Annotation\Type("array")
+     */
+    private $gFields = [];
+
+    public static function arrayColumns(): array
     {
-        $this->name = $name;
-        $this->productImage = $productImage;
-        $this->productUrl = $productUrl;
-        $this->imageUrl = $imageUrl;
-        $this->height = $height;
-        $this->width = $width;
-        $this->categories = $categories;
-        $this->MerchantCategoryName = $MerchantCategoryName;
-        $this->TDCategoryName = $TDCategoryName;
-        $this->TDCategoryId = $TDCategoryId;
-        $this->TDProductId = $TDProductId;
-        $this->description = $description;
-        $this->feedId = $feedId;
-        $this->groupingId = $groupingId;
-        $this->tradeDoublerId = $tradeDoublerId;
-        $this->productLanguage = $productLanguage;
-        $this->modified = $modified;
-        $this->price = $price;
-        $this->currency = $currency;
-        $this->programName = $programName;
-        $this->availability = $availability;
-        $this->brand = $brand;
-        $this->condition = $condition;
-        $this->deliveryTime = $deliveryTime;
-        $this->ean = $ean;
-        $this->upc = $upc;
-        $this->isbn = $isbn;
-        $this->mpn = $mpn;
-        $this->sku = $sku;
-        $this->identifiers = $identifiers;
-        $this->inStock = $inStock;
-        $this->manufacturer = $manufacturer;
-        $this->model = $model;
-        $this->programLogo = $programLogo;
-        $this->promoText = $promoText;
-        $this->shippingCost = $shippingCost;
-        $this->shortDescription = $shortDescription;
-        $this->size = $size;
-        $this->fields = $fields;
-        $this->warranty = $warranty;
-        $this->weight = $weight;
-        $this->techSpecs = $techSpecs;
-        $this->dateformat = $dateformat;
-        $this->shop = $shop;
-        $this->identityUniqData = $identityUniqData;
+        return ['gFieldsShow'];
     }
 
     public static function getImageColumns(): array
@@ -426,7 +388,7 @@ class TradeDoublerProduct extends AbstractDocument implements DataTableInterface
 
     public static function convertToHtmColumns(): array
     {
-        return ['description'];    
+        return ['description'];
     }
 
     public static function getSeparateFilterColumn(): array

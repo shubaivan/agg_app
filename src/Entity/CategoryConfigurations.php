@@ -7,6 +7,12 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CategoryConfigurationsRepository")
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
+ *
+ * @ORM\Table(name="category_configurations",
+ *     indexes={
+ *     @ORM\Index(name="category_configurations_sizes_idx", columns={"sizes"})
+ * }
+ *     )
  */
 class CategoryConfigurations
 {

@@ -3,15 +3,20 @@
 
 namespace App\EventListener;
 
+use App\Entity\Brand;
+use App\Entity\Category;
+use App\Entity\Collection\SearchProducts\AdjacentProduct;
 use App\Entity\Product;
+use App\Entity\SlugAbstract;
 use App\RepositoryMysql\ColoursRepository;
+use Cocur\Slugify\SlugifyInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\EventDispatcher\PreDeserializeEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-class JmsEventSubscriber implements EventSubscriberInterface
+class JmsEventSubscriber extends SlugApproach implements EventSubscriberInterface
 {
     /**
      * @var ColoursRepository ColoursRepository
@@ -22,8 +27,9 @@ class JmsEventSubscriber implements EventSubscriberInterface
      * JmsEventSubscriber constructor.
      * @param ColoursRepository $repository
      */
-    public function __construct(ColoursRepository $repository)
+    public function __construct(SlugifyInterface $cs, ColoursRepository $repository)
     {
+        parent::__construct($cs);
         $this->repository = $repository;
     }
 
@@ -39,8 +45,31 @@ class JmsEventSubscriber implements EventSubscriberInterface
                 'event' => 'serializer.post_deserialize',
                 'class' => Product::class,
                 'method' => 'onPostDeserializeProduct',
-            )
+            ),
+
+            array(
+                'event' => 'serializer.pre_serialize',
+                'class' => Category::class,
+                'method' => 'onPreDeserializeCategory',
+            ),
+            array(
+                'event' => 'serializer.pre_serialize',
+                'class' => AdjacentProduct::class,
+                'method' => 'onPreDeserializeAdjacentProduct',
+            ),
         );
+    }
+
+    public function onPreDeserializeAdjacentProduct(ObjectEvent $event)
+    {
+        $object = $event->getObject();
+        $this->applySlug($object);
+    }
+
+    public function onPreDeserializeCategory(ObjectEvent $event)
+    {
+        $object = $event->getObject();
+        $this->applySlug($object);
     }
 
     /**
@@ -92,5 +121,17 @@ class JmsEventSubscriber implements EventSubscriberInterface
         }, array_keys($data), $data);
 
         $event->setData($data);
+    }
+
+    /**
+     * @param $object
+     */
+    private function applySlug($object): void
+    {
+        if ($object instanceof SlugAbstract
+            && !$object->getSlug()
+        ) {
+            $this->applySlugToEntity($object);
+        }
     }
 }

@@ -6,6 +6,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use App\DocumentRepository\AdrecordProductRepository;
 use JMS\Serializer\Annotation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @MongoDB\Document(repositoryClass=AdrecordProductRepository::class)
@@ -32,6 +33,7 @@ use JMS\Serializer\Annotation;
  *     "category",
  *     "price"
  * })
+ * @MongoDB\HasLifecycleCallbacks()
  */
 class AdrecordProduct extends AbstractDocument implements DataTableInterface
 {
@@ -51,6 +53,7 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
      * @MongoDB\Index()
+     * @Assert\NotBlank()
      */
     private $SKU;
 
@@ -137,57 +140,6 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
      * @Annotation\Type("string")
      */
     private $gender;
-
-    /**
-     * AdrecordProduct constructor.
-     * @param $name
-     * @param $category
-     * @param $SKU
-     * @param $EAN
-     * @param $description
-     * @param $model
-     * @param $brand
-     * @param $price
-     * @param $shippingPrice
-     * @param $currency
-     * @param $productUrl
-     * @param $graphicUrl
-     * @param $inStock
-     * @param $inStockQty
-     * @param $deliveryTime
-     * @param $regularPrice
-     * @param $gender
-     * @param $shop
-     * @param $identityUniqData
-     */
-    public function __construct(
-        $name, $category, $SKU, $EAN, $description, $model,
-        $brand, $price, $shippingPrice, $currency, $productUrl,
-        $graphicUrl, $inStock, $inStockQty, $deliveryTime,
-        $regularPrice, $gender, $shop, $identityUniqData
-    )
-    {
-        $this->name = $name;
-        $this->category = $category;
-        $this->SKU = $SKU;
-        $this->EAN = $EAN;
-        $this->description = $description;
-        $this->model = $model;
-        $this->brand = $brand;
-        $this->price = $price;
-        $this->shippingPrice = $shippingPrice;
-        $this->currency = $currency;
-        $this->productUrl = $productUrl;
-        $this->graphicUrl = $graphicUrl;
-        $this->inStock = $inStock;
-        $this->inStockQty = $inStockQty;
-        $this->deliveryTime = $deliveryTime;
-        $this->regularPrice = $regularPrice;
-        $this->gender = $gender;
-        $this->shop = $shop;
-        $this->identityUniqData = $identityUniqData;
-    }
-
 
     /**
      * @return mixed
@@ -544,5 +496,10 @@ class AdrecordProduct extends AbstractDocument implements DataTableInterface
     public static function getSeparateFilterColumn(): array
     {
         return array_merge(['SKU', 'brand'], parent::getSeparateFilterColumn());
+    }
+
+    public static function arrayColumns(): array
+    {
+        return [];
     }
 }

@@ -12,9 +12,6 @@ export default function list() {
             console.log(result.responseJSON.status);
         },
         success: (data) => {
-            if (!data.length) {
-                return;
-            }
             const awinproductcollection = window.Routing
                 .generate('app_rest_awinproductcollection_postproducts');
             var common_defs = [];
@@ -107,25 +104,26 @@ export default function list() {
                             }
                         } );
                     } );
+                    if (data.length) {
+                        this.api().columns(decline_reason_key).every( function () {
+                            var column = this;
+                            var select = $('<select><option value=""></option></select>')
+                                .appendTo( $(column.footer()).empty() )
+                                .on( 'change', function () {
+                                    var val = $.fn.dataTable.util.escapeRegex(
+                                        $(this).val()
+                                    );
 
-                    this.api().columns(decline_reason_key).every( function () {
-                        var column = this;
-                        var select = $('<select><option value=""></option></select>')
-                            .appendTo( $(column.footer()).empty() )
-                            .on( 'change', function () {
-                                var val = $.fn.dataTable.util.escapeRegex(
-                                    $(this).val()
-                                );
-
-                                column
-                                    .search( val ? val : '', false, false )
-                                    .draw();
-                            } );
-                        $.each(data, function( key, value ) {
-                            // console.log(key, value);
-                            select.append( '<option value="'+value+'">'+value.substr( 0, 10 )+'</option>' )
-                        });
-                    } );
+                                    column
+                                        .search( val ? val : '', false, false )
+                                        .draw();
+                                } );
+                            $.each(data, function( key, value ) {
+                                // console.log(key, value);
+                                select.append( '<option value="'+value+'">'+value.substr( 0, 10 )+'</option>' )
+                            });
+                        } );
+                    }
                 },
                 'responsive': true,
                 'fixedHeader': true,

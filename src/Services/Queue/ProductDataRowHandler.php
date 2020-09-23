@@ -8,6 +8,7 @@ use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
 use App\Document\TradeDoublerProduct;
+use App\Entity\ManuallyResourceJob;
 use App\Entity\Product;
 use App\Entity\Shop;
 use App\Exception\AdminShopRulesException;
@@ -169,107 +170,118 @@ class ProductDataRowHandler
                 if (count($handleAnalysisProductByMainCategory)) {
                     $product->setMatchForCategories(true);
                     $this->getEm()->flush();
+
                     $this->getRedisHelper()
-                        ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $filePath);
-                    $this->getRedisHelper()
-                        ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL . $dataRow->getShop());
+                        ->setStatisticsInRedis(
+                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL, $dataRow, $filePath
+                        );
                 }
+            } else {
+                $this->getRedisHelper()
+                    ->setStatisticsInRedis(
+                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_EXIST, $dataRow, $filePath
+                    );
             }
 
             if (!$existProduct) {
                 $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE . $filePath);
+                    ->setStatisticsInRedis(
+                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE, $dataRow, $filePath
+                    );
 
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_NEW_ONE . $dataRow->getShop());
             } else {
                 $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST . $filePath);
-
-                $this->getRedisHelper()
-                    ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST . $dataRow->getShop());
-            }
-
-
-            if ($dataRow->getLastProduct()) {
-                $this->getCacheManager()->clearAllPoolsCache();
-//                $this->getProductService()->autoVACUUM();
-                $this->vacuumBus->dispatch(new VacuumJob(true));
-                $this->getRedisHelper()
-                    ->hMSet(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $dataRow->getRedisUniqKey(),
-                        [$filePath => (new \DateTime())->getTimestamp()]
+                    ->setStatisticsInRedis(
+                        Shop::PREFIX_PROCESSING_DATA_SHOP_SUCCESSFUL_EXIST, $dataRow, $filePath
                     );
             }
         } catch (AdminShopRulesException $adminShopRulesException) {
             $this->markDocumentProduct($dataRow, $adminShopRulesException);
+
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION, $dataRow, $filePath
+                );
         } catch (GlobalMatchExceptionBrand $globalMatchException) {
             $this->markDocumentProduct($dataRow, $globalMatchException);
+
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND, $dataRow, $filePath
+                );
         } catch (GlobalMatchException $globalMatchException) {
             $this->markDocumentProduct($dataRow, $globalMatchException);
+
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION, $dataRow, $filePath
+                );
         } catch (ValidatorException $e) {
             $this->markDocumentProduct($dataRow, $e);
             $this->getLogger()->error($e->getMessage());
+
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED, $dataRow, $filePath
+                );
             throw $e;
         } catch (BadRequestHttpException $e) {
             $this->getLogger()->error($e->getMessage());
+
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED, $dataRow, $filePath
+                );
             throw $e;
         } catch (\Exception $e) {
             $this->getLogger()->error($e->getMessage());
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED, $dataRow, $filePath
+                );
             throw $e;
         } catch (\Throwable $exception) {
             $this->getLogger()->error($exception->getMessage());
             $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $dataRow->getShop());
-            $this->getRedisHelper()
-                ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
-                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED . $filePath);
+                ->setStatisticsInRedis(
+                    Shop::PREFIX_PROCESSING_DATA_SHOP_FAILED, $dataRow, $filePath
+                );
             throw $exception;
+        } finally {
+            $this->postExecutedJob($dataRow);
         }
 
         echo $dataRow->generateIdentityUniqData() . PHP_EOL;
+    }
+
+    /**
+     * @param ResourceProductQueues $dataRow
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Throwable
+     */
+    private function postExecutedJob(ResourceProductQueues $dataRow)
+    {
+        if ($dataRow->getLastProduct()) {
+            $this->getCacheManager()->clearAllPoolsCache();
+            /** @var ManuallyResourceJob $oneBy */
+            $oneBy = $this->em->getRepository(ManuallyResourceJob::class)
+                ->findOneBy(['redisUniqKey' => $dataRow->getRedisUniqKey()]);
+            echo 'last_product';
+            echo $oneBy ? $oneBy->getRedisUniqKey() . $oneBy->getId() : 'no';
+            if ($oneBy) {
+                echo 'match one by';
+                $oneBy
+                    ->setStatus(ManuallyResourceJob::STATUS_FINISHED);
+                $this->em->flush();
+            }
+//                $this->getProductService()->autoVACUUM();
+            $this->vacuumBus->dispatch(new VacuumJob(true));
+            $this->getRedisHelper()
+                ->hMSet(HandleDownloadFileData::TIME_SPEND_PRODUCTS_SHOP_END . $dataRow->getRedisUniqKey(),
+                    [$dataRow->getFilePath() => (new \DateTime())->getTimestamp()]
+                );
+        }
     }
 
     /**
@@ -282,7 +294,7 @@ class ProductDataRowHandler
     {
         $documents = AbstractDocument::getChilds();
         $declineReasonClass = (new \ReflectionClass($exception))->getShortName().':'.$exception->getMessage();
-        
+
         foreach ($documents as $document) {
             $oneBy = $this->dm->getRepository($document)
                 ->findOneBy(['identityUniqData' => $dataRow->generateIdentityUniqData()]);

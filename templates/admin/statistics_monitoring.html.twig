@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile!{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+
+    <div id="resource_statistics" class="overflow-auto"></div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('index/js/statisticsMonitoring.min') }}
+
+{% endblock %}

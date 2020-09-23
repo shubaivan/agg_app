@@ -5,6 +5,8 @@ namespace App\Command;
 
 
 use App\Cache\CacheManager;
+use App\Services\Admin\ResourceShopManagement;
+use App\Services\Storage\DigitalOceanStorage;
 use App\Util\RedisHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,6 +27,8 @@ class AwinResourceDownload extends ResourceDownloadFile
      * @param ContainerBagInterface $params
      * @param CacheManager $cacheManager
      * @param RedisHelper $redisHelper
+     * @param DigitalOceanStorage $do
+     * @param ResourceShopManagement $resourceShopManagement
      */
     public function __construct(
         KernelInterface $kernel,
@@ -32,18 +36,22 @@ class AwinResourceDownload extends ResourceDownloadFile
         LoggerInterface $adrecordLogLogger,
         ContainerBagInterface $params,
         CacheManager $cacheManager,
-        RedisHelper $redisHelper
+        RedisHelper $redisHelper,
+        DigitalOceanStorage $do,
+        ResourceShopManagement $resourceShopManagement
     )
     {
 
         $url = $params->get('awin_download_urls');
         $dirForFiles = $params->get('awin_download_file_path');
         parent::__construct(
+            $resourceShopManagement,
             $kernel,
             $bus,
             $adrecordLogLogger,
             $cacheManager,
             $redisHelper,
+            $do,
             $dirForFiles,
             $url
         );

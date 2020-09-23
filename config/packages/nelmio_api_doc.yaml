@@ -2,6 +2,7 @@ nelmio_api_doc:
   areas:
     path_patterns: # an array of regexps
       - ^/api(?!/doc$)
+      - ^/admin/api(?!/doc$)
 
     documentation:
       host: '%env(MAIN_HOST)%'

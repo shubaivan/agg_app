@@ -104,6 +104,9 @@ class HoverMenuManagmentController extends AbstractRestController
         $categoryConfigurations
             ->setKeyWords($pkw)
             ->setNegativeKeyWords($nkw);
+        if ($request->get('position')) {
+            $category->setPosition($request->get('position'));
+        }
         if ($request->get('hotCatgory')) {
             $category->setHotCategory(true);
         } else {
@@ -118,6 +121,7 @@ class HoverMenuManagmentController extends AbstractRestController
         /** @var DoctrineProvider $resultCacheImpl1 */
         $resultCacheImpl1 = $configuration->getResultCacheImpl();
         $resultCacheImpl1->delete(CategoryRepository::CACHE_HOT_CATEGORY_ID);
+        $resultCacheImpl1->delete(CategoryRepository::CACHE_CUSTOM_CATEGORY_ID);
 
         $this->getTagAwareQueryResultCacheCategoryConf()
             ->getTagAwareAdapter()

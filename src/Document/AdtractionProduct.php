@@ -6,6 +6,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use App\DocumentRepository\AdtractionProductRepository;
 use JMS\Serializer\Annotation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @MongoDB\Document(repositoryClass=AdtractionProductRepository::class)
@@ -36,6 +37,8 @@ use JMS\Serializer\Annotation;
  *     "Currency",
  *     "Instock"
  * })
+ *
+ * @MongoDB\HasLifecycleCallbacks()
  */
 class AdtractionProduct extends AbstractDocument
 {
@@ -43,6 +46,7 @@ class AdtractionProduct extends AbstractDocument
      * @MongoDB\Field(type="string")
      * @Annotation\Type("string")
      * @MongoDB\Index()
+     * @Assert\NotBlank()
      */
     private $SKU;
     /**
@@ -121,54 +125,6 @@ class AdtractionProduct extends AbstractDocument
      */
     private $Extras;
 
-    /**
-     * AdtractionProduct constructor.
-     * @param $SKU
-     * @param $Name
-     * @param $Description
-     * @param $Category
-     * @param $Price
-     * @param $Shipping
-     * @param $Currency
-     * @param $Instock
-     * @param $ProductUrl
-     * @param $ImageUrl
-     * @param $TrackingUrl
-     * @param $Brand
-     * @param $OriginalPrice
-     * @param $Ean
-     * @param $ManufacturerArticleNumber
-     * @param $Extras
-     * @param $shop
-     * @param $identityUniqData
-     */
-    public function __construct(
-        $SKU, $Name, $Description, $Category, $Price,
-        $Shipping, $Currency, $Instock, $ProductUrl, $ImageUrl,
-        $TrackingUrl, $Brand, $OriginalPrice, $Ean,
-        $ManufacturerArticleNumber, $Extras, $shop, $identityUniqData
-    )
-    {
-        $this->SKU = $SKU;
-        $this->Name = $Name;
-        $this->Description = $Description;
-        $this->Category = $Category;
-        $this->Price = $Price;
-        $this->Shipping = $Shipping;
-        $this->Currency = $Currency;
-        $this->Instock = $Instock;
-        $this->ProductUrl = $ProductUrl;
-        $this->ImageUrl = $ImageUrl;
-        $this->TrackingUrl = $TrackingUrl;
-        $this->Brand = $Brand;
-        $this->OriginalPrice = $OriginalPrice;
-        $this->Ean = $Ean;
-        $this->ManufacturerArticleNumber = $ManufacturerArticleNumber;
-        $this->Extras = $Extras;
-        $this->shop = $shop;
-        $this->identityUniqData = $identityUniqData;
-    }
-
     public static function getImageColumns(): array
     {
         return [
@@ -200,5 +156,10 @@ class AdtractionProduct extends AbstractDocument
     public static function getSeparateFilterColumn(): array
     {
         return array_merge(['SKU', 'Brand'], parent::getSeparateFilterColumn());
+    }
+
+    public static function arrayColumns(): array
+    {
+        return [];
     }
 }

@@ -8,6 +8,7 @@ use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
 use App\Document\TradeDoublerProduct;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -171,7 +172,8 @@ class ProductCollectionController extends AbstractController
         if ($oneProduct) {
             $serialize = $this->serializer->serialize(
                 $oneProduct,
-                'json'
+                'json',
+                SerializationContext::create()->setGroups(TradeDoublerProduct::GROUP_GET_TH)
             );
         }
         $json_decode = json_decode($serialize, true);
@@ -187,6 +189,7 @@ class ProductCollectionController extends AbstractController
             'th_keys' => $keys,
             'dataTbaleKeys' => $dataTableColumnData,
             'img_columns' => TradeDoublerProduct::getImageColumns(),
+            'array_columns' => TradeDoublerProduct::arrayColumns(),
             'link_columns' => TradeDoublerProduct::getLinkColumns(),
             'short_preview_columns' => TradeDoublerProduct::getShortPreviewText(),
             'separate_filter_column' => TradeDoublerProduct::getSeparateFilterColumn(),

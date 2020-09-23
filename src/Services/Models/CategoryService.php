@@ -517,7 +517,7 @@ class CategoryService extends AbstractModel
             return false;
         }
         $prepareDataForGINSearch = $this->prepareProductDataForMatching(
-            $productComparingData, false, 3
+            $productComparingData, true, 3
         );
         if (!strlen($prepareDataForGINSearch)) {
             return false;

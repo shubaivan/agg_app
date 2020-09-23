@@ -1,0 +1,19 @@
+flysystem:
+  storages:
+    reaources.storage:
+      adapter: 'aws'
+      options:
+        client: 'Aws\S3\S3Client' # The service ID of the Aws\S3\S3Client instance
+        bucket: 'minimoj-consumer'
+        prefix: 'minimoj'
+
+services:
+  Aws\S3\S3Client:
+    arguments:
+      - endpoint: '%env(S3_END_POINT)%'
+        version: 'latest'
+        region: 'ams3'
+        use_path_style_endpoint: true
+        credentials:
+          key: '%env(S3_STORAGE_KEY)%'
+          secret: '%env(S3_STORAGE_SECRET)%'

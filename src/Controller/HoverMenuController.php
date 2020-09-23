@@ -17,6 +17,7 @@ class HoverMenuController extends AbstractController
         'CategoryName',
         'PositiveKeyWords',
         'NegativeKeyWords',
+        'CategoryPosition',
         'Action'
     ];
     

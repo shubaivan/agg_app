@@ -5,6 +5,7 @@
 {% block body %}
     {{ parent() }}
 
+    {% if th_keys|length %}
         <!-- Table -->
         <table id='empTable' class='display dataTable'>
 
@@ -16,12 +17,13 @@
             </tr>
             </thead>
             <tfoot>
-                {% for columnProduct in th_keys %}
-                    <th scope="col">{{ columnProduct }}</th>
-                {% endfor %}
+            {% for columnProduct in th_keys %}
+                <th scope="col">{{ columnProduct }}</th>
+            {% endfor %}
             </tfoot>
 
         </table>
+    {% endif %}
 
 {% endblock %}
 
@@ -40,6 +42,7 @@
         let img_columns = getJSonObject("{{ img_columns ? img_columns|json_encode() : "{}" }}");
         let link_columns = getJSonObject("{{ link_columns ? link_columns|json_encode() : "{}" }}");
         let short_preview_columns = getJSonObject("{{ short_preview_columns ? short_preview_columns|json_encode() : "{}" }}");
+        let array_columns = getJSonObject("{{ array_columns ? array_columns|json_encode() : "{}" }}");
 
         let separate_filter_column = getJSonObject("{{ separate_filter_column ? separate_filter_column|json_encode() : "{}" }}");
         let decline_reason = getJSonObject("{{ decline_reason ? decline_reason|json_encode() : "{}" }}");

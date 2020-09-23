@@ -2,6 +2,8 @@
 
 namespace App\Util;
 
+use App\Entity\Shop;
+use App\QueueModel\ResourceProductQueues;
 use Redis;
 
 class RedisHelper
@@ -166,6 +168,21 @@ class RedisHelper
     {
         $this->connect();
         return $this->redis->hGetAll($key);
+    }
+
+
+    /**
+     * @param ResourceProductQueues $dataRow
+     * @param string $filePath
+     */
+    public function setStatisticsInRedis(string $statKey, ResourceProductQueues $dataRow, string $filePath): void
+    {
+        $this
+            ->hIncrBy(Shop::PREFIX_HASH . $dataRow->getRedisUniqKey(),
+                $statKey . $filePath);
+        $this
+            ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
+                $statKey . $dataRow->getShop());
     }
 
     /**

@@ -91,6 +91,34 @@
 
             </tr>
 
+            {% if is_granted(constant('App\\Entity\\User::ROLE_ADMIN')) %}
+                <tr>
+                    <th scope="row">1</th>
+                    <td>
+                        Resource shops management
+                    </td>
+                    <td>
+                        <a href="{{ path('admin_resource_shop_list') }}">
+                            List
+                        </a>
+                    </td>
+
+                </tr>
+            {% endif %}
+
+            <tr>
+                <th scope="row">1</th>
+                <td>
+                    Statistics monitoring
+                </td>
+                <td>
+                    <a href="{{ path('admin_statistics_monitoring') }}">
+                        List
+                    </a>
+                </td>
+
+            </tr>
+
             </tbody>
         </table>
 

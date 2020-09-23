@@ -34,7 +34,8 @@ class CategoryRepository extends ServiceEntityRepository
     const STRICT = 'strict';
     const MAIN_CATEGORY_IDS_DATA = 'main_category_ids_data';
     const CACHE_HOT_CATEGORY_ID = 'cache_hot_category_id';
-    
+    const CACHE_CUSTOM_CATEGORY_ID = 'cache_custom_category_id';
+
     /**
      * @var Helpers
      */
@@ -80,6 +81,21 @@ class CategoryRepository extends ServiceEntityRepository
         $queryBuilder
             ->where('s.hotCategory = :hotCategory')
             ->setParameter('hotCategory', true);
+
+        $sortBy = $paramFetcher->get(ProductRepository::SORT_BY);
+        $sortOrder = $paramFetcher->get(ProductRepository::SORT_ORDER);
+
+        $sortBy = $this->getHelpers()->white_list($sortBy,
+            ['position', 'createdAt', 'categoryName', 'id'],
+            "Invalid ORDER field name " . $sortBy
+        );
+
+        $sortOrder = $this->getHelpers()->white_list(
+            $sortOrder,
+            [Criteria::DESC, Criteria::ASC],
+            "Invalid ORDER BY direction " . $sortOrder
+        );
+
         return $this->getList(
             $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
             $queryBuilder,
@@ -122,8 +138,14 @@ class CategoryRepository extends ServiceEntityRepository
         $offset = $limit * ((int)$parameterBag->get('page') - 1);
         $sortBy = $parameterBag->get('sort_by');
         $sortOrder = $parameterBag->get('sort_order');
+        $sortOrder = $this->getHelpers()->white_list(
+            $sortOrder,
+            [Criteria::DESC, Criteria::ASC],
+            "Invalid ORDER BY direction " . $sortOrder
+        );
+
         $sortBy = $this->getHelpers()->white_list($sortBy,
-            ["id", "categoryName", "createdAt"], "Invalid field name " . $sortBy);
+            ["id", "categoryName", "createdAt", "position"], "Invalid field name " . $sortBy);
 
         $dql = '
                 SELECT DISTINCT c
@@ -150,7 +172,7 @@ class CategoryRepository extends ServiceEntityRepository
             ->createQuery($dql)
             ->setMaxResults($limit)
             ->setFirstResult($offset)
-            ->enableResultCache()
+            ->enableResultCache(0, self::CACHE_CUSTOM_CATEGORY_ID)
             ->useQueryCache(true);
 
         if ($parameterBag->get('search')) {

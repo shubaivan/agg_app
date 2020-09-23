@@ -1,0 +1,79 @@
+<h1>Statistics (Information updating every 20 seconds)</h1>
+
+
+<ul>
+    {% for k, q in quantityResult %}
+        <li>
+            <b>{{ k }}</b>: jobs quantity {{ q.messageCount }}<br>
+{#            <b>consumerCount</b>: {{ q.consumerCount }}#}
+        </li>
+
+    {% endfor %}
+</ul>
+
+
+
+<table>
+    <tr>
+        {% for iterRedisKey, iterRedisData in prepareDataTh  %}
+            <th colspan="{{ iterRedisData|length > 0 ? iterRedisData|length : ''}}" >{{iterRedisKey}}</th>
+        {% endfor %}
+    </tr>
+    <tr>
+        {% for iterRedisKey, iterRedisData in prepareDataTh  %}
+            {% if iterRedisData is iterable %}
+                {% for uniqRedisKey in iterRedisData %}
+                    <td>{{uniqRedisKey}}</td><br>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    </tr>
+
+    <tr>
+        {% for resultKey, result in resultData  %}
+            <td>
+                {% if result is iterable %}
+                    {% for keyData, ValueData in result %}
+                        {% if ValueData is iterable %}
+                            <ul>
+                                {% for resourceKey, resourceValue  in ValueData %}
+                                    <h3>
+                                        {{ resourceKey|capitalize }}
+                                    </h3>
+                                    {% if resourceValue is iterable %}
+                                        {% for prefixNameKey, prefixNameVaue in resourceValue %}
+                                            <h4>
+                                                {{ prefixNameKey|capitalize }}
+                                            </h4>
+                                            {% if prefixNameVaue is iterable %}
+                                                {% for blockNameKey, blockNameValue in prefixNameVaue %}
+                                                    <li>
+                                                        {{ blockNameKey }}
+                                                    </li>
+                                                    {% set total_block_value = 0 %}
+                                                    {% if blockNameValue is iterable %}
+                                                        <ul>
+                                                            {% for shopKey, shopValue in blockNameValue %}
+                                                                <li>
+                                                                    {% set total_block_value = total_block_value + shopValue %}
+                                                                    {{ shopKey|capitalize }} - {{ shopValue }}
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    {% endif %}
+                                                    <b>Total: {{ total_block_value }}</b>
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            {{keyData}} - {{ ValueData }}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </td>
+        {% endfor %}
+    </tr>
+</table>

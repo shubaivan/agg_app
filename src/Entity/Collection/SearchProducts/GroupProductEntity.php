@@ -677,4 +677,8 @@ class GroupProductEntity extends CommonProduct
         return $arr;
     }
 
+    public function getDataFroSlug()
+    {
+        return implode('_', $this->getStoreNamesValue());
+    }
 }

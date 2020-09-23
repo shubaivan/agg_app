@@ -40,11 +40,8 @@ class AwinProductRepository extends ServiceDocumentRepository implements Careful
      */
     public function matchExistProduct(ResourceProductQueues $productQueues)
     {
-        return  $this->matchExistProductAllow('AwinProduct',[
-            'aw_product_id' => $productQueues->getSku(),
-            'brand_name' => $productQueues->getBrand(),
-            'ean' => $productQueues->getEan(),
-            'shop' => $productQueues->getShop(),
+        return  $this->matchExistProductAllow('AwinProduct', [
+            'identityUniqData' => $productQueues->getAttributeByName('identityUniqData'),
         ]);
     }
 
