@@ -24,6 +24,7 @@ class PgDataBaseActivitySubscriber extends SlugApproach implements EventSubscrib
             Events::postFlush,
         ];
     }
+
     public function postFlush(PostFlushEventArgs $event)
     {
         $em = $event->getEntityManager();
@@ -46,15 +47,21 @@ class PgDataBaseActivitySubscriber extends SlugApproach implements EventSubscrib
     {
         $object = $event->getObject();
 //        $this->en = $object;
-        if ($object instanceof SlugAbstract) {
-            $this->applySlugToEntity($object);
-        }
+        $this->applySlug($object);
     }
 
     public function preUpdate(LifecycleEventArgs $event)
     {
         $object = $event->getObject();
 //        $this->en = $object;
+        $this->applySlug($object);
+    }
+
+    /**
+     * @param object $object
+     */
+    private function applySlug(object $object): void
+    {
         if ($object instanceof SlugAbstract) {
             $this->applySlugToEntity($object);
         }

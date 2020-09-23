@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (input.val().match(regexp_clear_space)) {
                 let clearValue = input.val().replace(regexp_clear_space, ' ');
                 input.val(clearValue);
-                var regexp = /[^a-z, ¤æøĂéëäöåÉÄÖÅ™®«»©]+/gi;
+                var regexp = /[^a-z, ¤æøĂéëäöåÉÄÖÅ&™®«»©]+/gi;
                 if (clearValue.match(regexp)) {
                     input.val(clearValue.replace(regexp, ''));
                 }
