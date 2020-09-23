@@ -147,7 +147,7 @@ class Category extends SlugAbstract implements EntityValidatorException
 //            ) {
 //                $this->hotCategory = true;
 //            }
-            $this->categoryName = $categoryName;
+            $this->categoryName = trim($categoryName);;
         }
 
         return $this;
