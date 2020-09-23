@@ -144,10 +144,17 @@ document.addEventListener("DOMContentLoaded", function () {
                             '<p class="nkw_' + row.id + '">' + data + '</p>' : ''
                     }
                 },
-
                 {
 
                     "targets": 3,
+                    data: 'CategoryPosition',
+                    render: function (data, type, row, meta) {
+                        return type === 'display' ?
+                            '<p class="position_' + row.id + '">' + data + '</p>' : ''                    }
+                },
+                {
+
+                    "targets": 4,
                     data: 'Action',
                     render: function (data, type, row, meta) {
                         return '    <!-- Button trigger modal -->\n' +
@@ -163,6 +170,19 @@ document.addEventListener("DOMContentLoaded", function () {
             var modal = $(this);
             let hotCategory = modal.find('.modal-body #hotCatgory');
             hotCategory.prop("checked", false);
+
+            let category_position = modal.find('.modal-body #category_position');
+            category_position.val('');
+            category_position.text('');
+
+
+            let nkw = modal.find('.modal-body #nkw');
+            nkw.val('');
+            nkw.text('');
+
+            let pkw = modal.find('.modal-body #pkw');
+            pkw.val('');
+            pkw.text('');
         });
 
 
@@ -171,6 +191,8 @@ document.addEventListener("DOMContentLoaded", function () {
             var modal = $(this);
             let categoryId = button.data('categoryId');
             modal.find('.modal-title').text('Edit ' + $('.cn_' + categoryId).text() + ' category');
+
+
             let pkw_input = modal.find('.modal-body #pkw');
             let pkw_value = $('.pkw_' + categoryId);
 
@@ -179,6 +201,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (pkw_value_data) {
                     pkw_input.text(pkw_value_data);
                     pkw_input.val(pkw_value_data);
+                    return false;
+                }
+            });
+
+            let category_position_input = modal.find('.modal-body #category_position');
+            let category_position_value = $('.position_' + categoryId);
+
+            $.each(category_position_value, function (k, v) {
+                let category_position_value_data = $(v).text();
+                if (category_position_value_data) {
+                    category_position_input.text(category_position_value_data);
+                    category_position_input.val(category_position_value_data);
                     return false;
                 }
             });

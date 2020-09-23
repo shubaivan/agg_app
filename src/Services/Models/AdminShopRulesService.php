@@ -74,7 +74,7 @@ class AdminShopRulesService
                             if (isset($value[$extraKey])) {
                                 $implode = implode('|', $extraRule);
 
-                                if (preg_match_all("/$implode/iu", $value[$extraKey], $mt)) {
+                                if (preg_match_all("/\b$implode\b/iu", $value[$extraKey], $mt)) {
                                     $failedRule = false;
                                     break;
                                 } else {
@@ -120,7 +120,7 @@ class AdminShopRulesService
                             if (isset($value[$extraKey])) {
                                 $implode = implode('|', $extraRule);
 
-                                if (preg_match_all("/$implode/iu", $value[$extraKey], $mt)) {
+                                if (preg_match_all("/\b$implode\b/iu", $value[$extraKey], $mt)) {
                                     $failedRule = true;
                                     break;
                                 } else {

@@ -29,7 +29,8 @@ use App\Validation\Constraints\CustomUrl;
  *     @ORM\Index(name="created_asc_index", columns={"created_at"}),
  *     @ORM\Index(name="price_desc_index", columns={"price"}),
  *     @ORM\Index(name="price_asc_index", columns={"price"}),
- *     @ORM\Index(name="products_extras_idx", columns={"extras"})
+ *     @ORM\Index(name="products_extras_idx", columns={"extras"}),
+ *     @ORM\Index(name="product_slug_index", columns={"slug"})
  * }
  *     )
  *
@@ -46,7 +47,7 @@ use App\Validation\Constraints\CustomUrl;
  * @ORM\Cache("NONSTRICT_READ_WRITE")
  * @ORM\HasLifecycleCallbacks()
  */
-class Product implements EntityValidatorException
+class Product extends SlugAbstract implements EntityValidatorException
 {
     use TimestampableEntity;
 
@@ -162,7 +163,11 @@ class Product implements EntityValidatorException
     /**
      * @var Collection|Category[]
      * @ORM\Cache("NONSTRICT_READ_WRITE")
-     * @ORM\ManyToMany(targetEntity="Category", inversedBy="products", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(targetEntity="Category",
+     *     inversedBy="products",
+     *      cascade={"persist", "remove"},
+     *      orphanRemoval=true,
+     *      fetch="EXTRA_LAZY")
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $categoryRelation;
@@ -247,7 +252,10 @@ class Product implements EntityValidatorException
     /**
      * @var Brand
      * @ORM\Cache("NONSTRICT_READ_WRITE")
-     * @ORM\ManyToOne(targetEntity="Brand", inversedBy="products", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="Brand",
+     *      inversedBy="products",
+     *      cascade={"persist", "remove"}
+     *     )
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $brandRelation;
@@ -292,7 +300,11 @@ class Product implements EntityValidatorException
 
     /**
      * @var Collection|UserIpProduct[]
-     * @ORM\OneToMany(targetEntity="UserIpProduct", mappedBy="products")
+     * @ORM\OneToMany(targetEntity="UserIpProduct",
+     *     mappedBy="products",
+     *     cascade={"remove"},
+     *     orphanRemoval=true
+     *     )
      */
     private $userIpProducts;
 
@@ -305,7 +317,8 @@ class Product implements EntityValidatorException
     /**
      * @var Shop
      * @ORM\Cache("NONSTRICT_READ_WRITE")
-     * @ORM\ManyToOne(targetEntity="Shop", inversedBy="products", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="Shop", inversedBy="products",
+     *     cascade={"persist", "remove"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $shopRelation;
@@ -1042,5 +1055,10 @@ class Product implements EntityValidatorException
         $matchData = preg_replace('!\s+!', ',', $replace);
 
         return $matchData;
+    }
+
+    public function getDataFroSlug()
+    {
+        $this->name;
     }
 }

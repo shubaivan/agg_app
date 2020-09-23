@@ -1,0 +1,147 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile!{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    {% if th_keys|length %}
+
+        {% if prepareSelectShopName|length %}
+            <span class="table-add float-right mb-3 mr-2">
+                <button type="button" class="btn btn-success add-new-shop">Add New</button>
+            </span>
+        {% endif %}
+
+        <!-- Table -->
+        <table id='empTable' class='display dataTable'>
+
+            <thead>
+            <tr>
+                {% for columnProduct in th_keys %}
+                    <th scope="col">{{ columnProduct }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tfoot>
+            {% for columnProduct in th_keys %}
+                <th scope="col">{{ columnProduct }}</th>
+            {% endfor %}
+            </tfoot>
+
+        </table>
+    {% endif %}
+
+    <!-- Modal -->
+    <div class="modal fade" id="newShopRules" tabindex="-1" role="dialog" aria-labelledby="newShopRulesTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newShopRulesTitle">Create new rules</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="container-fluid">
+                        <div class="form-group">
+                            <label for="select-shop" class="col-sm-4 control-label">Please Select Shop </label>
+                            <div class="col-sm-10">
+                                <select id="select-shop" class="selectpicker select-shop" data-live-search="true">
+                                    <option value="" selected disabled>Please select Shop</option>
+                                    {% for key, groupShop in prepareSelectShopName %}
+                                    <optgroup label="{{ key }}">
+                                        {% for keyShopName, shopName in groupShop %}
+                                            <option value="{{ shopName }}">{{ shopName }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group block-for-select-column">
+                            <label for="select-column" class="col-sm-4 control-label"> Select Column </label>
+                            <div class="col-sm-10">
+                                <select id="select-column" class="selectpicker shop-rules-edit-select" data-live-search="true">
+                                    <option value="" selected disabled>Please select Column</option>
+                                    <option value="name">Name</option>
+                                    <option value="description">Description</option>
+                                    <option value="category">Category</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <form id="newShopRulesForm">
+
+                        </form>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editShopRules" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="container-fluid">
+
+                        <select id="select-column" class="selectpicker shop-rules-edit-select" data-live-search="true">
+                            <option value="" selected disabled>Please select Column</option>
+                            <option value="name">Name</option>
+                            <option value="description">Description</option>
+                            <option value="category">Category</option>
+                        </select>
+
+                        <form id="editShopRulesForm">
+                        </form>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('index/js/admin_shop_rule_list.min') }}
+
+    <script>
+        function getJSonObject(value) {
+            return $.parseJSON(value.replace(/&quot;/ig, '"'));
+        }
+
+        let th_keys = getJSonObject("{{ dataTbaleKeys ? dataTbaleKeys|json_encode() : "{}" }}");
+        let for_prepare_defs = getJSonObject("{{ dataTbaleKeys ? dataTbaleKeys|json_encode() : "{}" }}");
+
+        let img_columns = getJSonObject("{{ img_columns ? img_columns|json_encode() : "{}" }}");
+        let link_columns = getJSonObject("{{ link_columns ? link_columns|json_encode() : "{}" }}");
+        let short_preview_columns = getJSonObject("{{ short_preview_columns ? short_preview_columns|json_encode() : "{}" }}");
+
+        let separate_filter_column = getJSonObject("{{ separate_filter_column ? separate_filter_column|json_encode() : "{}" }}");
+        let convert_to_html_columns = getJSonObject("{{ convert_to_html_columns ? convert_to_html_columns|json_encode() : "{}" }}");
+
+    </script>
+
+
+{% endblock %}

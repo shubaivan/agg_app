@@ -50,10 +50,23 @@ class ManagerShopsService
 //'vegaoo'
 //'nordic_nest'
 
+// Awin
 //'nepiece_nordic'
 //'blue_tomato'
 //'ellos_se' 
-//'jd_sports' 
+//'jd_sports'
+// cubus
+
+//Adtraction
+//adlibris
+
+// TradeDoubler
+//eskor
+//pinkorblue
+//boozt
+//desigual
+//coolshop
+//teddymania
 
     /**
      * @var PyretService
@@ -339,7 +352,7 @@ class ManagerShopsService
 
     public function __call($name, $arguments)
     {
-        $prepareProperty = Shop::getMapShopNameByKey($name);
+        $prepareProperty = Shop::getMapShopKeyByOriginalName($name);
 
         if (property_exists($this, $prepareProperty)) {
             $this->getProprtyObject($prepareProperty)

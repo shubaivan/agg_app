@@ -175,6 +175,9 @@ document.addEventListener("DOMContentLoaded", function () {
     $('#exampleModalLong').on('hide.bs.modal', function (event) {
         var modal = $(this);
         let hotCategory = modal.find('.modal-body #topBrand');
+        let bn = modal.find('.modal-body #bn');
+        bn.val('');
+        bn.text('');
         hotCategory.prop("checked", false);
     });
 

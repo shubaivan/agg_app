@@ -5,6 +5,8 @@ namespace App\Command;
 use App\Cache\CacheManager;
 use App\Kernel;
 use App\QueueModel\FileReadyDownloaded;
+use App\Services\Admin\ResourceShopManagement;
+use App\Services\Storage\DigitalOceanStorage;
 use App\Util\RedisHelper;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -22,13 +24,15 @@ class TradeDoublerResourceDownloadFile extends ResourceDownloadFile
     protected static $defaultName = 'app:trade_doubler:download';
 
     /**
-     * AdtractionResourceDownloadFile constructor.
+     * TradeDoublerResourceDownloadFile constructor.
      * @param KernelInterface $kernel
      * @param MessageBusInterface $bus
      * @param LoggerInterface $adtractionLogLogger
      * @param ContainerBagInterface $params
      * @param CacheManager $cacheManager
      * @param RedisHelper $redisHelper
+     * @param DigitalOceanStorage $do
+     * @param ResourceShopManagement $resourceShopManagement
      */
     public function __construct(
         KernelInterface $kernel,
@@ -36,7 +40,9 @@ class TradeDoublerResourceDownloadFile extends ResourceDownloadFile
         LoggerInterface $adtractionLogLogger,
         ContainerBagInterface $params,
         CacheManager $cacheManager,
-        RedisHelper $redisHelper
+        RedisHelper $redisHelper,
+        DigitalOceanStorage $do,
+        ResourceShopManagement $resourceShopManagement
     )
     {
 
@@ -44,11 +50,13 @@ class TradeDoublerResourceDownloadFile extends ResourceDownloadFile
         $filePath = $params->get('tradedoubler_download_file_path');
 
         parent::__construct(
+            $resourceShopManagement,
             $kernel,
             $bus,
             $adtractionLogLogger,
             $cacheManager,
             $redisHelper,
+            $do,
             $filePath,
             $urls
         );

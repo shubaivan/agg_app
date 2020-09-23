@@ -85,9 +85,9 @@ trait CommonTrait
             array_push($filter, $addFields);
             array_push($filterQuantity, $addFields);
 
-            $addMatch = ['$match' => ['score' => ['$gte' => 1.0]]];
-            array_push($filter, $addMatch);
-            array_push($filterQuantity, $addMatch);
+//            $addMatch = ['$match' => ['score' => ['$gte' => 1.0]]];
+//            array_push($filter, $addMatch);
+//            array_push($filterQuantity, $addMatch);
 
             $sort_by_search = [
                 'score' => ['$meta' => 'textScore']

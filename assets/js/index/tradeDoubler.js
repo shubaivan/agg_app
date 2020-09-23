@@ -38,9 +38,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log(result.responseJSON.status);
         },
         success: (data) => {
-            if (!data.length) {
-                return;
-            }
             const collectionData = window.Routing
                 .generate('app_rest_tradedoublercollection_postproducts');
             var common_defs = [];
@@ -107,6 +104,19 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     })
                 }
+
+                if ($.inArray(value.data, array_columns ) !== -1) {
+                    decline_reason_key.push(key);
+                    common_defs.push({
+                        "targets": key,
+                        "data": value.data,
+                        "render": function ( data, type, row, meta ) {
+                            return type === 'display' ?
+                                JSON.stringify(data) :
+                                '';
+                        }
+                    })
+                }
             });
 
 // Setup - add a text input to each footer cell
@@ -133,25 +143,26 @@ document.addEventListener("DOMContentLoaded", function () {
                             }
                         } );
                     } );
+                    if (data.length) {
+                        this.api().columns(decline_reason_key).every( function () {
+                            var column = this;
+                            var select = $('<select><option value=""></option></select>')
+                                .appendTo( $(column.footer()).empty() )
+                                .on( 'change', function () {
+                                    var val = $.fn.dataTable.util.escapeRegex(
+                                        $(this).val()
+                                    );
 
-                    this.api().columns(decline_reason_key).every( function () {
-                        var column = this;
-                        var select = $('<select><option value=""></option></select>')
-                            .appendTo( $(column.footer()).empty() )
-                            .on( 'change', function () {
-                                var val = $.fn.dataTable.util.escapeRegex(
-                                    $(this).val()
-                                );
-
-                                column
-                                    .search( val ? val : '', false, false )
-                                    .draw();
-                            } );
-                        $.each(data, function( key, value ) {
-                            // console.log(key, value);
-                            select.append( '<option value="'+value+'">'+value.substr( 0, 10 )+'</option>' )
-                        });
-                    } );
+                                    column
+                                        .search( val ? val : '', false, false )
+                                        .draw();
+                                } );
+                            $.each(data, function( key, value ) {
+                                // console.log(key, value);
+                                select.append( '<option value="'+value+'">'+value.substr( 0, 10 )+'</option>' )
+                            });
+                        } );
+                    }
                 },
                 'responsive': true,
                 'fixedHeader': true,

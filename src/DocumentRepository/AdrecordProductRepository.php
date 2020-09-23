@@ -31,11 +31,8 @@ class AdrecordProductRepository extends ServiceDocumentRepository implements Car
      */
     public function matchExistProduct(ResourceProductQueues $productQueues)
     {
-        return  $this->matchExistProductAllow('AdrecordProduct',[
-            'SKU' => $productQueues->getSku(),
-            'brand' => $productQueues->getBrand(),
-            'EAN' => $productQueues->getEan(),
-            'shop' => $productQueues->getShop(),
+        return  $this->matchExistProductAllow('AdrecordProduct', [
+            'identityUniqData' => $productQueues->getAttributeByName('identityUniqData'),
         ]);
     }
 

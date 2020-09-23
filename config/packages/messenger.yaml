@@ -19,6 +19,10 @@ framework:
           middleware:
             - doctrine_ping_connection
             - doctrine_close_connection
+        manually.bus:
+          middleware:
+            - doctrine_ping_connection
+            - doctrine_close_connection
 
       failure_transport: failed
 
@@ -92,6 +96,18 @@ framework:
               vacuum_row:
                 binding_keys: [vacuum_row]
 
+        manually_resource_jobs:
+          dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+          serializer: App\Messenger\ExternalJsonMessageSerializer
+          options:
+            exchange:
+              type: direct
+              name: manually_resource_jobs
+              default_publish_routing_key: manually_resource_jobs
+            queues:
+              manually_resource_jobs:
+                binding_keys: [manually_resource_jobs]
+
         carriage_shop:
           dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
           serializer: App\Messenger\ExternalJsonMessageSerializer
@@ -114,4 +130,5 @@ framework:
         'App\QueueModel\VacuumJob': vacuum_row
         'App\QueueModel\AwinDataRow': awin_parse_row
         'App\QueueModel\TradeDoublerDataRow': trade_doubler_parse_row
+        'App\QueueModel\ManuallyResourceJobs': manually_resource_jobs
 

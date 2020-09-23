@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile!{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    {% if th_keys|length %}
+        <!-- Table -->
+        <table id='empTable' class='display dataTable'>
+
+            <thead>
+            <tr>
+                {% for columnProduct in th_keys %}
+                    <th scope="col">{{ columnProduct }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tfoot>
+            {% for columnProduct in th_keys %}
+                <th scope="col">{{ columnProduct }}</th>
+            {% endfor %}
+            </tfoot>
+
+        </table>
+    {% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('index/js/resource_shop_list.min') }}
+
+    <script>
+        function getJSonObject(value) {
+            return $.parseJSON(value.replace(/&quot;/ig, '"'));
+        }
+
+        let th_keys = getJSonObject("{{ dataTbaleKeys ? dataTbaleKeys|json_encode() : "{}" }}");
+        let for_prepare_defs = getJSonObject("{{ dataTbaleKeys ? dataTbaleKeys|json_encode() : "{}" }}");
+
+    </script>
+
+{% endblock %}

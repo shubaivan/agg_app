@@ -15,6 +15,7 @@ fos_rest:
     format_listener:
         rules:
             - { path: ^/api, prefer_extension: true, fallback_format: json, priorities: [ json ] }
+            - { path: ^/admin/api, prefer_extension: true, fallback_format: json, priorities: [ json ] }
             - { path: ^/, priorities: [ json, xml, html ], fallback_format: ~, prefer_extension: true }
     view:
       view_response_listener: 'force'
@@ -30,16 +31,18 @@ fos_rest:
     exception:
         enabled: true
         codes:
-            'Symfony\Component\Routing\Exception\ResourceNotFoundException': 404
-            'Doctrine\ORM\OptimisticLockException': HTTP_CONFLICT
-            'Symfony\Component\HttpKernel\Exception\BadRequestHttpException': 400
-            'Doctrine\DBAL\Exception\SyntaxErrorException': 400
-            'Doctrine\DBAL\Exception\InvalidFieldNameException': 400
+            Symfony\Component\Routing\Exception\ResourceNotFoundException: 404
+            Doctrine\ORM\OptimisticLockException: HTTP_CONFLICT
+            Symfony\Component\HttpKernel\Exception\BadRequestHttpException: 400
+            Doctrine\DBAL\Exception\SyntaxErrorException: 400
+            Doctrine\DBAL\Exception\InvalidFieldNameException: 400
             Exception: 400
+            Symfony\Component\Security\Core\Exception\AccessDeniedException: 403
         messages:
             Symfony\Component\HttpKernel\Exception\BadRequestHttpException: true
             Symfony\Component\HttpKernel\Exception\HttpException: true
-            'Doctrine\DBAL\Exception\SyntaxErrorException': true
-            'Doctrine\DBAL\Exception\InvalidFieldNameException': true
+            Doctrine\DBAL\Exception\SyntaxErrorException: true
+            Doctrine\DBAL\Exception\InvalidFieldNameException: true
             Exception: true
+            Symfony\Component\Security\Core\Exception\AccessDeniedException: true
 

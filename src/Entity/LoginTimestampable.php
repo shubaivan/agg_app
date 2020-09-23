@@ -27,7 +27,7 @@ trait LoginTimestampable
     /**
      * @return \DateTime
      */
-    public function getLoginAt(): \DateTime
+    public function getLoginAt()
     {
         return $this->loginAt;
     }
@@ -45,7 +45,7 @@ trait LoginTimestampable
     /**
      * @return \DateTime
      */
-    public function getLogoutAt(): \DateTime
+    public function getLogoutAt()
     {
         return $this->logoutAt;
     }

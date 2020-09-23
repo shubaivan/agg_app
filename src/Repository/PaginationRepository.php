@@ -43,9 +43,11 @@ trait PaginationRepository
                 $qb
                     ->orderBy('s.' . $param->get('sort_by'), $param->get('sort_order'));
             }
-            $qb
-                ->setFirstResult($param->get('count') * ($param->get('page') - 1))
-                ->setMaxResults($param->get('count'));
+            if ($param->get('count') && $param->get('page')) {
+                $qb
+                    ->setFirstResult($param->get('count') * ($param->get('page') - 1))
+                    ->setMaxResults($param->get('count'));
+            }
 
             $query =$qb->getQuery();
 

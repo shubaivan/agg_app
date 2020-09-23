@@ -25,7 +25,7 @@ class AdminConfigurationFixtures extends AbstractFixtures implements DependentFi
         Blankens';
 
     const PROPERTYDATA_KEYWORDS = '
-               vuxen, fucker, sex
+               vuxen, fucker, sexig, sexy, adult, sexuella, sexual, sexism, sexist, sexuality, sextant, Sexualität, Bibelns, POLITY, shame
             ';
 
     public function load(ObjectManager $manager)

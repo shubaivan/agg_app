@@ -82,7 +82,7 @@ class CategoryKladerFixtures extends AbstractFixtures
                 ',
             ],
             [
-                'name' => 'Underkläder',
+                'name' => 'Underkläder & Strumpor',
                 'key_word' => '
                     Kalsonger, trosor, strumpor, strumpbyxor, Benvärmare, Boxershorts, Long johns, Strumpbyxor, Strumpbyxa, Strumpor, Trosor, 
                     Trosa, Underbyxor, Underbyxa Underklädsset, Underlinnen, Underlinne, Trunks,
@@ -151,10 +151,10 @@ class CategoryKladerFixtures extends AbstractFixtures
                 ]
             ],
             [
-                'name' => 'Sovkläder',
+                'name' => 'Pyjamas & Nattlinnen',
                 'key_word' => '
                     Pyjamas, Nattlinne, Nattlinnen, Nattklänning, Nattklänningar,
-                    Pajamas, Nightdress, Nightgown, Nightgowns
+                    Pajamas, Nightdress, Nightgown, Nightgowns 
                 ',
                 'sub_key_word' => [
                     'Pyjamas' => 'pyjamas, pyjamasar',

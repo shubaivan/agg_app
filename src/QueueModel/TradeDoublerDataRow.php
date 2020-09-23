@@ -14,6 +14,30 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
         $imgCounter = 1;
         $rowData = $this->getRow();
         $rowData['Extras'] = '';
+
+        $pregFieldKeys = preg_grep('/\(field\)/iu', array_keys($rowData));
+        if (is_array($pregFieldKeys) && count($pregFieldKeys)) {
+            $fieldsData = array_intersect_key( $rowData, array_flip($pregFieldKeys) );
+            if (is_array($fieldsData) && count($fieldsData)) {
+                $rowData['gFields'] = $fieldsData;
+                $rowData['gFieldsShow'] = $fieldsData;
+                foreach ($fieldsData as $key=>$fieldData) {
+                    $modifyKey = preg_replace('/\(field\)g:|\(field\)/', '', $key);
+                    if (strlen($modifyKey)) {
+                        $modifyKey = mb_strtoupper($modifyKey);
+                        if ($modifyKey == 'COLOR') {
+                            $modifyKey = Product::COLOUR;
+                        }
+                        if ($modifyKey == 'ADDITIONAL_IMAGE_LINK') {
+                            $rowData['Extras'] .= '{ALTERNATIVE_IMAGE_'.$imgCounter.'#' . $fieldData . '}';
+                        } else {
+                            $rowData['Extras'] .= '{'.$modifyKey.'#' . $fieldData . '}';
+                        }
+                    }
+                }
+            }
+        }
+
         if (isset($rowData['id'])) {
             $rowData['tradeDoublerId'] = $rowData['id'];
             unset($rowData['id']);
@@ -159,12 +183,13 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
             && strlen($this->getAttributeByName('identifiers'))
         ) {
             $prepare[] = $this->getAttributeByName('identifiers');
-        }
-        $preg_replace = preg_replace('/;/', '', ';;;;');
-        if (!strlen($preg_replace)) {
-            if ($this->getAttributeByName('tradeDoublerId')
-                && strlen($this->getAttributeByName('tradeDoublerId'))) {
-                $prepare[] = $this->getAttributeByName('tradeDoublerId');
+
+            $preg_replace = preg_replace('/;/', '', $this->getAttributeByName('identifiers'));
+            if (!strlen($preg_replace)) {
+                if ($this->getAttributeByName('tradeDoublerId')
+                    && strlen($this->getAttributeByName('tradeDoublerId'))) {
+                    $prepare[] = $this->getAttributeByName('tradeDoublerId');
+                }
             }
         }
 

@@ -16,12 +16,12 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
     private $configuration = [
         'Lindex' =>
             [
-                'category' => 'Kids wear'
+                'category' => ['Kids wear']
             ]
         ,
         'Åhlens' =>
             [
-                'category' => 'Barn & ungdom'
+                'category' => ['Barn & ungdom']
             ]
         ,
         'Sportshopen' =>
@@ -175,7 +175,7 @@ class AdminShopsRulesFixtures extends Fixture implements DependentFixtureInterfa
     public function load(ObjectManager $manager)
     {
         foreach ($this->configuration as $shopName => $conf) {
-            $mapShopNameByKey = Shop::getMapShopNameByKey($shopName);
+            $mapShopNameByKey = Shop::getMapShopKeyByOriginalName($shopName);
             if ($mapShopNameByKey) {
                 $adminShopsRules = new AdminShopsRules();
                 $adminShopsRules
