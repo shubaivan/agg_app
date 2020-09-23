@@ -16,9 +16,8 @@ abstract class SlugAbstract implements SlugInterface
      * @Annotation\Groups({
      *     Category::SERIALIZED_GROUP_LIST,
      *     Product::SERIALIZED_GROUP_LIST,
-     *      Category::SERIALIZED_GROUP_RELATIONS_LIST,
-     *     SearchProductCollection::GROUP_GET,
-     *     Product::SERIALIZED_GROUP_LIST
+     *     Category::SERIALIZED_GROUP_RELATIONS_LIST,
+     *     SearchProductCollection::GROUP_GET
      *     })
      */
     protected $slug;
