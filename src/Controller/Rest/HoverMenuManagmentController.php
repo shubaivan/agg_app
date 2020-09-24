@@ -7,6 +7,8 @@ use App\Controller\HoverMenuController;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
+use App\Entity\Category;
+use App\Entity\CategoryRelations;
 use App\Exception\ValidatorException;
 use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
@@ -59,6 +61,35 @@ class HoverMenuManagmentController extends AbstractRestController
         $this->categoryConfRepo = $categoryConfRepo;
         $this->categoryRepo = $categoryRepo;
         $this->tagAwareQueryResultCacheCategoryConf = $tagAwareQueryResultCacheCategoryConf;
+    }
+
+    /**
+     * get sub Categories.
+     *
+     * @Rest\Post("/api/hover_menu/sub_categories", options={"expose": true})
+     *
+     * @param Request $request
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="HoverMenu")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object HoverMenu",
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws InvalidArgumentException When $tags is not valid
+     */
+    public function getSubCategoriesAction(Request $request)
+    {
+        $subCategoriesByIds = $this->categoryRepo
+            ->getSubCategoriesByIds($request->get('category_id'));
+
+        return $this->createSuccessResponse($subCategoriesByIds);
     }
 
     /**
@@ -169,7 +200,7 @@ class HoverMenuManagmentController extends AbstractRestController
     /**
      * get Products.
      *
-     * @Rest\Get("/api/hover_menu/list", options={"expose": true})
+     * @Rest\Post("/api/hover_menu/list", options={"expose": true})
      *
      * @param Request $request
      *
@@ -189,16 +220,16 @@ class HoverMenuManagmentController extends AbstractRestController
     public function listHoverMenuAction(Request $request)
     {
         $data = $this->categoryConfRepo
-            ->getHoverMenuCategoryConf($request->query->all());
+            ->getHoverMenuCategoryConf($request->request->all());
 
         $view = $this->createSuccessResponse(
             array_merge(
                 [
-                    "draw" => $request->query->get('draw'),
+                    "draw" => $request->request->get('draw'),
                     "recordsTotal" => $this->categoryConfRepo
-                        ->getHoverMenuCategoryConf($request->query->all(), true, true),
+                        ->getHoverMenuCategoryConf($request->request->all(), true, true),
                     "recordsFiltered" => $this->categoryConfRepo
-                        ->getHoverMenuCategoryConf($request->query->all(), true),
+                        ->getHoverMenuCategoryConf($request->request->all(), true),
                 ],
                 ['data' => $data]
             )

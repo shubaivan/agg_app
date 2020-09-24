@@ -24,9 +24,18 @@ require('@fortawesome/fontawesome-free/js/all.js');
 require('bootstrap');
 
 document.addEventListener("DOMContentLoaded", function () {
+    var sub_category_ids = {};
+    var table;
+    var global_level;
+
 
     const app_rest_hovermenumanagment_listthhovermenu = window.Routing
         .generate('app_rest_hovermenumanagment_listthhovermenu');
+    const app_rest_hovermenumanagment_getsubcategories = window.Routing
+        .generate('app_rest_hovermenumanagment_getsubcategories');
+    const app_rest_hovermenumanagment_listhovermenu = window.Routing
+        .generate('app_rest_hovermenumanagment_listhovermenu');
+
     const body = $('body');
     body.on('keydown keyup onblur', '#pkw, #nkw, #category_name', function () {
         let input = $(this);
@@ -43,6 +52,41 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    body.on('change', '.radio-level input[type=radio][name=change-category-level-filter]', function () {
+        let input = $(this);
+
+        global_level = input.val();
+        let pathPresent = $('#path_present h2');
+        pathPresent.empty();
+
+        let select = $('#filter-by-top');
+        select.find('option:first').prop('selected',true);
+        select
+            .val('all')
+            .trigger('change');
+
+        if (table) {
+            table.search('');
+            table.ajax.reload();
+        }
+    });
+
+    body.on('click', 'a.triger_sub_categories', function () {
+        let aCurrentTag = $(this);
+        aCurrentTag.nextAll().remove();
+        let categoryId = aCurrentTag.data('categoryId');
+        let categoryName = aCurrentTag.data('categoryName');
+        aCurrentTag.remove();
+        applySubCategories(categoryId, categoryName);
+    });
+
+    body.on('click', 'button.triger_sub_categories', function () {
+        let button = $(this);
+        let categoryId = button.data('categoryId');
+        let categoryName = button.data('categoryName');
+        applySubCategories(categoryId, categoryName);
+    });
+
     $.ajax({
         type: "GET",
         url: app_rest_hovermenumanagment_listthhovermenu,
@@ -55,17 +99,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 columns.push({
                     'data': v
                 })
-            })
-            console.log(columns)
+            });
             generateDataTables(columns);
         }
     });
 
     function generateDataTables(columns) {
-        const app_rest_hovermenumanagment_listhovermenu = window.Routing
-            .generate('app_rest_hovermenumanagment_listhovermenu');
-
-        var table = $('#empTable').DataTable({
+        table = $('#empTable').DataTable({
             initComplete: function () {
                 this.api().columns(0).every(function () {
                     var column = this;
@@ -82,6 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 .search(val ? val : '', false, false)
                                 .draw();
                         });
+                    select.attr('id', 'filter-by-top');
                     var labelTag = $('<label />').attr('for', 'inputState');
                     labelTag.text('Hot');
                     divTag.append(labelTag).append(select);
@@ -98,9 +139,15 @@ document.addEventListener("DOMContentLoaded", function () {
             'fixedHeader': true,
             'processing': true,
             'serverSide': true,
-            'serverMethod': 'get',
+            'serverMethod': 'POST',
             'ajax': {
-                'url': app_rest_hovermenumanagment_listhovermenu,
+                "url": app_rest_hovermenumanagment_listhovermenu,
+                "data": function ( d ) {
+                    d.sub_categories_id = sub_category_ids;
+                    if (global_level) {
+                        d.level = global_level;
+                    }
+                }
             },
             columns: columns,
             "columnDefs": [
@@ -157,10 +204,50 @@ document.addEventListener("DOMContentLoaded", function () {
                     "targets": 4,
                     data: 'Action',
                     render: function (data, type, row, meta) {
-                        return '    <!-- Button trigger modal -->\n' +
-                            '    <button type="button" class="btn btn-primary" data-category-id="' + row.id + '" data-toggle="modal" data-target="#exampleModalLong">\n' +
-                            '        Edit\n' +
-                            '    </button>';
+                        let result = '';
+
+                        let actions = data.split(",");
+                        var divTag = $('<div/>');
+                        var divBtnGroup = $('<div/>').addClass('btn-toolbar');
+                        $.each(actions, function (k, v) {
+                            if (v === 'Sub Categories' && !row.sub_count) {
+                                return;
+                            }
+                            let attrObj = {};
+                            if (k === 0) {
+                                attrObj = {
+                                    "class": 'btn btn-primary m-1'
+                                }
+                            } else {
+                                attrObj = {
+                                    "class": 'btn btn-info m-1'
+                                }
+                            }
+                            attrObj = $.extend(attrObj, {
+                                'data-category-id': row.id,
+                                'data-category-name': row.CategoryName,
+                                'type': 'button',
+                                'name': v,
+                                'text': v === 'Sub Categories' ? v + ' (' + row.sub_count + ')' : v
+                            });
+                            if (v === 'Edit') {
+                                attrObj = $.extend(
+                                    attrObj, {
+                                        'data-toggle': "modal",
+                                        'data-target': "#exampleModalLong"});
+                            }
+                            let button = $('<button/>',
+                                attrObj
+                            );
+                            button.addClass('triger_' + v.toLowerCase().replace(' ', '_'));
+                            divBtnGroup.append(button);
+                        });
+                        divTag.append(divBtnGroup);
+                        result = divTag.html();
+
+
+                        return type === 'display' ?
+                            result : ''
                     }
                 }
             ],
@@ -257,7 +344,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     return false;
                 }
             })
-        })
+        });
 
         $('.btn.btn-primary').on('click', function () {
             if ($('#editCateory textarea').length) {
@@ -281,9 +368,55 @@ document.addEventListener("DOMContentLoaded", function () {
                 success: (data) => {
                     console.log(data);
                     $('#exampleModalLong').modal('toggle');
-                    table.ajax.reload();
+                    table.ajax.reload(null, false);
                 }
             });
-        })
+        });
+    }
+
+    function applySubCategories(categoryId, categoryName) {
+        $.ajax({
+            type: "POST",
+            url: app_rest_hovermenumanagment_getsubcategories,
+            data: {
+                category_id: categoryId
+            },
+            error: (result) => {
+                console.log(result.responseJSON.status);
+            },
+            success: (data) => {
+                sub_category_ids = data;
+                let aTag = $('<a>',{
+                    'text': categoryName,
+                    'title': categoryName,
+                    'data-category-id': categoryId,
+                    'data-category-name': categoryName,
+                }).addClass('triger_sub_categories');
+
+                let pathPresent = $('#path_present h2');
+                pathPresent
+                    .append(' ');
+                if (pathPresent.find('a').length > 0
+                    && pathPresent.children().last().prop("tagName") !== 'svg'
+                ) {
+                    pathPresent
+                        .append( '<i class="fas fa-angle-double-right"></i>')
+                }
+                pathPresent
+                    .append(' ')
+                    .append(aTag);
+
+                let select = $('#filter-by-top');
+                select.find('option:first').prop('selected',true);
+                select
+                    .val('all')
+                    .trigger('change');
+
+                if (table) {
+                    table.search('');
+                    table.ajax.reload();
+                }
+            }
+        });
     }
 });

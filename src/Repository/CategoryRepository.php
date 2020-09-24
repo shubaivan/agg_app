@@ -938,4 +938,68 @@ class CategoryRepository extends ServiceEntityRepository
             return false;
         }
     }
+
+    /**
+     * @param int $categoryId
+     * @param bool $count
+     * @return int|mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function getSubCategoriesByIds(int $categoryId, bool $count = false)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $query = '';
+        $params = [];
+        $types = [];
+        if ($count) {
+            $query .= '
+                        SELECT COUNT(DISTINCT c_relations.id)
+                    ';
+        } else {
+            $query .= '
+                    SELECT                         
+                        c_relations.sub_category_id
+            ';
+        }
+
+        $query .= '
+                FROM category_relations AS c_relations               
+                WHERE c_relations.main_category_id = :category_id 
+        ';
+        $params[':category_id'] = $categoryId;
+        $types[':category_id'] = \PDO::PARAM_INT;
+
+        $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
+            $query,
+            $params,
+            $types,
+            ['sub_categories'],
+            0,
+            'sub_categories'
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+
+        if ($count) {
+            $fetchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $fetchResult = isset($fetchResult[0]['count']) ? (int)$fetchResult[0]['count'] : 0;
+        } else {
+            $fetchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $fetchResult = array_map(function ($v) {
+                return $v['sub_category_id'] ?? '';
+            }, $fetchResult);
+        }
+        $statement->closeCursor();
+
+        return $fetchResult;
+    }
 }

@@ -40,6 +40,7 @@ class PgDataBaseActivitySubscriber extends SlugApproach implements EventSubscrib
 
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
             $entityChangeSet = $uow->getEntityChangeSet($entity);
+            $this->applySlug($entity);
         }
     }
 
