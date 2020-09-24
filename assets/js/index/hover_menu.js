@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    body.on('change', '.radio-level input[type=radio][name=change-category-level-filter]', function () {
+    body.on('click', '.radio-level input[type=radio][name=change-category-level-filter]', function () {
         let input = $(this);
 
         global_level = input.val();
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
         pathPresent.empty();
 
         let select = $('#filter-by-top');
-        select.find('option:first').prop('selected',true);
+        select.find('option:first').prop('selected', true);
         select
             .val('all')
             .trigger('change');
@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
             'serverMethod': 'POST',
             'ajax': {
                 "url": app_rest_hovermenumanagment_listhovermenu,
-                "data": function ( d ) {
+                "data": function (d) {
                     d.sub_categories_id = sub_category_ids;
                     if (global_level) {
                         d.level = global_level;
@@ -197,7 +197,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     data: 'CategoryPosition',
                     render: function (data, type, row, meta) {
                         return type === 'display' ?
-                            '<p class="position_' + row.id + '">' + data + '</p>' : ''                    }
+                            '<p class="position_' + row.id + '">' + data + '</p>' : ''
+                    }
                 },
                 {
 
@@ -234,7 +235,8 @@ document.addEventListener("DOMContentLoaded", function () {
                                 attrObj = $.extend(
                                     attrObj, {
                                         'data-toggle': "modal",
-                                        'data-target': "#exampleModalLong"});
+                                        'data-target': "#exampleModalLong"
+                                    });
                             }
                             let button = $('<button/>',
                                 attrObj
@@ -386,7 +388,7 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             success: (data) => {
                 sub_category_ids = data;
-                let aTag = $('<a>',{
+                let aTag = $('<a>', {
                     'text': categoryName,
                     'title': categoryName,
                     'data-category-id': categoryId,
@@ -400,14 +402,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     && pathPresent.children().last().prop("tagName") !== 'svg'
                 ) {
                     pathPresent
-                        .append( '<i class="fas fa-angle-double-right"></i>')
+                        .append('<i class="fas fa-angle-double-right"></i>')
                 }
                 pathPresent
                     .append(' ')
                     .append(aTag);
 
+                $('.radio-level input[value=all]')
+                    .attr('checked', 'checked');
+                global_level = 'all';
+
                 let select = $('#filter-by-top');
-                select.find('option:first').prop('selected',true);
+                select.find('option:first').prop('selected', true);
                 select
                     .val('all')
                     .trigger('change');
