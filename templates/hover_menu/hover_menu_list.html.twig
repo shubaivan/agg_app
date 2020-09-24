@@ -5,26 +5,45 @@
 {% block body %}
     {{ parent() }}
 
-    <div class="row">
+    <div class="row radio-level">
         <div class="col-md-8 mx-auto text-center">
+            <!-- all-->
+            <div class="custom-control custom-radio custom-control-inline">
+                <input type="radio" class="custom-control-input" id="all" name="change-category-level-filter" value="all">
+                <label class="custom-control-label" for="all">All level</label>
+            </div>
+
             <!-- Default inline 1-->
             <div class="custom-control custom-radio custom-control-inline">
-                <input type="radio" class="custom-control-input" id="defaultInline1" name="inlineDefaultRadiosExample">
-                <label class="custom-control-label" for="defaultInline1">1</label>
+                <input type="radio"
+                       class="custom-control-input"
+                       id="defaultInline1"
+                       name="change-category-level-filter"
+                       value="1"
+                >
+                <label class="custom-control-label" for="defaultInline1">1th level</label>
             </div>
 
             <!-- Default inline 2-->
             <div class="custom-control custom-radio custom-control-inline">
-                <input type="radio" class="custom-control-input" id="defaultInline2" name="inlineDefaultRadiosExample">
-                <label class="custom-control-label" for="defaultInline2">2</label>
+                <input type="radio" class="custom-control-input" id="defaultInline2" name="change-category-level-filter" value="2">
+                <label class="custom-control-label" for="defaultInline2">2th level</label>
             </div>
 
             <!-- Default inline 3-->
             <div class="custom-control custom-radio custom-control-inline">
-                <input type="radio" class="custom-control-input" id="defaultInline3" name="inlineDefaultRadiosExample">
-                <label class="custom-control-label" for="defaultInline3">3</label>
+                <input type="radio" class="custom-control-input" id="defaultInline3" name="change-category-level-filter" value="3">
+                <label class="custom-control-label" for="defaultInline3">3th level</label>
             </div>
 
+        </div>
+    </div>
+
+    <div class="row" id="path_present">
+        <div class="col-md-8 mx-auto text-center">
+            <h2 style="color: #1f69c0">
+
+            </h2>
         </div>
     </div>
 

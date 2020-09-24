@@ -238,7 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
             success: (data) => {
                 console.log(data);
                 $('#exampleModalLong').modal('toggle');
-                table.ajax.reload();
+                table.ajax.reload(null, false);
             }
         });
     })

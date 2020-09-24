@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
             success: (data) => {
                 console.log(data);
                 if (table) {
-                    table.ajax.reload();
+                    table.ajax.reload(null, false);
                 }
             }
         });

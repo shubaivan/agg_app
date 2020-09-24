@@ -356,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
             success: (data) => {
                 console.log(data);
                 modalObject.modal('toggle');
-                table.ajax.reload();
+                table.ajax.reload(null, false);
             }
         });
     }
