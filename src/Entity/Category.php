@@ -116,7 +116,7 @@ class Category extends SlugAbstract implements EntityValidatorException
      * @ORM\Column(type="integer", nullable=true, options={"default": "0"})
      * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
      */
-    private $position;
+    private $position = 0;
     
     public function __construct()
     {
