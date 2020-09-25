@@ -56,6 +56,9 @@ document.addEventListener("DOMContentLoaded", function () {
         let input = $(this);
 
         global_level = input.val();
+        if (global_level === 'all') {
+            sub_category_ids = {};
+        }
         let pathPresent = $('#path_present h2');
         pathPresent.empty();
 
