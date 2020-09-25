@@ -80,7 +80,8 @@ EOF;
         $allStatistics = $this->statisticsService->getAllStatistics();
         return $this->render('statistics/statistics.html.twig', [
             'prepareDataTh' => $allStatistics['prepareDataTh'],
-            'resultData' => $allStatistics['resultData']
+            'resultData' => $allStatistics['resultData'],
+            'quantityResult' => $allStatistics['quantityResult']
         ]);
     }
 
