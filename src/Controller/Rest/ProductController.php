@@ -228,9 +228,9 @@ class ProductController extends AbstractRestController
     }
 
     /**
-     * get Product data by id.
+     * get Product data by slug.
      *
-     * @Rest\Get("/api/product/{id}", requirements={"id"="\d+"})
+     * @Rest\Get("/api/product/{slug}")
      *
      * @SWG\Tag(name="Products")
      *

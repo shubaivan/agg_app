@@ -224,7 +224,7 @@ class ResourceDownloadFile extends Command
     /**
      * @return TraceableMessageBus
      */
-    protected function getBus(): TraceableMessageBus
+    protected function getBus()
     {
         return $this->bus;
     }
