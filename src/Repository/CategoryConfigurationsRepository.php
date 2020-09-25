@@ -193,6 +193,7 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
                     SELECT                         
                         category_alias.id,                       
                         category_alias.hot_category as "HotCategory",
+                        category_alias.disable_for_parsing as "DisableForParsing",
                         category_alias.category_name as "CategoryName",                       
                         c_conf.key_words as "PositiveKeyWords",
                         c_conf.negative_key_words as "NegativeKeyWords",

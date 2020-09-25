@@ -65,12 +65,14 @@ document.addEventListener("DOMContentLoaded", function () {
         let select = $('#filter-by-top');
         select.find('option:first').prop('selected', true);
         select
-            .val('all')
-            .trigger('change');
+            .val('all');
 
         if (table) {
-            table.search('');
-            table.ajax.reload();
+            table
+                .search('')
+                .columns( 0 )
+                .search('all')
+                .draw();
         }
     });
 
@@ -160,16 +162,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     "data": 'CategoryName',
                     "render": function (data, type, row, meta) {
                         let hotCategory = row.HotCategory;
+                        let disableForParsing = row.DisableForParsing;
                         var divTag = $('<div/>');
                         var pTag = $('<p/>', {"class": 'cn_' + row.id});
                         var span = $('<span />').addClass('hc_' + row.id).attr('hc_val', hotCategory);
+                        var span_dfp = $('<span />').addClass('dfp_' + row.id).attr('dfp_val', disableForParsing);
+
+                        if (disableForParsing) {
+                            span_dfp.append('<i class="fas fa-bell-slash"></i>');
+                        } else {
+                            span_dfp.append('<i class="fas fa-bell"></i>');
+                        }
 
                         if (hotCategory === true) {
                             span.append('<i class="fa fa-check" aria-hidden="true"></i>');
                         } else {
                             span.append('<i class="fas fa-ban"></i>');
                         }
-                        pTag.append(data).append(span);
+                        pTag.append(data).append(span).append(span_dfp);
                         divTag.append(pTag);
                         return type === 'display' ?
                             divTag.html() : ''
@@ -348,7 +358,19 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                     return false;
                 }
-            })
+            });
+
+            let disableForParsing = modal.find('.modal-body #disableForParsing');
+            let dfp_value = $('.dfp_' + categoryId);
+            $.each(dfp_value, function (k, v) {
+                let dfp_value_data = $(v).attr('dfp_val');
+                if (dfp_value_data) {
+                    if (dfp_value_data === 'true') {
+                        disableForParsing.prop("checked", true);
+                    }
+                    return false;
+                }
+            });
         });
 
         $('.btn.btn-primary').on('click', function () {
@@ -418,12 +440,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 let select = $('#filter-by-top');
                 select.find('option:first').prop('selected', true);
                 select
-                    .val('all')
-                    .trigger('change');
+                    .val('all');
 
                 if (table) {
-                    table.search('');
-                    table.ajax.reload();
+                    table
+                        .search('')
+                        .columns( 0 )
+                        .search('all')
+                        .draw();
                 }
             }
         });

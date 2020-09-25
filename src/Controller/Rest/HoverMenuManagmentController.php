@@ -146,6 +146,12 @@ class HoverMenuManagmentController extends AbstractRestController
         } else {
             $category->setHotCategory(false);
         }
+
+        if ($request->get('disableForParsing')) {
+            $category->setDisableForParsing(true);
+        } else {
+            $category->setDisableForParsing(false);
+        }
         $this->categoryConfRepo->save($categoryConfigurations);
         /** @var Registry $resultCacheImpl */
         $resultCacheImpl = $this->get('doctrine');

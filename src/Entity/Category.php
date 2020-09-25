@@ -104,6 +104,12 @@ class Category extends SlugAbstract implements EntityValidatorException
     private $hotCategory = false;
 
     /**
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
+     */
+    private $disableForParsing = false;
+
+    /**
      * @var CategorySection
      * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToOne(targetEntity="CategorySection", inversedBy="categories", cascade={"persist"})
@@ -354,6 +360,14 @@ class Category extends SlugAbstract implements EntityValidatorException
         $collection = new ArrayCollection(iterator_to_array($iterator));
 
         return $collection;
+    }
+
+    /**
+     * @param bool $disableForParsing
+     */
+    public function setDisableForParsing(bool $disableForParsing): void
+    {
+        $this->disableForParsing = $disableForParsing;
     }
 
     public function getDataFroSlug()

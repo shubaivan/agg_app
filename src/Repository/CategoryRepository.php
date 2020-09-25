@@ -396,6 +396,7 @@ class CategoryRepository extends ServiceEntityRepository
 
         $query .= '
                 WHERE ca.id IN ('.$idsMain.')
+                AND ca.disable_for_parsing = :disable_for_parsing
             ';
 
 
@@ -404,6 +405,7 @@ class CategoryRepository extends ServiceEntityRepository
                 AND crsub.common_fts @@ to_tsquery(\'my_swedish\', :sub_main_search)
                 AND crsub.negative_key_words_fts @@ to_tsquery(\'my_swedish\', :sub_main_search) = FALSE
                 AND (crsub.sizes = \'{}\' OR crsub.sizes = \'[]\')
+                AND crsub.disable_for_parsing = :disable_for_parsing
             ';
         }
 
@@ -411,6 +413,7 @@ class CategoryRepository extends ServiceEntityRepository
             $query .= '
                 AND crsub_main.common_fts @@ to_tsquery(\'my_swedish\', :sub_sub_main_search)
                 AND (crsub_main.sizes = \'{}\' OR crsub_main.sizes = \'[]\')
+                AND crsub_main.disable_for_parsing = :disable_for_parsing
             ';
         }
 
@@ -434,6 +437,9 @@ class CategoryRepository extends ServiceEntityRepository
                 ';
             }
         }
+
+        $params[':disable_for_parsing'] = false;
+        $types[':disable_for_parsing'] = \PDO::PARAM_BOOL;
 
 //        $params[':main_search_parial_category'] = $mainSearch;
 //        $types[':main_search_parial_category'] = \PDO::PARAM_STR;
@@ -832,17 +838,21 @@ class CategoryRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
 
         $query  = '
-                SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words FROM category AS c
+                SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words 
+                FROM category AS c
                 INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
                 WHERE 
                 EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
-                AND
+                AND category.disable_for_parsing = :disable_for_parsing
                 NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
+                AND 
                 AND to_tsvector(\'my_swedish\', regexp_replace(:productCategoriesData, \'\', \'\')) 
                         @@ to_tsquery(\'my_swedish\', REGEXP_REPLACE(REGEXP_REPLACE(conf.key_words, \'\s+\', \'\', \'g\'), \',\', \':*|\', \'g\'))
                 AND to_tsvector(\'my_swedish\', regexp_replace(:productCategoriesData, \'\', \'\')) 
                         @@ to_tsquery(\'my_swedish\', COALESCE (REGEXP_REPLACE(REGEXP_REPLACE(conf.negative_key_words, \'\s+\', \'\', \'g\'), \',\', \'|\', \'g\'), \'\')) = FALSE                        
             ';
+        $mainParams[':disable_for_parsing'] = false;
+        $mainType[':disable_for_parsing'] = \PDO::PARAM_BOOL;
 
         $mainParams[':productCategoriesData'] = $productCategoriesData;
         $mainType[':productCategoriesData'] = \PDO::PARAM_STR;
