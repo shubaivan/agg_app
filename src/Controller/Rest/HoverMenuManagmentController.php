@@ -80,14 +80,12 @@ class HoverMenuManagmentController extends AbstractRestController
      * )
      *
      * @return \FOS\RestBundle\View\View
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws InvalidArgumentException When $tags is not valid
+     * @throws \Doctrine\DBAL\Cache\CacheException
      */
     public function getSubCategoriesAction(Request $request)
     {
         $subCategoriesByIds = $this->categoryRepo
-            ->getSubCategoriesByIds($request->get('category_id'));
+            ->getSubCategoriesByIds([$request->get('category_id')]);
 
         return $this->createSuccessResponse($subCategoriesByIds);
     }
@@ -147,11 +145,31 @@ class HoverMenuManagmentController extends AbstractRestController
             $category->setHotCategory(false);
         }
 
+        $updateIds = [$category->getId()];
+        $catIds = [$category->getId()];
+        while (count($catIds)) {
+            $buferIds = [];
+
+            $ids = $this->categoryRepo
+                ->getSubCategoriesByIds($catIds);
+            $buferIds = array_merge($buferIds, $ids);
+            $updateIds = array_merge($updateIds, $ids);
+
+            if (count($buferIds)) {
+                $catIds = $buferIds;
+            } else {
+                $catIds = [];
+            }
+        }
+
         if ($request->get('disableForParsing')) {
             $category->setDisableForParsing(true);
+            $this->setUpdateDisableForParsingByIds($updateIds, true);
         } else {
             $category->setDisableForParsing(false);
+            $this->setUpdateDisableForParsingByIds($updateIds, false);
         }
+
         $this->categoryConfRepo->save($categoryConfigurations);
         /** @var Registry $resultCacheImpl */
         $resultCacheImpl = $this->get('doctrine');
@@ -165,7 +183,9 @@ class HoverMenuManagmentController extends AbstractRestController
 
         $this->getTagAwareQueryResultCacheCategoryConf()
             ->getTagAwareAdapter()
-            ->invalidateTags([CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH]);
+            ->invalidateTags([
+                CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH
+            ]);
         $view = $this->createSuccessResponse(
             ['test' => 1]
         );
@@ -250,5 +270,16 @@ class HoverMenuManagmentController extends AbstractRestController
     public function getTagAwareQueryResultCacheCategoryConf(): TagAwareQueryResultCacheCategoryConf
     {
         return $this->tagAwareQueryResultCacheCategoryConf;
+    }
+
+    /**
+     * @param array $updateIds
+     * @param bool $value
+     * @throws DBALException
+     */
+    private function setUpdateDisableForParsingByIds(array $updateIds, bool $value): void
+    {
+        $this->categoryRepo
+            ->updateDisableForParsingByIds($updateIds, $value);
     }
 }
