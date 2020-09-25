@@ -107,13 +107,16 @@ class HoverMenuManagmentController extends AbstractRestController
      * )
      *
      * @return \FOS\RestBundle\View\View
+     * @throws DBALException
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\DBAL\Cache\CacheException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws InvalidArgumentException When $tags is not valid
      */
     public function editHoverMenuAction(Request $request)
     {
-        $categoryConfigurations = $this->categoryConfRepo->findOneBy(['categoryId' => $request->get('category_id')]);
+        $categoryConfigurations = $this->categoryConfRepo
+            ->findOneBy(['categoryId' => $request->get('category_id')]);
 
         $category = $categoryConfigurations->getCategoryId();
         $pkw = $this->getHelpers()
@@ -145,32 +148,16 @@ class HoverMenuManagmentController extends AbstractRestController
             $category->setHotCategory(false);
         }
 
-        $updateIds = [$category->getId()];
-        $catIds = [$category->getId()];
-        while (count($catIds)) {
-            $buferIds = [];
-
-            $ids = $this->categoryRepo
-                ->getSubCategoriesByIds($catIds);
-            $buferIds = array_merge($buferIds, $ids);
-            $updateIds = array_merge($updateIds, $ids);
-
-            if (count($buferIds)) {
-                $catIds = $buferIds;
-            } else {
-                $catIds = [];
-            }
-        }
+        $this->categoryConfRepo->save($categoryConfigurations);
 
         if ($request->get('disableForParsing')) {
             $category->setDisableForParsing(true);
-            $this->setUpdateDisableForParsingByIds($updateIds, true);
+            $this->setUpdateDisableForParsingByIds($category, true);
         } else {
             $category->setDisableForParsing(false);
-            $this->setUpdateDisableForParsingByIds($updateIds, false);
+            $this->setUpdateDisableForParsingByIds($category, false);
         }
 
-        $this->categoryConfRepo->save($categoryConfigurations);
         /** @var Registry $resultCacheImpl */
         $resultCacheImpl = $this->get('doctrine');
         $objectManager = $resultCacheImpl->getManager();
@@ -273,12 +260,30 @@ class HoverMenuManagmentController extends AbstractRestController
     }
 
     /**
-     * @param array $updateIds
+     * @param Category $category
      * @param bool $value
      * @throws DBALException
+     * @throws \Doctrine\DBAL\Cache\CacheException
      */
-    private function setUpdateDisableForParsingByIds(array $updateIds, bool $value): void
+    private function setUpdateDisableForParsingByIds(Category $category, bool $value): void
     {
+        $updateIds = [$category->getId()];
+        $catIds = [$category->getId()];
+        while (count($catIds)) {
+            $buferIds = [];
+
+            $ids = $this->categoryRepo
+                ->getSubCategoriesByIds($catIds);
+            $buferIds = array_merge($buferIds, $ids);
+            $updateIds = array_merge($updateIds, $ids);
+
+            if (count($buferIds)) {
+                $catIds = $buferIds;
+            } else {
+                $catIds = [];
+            }
+        }
+
         $this->categoryRepo
             ->updateDisableForParsingByIds($updateIds, $value);
     }

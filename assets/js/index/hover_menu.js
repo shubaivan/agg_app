@@ -268,7 +268,8 @@ document.addEventListener("DOMContentLoaded", function () {
             ],
         });
 
-        $('#exampleModalLong').on('hide.bs.modal', function (event) {
+        let exampleModalLong = $('#exampleModalLong');
+        exampleModalLong.on('hide.bs.modal', function (event) {
             var modal = $(this);
             let hotCategory = modal.find('.modal-body #hotCatgory');
             hotCategory.prop("checked", false);
@@ -291,14 +292,14 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
 
-        $('#exampleModalLong').on('show.bs.modal', function (event) {
+        exampleModalLong.on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget); // Button that triggered the modal
             var modal = $(this);
             let categoryId = button.data('categoryId');
-            modal.find('.modal-title').text('Edit ' + $('.cn_' + categoryId).text() + ' category');
+            let cn_value = $('.cn_' + categoryId);
+            modal.find('.modal-title').text('Edit ' + cn_value.text() + ' category');
 
             let category_name_input = modal.find('.modal-body #category_name');
-            let cn_value = $('.cn_' + categoryId);
 
             $.each(cn_value, function (k, v) {
                 let cn_value_data = $(v).text();
@@ -374,8 +375,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         $('.btn.btn-primary').on('click', function () {
-            if ($('#editCateory textarea').length) {
-                $.each($('#editCateory textarea'), function (k, v) {
+            let editCateory = $('#editCateory textarea');
+            if (editCateory.length) {
+                $.each(editCateory, function (k, v) {
                     $(v).val($.trim($(v).val()));
                 })
             }
