@@ -850,15 +850,17 @@ class CategoryRepository extends ServiceEntityRepository
                 FROM category AS c
                 INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
                 WHERE 
-                EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
-                AND category.disable_for_parsing = :disable_for_parsing
-                NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
-                AND 
+                (
+                    EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)            
+                    AND
+                    NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)   
+                )              
                 AND to_tsvector(\'my_swedish\', regexp_replace(:productCategoriesData, \'\', \'\')) 
                         @@ to_tsquery(\'my_swedish\', REGEXP_REPLACE(REGEXP_REPLACE(conf.key_words, \'\s+\', \'\', \'g\'), \',\', \':*|\', \'g\'))
                 AND to_tsvector(\'my_swedish\', regexp_replace(:productCategoriesData, \'\', \'\')) 
-                        @@ to_tsquery(\'my_swedish\', COALESCE (REGEXP_REPLACE(REGEXP_REPLACE(conf.negative_key_words, \'\s+\', \'\', \'g\'), \',\', \'|\', \'g\'), \'\')) = FALSE                        
-            ';
+                        @@ to_tsquery(\'my_swedish\', COALESCE (REGEXP_REPLACE(REGEXP_REPLACE(conf.negative_key_words, \'\s+\', \'\', \'g\'), \',\', \'|\', \'g\'), \'\')) = FALSE
+                AND c.disable_for_parsing = :disable_for_parsing                                                
+        ';
         $mainParams[':disable_for_parsing'] = false;
         $mainType[':disable_for_parsing'] = \PDO::PARAM_BOOL;
 
