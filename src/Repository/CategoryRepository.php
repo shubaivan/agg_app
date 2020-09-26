@@ -202,20 +202,28 @@ class CategoryRepository extends ServiceEntityRepository
         if ($contains) {
             $result = $this->getTagAwareQueryResultCacheCategory()->fetch(self::MAIN_CATEGORY_IDS_DATA);
         } else {
+            $params = [];
+            $types = [];
             $connection = $this->getEntityManager()->getConnection();
 
             $query = '
                 SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words FROM category AS c
                 INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
                 WHERE 
-                EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
-                AND
-                NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
+                (
+                    EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
+                    AND
+                    NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
+                )
+                AND c.disable_for_parsing = :disable_for_parsing
             ';
+            $params[':disable_for_parsing'] = false;
+            $types[':disable_for_parsing'] = \PDO::PARAM_BOOL;
+
             $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
                 $query,
-                [],
-                [],
+                $params,
+                $types,
                 ['main_category_ids'],
                 0,
                 "main_category_ids"

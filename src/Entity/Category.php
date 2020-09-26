@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * }
  * )
  * @UniqueEntity(fields={"categoryName"}, groups={Category::SERIALIZED_GROUP_CREATE})
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="categories_region")
  * @ORM\HasLifecycleCallbacks()
  */
 class Category extends SlugAbstract implements EntityValidatorException
@@ -72,7 +72,7 @@ class Category extends SlugAbstract implements EntityValidatorException
 
     /**
      * @ORM\OneToMany(targetEntity="CategoryRelations", mappedBy="subCategory")
-     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="categories_region")
      */
     private $subCategoryRelations;
 
@@ -80,14 +80,14 @@ class Category extends SlugAbstract implements EntityValidatorException
      * @ORM\OneToMany(targetEntity="CategoryRelations", mappedBy="mainCategory")
      * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
      * @Annotation\Accessor(getter="getAccessorMainCategoryRelations")
-     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="categories_region")
      */
     private $mainCategoryRelations;
 
     /**
      * @var CategoryConfigurations
      * @ORM\OneToOne(targetEntity="CategoryConfigurations", mappedBy="categoryId", cascade={"persist"})
-     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="categories_region")
      */
     private $categoryConfigurations;
 
@@ -111,7 +111,7 @@ class Category extends SlugAbstract implements EntityValidatorException
 
     /**
      * @var CategorySection
-     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="categories_region")
      * @ORM\ManyToOne(targetEntity="CategorySection", inversedBy="categories", cascade={"persist"})
      * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
      */
@@ -348,7 +348,12 @@ class Category extends SlugAbstract implements EntityValidatorException
             $cond = $_GET["sort_order"];
         }
         $collection = $this->getMainCategoryRelations();
-        $iterator = $collection->getIterator();
+
+        $filterCollection = $collection
+            ->filter(function (CategoryRelations $categoryRelations) {
+                return !$categoryRelations->getSubCategory()->isDisableForParsing();
+            });
+        $iterator = $filterCollection->getIterator();
         $iterator->uasort(function ($a, $b) use ($cond) {
             /**
              * @var $a CategoryRelations
@@ -368,6 +373,14 @@ class Category extends SlugAbstract implements EntityValidatorException
     public function setDisableForParsing(bool $disableForParsing): void
     {
         $this->disableForParsing = $disableForParsing;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDisableForParsing(): bool
+    {
+        return $this->disableForParsing;
     }
 
     public function getDataFroSlug()

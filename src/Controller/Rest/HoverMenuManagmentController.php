@@ -2,7 +2,9 @@
 
 namespace App\Controller\Rest;
 
+use App\Cache\TagAwareQueryResultCacheCategory;
 use App\Cache\TagAwareQueryResultCacheCategoryConf;
+use App\Cache\TagAwareQuerySecondLevelCacheCategory;
 use App\Controller\HoverMenuController;
 use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
@@ -44,16 +46,23 @@ class HoverMenuManagmentController extends AbstractRestController
     private $tagAwareQueryResultCacheCategoryConf;
 
     /**
+     * @var TagAwareQuerySecondLevelCacheCategory
+     */
+    private $tagAwareQuerySecondLevelCacheCategory;
+
+    /**
      * HoverMenuManagmentController constructor.
      * @param CategoryConfigurationsRepository $categoryConfRepo
      * @param CategoryRepository $categoryRepo
      * @param TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf
+     * @param TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory
      */
     public function __construct(
         CategoryConfigurationsRepository $categoryConfRepo,
         CategoryRepository $categoryRepo,
         Helpers $helpers,
-        TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf
+        TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf,
+        TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory
     )
     {
         parent::__construct($helpers);
@@ -61,6 +70,7 @@ class HoverMenuManagmentController extends AbstractRestController
         $this->categoryConfRepo = $categoryConfRepo;
         $this->categoryRepo = $categoryRepo;
         $this->tagAwareQueryResultCacheCategoryConf = $tagAwareQueryResultCacheCategoryConf;
+        $this->tagAwareQuerySecondLevelCacheCategory = $tagAwareQuerySecondLevelCacheCategory;
     }
 
     /**
@@ -173,6 +183,10 @@ class HoverMenuManagmentController extends AbstractRestController
             ->invalidateTags([
                 CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH
             ]);
+
+        $this->tagAwareQuerySecondLevelCacheCategory
+            ->deleteAll();
+
         $view = $this->createSuccessResponse(
             ['test' => 1]
         );

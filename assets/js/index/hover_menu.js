@@ -274,6 +274,9 @@ document.addEventListener("DOMContentLoaded", function () {
             let hotCategory = modal.find('.modal-body #hotCatgory');
             hotCategory.prop("checked", false);
 
+            let disableForParsing = modal.find('.modal-body #disableForParsing');
+            disableForParsing.prop("checked", false);
+
             let category_position = modal.find('.modal-body #category_position');
             category_position.val('');
             category_position.text('');

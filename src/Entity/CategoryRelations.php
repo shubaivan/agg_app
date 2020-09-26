@@ -29,13 +29,13 @@ class CategoryRelations
     /**
      * @ORM\ManyToOne(targetEntity="Category", inversedBy="subCategoryRelations", cascade={"persist"})
      * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
-     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="categories_region")
      */
     private $subCategory;
 
     /**
      * @ORM\ManyToOne(targetEntity="Category", inversedBy="mainCategoryRelations", cascade={"persist"})
-     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="categories_region")
      */
     private $mainCategory;
 
