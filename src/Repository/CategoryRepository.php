@@ -420,7 +420,6 @@ class CategoryRepository extends ServiceEntityRepository
                 AND crsub.common_fts @@ to_tsquery(\'my_swedish\', :sub_main_search)
                 AND crsub.negative_key_words_fts @@ to_tsquery(\'my_swedish\', :sub_main_search) = FALSE
                 AND (crsub.sizes = \'{}\' OR crsub.sizes = \'[]\')
-                AND crsub.disable_for_parsing = :disable_for_parsing
             ';
         }
 
@@ -428,7 +427,6 @@ class CategoryRepository extends ServiceEntityRepository
             $query .= '
                 AND crsub_main.common_fts @@ to_tsquery(\'my_swedish\', :sub_sub_main_search)
                 AND (crsub_main.sizes = \'{}\' OR crsub_main.sizes = \'[]\')
-                AND crsub_main.disable_for_parsing = :disable_for_parsing
             ';
         }
 
