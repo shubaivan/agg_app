@@ -185,7 +185,7 @@ class ProductService extends AbstractModel
      * @throws CacheException
      * @throws ValidatorException
      */
-    public function getRelatedProductById(Product $product, ParamFetcher $paramFetcher)
+    public function getRelatedProducts(Product $product, ParamFetcher $paramFetcher)
     {
         $parameterBag = new ParameterBag($paramFetcher->all());
         $searchDataForRelated = $product->getSearchDataForRelatedProductItems();
