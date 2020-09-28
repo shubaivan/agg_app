@@ -53,6 +53,11 @@ class HoverMenuManagmentController extends AbstractRestController
     private $tagAwareQuerySecondLevelCacheCategory;
 
     /**
+     * @var TagAwareQueryResultCacheCategory
+     */
+    private $tagAwareQueryResultCacheCategory;
+
+    /**
      * @var ObjectsHandler
      */
     private $objectsHandler;
@@ -64,6 +69,7 @@ class HoverMenuManagmentController extends AbstractRestController
      * @param TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf
      * @param TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory
      * @param ObjectsHandler $objectsHandler
+     * @param TagAwareQueryResultCacheCategory $tagAwareQueryResultCacheCategory
      */
     public function __construct(
         CategoryConfigurationsRepository $categoryConfRepo,
@@ -71,7 +77,8 @@ class HoverMenuManagmentController extends AbstractRestController
         Helpers $helpers,
         TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf,
         TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory,
-        ObjectsHandler $objectsHandler
+        ObjectsHandler $objectsHandler,
+        TagAwareQueryResultCacheCategory $tagAwareQueryResultCacheCategory
     )
     {
         parent::__construct($helpers);
@@ -81,6 +88,7 @@ class HoverMenuManagmentController extends AbstractRestController
         $this->tagAwareQueryResultCacheCategoryConf = $tagAwareQueryResultCacheCategoryConf;
         $this->tagAwareQuerySecondLevelCacheCategory = $tagAwareQuerySecondLevelCacheCategory;
         $this->objectsHandler = $objectsHandler;
+        $this->tagAwareQueryResultCacheCategory = $tagAwareQueryResultCacheCategory;
     }
 
     /**
@@ -230,6 +238,15 @@ class HoverMenuManagmentController extends AbstractRestController
                 CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH_SUB_COUNT
             ]);
 
+        $this->getTagAwareQueryResultCacheCategory()
+            ->getTagAwareAdapter()
+            ->invalidateTags([
+                CategoryRepository::MAIN_CATEGORY_IDS
+            ]);
+
+        $this->getTagAwareQueryResultCacheCategory()
+            ->delete(CategoryRepository::MAIN_CATEGORY_IDS_DATA);
+
         $this->tagAwareQuerySecondLevelCacheCategory
             ->deleteAll();
 
@@ -313,6 +330,14 @@ class HoverMenuManagmentController extends AbstractRestController
     public function getTagAwareQueryResultCacheCategoryConf(): TagAwareQueryResultCacheCategoryConf
     {
         return $this->tagAwareQueryResultCacheCategoryConf;
+    }
+
+    /**
+     * @return TagAwareQueryResultCacheCategory
+     */
+    public function getTagAwareQueryResultCacheCategory(): TagAwareQueryResultCacheCategory
+    {
+        return $this->tagAwareQueryResultCacheCategory;
     }
 
     /**
