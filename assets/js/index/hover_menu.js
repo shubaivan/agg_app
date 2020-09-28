@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var table;
     var global_level;
 
+    let exampleModalLong = $('#exampleModalLong');
 
     const app_rest_hovermenumanagment_listthhovermenu = window.Routing
         .generate('app_rest_hovermenumanagment_listthhovermenu');
@@ -56,6 +57,24 @@ document.addEventListener("DOMContentLoaded", function () {
         let input = $(this);
 
         global_level = input.val();
+
+        if (global_level === '1') {
+            var span = $('<span/>', {
+                class: 'category-add float-right mb-3 mr-2'
+                });
+
+            var newButton = $('<button/>',
+                {
+                    text: 'Create new Category 1th level',
+                }).addClass('new_category_1_level')
+                .addClass('trigger_new_sub')
+                .addClass('btn btn-success');
+            span.append(newButton);
+            $('.radio-level').append(span);
+        } else {
+            $('.category-add').remove();
+        }
+
         if (global_level === 'all') {
             sub_category_ids = {};
         }
@@ -76,8 +95,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    body.on('click', 'a.triger_sub_categories', function () {
+    body.on('click', 'button.trigger_new_sub', function () {
+        let current = $(this);
+        exampleModalLong.modal('show', current);
+    });
+
+    body.on('click', 'a.trigger_sub_categories', function () {
         let aCurrentTag = $(this);
+        $('.category-add').remove();
         aCurrentTag.nextAll().remove();
         let categoryId = aCurrentTag.data('categoryId');
         let categoryName = aCurrentTag.data('categoryName');
@@ -85,8 +110,9 @@ document.addEventListener("DOMContentLoaded", function () {
         applySubCategories(categoryId, categoryName);
     });
 
-    body.on('click', 'button.triger_sub_categories', function () {
+    body.on('click', 'button.trigger_sub_categories', function () {
         let button = $(this);
+        $('.category-add').remove();
         let categoryId = button.data('categoryId');
         let categoryName = button.data('categoryName');
         applySubCategories(categoryId, categoryName);
@@ -254,7 +280,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             let button = $('<button/>',
                                 attrObj
                             );
-                            button.addClass('triger_' + v.toLowerCase().replace(' ', '_'));
+                            button.addClass('trigger_' + v.toLowerCase().replace(' ', '_'));
                             divBtnGroup.append(button);
                         });
                         divTag.append(divBtnGroup);
@@ -266,143 +292,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
             ],
-        });
-
-        let exampleModalLong = $('#exampleModalLong');
-        exampleModalLong.on('hide.bs.modal', function (event) {
-            var modal = $(this);
-            let hotCategory = modal.find('.modal-body #hotCatgory');
-            hotCategory.prop("checked", false);
-
-            let disableForParsing = modal.find('.modal-body #disableForParsing');
-            disableForParsing.prop("checked", false);
-
-            let category_position = modal.find('.modal-body #category_position');
-            category_position.val('');
-            category_position.text('');
-
-            let category_name_input = modal.find('.modal-body #category_name');
-            category_name_input.val('');
-            category_name_input.val('');
-
-            let nkw = modal.find('.modal-body #nkw');
-            nkw.val('');
-            nkw.text('');
-
-            let pkw = modal.find('.modal-body #pkw');
-            pkw.val('');
-            pkw.text('');
-        });
-
-
-        exampleModalLong.on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget); // Button that triggered the modal
-            var modal = $(this);
-            let categoryId = button.data('categoryId');
-            let cn_value = $('.cn_' + categoryId);
-            modal.find('.modal-title').text('Edit ' + cn_value.text() + ' category');
-
-            let category_name_input = modal.find('.modal-body #category_name');
-
-            $.each(cn_value, function (k, v) {
-                let cn_value_data = $(v).text();
-                if (cn_value_data) {
-                    category_name_input.text(cn_value_data);
-                    category_name_input.val(cn_value_data);
-                    return false;
-                }
-            });
-
-            let pkw_input = modal.find('.modal-body #pkw');
-            let pkw_value = $('.pkw_' + categoryId);
-
-            $.each(pkw_value, function (k, v) {
-                let pkw_value_data = $(v).text();
-                if (pkw_value_data) {
-                    pkw_input.text(pkw_value_data);
-                    pkw_input.val(pkw_value_data);
-                    return false;
-                }
-            });
-
-            let category_position_input = modal.find('.modal-body #category_position');
-            let category_position_value = $('.position_' + categoryId);
-
-            $.each(category_position_value, function (k, v) {
-                let category_position_value_data = $(v).text();
-                if (category_position_value_data) {
-                    category_position_input.text(category_position_value_data);
-                    category_position_input.val(category_position_value_data);
-                    return false;
-                }
-            });
-
-            let nkw_input = modal.find('.modal-body #nkw');
-            let nkw_value = $('.nkw_' + categoryId);
-            $.each(nkw_value, function (k, v) {
-                let nkw_value_data = $(v).text();
-                if (nkw_value_data) {
-                    nkw_input.text(nkw_value_data);
-                    nkw_input.val(nkw_value_data);
-                    return false;
-                }
-            });
-
-            let category_id_input = modal.find('.modal-body #category_id');
-            category_id_input.text(categoryId);
-            category_id_input.val(categoryId);
-
-            let hotCategory = modal.find('.modal-body #hotCatgory');
-            let hc_value = $('.hc_' + categoryId);
-            $.each(hc_value, function (k, v) {
-                let hc_value_data = $(v).attr('hc_val');
-                if (hc_value_data) {
-                    if (hc_value_data === 'true') {
-                        hotCategory.prop("checked", true);
-                    }
-                    return false;
-                }
-            });
-
-            let disableForParsing = modal.find('.modal-body #disableForParsing');
-            let dfp_value = $('.dfp_' + categoryId);
-            $.each(dfp_value, function (k, v) {
-                let dfp_value_data = $(v).attr('dfp_val');
-                if (dfp_value_data) {
-                    if (dfp_value_data === 'true') {
-                        disableForParsing.prop("checked", true);
-                    }
-                    return false;
-                }
-            });
-        });
-
-        $('.btn.btn-primary').on('click', function () {
-            let editCateory = $('#editCateory textarea');
-            if (editCateory.length) {
-                $.each(editCateory, function (k, v) {
-                    $(v).val($.trim($(v).val()));
-                })
-            }
-
-            let serialize = $('#editCateory').serialize();
-
-            const app_rest_hovermenumanagment_edithovermenu = window.Routing
-                .generate('app_rest_hovermenumanagment_edithovermenu');
-
-            $.ajax({
-                type: "POST",
-                url: app_rest_hovermenumanagment_edithovermenu,
-                data: serialize,
-                error: (result) => {
-                    console.log(result.responseJSON.status);
-                },
-                success: (data) => {
-                    console.log(data);
-                    $('#exampleModalLong').modal('toggle');
-                    table.ajax.reload(null, false);
-                }
-            });
         });
     }
 
@@ -423,7 +312,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     'title': categoryName,
                     'data-category-id': categoryId,
                     'data-category-name': categoryName,
-                }).addClass('triger_sub_categories');
+                }).addClass('trigger_sub_categories');
 
                 let pathPresent = $('#path_present h2');
                 pathPresent
@@ -457,4 +346,148 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+
+    exampleModalLong.on('hide.bs.modal', function (event) {
+        var modal = $(this);
+        let hotCategory = modal.find('.modal-body #hotCatgory');
+        hotCategory.prop("checked", false);
+
+        let disableForParsing = modal.find('.modal-body #disableForParsing');
+        disableForParsing.prop("checked", false);
+
+        let category_position = modal.find('.modal-body #category_position');
+        category_position.val('');
+        category_position.text('');
+
+        let category_name_input = modal.find('.modal-body #category_name');
+        category_name_input.val('');
+        category_name_input.val('');
+
+        let nkw = modal.find('.modal-body #nkw');
+        nkw.val('');
+        nkw.text('');
+
+        let pkw = modal.find('.modal-body #pkw');
+        pkw.val('');
+        pkw.text('');
+    });
+
+    exampleModalLong.on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);// Button that triggered the modal
+        var modal = $(this);
+        let categoryId = button.data('categoryId');
+
+        if (button.hasClass('trigger_new_sub')) {
+            let main_category_id = modal.find('.modal-body #main_category_id');
+            main_category_id.text(categoryId);
+            main_category_id.val(categoryId);
+            return true;
+        }
+
+        let cn_value = $('.cn_' + categoryId);
+        modal.find('.modal-title').text('Edit ' + cn_value.text() + ' category');
+
+        let category_name_input = modal.find('.modal-body #category_name');
+
+        $.each(cn_value, function (k, v) {
+            let cn_value_data = $(v).text();
+            if (cn_value_data) {
+                category_name_input.text(cn_value_data);
+                category_name_input.val(cn_value_data);
+                return false;
+            }
+        });
+
+        let pkw_input = modal.find('.modal-body #pkw');
+        let pkw_value = $('.pkw_' + categoryId);
+
+        $.each(pkw_value, function (k, v) {
+            let pkw_value_data = $(v).text();
+            if (pkw_value_data) {
+                pkw_input.text(pkw_value_data);
+                pkw_input.val(pkw_value_data);
+                return false;
+            }
+        });
+
+        let category_position_input = modal.find('.modal-body #category_position');
+        let category_position_value = $('.position_' + categoryId);
+
+        $.each(category_position_value, function (k, v) {
+            let category_position_value_data = $(v).text();
+            if (category_position_value_data) {
+                category_position_input.text(category_position_value_data);
+                category_position_input.val(category_position_value_data);
+                return false;
+            }
+        });
+
+        let nkw_input = modal.find('.modal-body #nkw');
+        let nkw_value = $('.nkw_' + categoryId);
+        $.each(nkw_value, function (k, v) {
+            let nkw_value_data = $(v).text();
+            if (nkw_value_data) {
+                nkw_input.text(nkw_value_data);
+                nkw_input.val(nkw_value_data);
+                return false;
+            }
+        });
+
+        let category_id_input = modal.find('.modal-body #category_id');
+        category_id_input.text(categoryId);
+        category_id_input.val(categoryId);
+
+        let hotCategory = modal.find('.modal-body #hotCatgory');
+        let hc_value = $('.hc_' + categoryId);
+        $.each(hc_value, function (k, v) {
+            let hc_value_data = $(v).attr('hc_val');
+            if (hc_value_data) {
+                if (hc_value_data === 'true') {
+                    hotCategory.prop("checked", true);
+                }
+                return false;
+            }
+        });
+
+        let disableForParsing = modal.find('.modal-body #disableForParsing');
+        let dfp_value = $('.dfp_' + categoryId);
+        $.each(dfp_value, function (k, v) {
+            let dfp_value_data = $(v).attr('dfp_val');
+            if (dfp_value_data) {
+                if (dfp_value_data === 'true') {
+                    disableForParsing.prop("checked", true);
+                }
+                return false;
+            }
+        });
+    });
+
+    $('.btn.btn-primary').on('click', function () {
+        let editCateory = $('#editCateory textarea');
+        if (editCateory.length) {
+            $.each(editCateory, function (k, v) {
+                $(v).val($.trim($(v).val()));
+            })
+        }
+
+        let serialize = $('#editCateory').serialize();
+
+        const app_rest_hovermenumanagment_edithovermenu = window.Routing
+            .generate('app_rest_hovermenumanagment_edithovermenu');
+
+        $.ajax({
+            type: "POST",
+            url: app_rest_hovermenumanagment_edithovermenu,
+            data: serialize,
+            error: (result) => {
+                console.log(result.responseJSON.status);
+            },
+            success: (data) => {
+                console.log(data);
+                $('#exampleModalLong').modal('toggle');
+                table.ajax.reload(null, false);
+            }
+        });
+    });
 });

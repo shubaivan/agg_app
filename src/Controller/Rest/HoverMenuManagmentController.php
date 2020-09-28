@@ -10,11 +10,13 @@ use App\Document\AdrecordProduct;
 use App\Document\AdtractionProduct;
 use App\Document\AwinProduct;
 use App\Entity\Category;
+use App\Entity\CategoryConfigurations;
 use App\Entity\CategoryRelations;
 use App\Exception\ValidatorException;
 use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
 use App\Services\Helpers;
+use App\Services\ObjectsHandler;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ODM\MongoDB\DocumentManager;
@@ -51,18 +53,25 @@ class HoverMenuManagmentController extends AbstractRestController
     private $tagAwareQuerySecondLevelCacheCategory;
 
     /**
+     * @var ObjectsHandler
+     */
+    private $objectsHandler;
+
+    /**
      * HoverMenuManagmentController constructor.
      * @param CategoryConfigurationsRepository $categoryConfRepo
      * @param CategoryRepository $categoryRepo
      * @param TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf
      * @param TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory
+     * @param ObjectsHandler $objectsHandler
      */
     public function __construct(
         CategoryConfigurationsRepository $categoryConfRepo,
         CategoryRepository $categoryRepo,
         Helpers $helpers,
         TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf,
-        TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory
+        TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory,
+        ObjectsHandler $objectsHandler
     )
     {
         parent::__construct($helpers);
@@ -71,6 +80,7 @@ class HoverMenuManagmentController extends AbstractRestController
         $this->categoryRepo = $categoryRepo;
         $this->tagAwareQueryResultCacheCategoryConf = $tagAwareQueryResultCacheCategoryConf;
         $this->tagAwareQuerySecondLevelCacheCategory = $tagAwareQuerySecondLevelCacheCategory;
+        $this->objectsHandler = $objectsHandler;
     }
 
     /**
@@ -116,19 +126,31 @@ class HoverMenuManagmentController extends AbstractRestController
      *     description="Json collection object HoverMenu",
      * )
      *
-     * @return \FOS\RestBundle\View\View
+     * @return array
      * @throws DBALException
      * @throws InvalidArgumentException
      * @throws \Doctrine\DBAL\Cache\CacheException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ValidatorException
      */
     public function editHoverMenuAction(Request $request)
     {
-        $categoryConfigurations = $this->categoryConfRepo
-            ->findOneBy(['categoryId' => $request->get('category_id')]);
+        if (!(int)$request->get('category_id')
+        ) {
+            $category = new Category();
+            $category
+                ->setCustomeCategory(true);
 
-        $category = $categoryConfigurations->getCategoryId();
+            $categoryConfigurations = new CategoryConfigurations();
+            $category
+                ->setCategoryConfigurations($categoryConfigurations);
+        } else {
+            $categoryConfigurations = $this->categoryConfRepo
+                ->findOneBy(['categoryId' => $request->get('category_id')]);
+            $category = $categoryConfigurations->getCategoryId();
+        }
+
         $pkw = $this->getHelpers()
             ->handleKeyWords(
                 $request->get('pkw'),
@@ -157,8 +179,30 @@ class HoverMenuManagmentController extends AbstractRestController
         } else {
             $category->setHotCategory(false);
         }
+        $this->objectsHandler
+            ->validateEntity(
+                $category,
+                [Category::SERIALIZED_GROUP_CREATE]
+            );
 
-        $this->categoryConfRepo->save($categoryConfigurations);
+        $this->categoryRepo->getPersist($category);
+        $this->categoryConfRepo->getPersist($categoryConfigurations);
+
+        if ((int)$request->get('main_category_id')) {
+            $main = $this->categoryRepo
+                ->findOneBy(['id' => $request->get('main_category_id')]);
+            if ($main) {
+                $categoryRelations = new CategoryRelations();
+                $categoryRelations
+                    ->setSubCategory($category)
+                    ->setMainCategory($main);
+
+                $this->categoryRepo
+                    ->getPersist($categoryRelations);
+            }
+        }
+
+        $this->categoryRepo->save($categoryConfigurations);
 
         if ($request->get('disableForParsing')) {
             $category->setDisableForParsing(true);
@@ -181,17 +225,14 @@ class HoverMenuManagmentController extends AbstractRestController
         $this->getTagAwareQueryResultCacheCategoryConf()
             ->getTagAwareAdapter()
             ->invalidateTags([
-                CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH
+                CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH,
+                CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH_SUB_COUNT
             ]);
 
         $this->tagAwareQuerySecondLevelCacheCategory
             ->deleteAll();
 
-        $view = $this->createSuccessResponse(
-            ['test' => 1]
-        );
-
-        return $view;
+        return ['success' => 1];
     }
 
     /**

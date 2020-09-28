@@ -1091,4 +1091,24 @@ class CategoryRepository extends ServiceEntityRepository
 
         return $fetchResult;
     }
+
+    /**
+     * @param $object
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function save($object)
+    {
+        $this->getPersist($object);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param $object
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function getPersist($object): void
+    {
+        $this->getEntityManager()->persist($object);
+    }
 }
