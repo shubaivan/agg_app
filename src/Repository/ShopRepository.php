@@ -192,7 +192,8 @@ class ShopRepository extends ServiceEntityRepository
                     SELECT                         
                             DISTINCT shop_alias.id,
                             shop_alias.shop_name AS "shopName",
-                            shop_alias.created_at AS "createdAt"
+                            shop_alias.created_at AS "createdAt",
+                            shop_alias.slug
             ';
 
             if ($search) {

@@ -29,12 +29,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const body = $('body');
     const app_rest_admin_resourceshops_shopreloading = window.Routing.generate('app_rest_admin_resourceshops_shopreloading');
     var table;
-    body.on('click', '.resource_reloading', function () {
+    body.on('click', '.resource_reloading button', function () {
         let current = $(this);
-        let button = current.find('button');
-        let shopName = button.data('shopName');
-
-        reloadingShop(shopName, current);
+        console.log(current);
+        let shopName = current.data('shopName');
+        reloadingShop(shopName);
     });
 
     const app_rest_admin_resourceshops_resourcelist = window.Routing.generate('app_rest_admin_resourceshops_resourcelist');
@@ -166,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    function reloadingShop(shopName, current) {
+    function reloadingShop(shopName) {
         $.ajax({
             type: "POST",
             url: app_rest_admin_resourceshops_shopreloading,

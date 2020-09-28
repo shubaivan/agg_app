@@ -8,6 +8,7 @@ use App\EventListener\SlugApproach;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
@@ -22,7 +23,13 @@ class PgDataBaseActivitySubscriber extends SlugApproach implements EventSubscrib
             Events::preUpdate,
             Events::onFlush,
             Events::postFlush,
+            Events::preFlush,
         ];
+    }
+
+    public function preFlush(PreFlushEventArgs $event)
+    {
+        $entityManager = $event->getEntityManager();
     }
 
     public function postFlush(PostFlushEventArgs $event)

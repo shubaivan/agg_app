@@ -65,12 +65,14 @@ document.addEventListener("DOMContentLoaded", function () {
         let select = $('#filter-by-top');
         select.find('option:first').prop('selected', true);
         select
-            .val('all')
-            .trigger('change');
+            .val('all');
 
         if (table) {
-            table.search('');
-            table.ajax.reload();
+            table
+                .search('')
+                .columns( 0 )
+                .search('all')
+                .draw();
         }
     });
 
@@ -160,16 +162,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     "data": 'CategoryName',
                     "render": function (data, type, row, meta) {
                         let hotCategory = row.HotCategory;
+                        let disableForParsing = row.DisableForParsing;
                         var divTag = $('<div/>');
                         var pTag = $('<p/>', {"class": 'cn_' + row.id});
                         var span = $('<span />').addClass('hc_' + row.id).attr('hc_val', hotCategory);
+                        var span_dfp = $('<span />').addClass('dfp_' + row.id).attr('dfp_val', disableForParsing);
+
+                        if (disableForParsing) {
+                            span_dfp.append('<i class="fas fa-bell-slash"></i>');
+                        } else {
+                            span_dfp.append('<i class="fas fa-bell"></i>');
+                        }
 
                         if (hotCategory === true) {
                             span.append('<i class="fa fa-check" aria-hidden="true"></i>');
                         } else {
                             span.append('<i class="fas fa-ban"></i>');
                         }
-                        pTag.append(data).append(span);
+                        pTag.append(data).append(span).append(span_dfp);
                         divTag.append(pTag);
                         return type === 'display' ?
                             divTag.html() : ''
@@ -258,10 +268,14 @@ document.addEventListener("DOMContentLoaded", function () {
             ],
         });
 
-        $('#exampleModalLong').on('hide.bs.modal', function (event) {
+        let exampleModalLong = $('#exampleModalLong');
+        exampleModalLong.on('hide.bs.modal', function (event) {
             var modal = $(this);
             let hotCategory = modal.find('.modal-body #hotCatgory');
             hotCategory.prop("checked", false);
+
+            let disableForParsing = modal.find('.modal-body #disableForParsing');
+            disableForParsing.prop("checked", false);
 
             let category_position = modal.find('.modal-body #category_position');
             category_position.val('');
@@ -281,14 +295,14 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
 
-        $('#exampleModalLong').on('show.bs.modal', function (event) {
+        exampleModalLong.on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget); // Button that triggered the modal
             var modal = $(this);
             let categoryId = button.data('categoryId');
-            modal.find('.modal-title').text('Edit ' + $('.cn_' + categoryId).text() + ' category');
+            let cn_value = $('.cn_' + categoryId);
+            modal.find('.modal-title').text('Edit ' + cn_value.text() + ' category');
 
             let category_name_input = modal.find('.modal-body #category_name');
-            let cn_value = $('.cn_' + categoryId);
 
             $.each(cn_value, function (k, v) {
                 let cn_value_data = $(v).text();
@@ -348,12 +362,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                     return false;
                 }
-            })
+            });
+
+            let disableForParsing = modal.find('.modal-body #disableForParsing');
+            let dfp_value = $('.dfp_' + categoryId);
+            $.each(dfp_value, function (k, v) {
+                let dfp_value_data = $(v).attr('dfp_val');
+                if (dfp_value_data) {
+                    if (dfp_value_data === 'true') {
+                        disableForParsing.prop("checked", true);
+                    }
+                    return false;
+                }
+            });
         });
 
         $('.btn.btn-primary').on('click', function () {
-            if ($('#editCateory textarea').length) {
-                $.each($('#editCateory textarea'), function (k, v) {
+            let editCateory = $('#editCateory textarea');
+            if (editCateory.length) {
+                $.each(editCateory, function (k, v) {
                     $(v).val($.trim($(v).val()));
                 })
             }
@@ -418,12 +445,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 let select = $('#filter-by-top');
                 select.find('option:first').prop('selected', true);
                 select
-                    .val('all')
-                    .trigger('change');
+                    .val('all');
 
                 if (table) {
-                    table.search('');
-                    table.ajax.reload();
+                    table
+                        .search('')
+                        .columns( 0 )
+                        .search('all')
+                        .draw();
                 }
             }
         });

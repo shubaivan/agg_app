@@ -818,6 +818,7 @@ class ProductRepository extends ServiceEntityRepository
                 ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.price::text)) AS "storePrice"
                 ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.image_url)) AS "storeImageUrl"
                 ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.name)) AS "storeNames"
+                ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.slug)) AS "storeProductSlug"
                 ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.extras::text)) AS "storeExtras"
             ';
             if ($parameterBag->get(ProductService::SELF_PRODUCT)
@@ -1018,7 +1019,8 @@ class ProductRepository extends ServiceEntityRepository
             SELECT
                 DISTINCT shop_alias.id,
                 shop_alias.shop_name AS "shopName",
-                shop_alias.created_at AS "createdAt"
+                shop_alias.created_at AS "createdAt",
+                shop_alias.slug
             FROM shop shop_alias
             INNER JOIN products products_alias ON products_alias.shop_relation_id = shop_alias.id
         ';
@@ -1040,7 +1042,8 @@ class ProductRepository extends ServiceEntityRepository
             SELECT                         
                 DISTINCT category_alias.id,
                 category_alias.category_name AS "categoryName",
-                category_alias.created_at AS "createdAt"
+                category_alias.created_at AS "createdAt",
+                category_alias.slug
             FROM category category_alias
             INNER JOIN product_category product_category_alias ON product_category_alias.category_id = category_alias.id
             INNER JOIN products products_alias ON products_alias.id = product_category_alias.product_id                    
@@ -1105,7 +1108,8 @@ class ProductRepository extends ServiceEntityRepository
             SELECT
                 DISTINCT brand_alias.id,
                 brand_alias.brand_name AS "brandName",
-                brand_alias.created_at AS "createdAt"
+                brand_alias.created_at AS "createdAt",
+                brand_alias.slug
             FROM brand brand_alias
             INNER JOIN products products_alias ON products_alias.brand_relation_id = brand_alias.id
         ';

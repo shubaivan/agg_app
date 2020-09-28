@@ -97,9 +97,9 @@ class BrandController extends AbstractRestController
     }
 
     /**
-     * get Brand by id.
+     * get Brand by slug.
      *
-     * @Rest\Get("/api/brand/{id}", requirements={"id"="\d+"})
+     * @Rest\Get("/api/brand/{slug}")
      *
      * @View(serializerGroups={Brand::SERIALIZED_GROUP_LIST}, statusCode=Response::HTTP_OK)
      *
@@ -117,7 +117,7 @@ class BrandController extends AbstractRestController
      * @return \FOS\RestBundle\View\View
      * @throws \Exception
      */
-    public function getBrandByIdAction(
+    public function getBrandBySlugAction(
         Brand $brand
     )
     {

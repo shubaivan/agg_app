@@ -105,17 +105,10 @@
     </div>
 {% endblock %}
 {% block javascripts %}
-{#    {{ encore_entry_script_tags('app') }}#}
+
     <script src="{{ asset('bundles/fosjsrouting/js/router.min.js') }}"></script>
     <script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
 
-{#    <script>#}
-{#        function getJSonObject(value) {#}
-{#            return $.parseJSON(value.replace(/&quot;/ig, '"'));#}
-{#        }#}
-
-{#        let user_roles = getJSonObject("{{ app.user ? app.user.roles|json_encode() : "{}" }}");#}
-{#    </script>#}
 {% endblock %}
 </body>
 </html>

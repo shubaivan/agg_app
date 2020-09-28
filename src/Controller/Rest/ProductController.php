@@ -228,9 +228,9 @@ class ProductController extends AbstractRestController
     }
 
     /**
-     * get Product data by id.
+     * get Product data by slug.
      *
-     * @Rest\Get("/api/product/{id}", requirements={"id"="\d+"})
+     * @Rest\Get("/api/product/{slug}")
      *
      * @SWG\Tag(name="Products")
      *
@@ -300,9 +300,9 @@ class ProductController extends AbstractRestController
     }
 
     /**
-     * get related Products data by id.
+     * get related Products data by slug.
      *
-     * @Rest\Get("/api/related/products/{id}", requirements={"id"="\d+"})
+     * @Rest\Get("/api/related/products/{slug}")
      *
      * @SWG\Tag(name="Products")
      *
@@ -359,12 +359,12 @@ class ProductController extends AbstractRestController
      * @throws ValidatorException
      * @throws \Exception
      */
-    public function getRelatedProductByIdAction(
+    public function getRelatedProductBySlugAction(
         Product $product, ParamFetcher $paramFetcher
     )
     {
         $relatedProductByIdCollection = $this->getProductService()
-            ->getRelatedProductById($product, $paramFetcher);
+            ->getRelatedProducts($product, $paramFetcher);
 
         $view = $this->createSuccessResponse(
             $relatedProductByIdCollection, [Product::SERIALIZED_GROUP_LIST]

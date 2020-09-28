@@ -255,9 +255,9 @@ class CategoryController extends AbstractRestController
     }
 
     /**
-     * get Category by id.
+     * get Category by slug.
      *
-     * @Rest\Get("/api/category/{id}", requirements={"id"="\d+"})
+     * @Rest\Get("/api/category/{slug}")
      *
      * @SWG\Tag(name="Category")
      *
@@ -274,7 +274,7 @@ class CategoryController extends AbstractRestController
      *
      * @throws \Exception
      */
-    public function getCategoryByIdAction(
+    public function getCategoryBySlugAction(
         Category $category
     )
     {

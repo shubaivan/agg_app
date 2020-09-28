@@ -22,6 +22,14 @@ class GroupProductEntity extends CommonProduct
      * @var string
      * @Annotation\Type("string")
      * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
+     * @Annotation\Accessor(setter="setStoreProductSlugAccessor")
+     */
+    private $storeProductSlug;
+
+    /**
+     * @var string
+     * @Annotation\Type("string")
+     * @Annotation\Groups({SearchProductCollection::GROUP_CREATE})
      * @Annotation\Accessor(setter="setStoreManufacturerArticleNumberAccessor")
      */
     private $storeManufacturerArticleNumber;
@@ -200,6 +208,10 @@ class GroupProductEntity extends CommonProduct
     public function setStoreProductUrlAccessor(string $value)
     {
         $this->storeProductUrl = $this->storePropertyAccessor($value);
+    }
+
+    public function setStoreProductSlugAccessor(string $v) {
+        $this->storeProductSlug = $this->storePropertyAccessor($v);
     }
 
     /**
@@ -442,6 +454,11 @@ class GroupProductEntity extends CommonProduct
         return isset($this->storeInstock[$key]) ? $this->storeInstock[$key] : null;
     }
 
+    public function getStoreSlugDataByKey($key)
+    {
+        return isset($this->storeProductSlug[$key]) ? $this->storeProductSlug[$key] : null;
+    }
+
     public function getStoreImageUrlDataByKey($key)
     {
         return isset($this->storeImageUrl[$key]) ? $this->storeImageUrl[$key] : null;
@@ -672,7 +689,8 @@ class GroupProductEntity extends CommonProduct
             'shopRelationId' => $this->shopRelationId,
             'productUrl' => $this->getStoreProductUrlDataByKey($id),
             'description' => $this->getStoreDescriptionDataByKey($id),
-            'instock' => $this->getStoreInstockDataByKey($id)
+            'instock' => $this->getStoreInstockDataByKey($id),
+            'slug' => $this->getStoreSlugDataByKey($id)
         ];
         return $arr;
     }

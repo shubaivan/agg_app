@@ -35,6 +35,7 @@ class CategoryRepository extends ServiceEntityRepository
     const MAIN_CATEGORY_IDS_DATA = 'main_category_ids_data';
     const CACHE_HOT_CATEGORY_ID = 'cache_hot_category_id';
     const CACHE_CUSTOM_CATEGORY_ID = 'cache_custom_category_id';
+    const SUB_CATEGORIES = 'sub_categories';
 
     /**
      * @var Helpers
@@ -80,7 +81,9 @@ class CategoryRepository extends ServiceEntityRepository
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder
             ->where('s.hotCategory = :hotCategory')
-            ->setParameter('hotCategory', true);
+            ->setParameter('hotCategory', true)
+            ->andWhere('s.disableForParsing = :disableForParsing')
+            ->setParameter('disableForParsing', false);
 
         $sortBy = $paramFetcher->get(ProductRepository::SORT_BY);
         $sortOrder = $paramFetcher->get(ProductRepository::SORT_ORDER);
@@ -152,11 +155,12 @@ class CategoryRepository extends ServiceEntityRepository
                 FROM App\Entity\Category c    
                 INNER JOIN c.mainCategoryRelations m                                       
                 WHERE c.customeCategory = :custom
+                AND c.disableForParsing = :disableForParsing
         ';
 
         if (is_array($mainCategoryIds) && count($mainCategoryIds) > 0) {
             $dql .= '
-                            AND c.id IN (:ids)               
+                AND c.id IN (:ids)               
             ';
         }
 
@@ -182,6 +186,7 @@ class CategoryRepository extends ServiceEntityRepository
             $query->setParameter(':ids', $mainCategoryIds);
         }
         $query->setParameter(':custom', 't');
+        $query->setParameter(':disableForParsing', 'f');
 
         return $query->getResult();
     }
@@ -197,20 +202,28 @@ class CategoryRepository extends ServiceEntityRepository
         if ($contains) {
             $result = $this->getTagAwareQueryResultCacheCategory()->fetch(self::MAIN_CATEGORY_IDS_DATA);
         } else {
+            $params = [];
+            $types = [];
             $connection = $this->getEntityManager()->getConnection();
 
-            $query  = '
+            $query = '
                 SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words FROM category AS c
                 INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
                 WHERE 
-                EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
-                AND
-                NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
+                (
+                    EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
+                    AND
+                    NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
+                )
+                AND c.disable_for_parsing = :disable_for_parsing
             ';
-                $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
+            $params[':disable_for_parsing'] = false;
+            $types[':disable_for_parsing'] = \PDO::PARAM_BOOL;
+
+            $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
                 $query,
-                [],
-                [],
+                $params,
+                $types,
                 ['main_category_ids'],
                 0,
                 "main_category_ids"
@@ -236,10 +249,12 @@ class CategoryRepository extends ServiceEntityRepository
                     $mainCategoryWords['category_ids'][] = $main['id'];
                     $mainCategoryWords['categories'][$main['category_name']]['positive'] = $main['key_words'];
                     $mainCategoryWords['categories'][$main['category_name']]['id'] = $main['id'];
-                    
+
                     $negative_key_words = null;
                     if (strlen($main['negative_key_words'])) {
-                        $negative_key_words = implode(', ', array_map(function ($v) {return '!' . $v;}, explode(',', $main['negative_key_words'])));
+                        $negative_key_words = implode(', ', array_map(function ($v) {
+                            return '!' . $v;
+                        }, explode(',', $main['negative_key_words'])));
                     }
 
                     $mainCategoryWords['categories'][$main['category_name']]['negative'] = $negative_key_words;
@@ -252,7 +267,7 @@ class CategoryRepository extends ServiceEntityRepository
                 }
             }
             $this->getTagAwareQueryResultCacheCategory()
-                ->save(self::MAIN_CATEGORY_IDS_DATA, $mainCategoryWords,86399);
+                ->save(self::MAIN_CATEGORY_IDS_DATA, $mainCategoryWords, 86399);
             $result = $mainCategoryWords;
         }
 
@@ -311,8 +326,8 @@ class CategoryRepository extends ServiceEntityRepository
 //            }
 //        }
         $params = [];
-        $ids = $parameterBag->get( CategoryService::MAIN_SEARCH );
-        foreach ($ids as $key=>$id) {
+        $ids = $parameterBag->get(CategoryService::MAIN_SEARCH);
+        foreach ($ids as $key => $id) {
             $params[':main_id' . $key] = $id;
             $types[':main_id' . $key] = \PDO::PARAM_INT;
         }
@@ -395,7 +410,8 @@ class CategoryRepository extends ServiceEntityRepository
         }
 
         $query .= '
-                WHERE ca.id IN ('.$idsMain.')
+                WHERE ca.id IN (' . $idsMain . ')
+                AND ca.disable_for_parsing = :disable_for_parsing
             ';
 
 
@@ -435,6 +451,9 @@ class CategoryRepository extends ServiceEntityRepository
             }
         }
 
+        $params[':disable_for_parsing'] = false;
+        $types[':disable_for_parsing'] = \PDO::PARAM_BOOL;
+
 //        $params[':main_search_parial_category'] = $mainSearch;
 //        $types[':main_search_parial_category'] = \PDO::PARAM_STR;
 
@@ -473,7 +492,7 @@ class CategoryRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
         $params = [];
 
-        foreach ($ids as $key=>$id) {
+        foreach ($ids as $key => $id) {
             $params[':main_id' . $key] = $id;
             $types[':main_id' . $key] = \PDO::PARAM_INT;
         }
@@ -492,7 +511,7 @@ class CategoryRepository extends ServiceEntityRepository
         ';
 
         $query .= '
-                WHERE ca.id IN ('.$idsMain.')
+                WHERE ca.id IN (' . $idsMain . ')
                 AND cc.common_fts @@ to_tsquery(\'my_swedish\', :main_search)
                 AND cc.negative_key_words_fts @@ to_tsquery(\'my_swedish\', :main_search) = FALSE
             ';
@@ -554,7 +573,8 @@ class CategoryRepository extends ServiceEntityRepository
                     SELECT                         
                             DISTINCT category_alias.id,
                             category_alias.category_name AS "categoryName",
-                            category_alias.created_at AS "createdAt"
+                            category_alias.created_at AS "createdAt",
+                            category_alias.slug
             ';
 
             if ($search) {
@@ -828,21 +848,28 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function isMatchToMainCategory(
         string $productCategoriesData
-    ) {
+    )
+    {
         $connection = $this->getEntityManager()->getConnection();
 
-        $query  = '
-                SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words FROM category AS c
+        $query = '
+                SELECT c.id, c.category_name, conf.key_words, conf.negative_key_words 
+                FROM category AS c
                 INNER JOIN category_configurations AS conf ON conf.category_id_id = c.id
                 WHERE 
-                EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)
-                AND
-                NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)
+                (
+                    EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = c.id)            
+                    AND
+                    NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = c.id)   
+                )              
                 AND to_tsvector(\'my_swedish\', regexp_replace(:productCategoriesData, \'\', \'\')) 
                         @@ to_tsquery(\'my_swedish\', REGEXP_REPLACE(REGEXP_REPLACE(conf.key_words, \'\s+\', \'\', \'g\'), \',\', \':*|\', \'g\'))
                 AND to_tsvector(\'my_swedish\', regexp_replace(:productCategoriesData, \'\', \'\')) 
-                        @@ to_tsquery(\'my_swedish\', COALESCE (REGEXP_REPLACE(REGEXP_REPLACE(conf.negative_key_words, \'\s+\', \'\', \'g\'), \',\', \'|\', \'g\'), \'\')) = FALSE                        
-            ';
+                        @@ to_tsquery(\'my_swedish\', COALESCE (REGEXP_REPLACE(REGEXP_REPLACE(conf.negative_key_words, \'\s+\', \'\', \'g\'), \',\', \'|\', \'g\'), \'\')) = FALSE
+                AND c.disable_for_parsing = :disable_for_parsing                                                
+        ';
+        $mainParams[':disable_for_parsing'] = false;
+        $mainType[':disable_for_parsing'] = \PDO::PARAM_BOOL;
 
         $mainParams[':productCategoriesData'] = $productCategoriesData;
         $mainType[':productCategoriesData'] = \PDO::PARAM_STR;
@@ -879,7 +906,7 @@ class CategoryRepository extends ServiceEntityRepository
             ';
         }
         $mainCategoryWordsArray = [];
-        foreach ($mainCategoriesData['categories'] as $keyCategoryData=>$categoryData) {
+        foreach ($mainCategoriesData['categories'] as $keyCategoryData => $categoryData) {
             $mainCategoryWordsArray[$keyCategoryData] = $categoryData['positive'];
         }
         $mainCategoryWordsString = $this->getHelpers()
@@ -914,13 +941,13 @@ class CategoryRepository extends ServiceEntityRepository
 
                         if (mb_stripos($matchingWord, $mainCategoryWord) !== false) {
                             $resultMatchArray = preg_grep("/\b$mainCategoryWord\b/iu", $mainCategoryWordsArray);
-                            foreach ($resultMatchArray as $nameMainCategory=>$matchPool) {
+                            foreach ($resultMatchArray as $nameMainCategory => $matchPool) {
 //                                if (isset($mainCategoriesData['categories'][$nameMainCategory]['negative'])) {
 //                                    $resultMainCategoryWords[] = '(' . $mainCategoryWord . ', ' . $mainCategoriesData['categories'][$nameMainCategory]['negative'] . ')';
 //                                } else {
 //                                    $resultMainCategoryWords[] = $mainCategoryWord;
 //                                }
-                                
+
                                 if (isset($mainCategoriesData['categories'][$nameMainCategory]['id'])) {
                                     $resultMainCategoryIds[] = $mainCategoriesData['categories'][$nameMainCategory]['id'];
                                 }
@@ -940,12 +967,12 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $categoryId
+     * @param array $categoryIds
      * @param bool $count
-     * @return int|mixed[]
+     * @return array|int|mixed[]
      * @throws \Doctrine\DBAL\Cache\CacheException
      */
-    public function getSubCategoriesByIds(int $categoryId, bool $count = false)
+    public function getSubCategoriesByIds(array $categoryIds, bool $count = false)
     {
         $connection = $this->getEntityManager()->getConnection();
 
@@ -965,18 +992,31 @@ class CategoryRepository extends ServiceEntityRepository
 
         $query .= '
                 FROM category_relations AS c_relations               
-                WHERE c_relations.main_category_id = :category_id 
         ';
-        $params[':category_id'] = $categoryId;
-        $types[':category_id'] = \PDO::PARAM_INT;
+
+        $ids = array_combine(
+            array_map(function ($key) {
+                return ':var_id' . $key;
+            }, array_keys($categoryIds)),
+            array_values($categoryIds)
+        );
+        $params = array_merge($ids, $params);
+        $types = array_merge(array_map(function ($v) {
+            return \PDO::PARAM_INT;
+        }, $ids), $types);
+        $bindKeysIds = implode(',', array_keys($ids));
+        $query .= "                           
+                WHERE c_relations.main_category_id IN ($bindKeysIds)
+        ";
+
 
         $this->getTagAwareQueryResultCacheCategory()->setQueryCacheTags(
             $query,
             $params,
             $types,
-            ['sub_categories'],
+            [self::SUB_CATEGORIES],
             0,
-            'sub_categories'
+            self::SUB_CATEGORIES
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
             ->prepareParamsForExecuteCacheQuery();
@@ -999,6 +1039,55 @@ class CategoryRepository extends ServiceEntityRepository
             }, $fetchResult);
         }
         $statement->closeCursor();
+
+        return $fetchResult;
+    }
+
+    /**
+     * @param array $categoryIds
+     * @param bool $disableForParsing
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
+     */
+    public function updateDisableForParsingByIds(array $categoryIds, bool $disableForParsing)
+    {
+        if (!count($categoryIds)) {
+            throw new \Exception('ids required true');
+        }
+        $connection = $this->getEntityManager()->getConnection();
+
+        $query = '';
+        $params = [];
+        $types = [];
+
+        $ids = array_combine(
+            array_map(function ($key) {
+                return ':var_id' . $key;
+            }, array_keys($categoryIds)),
+            array_values($categoryIds)
+        );
+        $params = array_merge($ids, $params);
+        $types = array_merge(array_map(function ($v) {
+            return \PDO::PARAM_INT;
+        }, $ids), $types);
+        $bindKeysIds = implode(',', array_keys($ids));
+
+        $query .= "
+                    UPDATE category
+                    SET disable_for_parsing = :disable_for_parsing
+                    WHERE id IN ($bindKeysIds)
+            ";
+        $params[':disable_for_parsing'] = $disableForParsing;
+        $types[':disable_for_parsing'] = \PDO::PARAM_BOOL;
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeQuery(
+            $query,
+            $params,
+            $types
+        );
+
+        $fetchResult = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
         return $fetchResult;
     }

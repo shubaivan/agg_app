@@ -1059,6 +1059,6 @@ class Product extends SlugAbstract implements EntityValidatorException
 
     public function getDataFroSlug()
     {
-        return $this->name;
+        return $this->identityUniqData;
     }
 }

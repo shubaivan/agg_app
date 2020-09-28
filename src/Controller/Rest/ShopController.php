@@ -96,9 +96,9 @@ class ShopController extends AbstractRestController
     }
 
     /**
-     * get Shop by id.
+     * get Shop by slug.
      *
-     * @Rest\Get("/api/shop/{id}", requirements={"id"="\d+"})
+     * @Rest\Get("/api/shop/{slug}")
      *
      * @SWG\Tag(name="Shop")
      *
@@ -115,7 +115,7 @@ class ShopController extends AbstractRestController
      *
      * @throws \Exception
      */
-    public function getShopByIdAction(
+    public function getShopBySlugAction(
         Shop $shop
     )
     {

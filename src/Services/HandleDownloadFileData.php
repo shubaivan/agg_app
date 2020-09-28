@@ -717,7 +717,7 @@ class HandleDownloadFileData
     /**
      * @return TraceableMessageBus
      */
-    public function getProductsBus(): TraceableMessageBus
+    public function getProductsBus()
     {
         return $this->productsBus;
     }

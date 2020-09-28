@@ -21,7 +21,10 @@ class AdjacentProduct extends CommonProduct
     /**
      * @var array
      * @Annotation\Type("array")
-     * @Annotation\Groups({AdjacentProduct::GROUP_GENERATE_ADJACENT, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({
+     *     AdjacentProduct::GROUP_GENERATE_ADJACENT,
+     *      Product::SERIALIZED_GROUP_LIST}
+     *     )
      */
     private $extras;
 

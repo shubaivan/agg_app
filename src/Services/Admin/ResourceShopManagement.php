@@ -212,7 +212,7 @@ class ResourceShopManagement
     /**
      * @return TraceableMessageBus
      */
-    protected function getBus(): TraceableMessageBus
+    protected function getBus()
     {
         return $this->bus;
     }
