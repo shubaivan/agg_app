@@ -96,12 +96,20 @@ class BrandRepository extends ServiceEntityRepository
      */
     public function matchExistByName(string $name) 
     {
-        return $this->createQueryBuilder('b')
-            ->where('b.brandName = :name')
-            ->setParameter('name', $name)
-            ->getQuery()
-            ->useQueryCache(true)
-            ->getOneOrNullResult();
+        $dql = '
+                SELECT b
+                FROM App\Entity\Brand b
+                WHERE ILIKE(b.brandName, :search) = TRUE    
+        ';
+
+        $query = $this->getEntityManager()
+            ->createQuery($dql)
+            ->useQueryCache(true);
+
+        $query->setParameter(':search', $name);
+
+
+        return $query->getOneOrNullResult();
     }
 
     /**

@@ -14,12 +14,9 @@ use JMS\Serializer\Annotation;
  * @ORM\Entity(repositoryClass="App\Repository\ShopRepository")
  * @ORM\Table(name="shop",
  *    uniqueConstraints={
- *        @UniqueConstraint(name="shop_name_idx",
- *            columns={"shop_name"})
- *    },
- *    indexes={
- *     @ORM\Index(name="shop_slug_index", columns={"slug"}),
- *     }
+ *        @UniqueConstraint(name="shop_name_idx", columns={"shop_name"}),
+ *        @UniqueConstraint(name="shop_slug_idx", columns={"slug"}),
+ *    }
  * )
  * @UniqueEntity(fields={"shopName"})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
