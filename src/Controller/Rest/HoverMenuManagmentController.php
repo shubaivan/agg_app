@@ -188,7 +188,8 @@ class HoverMenuManagmentController extends AbstractRestController
         $this->categoryRepo->getPersist($category);
         $this->categoryConfRepo->getPersist($categoryConfigurations);
 
-        if ((int)$request->get('main_category_id')) {
+        if (!(int)$request->get('category_id')
+            && (int)$request->get('main_category_id')) {
             $main = $this->categoryRepo
                 ->findOneBy(['id' => $request->get('main_category_id')]);
             if ($main) {
