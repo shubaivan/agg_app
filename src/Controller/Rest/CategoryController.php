@@ -274,7 +274,7 @@ class CategoryController extends AbstractRestController
      *
      * @throws \Exception
      */
-    public function getCategoryByIdAction(
+    public function getCategoryBySlugAction(
         Category $category
     )
     {

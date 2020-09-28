@@ -573,7 +573,8 @@ class CategoryRepository extends ServiceEntityRepository
                     SELECT                         
                             DISTINCT category_alias.id,
                             category_alias.category_name AS "categoryName",
-                            category_alias.created_at AS "createdAt"
+                            category_alias.created_at AS "createdAt",
+                            category_alias.slug
             ';
 
             if ($search) {

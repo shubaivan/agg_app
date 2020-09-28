@@ -117,7 +117,7 @@ class BrandController extends AbstractRestController
      * @return \FOS\RestBundle\View\View
      * @throws \Exception
      */
-    public function getBrandByIdAction(
+    public function getBrandBySlugAction(
         Brand $brand
     )
     {

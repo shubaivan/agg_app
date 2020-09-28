@@ -41,6 +41,21 @@ class JmsEventSubscriber extends SlugApproach implements EventSubscriberInterfac
                 'method' => 'onPreDeserializeProduct',
             ),
             array(
+                'event' => 'serializer.pre_deserialize',
+                'class' => Shop::class,
+                'method' => 'onPreDeserializeShop',
+            ),
+            array(
+                'event' => 'serializer.pre_deserialize',
+                'class' => Category::class,
+                'method' => 'onPreDeserializeCategory',
+            ),
+            array(
+                'event' => 'serializer.pre_deserialize',
+                'class' => Brand::class,
+                'method' => 'onPreDeserializeBrand',
+            ),
+            array(
                 'event' => 'serializer.post_deserialize',
                 'class' => Product::class,
                 'method' => 'onPostDeserializeProduct',
@@ -103,6 +118,24 @@ class JmsEventSubscriber extends SlugApproach implements EventSubscriberInterfac
         $this->applySlug($object);
     }
 
+    public function onPreDeserializeBrand(ObjectEvent $event)
+    {
+        $object = $event->getObject();
+        $this->applySlug($object);
+    }
+
+    public function onPreDeserializeCategory(ObjectEvent $event)
+    {
+        $object = $event->getObject();
+        $this->applySlug($object);
+    }
+
+    public function onPreDeserializeShop(ObjectEvent $event)
+    {
+        $object = $event->getObject();
+        $this->applySlug($object);
+    }
+
     /**
      * @param ObjectEvent $event
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -111,6 +144,8 @@ class JmsEventSubscriber extends SlugApproach implements EventSubscriberInterfac
     {
         /** @var Product $object */
         $object = $event->getObject();
+        $this->applySlug($object);
+
         if (!$object->getGroupIdentity()) {
             $object->setGroupIdentity($object->getIdentityUniqData());
         }

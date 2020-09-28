@@ -115,7 +115,7 @@ class ShopController extends AbstractRestController
      *
      * @throws \Exception
      */
-    public function getShopByIdAction(
+    public function getShopBySlugAction(
         Shop $shop
     )
     {
