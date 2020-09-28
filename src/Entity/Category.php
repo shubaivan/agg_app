@@ -17,13 +17,12 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\CategoryRepository")
  * @ORM\Table(name="category",
  *    uniqueConstraints={
- *        @UniqueConstraint(name="category_name_idx",
- *            columns={"category_name"})
+ *        @UniqueConstraint(name="category_name_idx", columns={"category_name"}),
+ *        @UniqueConstraint(name="category_slug_idx", columns={"slug"})
  *    },
  *     indexes={
  *     @ORM\Index(name="position_desc_index", columns={"position"}),
- *     @ORM\Index(name="position_asc_index", columns={"position"}),
- *     @ORM\Index(name="category_slug_index", columns={"slug"})
+ *     @ORM\Index(name="position_asc_index", columns={"position"})
  * }
  * )
  * @UniqueEntity(fields={"categoryName"}, groups={Category::SERIALIZED_GROUP_CREATE})

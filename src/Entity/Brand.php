@@ -17,12 +17,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\BrandRepository")
  * @ORM\Table(name="brand",
  *    uniqueConstraints={
- *        @UniqueConstraint(name="brand_name_idx",
- *            columns={"brand_name"})
- *    },
- *    indexes={
- *     @ORM\Index(name="brand_slug_index", columns={"slug"}),
- *     }
+ *        @UniqueConstraint(name="brand_name_idx",columns={"brand_name"}),
+ *        @UniqueConstraint(name="brand_slug_idx", columns={"slug"})
+ *    }
  * )
  * @UniqueEntity(fields={"brandName"}, groups={Brand::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")

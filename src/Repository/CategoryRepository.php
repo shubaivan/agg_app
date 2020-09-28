@@ -116,12 +116,20 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function matchExistByName(string $name)
     {
-        return $this->createQueryBuilder('c')
-            ->where('c.categoryName = :name')
-            ->setParameter('name', $name)
-            ->getQuery()
-            ->useQueryCache(true)
-            ->getOneOrNullResult();
+        $dql = '
+                SELECT c
+                FROM App\Entity\Category c
+                WHERE ILIKE(c.categoryName, :search) = TRUE    
+        ';
+
+        $query = $this->getEntityManager()
+            ->createQuery($dql)
+            ->useQueryCache(true);
+
+        $query->setParameter(':search', $name);
+
+
+        return $query->getOneOrNullResult();
     }
 
     /**

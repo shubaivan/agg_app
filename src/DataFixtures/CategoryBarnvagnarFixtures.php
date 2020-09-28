@@ -170,7 +170,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     wheels, wheel, tire
                 ',
                 'sub_key_word' => [
-                    'Hjul, Däck' => 'hjul, däck, terränghjul, promenadhjul, 2ME slang, joggingkitt, hjulpaket, 
+                    'HjulDäck' => 'hjul, däck, terränghjul, promenadhjul, 2ME slang, joggingkitt, hjulpaket, 
                     svängbara hjul, framhjul'
                 ]
             ],
