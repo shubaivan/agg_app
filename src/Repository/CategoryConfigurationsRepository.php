@@ -198,7 +198,7 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
                         c_conf.key_words as "PositiveKeyWords",
                         c_conf.negative_key_words as "NegativeKeyWords",
                         category_alias.position as "CategoryPosition",
-                        \'Edit,Sub Categories\' as "Action"
+                        \'Edit,Sub Categories,New Sub\' as "Action"
             ';
         }
 
@@ -211,10 +211,9 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
         switch ($parameterBag->get('level')):
             case '1':
                 $query .= '                
-                AND 
-                EXISTS(SELECT 1 FROM category_relations WHERE main_category_id = category_alias.id)
-                AND
-                NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = category_alias.id)';
+                AND                 
+                NOT EXISTS(SELECT 1 FROM category_relations WHERE sub_category_id = category_alias.id)               
+                ';
                 break;
             case '2':
                 $query .= '                
@@ -398,21 +397,30 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return TagAwareQueryResultCacheCategoryConf
+     */
+    public function getTagAwareQueryResultCacheCategoryConf(): TagAwareQueryResultCacheCategoryConf
+    {
+        return $this->tagAwareQueryResultCacheCategoryConf;
+    }
+
+    /**
      * @param $object
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function save($object)
     {
-        $this->getEntityManager()->persist($object);
+        $this->getPersist($object);
         $this->getEntityManager()->flush();
     }
 
     /**
-     * @return TagAwareQueryResultCacheCategoryConf
+     * @param $object
+     * @throws \Doctrine\ORM\ORMException
      */
-    public function getTagAwareQueryResultCacheCategoryConf(): TagAwareQueryResultCacheCategoryConf
+    public function getPersist($object): void
     {
-        return $this->tagAwareQueryResultCacheCategoryConf;
+        $this->getEntityManager()->persist($object);
     }
 }
