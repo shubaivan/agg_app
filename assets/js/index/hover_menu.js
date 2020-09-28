@@ -371,6 +371,14 @@ document.addEventListener("DOMContentLoaded", function () {
         let pkw = modal.find('.modal-body #pkw');
         pkw.val('');
         pkw.text('');
+
+        let category_id_input = modal.find('.modal-body #category_id');
+        category_id_input.text('');
+        category_id_input.val('');
+
+        let main_category_id = modal.find('.modal-body #main_category_id');
+        main_category_id.text('');
+        main_category_id.val('');
     });
 
     exampleModalLong.on('show.bs.modal', function (event) {
