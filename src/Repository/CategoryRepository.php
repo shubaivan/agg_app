@@ -36,6 +36,7 @@ class CategoryRepository extends ServiceEntityRepository
     const CACHE_HOT_CATEGORY_ID = 'cache_hot_category_id';
     const CACHE_CUSTOM_CATEGORY_ID = 'cache_custom_category_id';
     const SUB_CATEGORIES = 'sub_categories';
+    const MAIN_CATEGORY_IDS = 'main_category_ids';
 
     /**
      * @var Helpers
@@ -224,9 +225,9 @@ class CategoryRepository extends ServiceEntityRepository
                 $query,
                 $params,
                 $types,
-                ['main_category_ids'],
+                [self::MAIN_CATEGORY_IDS],
                 0,
-                "main_category_ids"
+                self::MAIN_CATEGORY_IDS
             );
             [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
                 ->prepareParamsForExecuteCacheQuery();
