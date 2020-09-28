@@ -818,6 +818,7 @@ class ProductRepository extends ServiceEntityRepository
                 ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.price::text)) AS "storePrice"
                 ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.image_url)) AS "storeImageUrl"
                 ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.name)) AS "storeNames"
+                ,hstore(array_agg(products_alias.id::TEXT), array_agg(products_alias.slug)) AS "storeProductSlug"
                 ,hstore(array_agg(products_alias.id::text), array_agg(products_alias.extras::text)) AS "storeExtras"
             ';
             if ($parameterBag->get(ProductService::SELF_PRODUCT)
