@@ -380,6 +380,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (button.hasClass('trigger_new_sub')) {
             let main_category_id = modal.find('.modal-body #main_category_id');
+            if (button.data('categoryName')) {
+                modal.find('.modal-title').text('New sub category for ' + button.data('categoryName'));
+            } else {
+                modal.find('.modal-title').text('New Category first level');
+            }
+
             main_category_id.text(categoryId);
             main_category_id.val(categoryId);
             return true;
