@@ -147,10 +147,7 @@ class HoverMenuManagmentController extends AbstractRestController
      * @return array
      * @throws DBALException
      * @throws InvalidArgumentException
-     * @throws \Doctrine\DBAL\Cache\CacheException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws ValidatorException
+     * @throws \Exception
      */
     public function editHoverMenuAction(Request $request)
     {
@@ -238,7 +235,7 @@ class HoverMenuManagmentController extends AbstractRestController
             $this->categoryRepo->getPersist($categoryConfigurations);
 
             $objectManager->flush();
-            $objectManager->getConnection()->commit();
+            $connection->commit();
             if ($request->get('disableForParsing')) {
                 $category->setDisableForParsing(true);
                 $this->setUpdateDisableForParsingByIds($category, true);
@@ -275,7 +272,7 @@ class HoverMenuManagmentController extends AbstractRestController
             $this->tagAwareQuerySecondLevelCacheCategory
                 ->deleteAll();
         }catch(\Exception $exception){
-            $objectManager->getConnection()->rollBack();
+            $connection->rollBack();
             throw $exception;
         }
 
