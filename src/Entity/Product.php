@@ -164,9 +164,8 @@ class Product extends SlugAbstract implements EntityValidatorException
      * @var Collection|Category[]
      * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToMany(targetEntity="Category",
-     *     inversedBy="products",
-     *      cascade={"persist", "remove"},
-     *      orphanRemoval=true,
+     *      inversedBy="products",
+     *      cascade={"persist"},
      *      fetch="EXTRA_LAZY")
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
@@ -254,7 +253,7 @@ class Product extends SlugAbstract implements EntityValidatorException
      * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToOne(targetEntity="Brand",
      *      inversedBy="products",
-     *      cascade={"persist", "remove"}
+     *      cascade={"persist"}
      *     )
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
@@ -318,7 +317,7 @@ class Product extends SlugAbstract implements EntityValidatorException
      * @var Shop
      * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToOne(targetEntity="Shop", inversedBy="products",
-     *     cascade={"persist", "remove"})
+     *     cascade={"persist"})
      * @Annotation\Groups({Product::SERIALIZED_GROUP_LIST})
      */
     private $shopRelation;
@@ -697,6 +696,14 @@ class Product extends SlugAbstract implements EntityValidatorException
         $this->shop = $shop;
 
         return $this;
+    }
+
+    public function getHoverMenuCategories()
+    {
+        return $this->getCategoryRelation()
+            ->filter(function (Category $category) {
+                return $category->getCustomeCategory();
+        });
     }
 
     /**

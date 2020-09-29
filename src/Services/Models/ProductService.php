@@ -3,7 +3,6 @@
 namespace App\Services\Models;
 
 use App\Entity\Category;
-use App\Entity\Collection\AvailableToDTO;
 use App\Entity\Collection\AvailableToCollection;
 use App\Entity\Collection\AvailableToModel;
 use App\Entity\Collection\ProductByIdCollection;
@@ -305,6 +304,17 @@ class ProductService extends AbstractModel
             ->fullTextSearchByParameterBag($parameterBag, true, 180);
 
         return $this->getSearchProductCollection($count, $collection);
+    }
+
+    /**
+     * @param Product $product
+     */
+    public function removeCustomCategoriesFromProduct(Product $product)
+    {
+        $collection = $product->getHoverMenuCategories();
+        foreach ($collection as $category) {
+            $product->removeCategoryRelation($category);
+        }
     }
 
     /**

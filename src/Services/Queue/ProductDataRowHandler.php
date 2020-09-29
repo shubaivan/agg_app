@@ -154,6 +154,7 @@ class ProductDataRowHandler
             if ($product->getId()) {
                 $existProduct = true;
             }
+            $this->getProductService()->removeCustomCategoriesFromProduct($product);
             $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
             $this->getCategoryService()->matchGlobalNegativeBrandWords($product);
             $this->getAdminShopRulesService()->executeShopRule($product);
@@ -164,22 +165,15 @@ class ProductDataRowHandler
             $this->getEm()->persist($product);
             $this->getEm()->flush();
 
-            if (!$product->isMatchForCategories() || $this->forceAnalysis == '1') {
-                $handleAnalysisProductByMainCategory = $this->getCategoryService()
-                    ->handleAnalysisProductByMainCategory($product);
-                if (count($handleAnalysisProductByMainCategory)) {
-                    $product->setMatchForCategories(true);
-                    $this->getEm()->flush();
+            $handleAnalysisProductByMainCategory = $this->getCategoryService()
+                ->handleAnalysisProductByMainCategory($product);
+            if (count($handleAnalysisProductByMainCategory)) {
+                $product->setMatchForCategories(true);
+                $this->getEm()->flush();
 
-                    $this->getRedisHelper()
-                        ->setStatisticsInRedis(
-                            Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL, $dataRow, $filePath
-                        );
-                }
-            } else {
                 $this->getRedisHelper()
                     ->setStatisticsInRedis(
-                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_EXIST, $dataRow, $filePath
+                        Shop::PREFIX_HANDLE_ANALYSIS_PRODUCT_SUCCESSFUL, $dataRow, $filePath
                     );
             }
 
