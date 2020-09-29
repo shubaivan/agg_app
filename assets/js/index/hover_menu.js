@@ -22,11 +22,13 @@ require('@fortawesome/fontawesome-free/js/all.js');
 // global.$ = global.jQuery = $;
 // import 'popper.js';
 require('bootstrap');
+require('bootstrap-select');
 
 document.addEventListener("DOMContentLoaded", function () {
     var sub_category_ids = {};
     var table;
     var global_level;
+    var sections_select;
 
     let exampleModalLong = $('#exampleModalLong');
 
@@ -95,9 +97,39 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    body.on('click', 'button.trigger_new_sub', function () {
+    body.on('click', 'button.trigger_new_sub, button.trigger_edit', function () {
         let current = $(this);
-        exampleModalLong.modal('show', current);
+
+        const app_rest_hovermenumanagment_getsectionlist = window.Routing
+            .generate('app_rest_hovermenumanagment_getsectionlist');
+
+        $.ajax({
+            type: "GET",
+            url: app_rest_hovermenumanagment_getsectionlist,
+            error: (result) => {
+                console.log(result);
+            },
+            success: (data) => {
+                console.log(data);
+                var divTag = $('<div />').addClass('form-group').attr('id', 'sections_select_container');
+                var select = $('<select><option value="" selected disabled>Please select section</option></select>');
+                select.attr({
+                    'id': 'sections_list',
+                    'name': 'sections_list',
+                    'data-live-search': 'true'
+                });
+                var labelTag = $('<label />').attr('for', 'sections_list');
+
+                labelTag.text('Sections');
+                divTag.append(labelTag).append(select);
+
+                $.each(data, function (key, value) {
+                    select.append('<option value="' + value.id + '">' + value.sectionName + '</option>')
+                });
+                sections_select = divTag;
+                exampleModalLong.modal('show', current);
+            }
+        });
     });
 
     body.on('click', 'a.trigger_sub_categories', function () {
@@ -153,8 +185,11 @@ document.addEventListener("DOMContentLoaded", function () {
                                 .search(val ? val : '', false, false)
                                 .draw();
                         });
-                    select.attr('id', 'filter-by-top');
-                    var labelTag = $('<label />').attr('for', 'inputState');
+                    select.attr({
+                        'id': 'filter-by-top',
+                        'name': 'filter-by-top'
+                    });
+                    var labelTag = $('<label />').attr('for', 'filter-by-top');
                     labelTag.text('Hot');
                     divTag.append(labelTag).append(select);
 
@@ -190,7 +225,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         let hotCategory = row.HotCategory;
                         let disableForParsing = row.DisableForParsing;
                         var divTag = $('<div/>');
-                        var pTag = $('<p/>', {"class": 'cn_' + row.id});
+                        var pTag = $('<p/>', {
+                            "class": 'cn_' + row.id,
+                            'section_id': row.section_relation_id
+                        });
                         var span = $('<span />').addClass('hc_' + row.id).attr('hc_val', hotCategory);
                         var span_dfp = $('<span />').addClass('dfp_' + row.id).attr('dfp_val', disableForParsing);
 
@@ -245,7 +283,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     data: 'Action',
                     render: function (data, type, row, meta) {
                         let result = '';
-
                         let actions = data.split(",");
                         var divTag = $('<div/>');
                         var divBtnGroup = $('<div/>').addClass('btn-toolbar');
@@ -270,13 +307,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 'name': v,
                                 'text': v === 'Sub Categories' ? v + ' (' + row.sub_count + ')' : v
                             });
-                            if (v === 'Edit') {
-                                attrObj = $.extend(
-                                    attrObj, {
-                                        'data-toggle': "modal",
-                                        'data-target': "#exampleModalLong"
-                                    });
-                            }
+
                             let button = $('<button/>',
                                 attrObj
                             );
@@ -379,12 +410,22 @@ document.addEventListener("DOMContentLoaded", function () {
         let main_category_id = modal.find('.modal-body #main_category_id');
         main_category_id.text('');
         main_category_id.val('');
+
+        let sections_select_container = modal.find('.modal-body #sections_select_container');
+        if (sections_select_container.length) {
+            sections_select_container.remove();
+        }
     });
 
     exampleModalLong.on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);// Button that triggered the modal
         var modal = $(this);
         let categoryId = button.data('categoryId');
+        modal.find('.modal-body #editCateory').append(sections_select);
+        let sections_list = modal.find('.modal-body #editCateory #sections_list');
+        if (sections_select) {
+            sections_list.selectpicker();
+        }
 
         if (button.hasClass('trigger_new_sub')) {
             let main_category_id = modal.find('.modal-body #main_category_id');
@@ -406,6 +447,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         $.each(cn_value, function (k, v) {
             let cn_value_data = $(v).text();
+            if ($(v).attr('section_id')) {
+                sections_list.val($(v).attr('section_id'));
+                sections_list.selectpicker('refresh');
+            }
             if (cn_value_data) {
                 category_name_input.text(cn_value_data);
                 category_name_input.val(cn_value_data);

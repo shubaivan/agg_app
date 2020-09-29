@@ -13,16 +13,19 @@ use JMS\Serializer\Annotation;
  */
 class CategorySection
 {
+    const SERIALIZED_GROUP_LIST = 'section_group_list';
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Annotation\Groups({CategorySection::SERIALIZED_GROUP_LIST})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST, CategorySection::SERIALIZED_GROUP_LIST})
      */
     private $sectionName;
 

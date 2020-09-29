@@ -20,6 +20,7 @@ abstract class SlugApproach
      */
     public function __construct(SlugifyInterface $cs)
     {
+        $cs->addRule('&', 'and');
         $this->cs = $cs;
     }
 

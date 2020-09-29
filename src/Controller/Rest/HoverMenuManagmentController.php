@@ -15,6 +15,7 @@ use App\Entity\CategoryRelations;
 use App\Exception\ValidatorException;
 use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
+use App\Repository\CategorySectionRepository;
 use App\Services\Helpers;
 use App\Services\ObjectsHandler;
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -29,6 +30,7 @@ use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
+use App\Entity\CategorySection;
 
 class HoverMenuManagmentController extends AbstractRestController
 {
@@ -63,6 +65,11 @@ class HoverMenuManagmentController extends AbstractRestController
     private $objectsHandler;
 
     /**
+     * @var CategorySectionRepository
+     */
+    private $categorySectionRepository;
+
+    /**
      * HoverMenuManagmentController constructor.
      * @param CategoryConfigurationsRepository $categoryConfRepo
      * @param CategoryRepository $categoryRepo
@@ -70,6 +77,7 @@ class HoverMenuManagmentController extends AbstractRestController
      * @param TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory
      * @param ObjectsHandler $objectsHandler
      * @param TagAwareQueryResultCacheCategory $tagAwareQueryResultCacheCategory
+     * @param CategorySectionRepository $categorySectionRepository
      */
     public function __construct(
         CategoryConfigurationsRepository $categoryConfRepo,
@@ -78,7 +86,8 @@ class HoverMenuManagmentController extends AbstractRestController
         TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf,
         TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory,
         ObjectsHandler $objectsHandler,
-        TagAwareQueryResultCacheCategory $tagAwareQueryResultCacheCategory
+        TagAwareQueryResultCacheCategory $tagAwareQueryResultCacheCategory,
+        CategorySectionRepository $categorySectionRepository
     )
     {
         parent::__construct($helpers);
@@ -89,6 +98,7 @@ class HoverMenuManagmentController extends AbstractRestController
         $this->tagAwareQuerySecondLevelCacheCategory = $tagAwareQuerySecondLevelCacheCategory;
         $this->objectsHandler = $objectsHandler;
         $this->tagAwareQueryResultCacheCategory = $tagAwareQueryResultCacheCategory;
+        $this->categorySectionRepository = $categorySectionRepository;
     }
 
     /**
@@ -157,6 +167,13 @@ class HoverMenuManagmentController extends AbstractRestController
             $categoryConfigurations = $this->categoryConfRepo
                 ->findOneBy(['categoryId' => $request->get('category_id')]);
             $category = $categoryConfigurations->getCategoryId();
+        }
+        if ($request->get('sections_list')) {
+            $categorySection = $this->getCategorySectionRepository()
+                ->findOneBy(['id' => $request->get('sections_list')]);
+            if ($categorySection) {
+                $category->setSectionRelation($categorySection);
+            }
         }
 
         $pkw = $this->getHelpers()
@@ -254,7 +271,34 @@ class HoverMenuManagmentController extends AbstractRestController
     }
 
     /**
-     * get Products.
+     * get sections list.
+     *
+     * @Rest\Get("/api/hover_menu/sections_list", options={"expose": true})
+     *
+     * @param Request $request
+     *
+     * @View(statusCode=Response::HTTP_OK, serializerGroups={CategorySection::SERIALIZED_GROUP_LIST})
+     *
+     * @SWG\Tag(name="HoverMenu")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object",
+     * )
+     *
+     * @return array
+     * @throws DBALException
+     * @throws ValidatorException
+     */
+    public function getSectionListAction(Request $request)
+    {
+        $sections = $this->getCategorySectionRepository()
+            ->getSections();
+        return $sections;
+    }
+
+    /**
+     * get th.
      *
      * @Rest\Get("/api/hover_menu/th_list", options={"expose": true})
      *
@@ -367,5 +411,13 @@ class HoverMenuManagmentController extends AbstractRestController
 
         $this->categoryRepo
             ->updateDisableForParsingByIds($updateIds, $value);
+    }
+
+    /**
+     * @return CategorySectionRepository
+     */
+    private function getCategorySectionRepository(): CategorySectionRepository
+    {
+        return $this->categorySectionRepository;
     }
 }

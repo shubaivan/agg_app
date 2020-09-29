@@ -198,6 +198,7 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
                         c_conf.key_words as "PositiveKeyWords",
                         c_conf.negative_key_words as "NegativeKeyWords",
                         category_alias.position as "CategoryPosition",
+                        category_alias.section_relation_id as section_relation_id,
                         \'Edit,Sub Categories,New Sub\' as "Action"
             ';
         }

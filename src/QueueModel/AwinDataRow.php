@@ -20,7 +20,17 @@ class AwinDataRow extends ResourceProductQueues
         $rowData['imageUrl'] = $rowData['merchant_image_url'];
 
         if (isset($rowData['merchant_category']) && $rowData['merchant_category']) {
-            $this->categories[] = $rowData['merchant_category'];
+            $merchant_category = $rowData['merchant_category'];
+            $expMerchant_category = explode('>', $merchant_category);
+            if (count($expMerchant_category)) {
+                $filter = array_filter($expMerchant_category, function ($v) {
+                    return strlen($v);
+                });
+                $map = array_map(function ($v) {
+                    return trim($v);
+                }, $filter);
+                $this->categories[] = array_merge($this->categories, $map);
+            }
         }
         
         $rowData['price'] = $rowData['search_price'];
