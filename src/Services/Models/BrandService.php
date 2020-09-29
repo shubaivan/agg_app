@@ -4,7 +4,6 @@ namespace App\Services\Models;
 
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
-use App\Entity\Category;
 use App\Entity\Collection\BrandsCollection;
 use App\Entity\Collection\Search\SearchBrandsCollection;
 use App\Entity\Product;
@@ -12,6 +11,7 @@ use App\Exception\ValidatorException;
 use App\Repository\BrandRepository;
 use App\Repository\ProductRepository;
 use App\Services\ObjectsHandler;
+use Cocur\Slugify\SlugifyInterface;
 use Doctrine\DBAL\Cache\CacheException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,7 +20,7 @@ use Doctrine\Persistence\ObjectRepository;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-class BrandService
+class BrandService extends AbstractModel
 {
     /**
      * @var EntityManager
@@ -42,13 +42,16 @@ class BrandService
      * @param EntityManagerInterface $em
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
      * @param ObjectsHandler $objecHandler
+     * @param SlugifyInterface $cs
      */
     public function __construct(
         EntityManagerInterface $em,
         TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
-        ObjectsHandler $objecHandler
+        ObjectsHandler $objecHandler,
+        SlugifyInterface $cs
     )
     {
+        parent::__construct($cs);
         $this->em = $em;
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
         $this->objecHandler = $objecHandler;
@@ -204,7 +207,7 @@ class BrandService
     private function matchExistBrand(string $name)
     {
         return $this->getBrandRepository()
-            ->matchExistByName($name);
+            ->matchExistBySlug($this->generateSlugForString($name));
     }
 
     /**

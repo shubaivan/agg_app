@@ -27,7 +27,11 @@ abstract class SlugApproach
     protected function applySlugToEntity(SlugAbstract $abstract)
     {
         $dataFroSlug = $abstract->getDataFroSlug();
-        $abstract->setSlug($this->cs->slugify($dataFroSlug));
-        $t = 1;
+        $abstract->setSlug($this->generateSlugForString($dataFroSlug));
+    }
+
+    protected function generateSlugForString(string $someString)
+    {
+        return $this->cs->slugify($someString);
     }
 }

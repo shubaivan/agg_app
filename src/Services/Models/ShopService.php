@@ -14,12 +14,13 @@ use App\Exception\ValidatorException;
 use App\Repository\ProductRepository;
 use App\Repository\ShopRepository;
 use App\Services\ObjectsHandler;
+use Cocur\Slugify\SlugifyInterface;
 use Doctrine\DBAL\Cache\CacheException;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class ShopService
+class ShopService extends AbstractModel
 {
     /**
      * @var ShopRepository
@@ -41,13 +42,16 @@ class ShopService
      * @param ShopRepository $shopRepository
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
      * @param ObjectsHandler $objecHandler
+     * @param SlugifyInterface $cs
      */
     public function __construct(
         ShopRepository $shopRepository,
         TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
-        ObjectsHandler $objecHandler
+        ObjectsHandler $objecHandler,
+        SlugifyInterface $cs
     )
     {
+        parent::__construct($cs);
         $this->shopRepository = $shopRepository;
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
         $this->objecHandler = $objecHandler;
@@ -196,7 +200,7 @@ class ShopService
     private function matchExistShop(string $name)
     {
         return $this->getShopRepository()
-            ->matchExistByName($name);
+            ->matchExistBySlug($this->generateSlugForString($name));
     }
 
     /**

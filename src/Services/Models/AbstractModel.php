@@ -2,11 +2,12 @@
 
 namespace App\Services\Models;
 
+use App\EventListener\SlugApproach;
 use FOS\RestBundle\Controller\Annotations\QueryParam;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-abstract class AbstractModel
+abstract class AbstractModel extends SlugApproach
 {
     /**
      * @param ParamFetcher $paramFetcher
