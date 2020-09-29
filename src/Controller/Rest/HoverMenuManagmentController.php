@@ -154,118 +154,131 @@ class HoverMenuManagmentController extends AbstractRestController
      */
     public function editHoverMenuAction(Request $request)
     {
-        if (!(int)$request->get('category_id')
-        ) {
-            $category = new Category();
-            $category
-                ->setCustomeCategory(true);
+        /** @var Registry $registry */
+        $registry = $this->get('doctrine');
+        $objectManager = $registry->getManager();
+        /** @var \Doctrine\DBAL\Connection $connection */
+        $connection = $objectManager->getConnection();
+        $connection->beginTransaction(); // suspend auto-commit
+        try{
+            if (!(int)$request->get('category_id')
+            ) {
+                $category = new Category();
+                $category
+                    ->setCustomeCategory(true);
 
-            $categoryConfigurations = new CategoryConfigurations();
-            $category
-                ->setCategoryConfigurations($categoryConfigurations);
-        } else {
-            $categoryConfigurations = $this->categoryConfRepo
-                ->findOneBy(['categoryId' => $request->get('category_id')]);
-            $category = $categoryConfigurations->getCategoryId();
-        }
-        if ($request->get('sections_list')) {
-            $categorySection = $this->getCategorySectionRepository()
-                ->findOneBy(['id' => $request->get('sections_list')]);
-            if ($categorySection) {
-                $category->setSectionRelation($categorySection);
+                $categoryConfigurations = new CategoryConfigurations();
+                $category
+                    ->setCategoryConfigurations($categoryConfigurations);
+            } else {
+                $categoryConfigurations = $this->categoryConfRepo
+                    ->findOneBy(['categoryId' => $request->get('category_id')]);
+                $category = $categoryConfigurations->getCategoryId();
             }
-        }
-
-        $pkw = $this->getHelpers()
-            ->handleKeyWords(
-                $request->get('pkw'),
-                $category->getCategoryName(),
-                'positive'
-            );
-
-        $nkw = $this->getHelpers()
-            ->handleKeyWords(
-                $request->get('nkw'),
-                $category->getCategoryName(),
-                'negative'
-            );
-
-        $categoryConfigurations
-            ->setKeyWords($pkw)
-            ->setNegativeKeyWords($nkw);
-        if ($request->get('category_position')) {
-            $category->setPosition($request->get('category_position'));
-        }
-        if ($request->get('category_name')) {
-            $category->setCategoryName($request->get('category_name'));
-        }
-        if ($request->get('hotCatgory')) {
-            $category->setHotCategory(true);
-        } else {
-            $category->setHotCategory(false);
-        }
-        $this->objectsHandler
-            ->validateEntity(
-                $category,
-                [Category::SERIALIZED_GROUP_CREATE]
-            );
-
-        $this->categoryRepo->getPersist($category);
-        $this->categoryConfRepo->getPersist($categoryConfigurations);
-
-        if (!(int)$request->get('category_id')
-            && (int)$request->get('main_category_id')) {
-            $main = $this->categoryRepo
-                ->findOneBy(['id' => $request->get('main_category_id')]);
-            if ($main) {
-                $categoryRelations = new CategoryRelations();
-                $categoryRelations
-                    ->setSubCategory($category)
-                    ->setMainCategory($main);
-
-                $this->categoryRepo
-                    ->getPersist($categoryRelations);
+            if ($request->get('sections_list')) {
+                $categorySection = $this->getCategorySectionRepository()
+                    ->findOneBy(['id' => $request->get('sections_list')]);
+                if ($categorySection) {
+                    $category->setSectionRelation($categorySection);
+                }
             }
+
+            $pkw = $this->getHelpers()
+                ->handleKeyWords(
+                    $request->get('pkw'),
+                    $category->getCategoryName(),
+                    'positive'
+                );
+
+            $nkw = $this->getHelpers()
+                ->handleKeyWords(
+                    $request->get('nkw'),
+                    $category->getCategoryName(),
+                    'negative'
+                );
+
+            $categoryConfigurations
+                ->setKeyWords($pkw)
+                ->setNegativeKeyWords($nkw);
+            if ($request->get('category_position')) {
+                $category->setPosition($request->get('category_position'));
+            }
+            if ($request->get('category_name')) {
+                $category->setCategoryName($request->get('category_name'));
+            }
+            if ($request->get('hotCatgory')) {
+                $category->setHotCategory(true);
+            } else {
+                $category->setHotCategory(false);
+            }
+            $this->objectsHandler
+                ->validateEntity(
+                    $category,
+                    [Category::SERIALIZED_GROUP_CREATE]
+                );
+
+            $this->categoryRepo->getPersist($category);
+            $this->categoryConfRepo->getPersist($categoryConfigurations);
+
+            if (!(int)$request->get('category_id')
+                && (int)$request->get('main_category_id')) {
+                $main = $this->categoryRepo
+                    ->findOneBy(['id' => $request->get('main_category_id')]);
+                if ($main) {
+                    $categoryRelations = new CategoryRelations();
+                    $categoryRelations
+                        ->setSubCategory($category)
+                        ->setMainCategory($main);
+
+                    $this->categoryRepo
+                        ->getPersist($categoryRelations);
+                }
+            }
+
+            $this->categoryRepo->getPersist($categoryConfigurations);
+
+            $objectManager->flush();
+            $objectManager->getConnection()->commit();
+            if ($request->get('disableForParsing')) {
+                $category->setDisableForParsing(true);
+                $this->setUpdateDisableForParsingByIds($category, true);
+            } else {
+                $category->setDisableForParsing(false);
+                $this->setUpdateDisableForParsingByIds($category, false);
+            }
+
+
+            /** @var Configuration $configuration */
+            $configuration = $objectManager->getConfiguration();
+            /** @var DoctrineProvider $resultCacheImpl1 */
+            $resultCacheImpl1 = $configuration->getResultCacheImpl();
+            $resultCacheImpl1->delete(CategoryRepository::CACHE_HOT_CATEGORY_ID);
+            $resultCacheImpl1->delete(CategoryRepository::CACHE_CUSTOM_CATEGORY_ID);
+
+            $this->getTagAwareQueryResultCacheCategoryConf()
+                ->getTagAwareAdapter()
+                ->invalidateTags([
+                    CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH,
+                    CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH_SUB_COUNT
+                ]);
+
+            $this->getTagAwareQueryResultCacheCategory()
+                ->getTagAwareAdapter()
+                ->invalidateTags([
+                    CategoryRepository::MAIN_CATEGORY_IDS,
+                    CategoryRepository::SUB_CATEGORIES
+                ]);
+
+            $this->getTagAwareQueryResultCacheCategory()
+                ->delete(CategoryRepository::MAIN_CATEGORY_IDS_DATA);
+
+            $this->tagAwareQuerySecondLevelCacheCategory
+                ->deleteAll();
+        }catch(\Exception $exception){
+            $objectManager->getConnection()->rollBack();
+            throw $exception;
         }
 
-        $this->categoryRepo->save($categoryConfigurations);
-
-        if ($request->get('disableForParsing')) {
-            $category->setDisableForParsing(true);
-            $this->setUpdateDisableForParsingByIds($category, true);
-        } else {
-            $category->setDisableForParsing(false);
-            $this->setUpdateDisableForParsingByIds($category, false);
-        }
-
-        /** @var Registry $resultCacheImpl */
-        $resultCacheImpl = $this->get('doctrine');
-        $objectManager = $resultCacheImpl->getManager();
-        /** @var Configuration $configuration */
-        $configuration = $objectManager->getConfiguration();
-        /** @var DoctrineProvider $resultCacheImpl1 */
-        $resultCacheImpl1 = $configuration->getResultCacheImpl();
-        $resultCacheImpl1->delete(CategoryRepository::CACHE_HOT_CATEGORY_ID);
-        $resultCacheImpl1->delete(CategoryRepository::CACHE_CUSTOM_CATEGORY_ID);
-
-        $this->getTagAwareQueryResultCacheCategoryConf()
-            ->getTagAwareAdapter()
-            ->invalidateTags([
-                CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH,
-                CategoryConfigurationsRepository::CATEGORY_CONF_SEARCH_SUB_COUNT
-            ]);
-
-        $this->getTagAwareQueryResultCacheCategory()
-            ->getTagAwareAdapter()
-            ->invalidateTags([
-                CategoryRepository::MAIN_CATEGORY_IDS
-            ]);
-
-        $this->getTagAwareQueryResultCacheCategory()
-            ->delete(CategoryRepository::MAIN_CATEGORY_IDS_DATA);
-
-        $this->tagAwareQuerySecondLevelCacheCategory
-            ->deleteAll();
 
         return ['success' => 1];
     }

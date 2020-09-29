@@ -308,7 +308,8 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
             $params,
             $types,
             [self::CATEGORY_CONF_SEARCH],
-            0, $count ? self::CATEGORY_CONF_SEARCH_CONT : self::CATEGORY_CONF_SEARCH
+            0,
+            $count ? self::CATEGORY_CONF_SEARCH_CONT : self::CATEGORY_CONF_SEARCH
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategoryConf()
             ->prepareParamsForExecuteCacheQuery();
