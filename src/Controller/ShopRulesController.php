@@ -76,8 +76,10 @@ class ShopRulesController extends AbstractController
                 SerializationContext::create()
                     ->setGroups(Product::SERIALIZED_GROUP_SHOP_RULES)
             );
+
+            $productsColumnRules['common'] = array_keys(json_decode($serialize, true));
         }
-        $productsColumnRules['common'] = array_keys(json_decode($serialize, true));
+
         $productsColumnRules['extras'] = $this->productRepository
             ->getUniqExtraKeys();
         $entity = $this->adminShopsRulesRepository
