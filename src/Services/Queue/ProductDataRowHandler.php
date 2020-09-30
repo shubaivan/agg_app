@@ -154,8 +154,8 @@ class ProductDataRowHandler
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
             if ($product->getId()) {
                 $existProduct = true;
+                $this->getProductService()->removeCustomCategoriesFromProduct($product);
             }
-            $this->getProductService()->removeCustomCategoriesFromProduct($product);
             $this->getCategoryService()->matchGlobalNegativeKeyWords($product);
             $this->getCategoryService()->matchGlobalNegativeBrandWords($product);
             $this->getAdminShopRulesService()->executeShopRule($product);

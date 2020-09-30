@@ -308,6 +308,8 @@ class ProductService extends AbstractModel
 
     /**
      * @param Product $product
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function removeCustomCategoriesFromProduct(Product $product)
     {
@@ -315,6 +317,7 @@ class ProductService extends AbstractModel
         foreach ($collection as $category) {
             $product->removeCategoryRelation($category);
         }
+        $this->getEm()->flush();
     }
 
     /**

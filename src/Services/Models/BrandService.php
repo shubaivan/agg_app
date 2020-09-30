@@ -65,7 +65,7 @@ class BrandService extends AbstractModel
      */
     public function createBrandFromProduct(Product $product)
     {
-        if (strlen($product->getBrand()) < 1) {
+        if (mb_strlen($product->getBrand()) < 1) {
             return false;
 //            throw new BadRequestHttpException('product id:' . $product->getId() . ' brand is empty');
         }
