@@ -70,6 +70,29 @@ abstract class ShopRules
     {
         $result = [];
         foreach ($data as $columnName => $columnData) {
+            if ($columnName == 'extras') {
+                array_map(function ($extraV, $extraK) use (&$result, $negativeType) {
+                    $array_map = array_map(function ($v) {
+                        return trim($v);
+                    }, array_unique(explode(',', implode(',', $extraV))));
+
+                    $array_filter = array_filter($array_map, function ($v) {
+                        if (strlen($v)) {
+                            return true;
+                        }
+                    });
+                    $columnName = 'extras';
+                    if ($negativeType) {
+                        $columnName = '!'.$columnName;
+                    }
+                    $result[$columnName][$extraK] = array_values(array_unique($array_filter));
+                    return ['extras' => [$extraK => $array_map]];
+                }, $columnData, array_keys($columnData));
+
+                continue;
+            }
+
+
             $array_map = array_map(function ($v) {
                 return trim($v);
             }, array_unique(explode(',', implode(',', $columnData))));
@@ -82,7 +105,7 @@ abstract class ShopRules
                 if ($negativeType) {
                     $columnName = '!'.$columnName;
                 }
-                $result[$columnName] = array_values($array_filter);
+                $result[$columnName] = array_values(array_unique($array_filter));
             }
         }
 

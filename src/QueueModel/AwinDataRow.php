@@ -21,7 +21,7 @@ class AwinDataRow extends ResourceProductQueues
 
         if (isset($rowData['merchant_category']) && $rowData['merchant_category']) {
             $merchant_category = $rowData['merchant_category'];
-            $expMerchant_category = explode('>', $merchant_category);
+            $expMerchant_category = preg_split('/>|:/', $merchant_category);
             if (count($expMerchant_category)) {
                 $filter = array_filter($expMerchant_category, function ($v) {
                     return strlen($v);
@@ -29,7 +29,7 @@ class AwinDataRow extends ResourceProductQueues
                 $map = array_map(function ($v) {
                     return trim($v);
                 }, $filter);
-                $this->categories[] = array_merge($this->categories, $map);
+                $this->categories = array_merge($this->categories, $map);
             }
         }
         
@@ -55,7 +55,7 @@ class AwinDataRow extends ResourceProductQueues
 
         $rowData['productShortDescription'] = $rowData['product_short_description'];
 
-        $explodeMerchantProductCategoryPath = explode('>', $rowData['merchant_product_category_path']);
+        $explodeMerchantProductCategoryPath = preg_split('/>|:/', $rowData['merchant_product_category_path']);
         if (count($explodeMerchantProductCategoryPath)) {
             $explodeMerchantProductCategoryPathFilter = array_filter($explodeMerchantProductCategoryPath, function ($v) {
                 return strlen($v);

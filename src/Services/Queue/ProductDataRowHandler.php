@@ -146,10 +146,11 @@ class ProductDataRowHandler
      */
     public function handleCsvRow(ResourceProductQueues $dataRow)
     {
+        $existProduct = false;
+        $shouldBeRemoved = false;
         try {
             $filePath = $dataRow->getFilePath();
-            $existProduct = false;
-            
+
             $product = $this->getProductService()->createProductFromCsvRow($dataRow);
             if ($product->getId()) {
                 $existProduct = true;
@@ -191,21 +192,21 @@ class ProductDataRowHandler
             }
         } catch (AdminShopRulesException $adminShopRulesException) {
             $this->markDocumentProduct($dataRow, $adminShopRulesException);
-
+            $shouldBeRemoved = true;
             $this->getRedisHelper()
                 ->setStatisticsInRedis(
                     Shop::PREFIX_PROCESSING_DATA_SHOP_ADMIN_SHOP_RULES_EXCEPTION, $dataRow, $filePath
                 );
         } catch (GlobalMatchExceptionBrand $globalMatchException) {
             $this->markDocumentProduct($dataRow, $globalMatchException);
-
+            $shouldBeRemoved = true;
             $this->getRedisHelper()
                 ->setStatisticsInRedis(
                     Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION_BRAND, $dataRow, $filePath
                 );
         } catch (GlobalMatchException $globalMatchException) {
             $this->markDocumentProduct($dataRow, $globalMatchException);
-
+            $shouldBeRemoved = true;
             $this->getRedisHelper()
                 ->setStatisticsInRedis(
                     Shop::PREFIX_PROCESSING_DATA_SHOP_GLOBAL_MATCH_EXCEPTION, $dataRow, $filePath
@@ -242,6 +243,10 @@ class ProductDataRowHandler
                 );
             throw $exception;
         } finally {
+            if ($existProduct && $shouldBeRemoved) {
+                $this->getEm()->remove($product);
+                $this->getEm()->flush();
+            }
             $this->postExecutedJob($dataRow);
         }
 

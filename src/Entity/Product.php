@@ -54,6 +54,9 @@ class Product extends SlugAbstract implements EntityValidatorException
     const SERIALIZED_GROUP_CREATE = 'product_group_create';
     const SERIALIZED_GROUP_LIST = 'product_group_list';
     const SERIALIZED_GROUP_CREATE_IDENTITY = 'product_group_create_identity';
+
+    const SERIALIZED_GROUP_SHOP_RULES = 'product_group_shop_rules';
+
     const SIZE = 'SIZE';
     const COLOUR = 'COLOUR';
     const OWN_COLOUR = 'OWN_COLOUR';
@@ -106,13 +109,21 @@ class Product extends SlugAbstract implements EntityValidatorException
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({
+     *     Product::SERIALIZED_GROUP_CREATE,
+     *      Product::SERIALIZED_GROUP_LIST,
+     *     Product::SERIALIZED_GROUP_SHOP_RULES
+     *     })
      */
     private $name;
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({
+     *     Product::SERIALIZED_GROUP_CREATE,
+     *      Product::SERIALIZED_GROUP_LIST,
+     *     Product::SERIALIZED_GROUP_SHOP_RULES
+     *     })
      */
     private $description;
 
@@ -151,7 +162,11 @@ class Product extends SlugAbstract implements EntityValidatorException
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({
+     *     Product::SERIALIZED_GROUP_CREATE,
+     *      Product::SERIALIZED_GROUP_LIST,
+     *     Product::SERIALIZED_GROUP_SHOP_RULES
+     *     })
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -238,7 +253,11 @@ class Product extends SlugAbstract implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({
+     *     Product::SERIALIZED_GROUP_CREATE,
+     *     Product::SERIALIZED_GROUP_LIST,
+     *     Product::SERIALIZED_GROUP_SHOP_RULES
+     * })
      * @Assert\Length(
      *      min = 1,
      *      max = 255,
@@ -291,7 +310,9 @@ class Product extends SlugAbstract implements EntityValidatorException
 
     /**
      * @ORM\Column(type="jsonb", nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE})
+     * @Annotation\Groups({
+     *     Product::SERIALIZED_GROUP_CREATE
+     * })
      * @Annotation\Accessor(setter="setExtrasAccessor")
      * @Annotation\Type("string")
      */
@@ -309,7 +330,11 @@ class Product extends SlugAbstract implements EntityValidatorException
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Annotation\Groups({Product::SERIALIZED_GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({
+     *     Product::SERIALIZED_GROUP_CREATE,
+     *      Product::SERIALIZED_GROUP_LIST,
+     *     Product::SERIALIZED_GROUP_SHOP_RULES
+     *     })
      */
     private $shop;
 

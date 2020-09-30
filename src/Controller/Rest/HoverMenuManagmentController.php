@@ -244,7 +244,6 @@ class HoverMenuManagmentController extends AbstractRestController
                 $this->setUpdateDisableForParsingByIds($category, false);
             }
 
-
             /** @var Configuration $configuration */
             $configuration = $objectManager->getConfiguration();
             /** @var DoctrineProvider $resultCacheImpl1 */

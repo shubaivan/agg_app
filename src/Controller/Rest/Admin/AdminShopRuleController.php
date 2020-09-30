@@ -171,7 +171,7 @@ class AdminShopRuleController extends AbstractRestController
      */
     public function createShopRulesAction(Request $request)
     {
-        $t =1;
+        /** @var CreateShopRules $handleObject */
         $handleObject = $this->getOh()
             ->handleObject(
                 $request->request->all(),
@@ -189,7 +189,7 @@ class AdminShopRuleController extends AbstractRestController
         $resultCacheImpl1->delete(AdminShopsRulesRepository::CACHE_ID_EXCLUDE_SHOP_FOR_RULE_LIST);
 
         $view = $this->createSuccessResponse(
-            ['test' => 1]
+            ['shopName' => $handleObject->getShopName()]
         );
 
         return $view;
