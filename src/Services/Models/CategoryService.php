@@ -21,6 +21,7 @@ use App\Repository\ProductRepository;
 use App\Services\Helpers;
 use App\Services\ObjectsHandler;
 use App\Util\RedisHelper;
+use Cocur\Slugify\SlugifyInterface;
 use Doctrine\DBAL\Cache\CacheException;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -69,6 +70,7 @@ class CategoryService extends AbstractModel
      * @param Helpers $helper
      * @param RedisHelper $redisHelper
      * @param CategoryConfigurationsRepository $categoryConfigurationsRepository
+     * @param SlugifyInterface $cs
      */
     public function __construct(
         CategoryRepository $categoryRepository,
@@ -76,9 +78,11 @@ class CategoryService extends AbstractModel
         TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
         Helpers $helper,
         RedisHelper $redisHelper,
-        CategoryConfigurationsRepository $categoryConfigurationsRepository
+        CategoryConfigurationsRepository $categoryConfigurationsRepository,
+        SlugifyInterface $cs
     )
     {
+        parent::__construct($cs);
         $this->categoryRepository = $categoryRepository;
         $this->objecHandler = $objecHandler;
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
@@ -584,7 +588,7 @@ class CategoryService extends AbstractModel
     private function matchExistCategory(string $name)
     {
         return $this->getCategoryRepository()
-            ->matchExistByName($name);
+            ->matchExistBySlug($this->generateSlugForString($name));
     }
 
     /**

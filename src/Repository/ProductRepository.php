@@ -478,6 +478,51 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\Cache\CacheException
+     */
+    public function getUniqExtraKeys()
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $query = '
+            SELECT	
+            DISTINCT(e.key) as keys
+            FROM products AS p
+            JOIN jsonb_each_text(p.extras) e on true	
+            WHERE e.key NOT ILIKE :exclude_key
+        ';
+
+        $bindParams[':exclude_key'] = 'ALTERNATIVE_%';
+        $bindParamsType[':exclude_key'] = ParameterType::STRING;
+        $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
+            $query,
+            $bindParams,
+            $bindParamsType,
+            ['UniqExtraKeys'],
+            0,
+            'UniqExtraKeys'
+        );
+        [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheProduct()
+            ->prepareParamsForExecuteCacheQuery();
+
+        /** @var ResultCacheStatement $statement */
+        $statement = $connection->executeCacheQuery(
+            $query,
+            $params,
+            $types,
+            $queryCacheProfile
+        );
+        $fetch = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $statement->closeCursor();
+        $result = array_map(function ($v) {
+            return $v['keys'];
+        }, $fetch);
+
+        return $result;
+    }
+
+    /**
      * @param string $shopName
      * @return mixed[]
      * @throws \Doctrine\DBAL\DBALException

@@ -90,24 +90,23 @@ class BrandRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param string $name
+     * @param string $slug
      * @return mixed
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function matchExistByName(string $name) 
+    public function matchExistBySlug(string $slug)
     {
         $dql = '
                 SELECT b
                 FROM App\Entity\Brand b
-                WHERE ILIKE(b.brandName, :search) = TRUE    
+                WHERE ILIKE(b.slug, :search) = TRUE    
         ';
 
         $query = $this->getEntityManager()
             ->createQuery($dql)
             ->useQueryCache(true);
 
-        $query->setParameter(':search', $name);
-
+        $query->setParameter(':search', $slug);
 
         return $query->getOneOrNullResult();
     }

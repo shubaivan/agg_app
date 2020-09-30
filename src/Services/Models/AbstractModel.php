@@ -2,11 +2,12 @@
 
 namespace App\Services\Models;
 
+use App\EventListener\SlugApproach;
 use FOS\RestBundle\Controller\Annotations\QueryParam;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-abstract class AbstractModel
+abstract class AbstractModel extends SlugApproach
 {
     /**
      * @param ParamFetcher $paramFetcher
@@ -51,15 +52,22 @@ abstract class AbstractModel
             if (is_array($matchData) && count($matchData)) {
 
                 $arrayFilter = array_filter($matchData, function ($v) use ($limitations) {
-                    if (strlen($v) >= $limitations && mb_check_encoding($v, "UTF-8")) {
+                    if (mb_strlen($v) >= $limitations && mb_check_encoding($v, "UTF-8")) {
                         return true;
                     }
                 });
                 $arrayUniqueFilter = array_unique($arrayFilter);
                 $arrayUniqueMap = array_map(function ($v) {
-                    return trim($v, '-');
+                    $trim = trim($v);
+                    $trim = trim($trim, '-');
+                    return $trim;
                 }, $arrayUniqueFilter);
-                $resultData = implode(',', $arrayUniqueMap);
+                $secondFilter = array_filter($arrayUniqueMap, function ($v) use ($limitations) {
+                    if (mb_strlen($v) >= $limitations) {
+                        return true;
+                    }
+                });
+                $resultData = implode(',', $secondFilter);
             }
         }
 

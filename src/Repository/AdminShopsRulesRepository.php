@@ -25,6 +25,7 @@ class AdminShopsRulesRepository extends ServiceEntityRepository
 
     const DATA_TABLES = 'admin_shop_rule_data_tables';
     const CACHE_ID_EXCLUDE_SHOP_FOR_RULE_LIST = 'cache_id_exclude_shop_for_rule_list';
+    const SHOP_RULE_LIST_BY_SHOP = 'shop_rule_list_by_shop';
 
     /**
      * @var Helpers
@@ -73,7 +74,9 @@ class AdminShopsRulesRepository extends ServiceEntityRepository
                 ->andWhere('a.store = :val')
                 ->setParameter('val', $value)
                 ->getQuery()
-                ->enableResultCache()
+                ->enableResultCache(
+                    0, self::SHOP_RULE_LIST_BY_SHOP . $value
+                )
                 ->useQueryCache(true)
                 ->getOneOrNullResult();
             $result = [];

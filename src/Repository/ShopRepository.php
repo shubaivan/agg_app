@@ -123,23 +123,23 @@ class ShopRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param string $name
+     * @param string $slug
      * @return mixed
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function matchExistByName(string $name)
+    public function matchExistBySlug(string $slug)
     {
         $dql = '
                 SELECT s
                 FROM App\Entity\Shop s
-                WHERE ILIKE(s.shopName, :search) = TRUE    
+                WHERE ILIKE(s.slug, :search) = TRUE    
         ';
 
         $query = $this->getEntityManager()
             ->createQuery($dql)
             ->useQueryCache(true);
 
-        $query->setParameter(':search', $name);
+        $query->setParameter(':search', $slug);
 
         return $query->getOneOrNullResult();
     }

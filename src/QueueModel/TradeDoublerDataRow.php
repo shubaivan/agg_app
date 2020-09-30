@@ -60,7 +60,7 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
             $this->categories = array_merge($this->categories, $explodeMerchantProductCategoryPathMap);
         }
 
-        $explodeMerchantProductCategoryPath = explode('>', $rowData['MerchantCategoryName']);
+        $explodeMerchantProductCategoryPath = preg_split('/>|:/', $rowData['MerchantCategoryName']);
         if (count($explodeMerchantProductCategoryPath)) {
             $explodeMerchantProductCategoryPathFilter = array_filter($explodeMerchantProductCategoryPath, function ($v) {
                 return strlen($v);

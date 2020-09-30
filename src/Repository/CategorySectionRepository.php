@@ -4,7 +4,9 @@ namespace App\Repository;
 
 use App\Entity\CategorySection;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query\Expr;
 
 /**
  * @method CategorySection|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,37 +16,29 @@ use Doctrine\Common\Persistence\ManagerRegistry;
  */
 class CategorySectionRepository extends ServiceEntityRepository
 {
+    const SECTIONS_LIST = 'sections_list';
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, CategorySection::class);
     }
 
-    // /**
-    //  * @return CategorySection[] Returns an array of CategorySection objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @return mixed
+     */
+    public function getSections()
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $qb = $this->createQueryBuilder('s');
 
-    /*
-    public function findOneBySomeField($value): ?CategorySection
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            $qb
+                ->orderBy('s.id', Criteria::DESC);
+
+        $query = $qb->getQuery();
+        $query->enableResultCache(0, self::SECTIONS_LIST);
+
+        $query
+            ->useQueryCache(true);
+
+        return $query->getResult();
     }
-    */
 }

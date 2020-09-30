@@ -194,14 +194,16 @@ document.addEventListener("DOMContentLoaded", function () {
                                 if ($.isArray(subV)) {
                                     let pTag = $('<p/>', {"class": 'sr_' + row.id});
                                     let iTag = $('<i/>');
-                                    if (~subK.indexOf("!")) {
-                                        subK = subK.replace('!', '');
+                                    let prepareK;
+                                    if (~k.indexOf("!")) {
+                                        prepareK = k.replace('!', '');
                                         iTag.addClass('fas fa-search-minus')
                                     } else {
+                                        prepareK = k;
                                         iTag.addClass('fas fa-search-plus')
                                     }
                                     pTag.append(iTag);
-                                    pTag.append(k + '<i class="fa fa-arrow-right" aria-hidden="true"></i>' + subK + ' - ' + subV.join(','));
+                                    pTag.append(prepareK + '<i class="fa fa-arrow-right" aria-hidden="true"></i>' + subK + ' - ' + subV.join(','));
 
                                     divTag.append(pTag)
                                 }
@@ -233,7 +235,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let modalNewShopRules = $('#newShopRules');
     let newShopRulesForm = modalNewShopRules.find('#newShopRulesForm');
     let shopNamesSelect = modalNewShopRules.find('.select-shop');
-    let columnsSelect = modalNewShopRules.find('.block-for-select-column');
+    let columnsSelect = modalNewShopRules.find('.shop-rules-edit-select');
+    let selectColumnExist = modalEditShopRules.find('#select-column-exist');
+    let columnsSelectBlock = modalNewShopRules.find('.block-for-select-column');
 
 
     $('.add-new-shop').on('click', function () {
@@ -242,15 +246,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     modalNewShopRules.on('show.bs.modal', function (event) {
         var modal = $(this);
-        let columnsSelect = modal.find('.block-for-select-column');
-        columnsSelect.hide();
+        columnsSelectBlock.hide();
     });
 
     modalNewShopRules.on('hide.bs.modal', function (event) {
         var modal = $(this);
         newShopRulesForm.empty();
-        let columnsSelectBlock = modal.find('.block-for-select-column');
-        let columnsSelect = columnsSelectBlock.find('.select-column');
+
         columnsSelect.find('option:first').prop('selected',true);
         columnsSelect.selectpicker('val', '');
         columnsSelect.selectpicker('refresh');
@@ -274,7 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
         hInput.val(selectedEl.val());
         newShopRulesForm.append(hInput);
 
-        columnsSelect.show();
+        columnsSelectBlock.show();
     });
 
     modalEditShopRules.on('hide.bs.modal', function (event) {
@@ -311,22 +313,36 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
             }
         }
-    })
-
-    $('.shop-rules-edit-select').on('change', function () {
-        let current = $(this);
-        let form = current.closest('.modal-body').find('form');
-        var selectedVal = $(this).children('option:selected').val();
-        prepareRuleBlockForm(selectedVal, null, form);
     });
 
+    selectColumnExist.on('change', function () {
+        handleSelect.call(this);
+    });
+
+    columnsSelect.on('change', function () {
+        handleSelect.call(this);
+    });
+
+    function handleSelect() {
+        let current = $(this);
+        let form = current.closest('.modal-body').find('form');
+        var selectedVal = current.val();
+        var selected = $(':selected', this);
+        let group = selected.closest('optgroup').attr('label');
+        if (group === 'extras') {
+            prepareRuleBlockForm(selectedVal, null, form, group);
+        } else {
+            prepareRuleBlockForm(selectedVal, null, form);
+        }
+    }
+
     modalNewShopRules.find('.btn.btn-primary').on('click', function () {
-        let selectVal = shopNamesSelect.children('option:selected').val();
-        shopNamesSelect.find('[value=' + selectVal + ']').remove();
-        shopNamesSelect.selectpicker('refresh');
         const apiPoint = window.Routing
             .generate('app_rest_admin_adminshoprule_createshoprules');
-        sendRequest($(this), apiPoint, modalNewShopRules);
+        sendRequest($(this), apiPoint, modalNewShopRules, function (shopName) {
+            $('[value="'+shopName+'"]', shopNamesSelect).remove();
+            shopNamesSelect.selectpicker('refresh');
+        });
     });
 
     modalEditShopRules.find('.btn.btn-primary').on('click', function () {
@@ -335,7 +351,14 @@ document.addEventListener("DOMContentLoaded", function () {
         sendRequest($(this), apiPoint, modalEditShopRules);
     });
 
-    function sendRequest(current, apiPoint, modalObject) {
+    /**
+     *
+     * @param current
+     * @param apiPoint
+     * @param modalObject
+     * @param callBackFunc
+     */
+    function sendRequest(current, apiPoint, modalObject, callBackFunc) {
         let form = current.closest('.modal-content').find('form');
         let formTextAreas = form.find('textarea');
         if (formTextAreas.length) {
@@ -356,6 +379,10 @@ document.addEventListener("DOMContentLoaded", function () {
             success: (data) => {
                 console.log(data);
                 modalObject.modal('toggle');
+                console.log(data.shopName);
+                if (callBackFunc && data.shopName) {
+                    callBackFunc(data.shopName);
+                }
                 table.ajax.reload(null, false);
             }
         });
@@ -417,15 +444,29 @@ document.addEventListener("DOMContentLoaded", function () {
         let smallText = 'Fill words';
         let iTag = $('<i/>');
         let negative = false;
-        if (~k.indexOf("!")) {
-            k = k.replace('!', '');
-            iTag.addClass('fas fa-search-minus');
-            smallText = smallText + ' for exclude';
-            negative = true;
+        if (parentK) {
+            if (~parentK.indexOf("!")) {
+                parentK = parentK.replace('!', '');
+                iTag.addClass('fas fa-search-minus');
+                smallText = smallText + ' for exclude';
+                negative = true;
+            } else {
+                iTag.addClass('fas fa-search-plus');
+                smallText = smallText + ' for match'
+            }
         } else {
-            iTag.addClass('fas fa-search-plus');
-            smallText = smallText + ' for match'
+            if (~k.indexOf("!")) {
+                k = k.replace('!', '');
+                iTag.addClass('fas fa-search-minus');
+                smallText = smallText + ' for exclude';
+                negative = true;
+            } else {
+                iTag.addClass('fas fa-search-plus');
+                smallText = smallText + ' for match'
+            }
+
         }
+
         let identityData = '';
         if (parentK) {
             identityData = k + '_' + parentK + '_input';
@@ -483,7 +524,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         let generateInputName = inputName;
         if(parentK) {
-            generateInputName = generateInputName + '[' + k + ']' + '[' + parentK + ']';
+            generateInputName = generateInputName + '[' + parentK + ']' + '[' + k + '][]';
         } else {
             generateInputName = generateInputName + '[' + k + '][]';
         }
