@@ -21,15 +21,15 @@ use Symfony\Component\Validator\Constraints as Assert;
  *        @UniqueConstraint(name="category_slug_idx", columns={"slug"})
  *    },
  *     indexes={
- *     @ORM\Index(name="position_desc_index", columns={"position"}),
- *     @ORM\Index(name="position_asc_index", columns={"position"})
+ *        @ORM\Index(name="position_desc_index", columns={"position"}),
+ *        @ORM\Index(name="position_asc_index", columns={"position"})
  * }
  * )
  * @UniqueEntity(fields={"categoryName"}, groups={Category::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="categories_region")
  * @ORM\HasLifecycleCallbacks()
  */
-class Category extends SlugAbstract implements EntityValidatorException
+class Category extends SEOModel implements EntityValidatorException
 {
     const SERIALIZED_GROUP_LIST = 'category_group_list';
     const SERIALIZED_GROUP_RELATIONS_LIST = 'category_group_relations_list';
@@ -380,6 +380,38 @@ class Category extends SlugAbstract implements EntityValidatorException
     public function isDisableForParsing(): bool
     {
         return $this->disableForParsing;
+    }
+
+    /**
+     * @param mixed $seoTitle
+     */
+    public function setSeoTitle($seoTitle): void
+    {
+        $this->seoTitle = $seoTitle;
+    }
+
+    /**
+     * @param mixed $seoDescription
+     */
+    public function setSeoDescription($seoDescription): void
+    {
+        $this->seoDescription = $seoDescription;
+    }
+
+    /**
+     * @param mixed $seoText1
+     */
+    public function setSeoText1($seoText1): void
+    {
+        $this->seoText1 = $seoText1;
+    }
+
+    /**
+     * @param mixed $seoText2
+     */
+    public function setSeoText2($seoText2): void
+    {
+        $this->seoText2 = $seoText2;
     }
 
     public function getDataFroSlug()

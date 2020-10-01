@@ -29,7 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * })
  * @ORM\HasLifecycleCallbacks()
  */
-class Brand extends SlugAbstract implements EntityValidatorException, DataTableInterface
+class Brand extends SEOModel implements EntityValidatorException, DataTableInterface
 {
     const SERIALIZED_GROUP_LIST = 'brand_group_list';
     const SERIALIZED_GROUP_LIST_TH = 'th_brand_group_list';

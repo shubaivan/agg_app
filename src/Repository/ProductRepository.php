@@ -1088,7 +1088,11 @@ class ProductRepository extends ServiceEntityRepository
                 DISTINCT category_alias.id,
                 category_alias.category_name AS "categoryName",
                 category_alias.created_at AS "createdAt",
-                category_alias.slug
+                category_alias.slug,
+                category_alias.seo_title,
+                category_alias.seo_description,
+                category_alias.seo_text1,
+                category_alias.seo_text1
             FROM category category_alias
             INNER JOIN product_category product_category_alias ON product_category_alias.category_id = category_alias.id
             INNER JOIN products products_alias ON products_alias.id = product_category_alias.product_id                    

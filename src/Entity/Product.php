@@ -983,14 +983,6 @@ class Product extends SlugAbstract implements EntityValidatorException
         }
     }
 
-//    /**
-//     * @return string
-//     */
-//    public function getMatchMainCategoryData(): string
-//    {
-//        return $this->matchMainCategoryData;
-//    }
-
     /**
      * @param string $matchMainCategoryData
      * @return Product
@@ -1003,13 +995,7 @@ class Product extends SlugAbstract implements EntityValidatorException
 
     public function setBrandAccessor($brand)
     {
-        if ($brand && strlen($brand)) {
-            if ($brand == 'Esprit'){
-                $brand = 'ESPRIT';
-            }
-
-            $this->setBrand(ucfirst($brand));
-        }
+        $this->setBrand($brand);
     }
 
     /**
