@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         var divTag = $('<div/>');
                         var pTag = $('<p/>', {
                             "class": 'cn_' + row.id,
-                            'section_id': row.section_relation_id
+                            'data-section-id': row.section_relation_id
                         });
                         var span = $('<span />').addClass('hc_' + row.id).attr('hc_val', hotCategory);
                         var span_dfp = $('<span />').addClass('dfp_' + row.id).attr('dfp_val', disableForParsing);
@@ -273,13 +273,48 @@ document.addEventListener("DOMContentLoaded", function () {
                     "targets": 3,
                     data: 'CategoryPosition',
                     render: function (data, type, row, meta) {
-                        return type === 'display' ?
+                        return type === 'display' && data ?
                             '<p class="position_' + row.id + '">' + data + '</p>' : ''
                     }
                 },
                 {
 
                     "targets": 4,
+                    data: 'SeoTitle',
+                    render: function (data, type, row, meta) {
+                        return type === 'display' && data ?
+                            '<p class="seo-title_' + row.id + '">' + data + '</p>' : ''
+                    }
+                },
+                {
+
+                    "targets": 5,
+                    data: 'SeoDescription',
+                    render: function (data, type, row, meta) {
+                        return type === 'display' && data ?
+                            '<p class="seo-description_' + row.id + '">' + data + '</p>' : ''
+                    }
+                },
+                {
+
+                    "targets": 6,
+                    data: 'SeoText1',
+                    render: function (data, type, row, meta) {
+                        return type === 'display' && data ?
+                            '<p class="seo_text1_' + row.id + '">' + data + '</p>' : ''
+                    }
+                },
+                {
+
+                    "targets": 7,
+                    data: 'SeoText2',
+                    render: function (data, type, row, meta) {
+                        return type === 'display' && data ?
+                            '<p class="seo_text2_' + row.id + '">' + data + '</p>' : ''
+                    }
+                },
+                {
+                    "targets": 8,
                     data: 'Action',
                     render: function (data, type, row, meta) {
                         let result = '';
@@ -381,35 +416,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     exampleModalLong.on('hide.bs.modal', function (event) {
         var modal = $(this);
-        let hotCategory = modal.find('.modal-body #hotCatgory');
-        hotCategory.prop("checked", false);
 
-        let disableForParsing = modal.find('.modal-body #disableForParsing');
-        disableForParsing.prop("checked", false);
+        let form = modal.find("form");
+        form.trigger("reset");
+        form.find('textarea').val('');
 
-        let category_position = modal.find('.modal-body #category_position');
-        category_position.val('');
-        category_position.text('');
-
-        let category_name_input = modal.find('.modal-body #category_name');
-        category_name_input.val('');
-        category_name_input.val('');
-
-        let nkw = modal.find('.modal-body #nkw');
-        nkw.val('');
-        nkw.text('');
-
-        let pkw = modal.find('.modal-body #pkw');
-        pkw.val('');
-        pkw.text('');
-
-        let category_id_input = modal.find('.modal-body #category_id');
-        category_id_input.text('');
-        category_id_input.val('');
-
-        let main_category_id = modal.find('.modal-body #main_category_id');
-        main_category_id.text('');
-        main_category_id.val('');
 
         let sections_select_container = modal.find('.modal-body #sections_select_container');
         if (sections_select_container.length) {
@@ -421,9 +432,15 @@ document.addEventListener("DOMContentLoaded", function () {
         var button = $(event.relatedTarget);// Button that triggered the modal
         var modal = $(this);
         let categoryId = button.data('categoryId');
+        let cn_value = $('.cn_' + categoryId);
+
         modal.find('.modal-body #editCateory').append(sections_select);
         let sections_list = modal.find('.modal-body #editCateory #sections_list');
         if (sections_select) {
+            let sectionId = cn_value.data('sectionId');
+            if (sectionId) {
+                sections_list.val(sectionId).change();
+            }
             sections_list.selectpicker();
         }
 
@@ -440,58 +457,17 @@ document.addEventListener("DOMContentLoaded", function () {
             return true;
         }
 
-        let cn_value = $('.cn_' + categoryId);
         modal.find('.modal-title').text('Edit ' + cn_value.text() + ' category');
+        setDataInForm(modal.find('.modal-body #category_name'), '.cn_' + categoryId);
+        setDataInForm(modal.find('.modal-body #pkw'), '.pkw_' + categoryId);
+        setDataInForm(modal.find('.modal-body #category_position'), '.position_' + categoryId);
+        setDataInForm(modal.find('.modal-body #nkw'), '.nkw_' + categoryId);
 
-        let category_name_input = modal.find('.modal-body #category_name');
+        setDataInForm(modal.find('.modal-body #category_seo_title'), '.seo-title_' + categoryId);
+        setDataInForm(modal.find('.modal-body #category_seo_description'), '.seo-description_' + categoryId);
+        setDataInForm(modal.find('.modal-body #category_seo_text1'), '.seo_text1_' + categoryId);
+        setDataInForm(modal.find('.modal-body #category_seo_text2'), '.seo_text2_' + categoryId);
 
-        $.each(cn_value, function (k, v) {
-            let cn_value_data = $(v).text();
-            if ($(v).attr('section_id')) {
-                sections_list.val($(v).attr('section_id'));
-                sections_list.selectpicker('refresh');
-            }
-            if (cn_value_data) {
-                category_name_input.text(cn_value_data);
-                category_name_input.val(cn_value_data);
-                return false;
-            }
-        });
-
-        let pkw_input = modal.find('.modal-body #pkw');
-        let pkw_value = $('.pkw_' + categoryId);
-
-        $.each(pkw_value, function (k, v) {
-            let pkw_value_data = $(v).text();
-            if (pkw_value_data) {
-                pkw_input.text(pkw_value_data);
-                pkw_input.val(pkw_value_data);
-                return false;
-            }
-        });
-
-        let category_position_input = modal.find('.modal-body #category_position');
-        let category_position_value = $('.position_' + categoryId);
-
-        $.each(category_position_value, function (k, v) {
-            let category_position_value_data = $(v).text();
-            if (category_position_value_data) {
-                category_position_input.text(category_position_value_data);
-                category_position_input.val(category_position_value_data);
-                return false;
-            }
-        });
-
-        let nkw_input = modal.find('.modal-body #nkw');
-        let nkw_value = $('.nkw_' + categoryId);
-        $.each(nkw_value, function (k, v) {
-            let nkw_value_data = $(v).text();
-            if (nkw_value_data) {
-                nkw_input.text(nkw_value_data);
-                nkw_input.val(nkw_value_data);
-                return false;
-            }
-        });
 
         let category_id_input = modal.find('.modal-body #category_id');
         category_id_input.text(categoryId);
@@ -522,6 +498,19 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+
+    function setDataInForm(formInput, classForValue)
+    {
+        let nkw_value = $(classForValue);
+        $.each(nkw_value, function (k, v) {
+            let nkw_value_data = $(v).text();
+            if (nkw_value_data) {
+                formInput.text(nkw_value_data);
+                formInput.val(nkw_value_data);
+                return false;
+            }
+        });
+    }
     $('.btn.btn-primary').on('click', function () {
         let editCateory = $('#editCateory textarea');
         if (editCateory.length) {

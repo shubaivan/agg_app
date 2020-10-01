@@ -18,6 +18,10 @@ class HoverMenuController extends AbstractController
         'PositiveKeyWords',
         'NegativeKeyWords',
         'CategoryPosition',
+        "SeoTitle",
+        "SeoDescription",
+        "SeoText1",
+        "SeoText2",
         'Action'
     ];
     

@@ -203,6 +203,10 @@ class HoverMenuManagmentController extends AbstractRestController
             if ($request->get('category_name')) {
                 $category->setCategoryName($request->get('category_name'));
             }
+            $category->setSeoTitle($request->get('category_seo_title'));
+            $category->setSeoDescription($request->get('category_seo_description'));
+            $category->setSeoText1($request->get('category_seo_text1'));
+            $category->setSeoText2($request->get('category_seo_text2'));
             if ($request->get('hotCatgory')) {
                 $category->setHotCategory(true);
             } else {

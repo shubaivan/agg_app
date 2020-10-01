@@ -440,45 +440,36 @@ class HandleDownloadFileData
             ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
                 Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
 
-        if (isset($this->awinDownloadUrls[$shop])) {
-            $this->createAwinJob(
-                $shop,
-                $offsetRecord,
-                $record,
-                $redisUniqKey,
-                $filePath
-            );
+        switch (true) {
+            case isset($this->awinDownloadUrls[$shop]) :
+                $class = AwinDataRow::class;
+                break;
+            case isset($this->tradedoublerDownloadUrls[$shop]) :
+                $class = TradeDoublerDataRow::class;
+                break;
+            case isset($this->adtractionDownloadUrls[$shop]) :
+                $class = AdtractionDataRow::class;
+                break;
+            case isset($this->adrecordDownloadUrls[$shop]) :
+                $class = AdrecordDataRow::class;
+                break;
+            default:
+                $class = false;
+                break;
         }
 
-        if (isset($this->tradedoublerDownloadUrls[$shop])) {
-            $this->createTradeDoublerJob(
-                $shop,
-                $offsetRecord,
-                $record,
-                $redisUniqKey,
-                $filePath
-            );
-        }
-        
-        if (isset($this->adtractionDownloadUrls[$shop])) {
-            $this->createAdtractionDataJob(
-                $shop, 
-                $offsetRecord, 
-                $record,
-                $redisUniqKey,
-                $filePath
-            );
+        if (!$class) {
+            throw new \Exception('shop was not found in resources map');
         }
 
-        if (isset($this->adrecordDownloadUrls[$shop])) {
-            $this->createAdrecordJob(
-                $shop,
-                $offsetRecord,
-                $record,
-                $redisUniqKey,
-                $filePath
-            );
-        }
+        $this->createJob(
+            $class,
+            $shop,
+            $offsetRecord,
+            $record,
+            $redisUniqKey,
+            $filePath
+        );
     }
 
     /**
@@ -507,7 +498,8 @@ class HandleDownloadFileData
      * @return array
      * @throws \Throwable
      */
-    private function createTradeDoublerJob(
+    private function createJob(
+        string $class,
         ?string $shop,
         $offsetRecord,
         $record,
@@ -515,132 +507,25 @@ class HandleDownloadFileData
         string $filePath
     ) :void
     {
-        $tradeDoublerDataRow = new TradeDoublerDataRow(
+        /** @var ResourceProductQueues $dataRow */
+        $dataRow = new $class(
             $record,
             ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)),
             $filePath,
             $redisUniqKey
         );
-        $tradeDoublerDataRow->transform();
+        $dataRow->transform();
 
         /** @var TradeDoublerProductRepository $savingSku */
-        $savingSku = $this->dm->getRepository($tradeDoublerDataRow::getMongoClass());
-        
+        $savingSku = $this->dm->getRepository($dataRow::getMongoClass());
+
         $saveProductInMongo = $this->saveProductInMongo(
-            $tradeDoublerDataRow,
+            $dataRow,
             $shop,
             $savingSku
         );
 
-        $this->getProductsBus()->dispatch($tradeDoublerDataRow);
-    }
-    
-    /**
-     * @param string|null $shop
-     * @param $offsetRecord
-     * @param $record
-     * @param string $redisUniqKey
-     * @param string $filePath
-     *
-     * @return array
-     * @throws \Throwable
-     */
-    private function createAwinJob(
-        ?string $shop,
-        $offsetRecord,
-        $record,
-        string $redisUniqKey,
-        string $filePath
-    ) :void
-    {
-        $awinDataRow = new AwinDataRow(
-            $record,
-            ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)),
-            $filePath,
-            $redisUniqKey
-        );
-        $awinDataRow->transform();
-
-        /** @var AwinProductRepository $savingSku */
-        $savingSku = $this->dm->getRepository($awinDataRow::getMongoClass());
-        $saveProductInMongo = $this->saveProductInMongo(
-            $awinDataRow,
-            $shop,
-            $savingSku
-        );
-
-        $this->getProductsBus()->dispatch($awinDataRow);
-    }
-    
-    /**
-     * @param string|null $shop
-     * @param $offsetRecord
-     * @param $record
-     * @param string $redisUniqKey
-     * @param string $filePath
-     *
-     * @throws \Throwable
-     */
-    private function createAdtractionDataJob(
-        ?string $shop, 
-        $offsetRecord,
-        $record,
-        string $redisUniqKey,
-        string $filePath
-    ) :void
-    {
-        $adtractionDataRow = new AdtractionDataRow(
-            $record,
-            ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)),
-            $filePath,
-            $redisUniqKey
-        );
-        $adtractionDataRow->transform();
-
-        /** @var AdtractionProductRepository $savingSku */
-        $savingSku = $this->dm->getRepository($adtractionDataRow::getMongoClass());
-        
-        $saveProductInMongo = $this->saveProductInMongo(
-            $adtractionDataRow,
-            $shop,
-            $savingSku
-        );
-        $this->getProductsBus()->dispatch($adtractionDataRow);
-    }
-
-    /**
-     * @param string|null $shop
-     * @param $offsetRecord
-     * @param $record
-     * @param string $redisUniqKey
-     * @param string $filePath
-     * 
-     * @throws \Throwable
-     */
-    private function createAdrecordJob(
-        ?string $shop,
-        $offsetRecord, 
-        $record,
-        string $redisUniqKey,
-        string $filePath): void
-    {
-        $adrecordDataRow = new AdrecordDataRow(
-            $record,
-            ((int)$offsetRecord >= $this->getCount($filePath, $redisUniqKey)),
-            $filePath,
-            $redisUniqKey
-        );
-        $adrecordDataRow->transform();
-
-        /** @var AdrecordProductRepository $savingSku */
-        $savingSku = $this->dm->getRepository($adrecordDataRow::getMongoClass());
-
-        $saveProductInMongo = $this->saveProductInMongo(
-            $adrecordDataRow,
-            $shop,
-            $savingSku
-        );
-        $this->getProductsBus()->dispatch($adrecordDataRow);
+        $this->getProductsBus()->dispatch($dataRow);
     }
 
     /**
@@ -728,6 +613,7 @@ class HandleDownloadFileData
      * @param string $redisUniqKey
      * @return string
      * @throws \League\Flysystem\FileNotFoundException
+     * @throws \Exception
      */
     private function saveFileFromDoINConsumer(string $filePath, string $shop, string $redisUniqKey): string
     {

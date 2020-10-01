@@ -22,7 +22,7 @@ use JMS\Serializer\Annotation;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
  * @ORM\HasLifecycleCallbacks()
  */
-class Shop extends SlugAbstract
+class Shop extends SEOModel
 {
     const PREFIX_HASH = 'statistic:';
 
