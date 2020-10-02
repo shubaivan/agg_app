@@ -6,6 +6,7 @@
 parameters:
     app.logout_listener.class: App\Listener\LogoutListener
     mongodb_server: '%env(MONGO_URL)%'
+
     awin_download_urls:
         'vegaoo': '%env(AWIN_DOWNLOAD_URL_VEGAOO)%'
         'nike': '%env(AWIN_DOWNLOAD_URL_Nike)%'

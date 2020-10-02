@@ -243,4 +243,9 @@ class Shop extends SEOModel
     {
         return $this->shopName;
     }
+
+    public function getNameForSeoDefaultTemplate()
+    {
+        return $this->shopName;
+    }
 }
