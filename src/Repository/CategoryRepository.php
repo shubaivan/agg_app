@@ -37,6 +37,7 @@ class CategoryRepository extends ServiceEntityRepository
     const CACHE_CUSTOM_CATEGORY_ID = 'cache_custom_category_id';
     const SUB_CATEGORIES = 'sub_categories';
     const MAIN_CATEGORY_IDS = 'main_category_ids';
+    const CATEGORY_FACET_FILTER = 'category_facet_filter';
 
     /**
      * @var Helpers
@@ -579,17 +580,30 @@ class CategoryRepository extends ServiceEntityRepository
                         SELECT COUNT(DISTINCT category_alias.id)
             ';
         } else {
-            $query .= '
+            $templateId = Category::getTemplateTitleId();
+            $seoTitle = getenv($templateId);
+
+            $seoDescrTemplId = Category::getTemplateDescriptionId();
+            $seoDescTempl = getenv($seoDescrTemplId);
+
+            $query .= "
                     SELECT                         
                             DISTINCT category_alias.id,
-                            category_alias.category_name AS "categoryName",
-                            category_alias.created_at AS "createdAt",
+                            category_alias.category_name AS \"categoryName\",
+                            category_alias.created_at AS \"createdAt\",
                             category_alias.slug,
-                            category_alias.seo_title,
-                            category_alias.seo_description,
+                            
+                            CASE WHEN category_alias.seo_title IS NULL OR category_alias.seo_title='' THEN regexp_replace('$seoTitle', '{{ name }}', category_alias.category_name, 'g')
+                                ELSE category_alias.seo_title
+                            END as seo_title,
+                            
+                            CASE WHEN category_alias.seo_description IS NULL OR category_alias.seo_description='' THEN regexp_replace('$seoDescTempl', '{{ name }}', category_alias.category_name, 'g')
+                                ELSE category_alias.seo_description
+                            END as seo_description,
+                            
                             category_alias.seo_text1,
                             category_alias.seo_text1
-            ';
+            ";
 
             if ($search) {
                 $query .= '
@@ -750,8 +764,9 @@ class CategoryRepository extends ServiceEntityRepository
             $query,
             $params,
             $types,
-            ['category_facet_filter'],
-            0, $count ? "category_facet_filter_cont" : "category_facet_filter_collection"
+            [self::CATEGORY_FACET_FILTER],
+            0,
+            $count ? "category_facet_filter_cont" : "category_facet_filter_collection"
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheCategory()
             ->prepareParamsForExecuteCacheQuery();

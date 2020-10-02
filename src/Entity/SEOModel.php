@@ -10,7 +10,8 @@ use App\Entity\Collection\SearchProducts\AdjacentProduct;
 
 abstract class SEOModel extends SlugAbstract
 {
-    protected static $templateId = '';
+    protected static $templateTitleId = '';
+    protected static $templateDescriptionId = '';
 
     abstract public function getNameForSeoDefaultTemplate();
 
@@ -35,6 +36,7 @@ abstract class SEOModel extends SlugAbstract
     /**
      * @ORM\Column(type="text", nullable=true)
      *
+     * @Annotation\Accessor(getter="getSeoDescriptionAccessor")
      * @Annotation\Type("string")
      * @Annotation\Groups({
      *     Category::SERIALIZED_GROUP_LIST,
@@ -125,15 +127,8 @@ abstract class SEOModel extends SlugAbstract
      */
     public function getSeoTitle()
     {
-        $templateId = static::getTemplateId();
-        $substituteName = $this->seoTitle;
-        if ($templateId && !$this->seoTitle) {
-            $seoTitle = getenv('CATEGORY_SEO_META_TITLE');
-            $substituteName = preg_replace('/{{ name }}/',
-                $this->getNameForSeoDefaultTemplate(), $seoTitle);
-        }
-
-        return $substituteName;
+        $templateId = static::getTemplateTitleId();
+        return $this->substituteParam($templateId, $this->seoTitle);
     }
 
     /**
@@ -142,6 +137,12 @@ abstract class SEOModel extends SlugAbstract
     public function getSeoDescription()
     {
         return $this->seoDescription;
+    }
+
+    public function getSeoDescriptionAccessor()
+    {
+        $templateId = static::getTemplateDescriptionId();
+        return $this->substituteParam($templateId, $this->seoDescription);
     }
 
     /**
@@ -163,8 +164,31 @@ abstract class SEOModel extends SlugAbstract
     /**
      * @return string
      */
-    public static function getTemplateId(): string
+    public static function getTemplateTitleId(): string
     {
-        return static::$templateId;
+        return static::$templateTitleId;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getTemplateDescriptionId(): string
+    {
+        return static::$templateDescriptionId;
+    }
+
+    /**
+     * @param string $templateId
+     * @param string $column
+     * @return string|string[]|null
+     */
+    private function substituteParam(string $templateId, ?string $column)
+    {
+        if ($templateId && !$column) {
+            $template = getenv($templateId);
+            $column = preg_replace('/{{ name }}/',
+                $this->getNameForSeoDefaultTemplate(), $template);
+        }
+        return $column;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Cache\TagAwareQueryResultCacheCommon;
 use App\Cache\TagAwareQueryResultCacheProduct;
+use App\Entity\Category;
 use App\Entity\Product;
 use App\Services\Helpers;
 use App\Services\Models\ProductService;
@@ -1077,20 +1078,34 @@ class ProductRepository extends ServiceEntityRepository
         return $realCacheKey;
     }
 
-
     /**
      * @return string
      */
     private function prepareCategoriesFacetFilterQuery()
     {
+        $templateId = Category::getTemplateTitleId();
+        $seoTitle = getenv($templateId);
+
+        $seoDescrTemplId = Category::getTemplateDescriptionId();
+        $seoDescTempl = getenv($seoDescrTemplId);
+
         $queryFacet = '
             SELECT                         
                 DISTINCT category_alias.id,
                 category_alias.category_name AS "categoryName",
                 category_alias.created_at AS "createdAt",
                 category_alias.slug,
-                category_alias.seo_title,
-                category_alias.seo_description,
+                
+                CASE WHEN category_alias.seo_title IS NULL OR category_alias.seo_title=\'\' 
+                    THEN regexp_replace(\''.$seoTitle.'\', \'{{ name }}\', category_alias.category_name, \'g\')
+                ELSE category_alias.seo_title
+                END as seo_title,
+                               
+                CASE WHEN category_alias.seo_description IS NULL OR category_alias.seo_description=\'\' 
+                    THEN regexp_replace(\''.$seoDescTempl.'\', \'{{ name }}\', category_alias.category_name, \'g\')
+                    ELSE category_alias.seo_description
+                END as seo_description,
+                
                 category_alias.seo_text1,
                 category_alias.seo_text1
             FROM category category_alias
