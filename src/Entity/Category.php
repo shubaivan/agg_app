@@ -32,7 +32,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Category extends SEOModel implements EntityValidatorException
 {
-    protected static $templateId = 'CATEGORY_SEO_META_TITLE';
+    protected static $templateTitleId = 'CATEGORY_SEO_META_TITLE';
+    protected static $templateDescriptionId = 'CATEGORY_SEO_META_DESCRIPTION';
 
     const SERIALIZED_GROUP_LIST = 'category_group_list';
     const SERIALIZED_GROUP_RELATIONS_LIST = 'category_group_relations_list';

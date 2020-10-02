@@ -266,7 +266,8 @@ class HoverMenuManagmentController extends AbstractRestController
                 ->getTagAwareAdapter()
                 ->invalidateTags([
                     CategoryRepository::MAIN_CATEGORY_IDS,
-                    CategoryRepository::SUB_CATEGORIES
+                    CategoryRepository::SUB_CATEGORIES,
+                    CategoryRepository::CATEGORY_FACET_FILTER,
                 ]);
 
             $this->getTagAwareQueryResultCacheCategory()
