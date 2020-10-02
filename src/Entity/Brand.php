@@ -200,4 +200,9 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
     {
         return $this->brandName;
     }
+
+    public function getNameForSeoDefaultTemplate()
+    {
+        return $this->brandName;
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Document\AdrecordProduct;
 use App\Exception\EntityValidatorException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -31,6 +32,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Category extends SEOModel implements EntityValidatorException
 {
+    protected static $templateId = 'CATEGORY_SEO_META_TITLE';
+
     const SERIALIZED_GROUP_LIST = 'category_group_list';
     const SERIALIZED_GROUP_RELATIONS_LIST = 'category_group_relations_list';
     const SERIALIZED_GROUP_CREATE = 'category_group_crete';
@@ -382,39 +385,12 @@ class Category extends SEOModel implements EntityValidatorException
         return $this->disableForParsing;
     }
 
-    /**
-     * @param mixed $seoTitle
-     */
-    public function setSeoTitle($seoTitle): void
-    {
-        $this->seoTitle = $seoTitle;
-    }
-
-    /**
-     * @param mixed $seoDescription
-     */
-    public function setSeoDescription($seoDescription): void
-    {
-        $this->seoDescription = $seoDescription;
-    }
-
-    /**
-     * @param mixed $seoText1
-     */
-    public function setSeoText1($seoText1): void
-    {
-        $this->seoText1 = $seoText1;
-    }
-
-    /**
-     * @param mixed $seoText2
-     */
-    public function setSeoText2($seoText2): void
-    {
-        $this->seoText2 = $seoText2;
-    }
-
     public function getDataFroSlug()
+    {
+        return $this->categoryName;
+    }
+
+    public function getNameForSeoDefaultTemplate()
     {
         return $this->categoryName;
     }
