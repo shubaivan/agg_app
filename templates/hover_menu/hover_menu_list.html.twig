@@ -1,7 +1,10 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Profile!{% endblock %}
-
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="{{ asset('simditor-2.3.28/styles/simditor.css') }}" />
+{% endblock %}
 {% block body %}
     {{ parent() }}
 
@@ -114,7 +117,7 @@
                                 <input type="text" id="category_name" name="category_name"/>
                             </div>
 
-                            <div class="row">
+                            <div class="row category_seo">
                                 <div class="col-md-6 ml-auto">
                                     <div class="form-group">
                                         <label for="category_seo_title" class="col-form-label">Category Seo title:</label>
@@ -129,7 +132,7 @@
                                 </div>
                             </div>
 
-                            <div class="row">
+                            <div class="row category_seo">
                                 <div class="col-md-6 ml-auto">
                                     <div class="form-group">
                                         <label for="category_seo_text1" class="col-form-label">Category Seo text1:</label>
@@ -163,5 +166,12 @@
 {% block javascripts %}
     {{ parent() }}
     {{ encore_entry_script_tags('index/js/hover_menu.min') }}
+
+
+    <script src="{{ asset('simditor-2.3.28/site/assets/scripts/module.js') }}"></script>
+    <script src="{{ asset('simditor-2.3.28/site/assets/scripts/hotkeys.js') }}"></script>
+
+
+    <script src="{{ asset('simditor-2.3.28/lib/simditor.js') }}"></script>
 
 {% endblock %}
