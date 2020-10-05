@@ -18,11 +18,13 @@ require('datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css');
 
 require('@fortawesome/fontawesome-free/js/all.js');
 
-// const $  = require( 'jquery' );
-// global.$ = global.jQuery = $;
+const $  = require( 'jquery' );
+global.$ = global.jQuery = $;
 // import 'popper.js';
 require('bootstrap');
 require('bootstrap-select');
+
+
 
 document.addEventListener("DOMContentLoaded", function () {
     var sub_category_ids = {};
@@ -282,8 +284,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     "targets": 4,
                     data: 'SeoTitle',
                     render: function (data, type, row, meta) {
+                        let divTagBuffer = $('<div/>');
+                        let divTagContent = $('<div/>').addClass('seo_title_' + row.id).addClass('category_seo');
+
+                        let parseHTML = $.parseHTML( data );
+                        divTagContent.append(parseHTML);
+                        divTagBuffer.append(divTagContent);
+                        let result = divTagBuffer.html();
+
                         return type === 'display' && data ?
-                            '<p class="seo-title_' + row.id + '">' + data + '</p>' : ''
+                            result : ''
                     }
                 },
                 {
@@ -291,8 +301,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     "targets": 5,
                     data: 'SeoDescription',
                     render: function (data, type, row, meta) {
+                        let divTagBuffer = $('<div/>');
+                        let divTagContent = $('<div/>').addClass('seo_description_' + row.id).addClass('category_seo');
+
+                        let parseHTML = $.parseHTML( data );
+                        divTagContent.append(parseHTML);
+                        divTagBuffer.append(divTagContent);
+                        let result = divTagBuffer.html();
+
                         return type === 'display' && data ?
-                            '<p class="seo-description_' + row.id + '">' + data + '</p>' : ''
+                            result : ''
                     }
                 },
                 {
@@ -300,8 +318,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     "targets": 6,
                     data: 'SeoText1',
                     render: function (data, type, row, meta) {
+                        let divTagBuffer = $('<div/>');
+                        let divTagContent = $('<div/>').addClass('seo_text1_' + row.id).addClass('category_seo');
+
+                        let parseHTML = $.parseHTML( data );
+                        divTagContent.append(parseHTML);
+                        divTagBuffer.append(divTagContent);
+                        let result = divTagBuffer.html();
+
                         return type === 'display' && data ?
-                            '<p class="seo_text1_' + row.id + '">' + data + '</p>' : ''
+                            result : ''
                     }
                 },
                 {
@@ -309,8 +335,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     "targets": 7,
                     data: 'SeoText2',
                     render: function (data, type, row, meta) {
+                        let divTagBuffer = $('<div/>');
+                        let divTagContent = $('<div/>').addClass('seo_text2_' + row.id).addClass('category_seo');
+
+                        let parseHTML = $.parseHTML( data );
+                        divTagContent.append(parseHTML);
+                        divTagBuffer.append(divTagContent);
+                        let result = divTagBuffer.html();
+
                         return type === 'display' && data ?
-                            '<p class="seo_text2_' + row.id + '">' + data + '</p>' : ''
+                            result : ''
                     }
                 },
                 {
@@ -431,6 +465,8 @@ document.addEventListener("DOMContentLoaded", function () {
     exampleModalLong.on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);// Button that triggered the modal
         var modal = $(this);
+        let form = modal.find("form");
+
         let categoryId = button.data('categoryId');
         let cn_value = $('.cn_' + categoryId);
 
@@ -458,16 +494,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         modal.find('.modal-title').text('Edit ' + cn_value.text() + ' category');
-        setDataInForm(modal.find('.modal-body #category_name'), '.cn_' + categoryId);
-        setDataInForm(modal.find('.modal-body #pkw'), '.pkw_' + categoryId);
-        setDataInForm(modal.find('.modal-body #category_position'), '.position_' + categoryId);
-        setDataInForm(modal.find('.modal-body #nkw'), '.nkw_' + categoryId);
-
-        setDataInForm(modal.find('.modal-body #category_seo_title'), '.seo-title_' + categoryId);
-        setDataInForm(modal.find('.modal-body #category_seo_description'), '.seo-description_' + categoryId);
-        setDataInForm(modal.find('.modal-body #category_seo_text1'), '.seo_text1_' + categoryId);
-        setDataInForm(modal.find('.modal-body #category_seo_text2'), '.seo_text2_' + categoryId);
-
+        setDataInForm(modal.find('.modal-body #category_name'),
+            '.cn_' + categoryId);
+        setDataInForm(modal.find('.modal-body #pkw'),
+            '.pkw_' + categoryId);
+        setDataInForm(modal.find('.modal-body #category_position'),
+            '.position_' + categoryId);
+        setDataInForm(modal.find('.modal-body #nkw'),
+            '.nkw_' + categoryId);
 
         let category_id_input = modal.find('.modal-body #category_id');
         category_id_input.text(categoryId);
@@ -496,20 +530,69 @@ document.addEventListener("DOMContentLoaded", function () {
                 return false;
             }
         });
+
+        $.each(form.find('.category_seo textarea'), function (k, v) {
+            Simditor.locale = 'en-US';
+            var editor = new Simditor({
+                textarea: v,
+                upload: false,
+                toolbar: [
+                    'title',
+                    'bold',
+                    'italic',
+                    'underline',
+                    'strikethrough',
+                    'fontScale',
+                    'color',
+                    'ol',
+                    'ul',
+                    'blockquote',
+                    'code',
+                    'table',
+                    'link',
+                    'hr',
+                    'indent',
+                    'outdent',
+                    'alignment'
+                ],
+                codeLanguages: [
+                    { name: 'HTML,XML', value: 'html' }
+                ],
+            });
+            console.log($(v).attr('id'));
+            let dataInForm = setDataInForm(modal.find('.modal-body #'+$(v).attr('id')),
+                $(v).attr('id').replace('category_', '.') + '_' + categoryId
+            );
+
+            editor.setValue(dataInForm)
+        });
     });
 
-
+    /**
+     *
+     * @param formInput
+     * @param classForValue
+     * @returns {string}
+     */
     function setDataInForm(formInput, classForValue)
     {
         let nkw_value = $(classForValue);
+        let nkw_value_data = '';
         $.each(nkw_value, function (k, v) {
-            let nkw_value_data = $(v).text();
+            if ($(v).hasClass('category_seo')) {
+                nkw_value_data = $(v).html();
+            } else {
+                nkw_value_data = $(v).text();
+            }
+
             if (nkw_value_data) {
                 formInput.text(nkw_value_data);
                 formInput.val(nkw_value_data);
                 return false;
             }
         });
+
+        return nkw_value_data;
     }
     $('.btn.btn-primary').on('click', function () {
         let editCateory = $('#editCateory textarea');
