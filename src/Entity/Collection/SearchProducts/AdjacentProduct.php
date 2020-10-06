@@ -132,7 +132,7 @@ class AdjacentProduct extends CommonProduct
 
     public function getPriceAccessor()
     {
-        $price = preg_replace('/.00/', '', $this->price);
+        $price = preg_replace('/\.00/', '', $this->price);
 
         return $price;
     }
