@@ -50,7 +50,7 @@ class LeksakscityService implements IdentityGroup
                 if (isset($query['url'])) {
                     if (preg_match('/([^\/]+$)/', $query['url'], $matches)) {
                         $identity = array_shift($matches);
-                        $identityReplace = preg_replace('/.html/', '', $identity);
+                        $identityReplace = preg_replace('/\.html/', '', $identity);
                         $identityExplode = explode('-', $identityReplace);
                         if ($identityExplode) {
                             $lastEl = array_pop($identityExplode);

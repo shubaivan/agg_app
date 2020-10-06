@@ -274,8 +274,8 @@ class GroupProductEntity extends CommonProduct
             $max = max($this->storePrice);
             $min = min($this->storePrice);
 
-            $max = preg_replace('/.00/', '', $max);
-            $min = preg_replace('/.00/', '', $min);
+            $max = preg_replace('/\.00/', '', $max);
+            $min = preg_replace('/\.00/', '', $min);
 
             $this->rangePrice = ((float)$max != (float)$min ? $min . ' - ' . $max : $max);
         }
