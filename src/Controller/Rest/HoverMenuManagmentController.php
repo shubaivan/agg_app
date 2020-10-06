@@ -241,11 +241,15 @@ class HoverMenuManagmentController extends AbstractRestController
             $objectManager->flush();
             $connection->commit();
             if ($request->get('disableForParsing')) {
-                $category->setDisableForParsing(true);
-                $this->setUpdateDisableForParsingByIds($category, true);
+                if (!$category->isDisableForParsing()) {
+                    $category->setDisableForParsing(true);
+                    $this->setUpdateDisableForParsingByIds($category, true);
+                }
             } else {
-                $category->setDisableForParsing(false);
-                $this->setUpdateDisableForParsingByIds($category, false);
+                if ($category->isDisableForParsing()) {
+                    $category->setDisableForParsing(false);
+                    $this->setUpdateDisableForParsingByIds($category, false);
+                }
             }
 
             /** @var Configuration $configuration */
