@@ -30,7 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="categories_region")
  * @ORM\HasLifecycleCallbacks()
  */
-class Category extends SEOModel implements EntityValidatorException
+class Category extends SEOModel implements EntityValidatorException, AttachmentFilesInterface
 {
     protected static $templateTitleId = 'CATEGORY_SEO_META_TITLE';
     protected static $templateDescriptionId = 'CATEGORY_SEO_META_DESCRIPTION';
@@ -126,12 +126,28 @@ class Category extends SEOModel implements EntityValidatorException
      * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
      */
     private $position = 0;
+
+    /**
+     * @var Files
+     *
+     * @ORM\OneToMany(
+     *     targetEntity="App\Entity\Files",
+     *     mappedBy="category",
+     *     orphanRemoval=true,
+     *     cascade={"persist"}
+     *     )
+     * @Assert\Valid()
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="categories_region")
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_RELATIONS_LIST})
+     */
+    private $files;
     
     public function __construct()
     {
         $this->products = new ArrayCollection();
         $this->subCategoryRelations = new ArrayCollection();
         $this->mainCategoryRelations = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -394,5 +410,61 @@ class Category extends SEOModel implements EntityValidatorException
     public function getNameForSeoDefaultTemplate()
     {
         return $this->categoryName;
+    }
+
+    public function getHotCategory(): ?bool
+    {
+        return $this->hotCategory;
+    }
+
+    public function getDisableForParsing(): ?bool
+    {
+        return $this->disableForParsing;
+    }
+
+    /**
+     * @return Collection|Files[]
+     */
+    public function getFiles(): Collection
+    {
+        return $this->files;
+    }
+
+    public function addFile(Files $file): self
+    {
+        if (!$this->files->contains($file)) {
+            $this->files[] = $file;
+            $file->setCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(Files $file): self
+    {
+        if ($this->files->contains($file)) {
+            $this->files->removeElement($file);
+            // set the owning side to null (unless already changed)
+            if ($file->getCategory() === $this) {
+                $file->setCategory(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function checkFileExist($name)
+    {
+        $isCheck = false;
+        $files = $this->getFiles()->getValues();
+        foreach ($files as $file) {
+            /** @var Files $file */
+            $isCheck = ($file->getOriginalName() === $name);
+            if ($isCheck) {
+                break;
+            }
+        }
+
+        return $isCheck;
     }
 }

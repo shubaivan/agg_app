@@ -16,6 +16,7 @@ use App\Exception\ValidatorException;
 use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\CategorySectionRepository;
+use App\Repository\FilesRepository;
 use App\Services\Helpers;
 use App\Services\ObjectsHandler;
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -43,6 +44,11 @@ class HoverMenuManagmentController extends AbstractRestController
      * @var CategoryRepository
      */
     private $categoryRepo;
+
+    /**
+     * @var FilesRepository
+     */
+    private $fileRepo;
 
     /**
      * @var TagAwareQueryResultCacheCategoryConf
@@ -73,6 +79,7 @@ class HoverMenuManagmentController extends AbstractRestController
      * HoverMenuManagmentController constructor.
      * @param CategoryConfigurationsRepository $categoryConfRepo
      * @param CategoryRepository $categoryRepo
+     * @param FilesRepository $fileRepo
      * @param TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf
      * @param TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory
      * @param ObjectsHandler $objectsHandler
@@ -82,6 +89,7 @@ class HoverMenuManagmentController extends AbstractRestController
     public function __construct(
         CategoryConfigurationsRepository $categoryConfRepo,
         CategoryRepository $categoryRepo,
+        FilesRepository $fileRepo,
         Helpers $helpers,
         TagAwareQueryResultCacheCategoryConf $tagAwareQueryResultCacheCategoryConf,
         TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory,
@@ -94,6 +102,7 @@ class HoverMenuManagmentController extends AbstractRestController
 
         $this->categoryConfRepo = $categoryConfRepo;
         $this->categoryRepo = $categoryRepo;
+        $this->fileRepo = $fileRepo;
         $this->tagAwareQueryResultCacheCategoryConf = $tagAwareQueryResultCacheCategoryConf;
         $this->tagAwareQuerySecondLevelCacheCategory = $tagAwareQuerySecondLevelCacheCategory;
         $this->objectsHandler = $objectsHandler;
@@ -237,7 +246,14 @@ class HoverMenuManagmentController extends AbstractRestController
             }
 
             $this->categoryRepo->getPersist($categoryConfigurations);
-
+            $fileIds = $request->get('file_ids');
+            if (count($fileIds)) {
+                $files = $this->fileRepo
+                    ->getByIds($fileIds);
+                foreach ($files as $file) {
+                    $file->setCategory($category);
+                }
+            }
             $objectManager->flush();
             $connection->commit();
             if ($request->get('disableForParsing')) {
@@ -252,9 +268,9 @@ class HoverMenuManagmentController extends AbstractRestController
                 }
             }
 
-            /** @var Configuration $configuration */
+            /** @fileIds Configuration $configuration */
             $configuration = $objectManager->getConfiguration();
-            /** @var DoctrineProvider $resultCacheImpl1 */
+            /** @fileIds DoctrineProvider $resultCacheImpl1 */
             $resultCacheImpl1 = $configuration->getResultCacheImpl();
             $resultCacheImpl1->delete(CategoryRepository::CACHE_HOT_CATEGORY_ID);
             $resultCacheImpl1->delete(CategoryRepository::CACHE_CUSTOM_CATEGORY_ID);

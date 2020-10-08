@@ -307,3 +307,9 @@ services:
       class: "%app.logout_listener.class%"
       arguments:
         - "@doctrine.orm.default_entity_manager"
+
+
+    App\EventListener\FilePathUploadListener:
+      tags:
+        - { name: doctrine.event_listener, event: prePersist }
+        - { name: doctrine.event_listener, event: preUpdate }
