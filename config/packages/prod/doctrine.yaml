@@ -92,6 +92,11 @@ doctrine:
                             cache_driver:
                                 type: service
                                 id: doctrine.orm.default_result_cache
+                        categories_region:
+                            lifetime: 31536000 # One year
+                            cache_driver:
+                                type: service
+                                id: App\Cache\TagAwareQuerySecondLevelCacheCategory
                 metadata_cache_driver:
                     type: pool
                     pool: doctrine.system_cache_pool

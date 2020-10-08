@@ -464,8 +464,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let form = modal.find("form");
         form.trigger("reset");
         form.find('textarea').val('');
-
-
+        form.find('.attachment_files_to_categories').remove();
         let sections_select_container = modal.find('.modal-body #sections_select_container');
         if (sections_select_container.length) {
             sections_select_container.remove();
@@ -629,7 +628,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 let input = $('<input>').attr({
                     type: 'hidden',
                     id: 'file_id_' + v.id,
-                    name: 'file_ids[]'
+                    name: 'file_ids[]',
+                    class: 'attachment_files_to_categories'
                 });
                 input.val(v.id);
                 form.append(input);
