@@ -477,192 +477,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let form = modal.find("form");
 
         let categoryId = button.data('categoryId');
-        let cn_value = $('.cn_' + categoryId);
-
-        modal.find('.modal-body #editCateory').append(sections_select);
-        let sections_list = modal.find('.modal-body #editCateory #sections_list');
-        if (sections_select) {
-            let sectionId = cn_value.data('sectionId');
-            if (sectionId) {
-                sections_list.val(sectionId).change();
-            }
-            sections_list.selectpicker();
-        }
-
-        if (button.hasClass('trigger_new_sub')) {
-            let main_category_id = modal.find('.modal-body #main_category_id');
-            if (button.data('categoryName')) {
-                modal.find('.modal-title').text('New sub category for ' + button.data('categoryName'));
-            } else {
-                modal.find('.modal-title').text('New Category first level');
-            }
-
-            main_category_id.text(categoryId);
-            main_category_id.val(categoryId);
-            return true;
-        }
-
-        modal.find('.modal-title').text('Edit ' + cn_value.text() + ' category');
-        setDataInForm(modal.find('.modal-body #category_name'),
-            '.cn_' + categoryId);
-        setDataInForm(modal.find('.modal-body #pkw'),
-            '.pkw_' + categoryId);
-        setDataInForm(modal.find('.modal-body #category_position'),
-            '.position_' + categoryId);
-        setDataInForm(modal.find('.modal-body #nkw'),
-            '.nkw_' + categoryId);
-
-        let category_id_input = modal.find('.modal-body #category_id');
-        category_id_input.text(categoryId);
-        category_id_input.val(categoryId);
-
-        let hotCategory = modal.find('.modal-body #hotCatgory');
-        let hc_value = $('.hc_' + categoryId);
-        $.each(hc_value, function (k, v) {
-            let hc_value_data = $(v).attr('hc_val');
-            if (hc_value_data) {
-                if (hc_value_data === 'true') {
-                    hotCategory.prop("checked", true);
-                }
-                return false;
-            }
-        });
-
-        let disableForParsing = modal.find('.modal-body #disableForParsing');
-        let dfp_value = $('.dfp_' + categoryId);
-        $.each(dfp_value, function (k, v) {
-            let dfp_value_data = $(v).attr('dfp_val');
-            if (dfp_value_data) {
-                if (dfp_value_data === 'true') {
-                    disableForParsing.prop("checked", true);
-                }
-                return false;
-            }
-        });
-        // Import the plugins
-        const Uppy = require('@uppy/core')
-        const XHRUpload = require('@uppy/xhr-upload')
-        const Dashboard = require('@uppy/dashboard')
-        let timeOfLastAttach = new Date();
-        const uppy = Uppy({
-            debug: true,
-            autoProceed: false,
-            restrictions: {
-                maxFileSize: 100097152,//100Mb
-            },
-            onBeforeFileAdded: (currentFile, files) => {
-                //чтоб мог добавить только один файл за раз
-                let currentTime = new Date();
-                if( (currentTime - timeOfLastAttach)<700 ){
-                    return false;
-                }
-                timeOfLastAttach = new Date();
-
-
-                let isSameFile = files && Object.values(files).some(item=>{
-                    return currentFile.name === item.data.name;
-                });
-                if(isSameFile) {
-                    alert('File already added.');
-                    return false;
-                }
-
-                return currentFile;
-            },
-            onBeforeUpload: (currentFiles) => {
-
-            }
-        });
-
-        uppy.use(Dashboard, {
-            trigger: '.UppyModalOpenerBtn',
-            inline: true,
-            target: '.DashboardContainer',
-            replaceTargetContent: true,
-            showProgressDetails: true,
-            showRemoveButtonAfterComplete: true,
-            note: 'add Images',
-            height: 470,
-            metaFields: [
-                { id: 'name', name: 'name', placeholder: 'file name' },
-                { id: 'caption', name: 'caption', placeholder: 'describe what the image is about' }
-            ],
-            browserBackButtonClose: true
-        });
-        uppy.setMeta({
-            id: categoryId, entity: 'Entity\\Category'
-        });
-        uppy.use(XHRUpload, {
-            endpoint: attachment_files,
-            formData: true,
-            fieldName: 'files[]',
-            // bundle: true,
-            metaFields: null,
-            getResponseData (responseText, response) {
-                return {
-                    url: responseText
-                }
-            }
-        });
-
-        uppy.on('file-added', (file) =>{
-
-        });
-
-        uppy.on('file-editor:complete', (updatedFile) => {
-            // console.log(updatedFile)
-        });
-
-        uppy.on('upload-success', (file, body) => {
-            let files = JSON.parse(body.body.url);
-            $.each(files, function (k, v) {
-                let input = $('<input>').attr({
-                    type: 'hidden',
-                    id: 'file_id_' + v.id,
-                    name: 'file_ids[]',
-                    class: 'attachment_files_to_categories'
-                });
-                input.val(v.id);
-                form.append(input);
-                uppy.setFileMeta(file.id, {m_file_id: v.id})
-            })
-        });
-
-        uppy.on('error', (error) => {
-            console.error(error.stack)
-        });
-
-        uppy.on('file-removed', (file, reason) => {
-            if (reason === 'removed-by-user' && file.meta.m_file_id) {
-                var app_rest_admin_attachmentfile_deleteattachmentfile = Routing.
-                    generate('app_rest_admin_attachmentfile_deleteattachmentfile', {'id': file.meta.m_file_id});
-                $.ajax({
-                    url: app_rest_admin_attachmentfile_deleteattachmentfile,
-                    type: 'DELETE',
-                    success: function(result) {
-                        console.log(result);
-                    },
-                    error: function(result){
-                        console.log(result);
-                    }
-                });
-            }
-        });
-
-        uppy.on('upload-error', (file, error, response) => {
-            uppy.removeFile(file.id);
-            let parse = JSON.parse(response.body.url);
-
-            uppy.info(parse.message, 'error', 5000);
-
-            console.log('error with file:', file.id);
-            console.log('error message:', error);
-        });
-
-        uppy.on('complete', result => {
-            console.log('successful files:', result.successful)
-            console.log('failed files:', result.failed)
-        });
 
         $.ajax({
             type: "POST",
@@ -674,6 +488,229 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log(result.responseJSON.status);
             },
             success: (data) => {
+                let cn_value = $('.cn_' + categoryId);
+                modal.find('.modal-body #editCateory').append(sections_select);
+                let sections_list = modal.find('.modal-body #editCateory #sections_list');
+                if (sections_select) {
+                    let sectionId = cn_value.data('sectionId');
+                    if (sectionId) {
+                        sections_list.val(sectionId).change();
+                    }
+                    sections_list.selectpicker();
+                }
+
+                if (button.hasClass('trigger_new_sub')) {
+                    let main_category_id = modal.find('.modal-body #main_category_id');
+                    if (button.data('categoryName')) {
+                        modal.find('.modal-title').text('New sub category for ' + button.data('categoryName'));
+                    } else {
+                        modal.find('.modal-title').text('New Category first level');
+                    }
+
+                    main_category_id.text(categoryId);
+                    main_category_id.val(categoryId);
+                    return true;
+                }
+
+                modal.find('.modal-title').text('Edit ' + cn_value.text() + ' category');
+                setDataInForm(modal.find('.modal-body #category_name'),
+                    '.cn_' + categoryId);
+                setDataInForm(modal.find('.modal-body #pkw'),
+                    '.pkw_' + categoryId);
+                setDataInForm(modal.find('.modal-body #category_position'),
+                    '.position_' + categoryId);
+                setDataInForm(modal.find('.modal-body #nkw'),
+                    '.nkw_' + categoryId);
+
+                let category_id_input = modal.find('.modal-body #category_id');
+                category_id_input.text(categoryId);
+                category_id_input.val(categoryId);
+
+                let hotCategory = modal.find('.modal-body #hotCatgory');
+                let hc_value = $('.hc_' + categoryId);
+                $.each(hc_value, function (k, v) {
+                    let hc_value_data = $(v).attr('hc_val');
+                    if (hc_value_data) {
+                        if (hc_value_data === 'true') {
+                            hotCategory.prop("checked", true);
+                        }
+                        return false;
+                    }
+                });
+
+                let disableForParsing = modal.find('.modal-body #disableForParsing');
+                let dfp_value = $('.dfp_' + categoryId);
+                $.each(dfp_value, function (k, v) {
+                    let dfp_value_data = $(v).attr('dfp_val');
+                    if (dfp_value_data) {
+                        if (dfp_value_data === 'true') {
+                            disableForParsing.prop("checked", true);
+                        }
+                        return false;
+                    }
+                });
+
+
+                $.each(form.find('.category_seo textarea'), function (k, v) {
+                    Simditor.locale = 'en-US';
+                    var editor = new Simditor({
+                        textarea: v,
+                        upload: false,
+                        toolbar: [
+                            'title',
+                            'bold',
+                            'italic',
+                            'underline',
+                            'strikethrough',
+                            'fontScale',
+                            'color',
+                            'ol',
+                            'ul',
+                            'blockquote',
+                            'code',
+                            'table',
+                            'link',
+                            'hr',
+                            'indent',
+                            'outdent',
+                            'alignment'
+                        ],
+                        codeLanguages: [
+                            { name: 'HTML,XML', value: 'html' }
+                        ],
+                    });
+                    // console.log($(v).attr('id'));
+                    let dataInForm = setDataInForm(modal.find('.modal-body #'+$(v).attr('id')),
+                        $(v).attr('id').replace('category_', '.') + '_' + categoryId
+                    );
+
+                    editor.setValue(dataInForm)
+                });
+
+                // Import the plugins
+                const Uppy = require('@uppy/core')
+                const XHRUpload = require('@uppy/xhr-upload')
+                const Dashboard = require('@uppy/dashboard')
+                let timeOfLastAttach = new Date();
+                const uppy = Uppy({
+                    debug: true,
+                    autoProceed: false,
+                    restrictions: {
+                        maxFileSize: 100097152,//100Mb
+                    },
+                    onBeforeFileAdded: (currentFile, files) => {
+                        //чтоб мог добавить только один файл за раз
+                        let currentTime = new Date();
+                        if( (currentTime - timeOfLastAttach)<700 ){
+                            return false;
+                        }
+                        timeOfLastAttach = new Date();
+
+
+                        let isSameFile = files && Object.values(files).some(item=>{
+                            return currentFile.name === item.data.name;
+                        });
+                        if(isSameFile) {
+                            alert('File already added.');
+                            return false;
+                        }
+
+                        return currentFile;
+                    },
+                    onBeforeUpload: (currentFiles) => {
+
+                    }
+                });
+
+                uppy.use(Dashboard, {
+                    trigger: '.UppyModalOpenerBtn',
+                    inline: true,
+                    target: '.DashboardContainer',
+                    replaceTargetContent: true,
+                    showProgressDetails: true,
+                    showRemoveButtonAfterComplete: true,
+                    note: 'add Images',
+                    height: 470,
+                    metaFields: [
+                        { id: 'name', name: 'name', placeholder: 'file name' },
+                        { id: 'caption', name: 'caption', placeholder: 'describe what the image is about' }
+                    ],
+                    browserBackButtonClose: true
+                });
+                uppy.setMeta({
+                    id: categoryId, entity: 'Entity\\Category'
+                });
+                uppy.use(XHRUpload, {
+                    endpoint: attachment_files,
+                    formData: true,
+                    fieldName: 'files[]',
+                    // bundle: true,
+                    metaFields: null,
+                    getResponseData (responseText, response) {
+                        return {
+                            url: responseText
+                        }
+                    }
+                });
+
+                uppy.on('file-added', (file) =>{
+
+                });
+
+                uppy.on('file-editor:complete', (updatedFile) => {
+                    // console.log(updatedFile)
+                });
+
+                uppy.on('upload-success', (file, body) => {
+                    let files = JSON.parse(body.body.url);
+                    $.each(files, function (k, v) {
+                        let input = $('<input>').attr({
+                            type: 'hidden',
+                            id: 'file_id_' + v.id,
+                            name: 'file_ids[]',
+                            class: 'attachment_files_to_categories'
+                        });
+                        input.val(v.id);
+                        form.append(input);
+                        uppy.setFileMeta(file.id, {m_file_id: v.id})
+                    })
+                });
+
+                uppy.on('error', (error) => {
+                    console.error(error.stack)
+                });
+
+                uppy.on('file-removed', (file, reason) => {
+                    if (reason === 'removed-by-user' && file.meta.m_file_id) {
+                        var app_rest_admin_attachmentfile_deleteattachmentfile = Routing.
+                        generate('app_rest_admin_attachmentfile_deleteattachmentfile', {'id': file.meta.m_file_id});
+                        $.ajax({
+                            url: app_rest_admin_attachmentfile_deleteattachmentfile,
+                            type: 'DELETE',
+                            success: function(result) {
+                                console.log(result);
+                            },
+                            error: function(result){
+                                console.log(result);
+                            }
+                        });
+                    }
+                });
+
+                uppy.on('upload-error', (file, error, response) => {
+                    uppy.removeFile(file.id);
+                    let parse = JSON.parse(response.body.url);
+
+                    uppy.info(parse.message, 'error', 5000);
+
+                    console.log('error with file:', file.id);
+                    console.log('error message:', error);
+                });
+
+                uppy.on('complete', result => {
+                    console.log('successful files:', result.successful)
+                    console.log('failed files:', result.failed)
+                });
 
                 (async function(arr){
                     //Promise.all не подходит, т.к. он отвалится если хоть одна фотка не загрузится
@@ -700,44 +737,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     }
                 })(data);
-
             }
-        });
-
-        $.each(form.find('.category_seo textarea'), function (k, v) {
-            Simditor.locale = 'en-US';
-            var editor = new Simditor({
-                textarea: v,
-                upload: false,
-                toolbar: [
-                    'title',
-                    'bold',
-                    'italic',
-                    'underline',
-                    'strikethrough',
-                    'fontScale',
-                    'color',
-                    'ol',
-                    'ul',
-                    'blockquote',
-                    'code',
-                    'table',
-                    'link',
-                    'hr',
-                    'indent',
-                    'outdent',
-                    'alignment'
-                ],
-                codeLanguages: [
-                    { name: 'HTML,XML', value: 'html' }
-                ],
-            });
-            console.log($(v).attr('id'));
-            let dataInForm = setDataInForm(modal.find('.modal-body #'+$(v).attr('id')),
-                $(v).attr('id').replace('category_', '.') + '_' + categoryId
-            );
-
-            editor.setValue(dataInForm)
         });
     });
 
@@ -797,7 +797,9 @@ document.addEventListener("DOMContentLoaded", function () {
             url: app_rest_hovermenumanagment_edithovermenu,
             data: serialize,
             error: (result) => {
-                console.log(result.responseJSON.status);
+                if (result.responseJSON.message) {
+                    alert(result.responseJSON.message);
+                }
             },
             success: (data) => {
                 console.log(data);
