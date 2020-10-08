@@ -427,6 +427,9 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
      */
     public function getFiles(): Collection
     {
+        if (!$this->files) {
+            $this->files = new ArrayCollection();
+        }
         return $this->files;
     }
 
