@@ -247,7 +247,7 @@ class HoverMenuManagmentController extends AbstractRestController
 
             $this->categoryRepo->getPersist($categoryConfigurations);
             $fileIds = $request->get('file_ids');
-            if (count($fileIds)) {
+            if (is_array($fileIds) && count($fileIds)) {
                 $files = $this->fileRepo
                     ->getByIds($fileIds);
                 foreach ($files as $file) {

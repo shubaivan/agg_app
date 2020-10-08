@@ -642,7 +642,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         uppy.on('file-removed', (file, reason) => {
-            if (reason === 'removed-by-user') {
+            if (reason === 'removed-by-user' && file.meta.m_file_id) {
                 var app_rest_admin_attachmentfile_deleteattachmentfile = Routing.
                     generate('app_rest_admin_attachmentfile_deleteattachmentfile', {'id': file.meta.m_file_id});
                 $.ajax({
@@ -672,23 +672,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log('successful files:', result.successful)
             console.log('failed files:', result.failed)
         });
-
-        // uppy.on('file-removed', (file) => {
-        //     console.log('Removed file', file);
-        //     var application_files_remove = Routing.generate('application_files_remove', {'name': file.name});
-        //     fetch(application_files_remove)
-        //         .then(res=>{
-        //             if (!res.ok){
-        //                 throw new Error();
-        //             } else {
-        //                 var removeElement = $("[data-name='"+file.name+"']");
-        //                 removeElement.remove();
-        //
-        //                 return res.json();
-        //             }
-        //         });
-        // });
-
 
         $.ajax({
             type: "POST",
