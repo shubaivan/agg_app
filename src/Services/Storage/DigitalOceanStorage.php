@@ -32,6 +32,16 @@ class DigitalOceanStorage
         echo $this->getStorage()->read($path); // file1more
     }
 
+    public function generateTimeStamp()
+    {
+        return (new \DateTime())->format('Ymd_H:i:s');
+    }
+
+    public function generateUniqId()
+    {
+        return md5(uniqid());
+    }
+
     /**
      * @return FilesystemInterface
      */

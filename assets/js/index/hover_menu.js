@@ -25,6 +25,11 @@ require('bootstrap');
 require('bootstrap-select');
 
 
+import {
+    getBlobFromImageUri,
+    createErrorImgPlaceHolder,
+    delay
+} from './parts/photos_config.js';
 
 document.addEventListener("DOMContentLoaded", function () {
     var sub_category_ids = {};
@@ -40,6 +45,11 @@ document.addEventListener("DOMContentLoaded", function () {
         .generate('app_rest_hovermenumanagment_getsubcategories');
     const app_rest_hovermenumanagment_listhovermenu = window.Routing
         .generate('app_rest_hovermenumanagment_listhovermenu');
+
+    const attachment_files = window.Routing
+        .generate('app_rest_admin_attachmentfile_postattachmentfile');
+    const app_rest_admin_attachmentfile_getattachmentfileslist = window.Routing
+        .generate('app_rest_admin_attachmentfile_getattachmentfileslist')
 
     const body = $('body');
     body.on('keydown keyup onblur', '#pkw, #nkw, #category_name', function () {
@@ -530,6 +540,195 @@ document.addEventListener("DOMContentLoaded", function () {
                 return false;
             }
         });
+        // Import the plugins
+        const Uppy = require('@uppy/core')
+        const XHRUpload = require('@uppy/xhr-upload')
+        const Dashboard = require('@uppy/dashboard')
+        let timeOfLastAttach = new Date();
+        const uppy = Uppy({
+            debug: true,
+            autoProceed: false,
+            restrictions: {
+                maxFileSize: 100097152,//100Mb
+            },
+            onBeforeFileAdded: (currentFile, files) => {
+                //чтоб мог добавить только один файл за раз
+                let currentTime = new Date();
+                if( (currentTime - timeOfLastAttach)<700 ){
+                    return false;
+                }
+                timeOfLastAttach = new Date();
+
+
+                let isSameFile = files && Object.values(files).some(item=>{
+                    return currentFile.name === item.data.name;
+                });
+                if(isSameFile) {
+                    alert('Такий файл вже додано.');
+                    return false;
+                }
+
+                return currentFile;
+            },
+            onBeforeUpload: (currentFiles) => {
+                // let picCounter = 0;
+                // $.each(currentFiles, function (k, v) {
+                //     uppy.setFileState(v.id, {
+                //         xhrUpload: { fieldName: 'pic_' + picCounter }
+                //     });
+                //     picCounter++;
+                // });
+            }
+        });
+
+        uppy.use(Dashboard, {
+            trigger: '.UppyModalOpenerBtn',
+            inline: true,
+            target: '.DashboardContainer',
+            replaceTargetContent: true,
+            showProgressDetails: true,
+            showRemoveButtonAfterComplete: true,
+            note: 'add Images',
+            height: 470,
+            metaFields: [
+                { id: 'name', name: 'name', placeholder: 'file name' },
+                { id: 'caption', name: 'caption', placeholder: 'describe what the image is about' }
+            ],
+            browserBackButtonClose: true
+        });
+        uppy.setMeta({
+            id: categoryId, entity: 'Entity\\Category'
+        });
+        uppy.use(XHRUpload, {
+            endpoint: attachment_files,
+            formData: true,
+            fieldName: 'files[]',
+            // bundle: true,
+            metaFields: null,
+            getResponseData (responseText, response) {
+                return {
+                    url: responseText
+                }
+            }
+        });
+
+        uppy.on('file-added', (file) =>{
+            // console.log(file);
+            // uppy.setFileMeta(file.id, {
+            //     hello_shuba: 'hello'
+            // });
+        });
+
+        uppy.on('file-editor:complete', (updatedFile) => {
+            // console.log(updatedFile)
+        });
+
+        uppy.on('upload-success', (file, body) => {
+            let files = JSON.parse(body.body.url);
+            $.each(files, function (k, v) {
+                let input = $('<input>').attr({
+                    type: 'hidden',
+                    id: 'file_id_' + v.id,
+                    name: 'file_ids[]'
+                });
+                input.val(v.id);
+                form.append(input);
+                uppy.setFileMeta(file.id, {m_file_id: v.id})
+            })
+        });
+
+        uppy.on('error', (error) => {
+            console.error(error.stack)
+        });
+
+        uppy.on('file-removed', (file, reason) => {
+            if (reason === 'removed-by-user') {
+                var app_rest_admin_attachmentfile_deleteattachmentfile = Routing.
+                    generate('app_rest_admin_attachmentfile_deleteattachmentfile', {'id': file.meta.m_file_id});
+                $.ajax({
+                    url: app_rest_admin_attachmentfile_deleteattachmentfile,
+                    type: 'DELETE',
+                    success: function(result) {
+
+                    },
+                    error: function(result){
+                        console.log(result);
+                    }
+                });
+            }
+        });
+
+        uppy.on('upload-error', (file, error, response) => {
+            uppy.removeFile(file.id);
+            let parse = JSON.parse(response.body.url);
+
+            uppy.info(parse.message, 'error', 5000);
+
+            console.log('error with file:', file.id);
+            console.log('error message:', error);
+        });
+
+        uppy.on('complete', result => {
+            console.log('successful files:', result.successful)
+            console.log('failed files:', result.failed)
+        });
+
+        // uppy.on('file-removed', (file) => {
+        //     console.log('Removed file', file);
+        //     var application_files_remove = Routing.generate('application_files_remove', {'name': file.name});
+        //     fetch(application_files_remove)
+        //         .then(res=>{
+        //             if (!res.ok){
+        //                 throw new Error();
+        //             } else {
+        //                 var removeElement = $("[data-name='"+file.name+"']");
+        //                 removeElement.remove();
+        //
+        //                 return res.json();
+        //             }
+        //         });
+        // });
+
+
+        $.ajax({
+            type: "POST",
+            url: app_rest_admin_attachmentfile_getattachmentfileslist,
+            data: {
+                id: categoryId, entity: 'Entity\\Category'
+            },
+            error: (result) => {
+                console.log(result.responseJSON.status);
+            },
+            success: (data) => {
+
+                (async function(arr){
+                    //Promise.all не подходит, т.к. он отвалится если хоть одна фотка не загрузится
+                    for(let item of arr){
+
+                        try {
+                            let blob = await getBlobFromImageUri(item.path);
+                            await delay(1000);//минимальное время задержки для корректной работы добавления фоток в Dashborad Uppy
+                            addInitPhotoToUppy(uppy, blob, false , item);
+
+                        } catch(e){
+
+                            let blob = await createErrorImgPlaceHolder();
+                            await delay(1000);
+                            addInitPhotoToUppy(uppy, blob, true, item);
+                            continue;
+                        } finally {
+                            uppy.getFiles().forEach(file => {
+                                uppy.setFileState(file.id, {
+                                    progress: { uploadComplete: true, uploadStarted: true }
+                                })
+                            })
+                        }
+
+                    }
+                })(data);
+
+            }
+        });
 
         $.each(form.find('.category_seo textarea'), function (k, v) {
             Simditor.locale = 'en-US';
@@ -567,6 +766,18 @@ document.addEventListener("DOMContentLoaded", function () {
             editor.setValue(dataInForm)
         });
     });
+
+    function addInitPhotoToUppy(uppy, blob, isErrorPhoto = false, item){
+        let configObj = {
+            name: item.originalName, // override in onBeforeFileAdded event
+            type: 'image/jpeg',
+            data: blob,
+            source: isErrorPhoto ? 'canvasPlaceholderError' : '',
+        };
+
+        let file_id = uppy.addFile(configObj);
+        uppy.setFileMeta(file_id, {m_file_id: item.id})
+    }
 
     /**
      *

@@ -19,6 +19,9 @@
     "build": "encore production --progress"
   },
   "dependencies": {
+    "@uppy/core": "^1.13.2",
+    "@uppy/dashboard": "^1.12.8",
+    "@uppy/xhr-upload": "^1.6.4",
     "bootstrap-select": "^1.13.18",
     "datatables.net": "^1.10.21",
     "datatables.net-autofill-bs4": "^2.3.5",
