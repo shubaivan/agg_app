@@ -3,43 +3,19 @@
 
 namespace App\Controller\Rest\Admin;
 
-use App\Cache\TagAwareQueryResultCacheBrand;
-use App\Cache\TagAwareQueryResultCacheProduct;
-use App\Entity\AdminShopsRules;
 use App\Entity\AttachmentFilesInterface;
-use App\Entity\Brand;
-use App\Entity\Collection\Admin\ShopRules\CreateShopRules;
-use App\Entity\Collection\Admin\ShopRules\EditShopRules;
 use App\Entity\Files;
-use App\Exception\ValidatorException;
-use App\Form\FileType;
-use App\Repository\AdminShopsRulesRepository;
-use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\FilesRepository;
-use App\Repository\ProductRepository;
-use App\Repository\ShopRepository;
-use App\Services\Admin\AdminShopRules;
-use App\Services\ObjectsHandler;
-use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Configuration;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Entity\Category;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Controller\Rest\AbstractRestController;
-use App\Repository\BrandRepository;
 use App\Services\Helpers;
-use Psr\Cache\InvalidArgumentException;
-use Symfony\Component\Cache\DoctrineProvider;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations\View;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
-
 
 class AttachmentFileController extends AbstractRestController
 {
@@ -190,7 +166,7 @@ class AttachmentFileController extends AbstractRestController
      *     description="Json collection object",
      * )
      *
-     * @return []
+     * @return array
      * @throws \Exception
      */
     public function deleteAttachmentFileAction(Files $file)
