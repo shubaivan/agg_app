@@ -570,13 +570,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return currentFile;
             },
             onBeforeUpload: (currentFiles) => {
-                // let picCounter = 0;
-                // $.each(currentFiles, function (k, v) {
-                //     uppy.setFileState(v.id, {
-                //         xhrUpload: { fieldName: 'pic_' + picCounter }
-                //     });
-                //     picCounter++;
-                // });
+
             }
         });
 
@@ -612,10 +606,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         uppy.on('file-added', (file) =>{
-            // console.log(file);
-            // uppy.setFileMeta(file.id, {
-            //     hello_shuba: 'hello'
-            // });
+
         });
 
         uppy.on('file-editor:complete', (updatedFile) => {
