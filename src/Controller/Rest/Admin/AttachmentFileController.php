@@ -150,7 +150,7 @@ class AttachmentFileController extends AbstractRestController
      *     description="Json collection object",
      * )
      *
-     * @return Collection
+     * @return array
      * @throws \Exception
      */
     public function getAttachmentFilesListAction(Request $request)
@@ -171,7 +171,7 @@ class AttachmentFileController extends AbstractRestController
             throw new \Exception('entity not found');
         }
 
-        return $parentEntity->getFiles();
+        return $parentEntity->getFiles()->getValues();
     }
 
     /**
