@@ -55,8 +55,8 @@ export function createErrorImgPlaceHolder(){
     ctx.font = '20px Source Sans Pro';
     ctx.fillStyle = '#333';
     ctx.textAlign = "center";
-    ctx.fillText('Фото', canvas.width/2, 40);
-    ctx.fillText('відсутнє', canvas.width/2, 70);
+    ctx.fillText('Img', canvas.width/2, 40);
+    ctx.fillText('not exist', canvas.width/2, 70);
 
 
     return new Promise((resolve,reject)=>{
