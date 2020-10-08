@@ -563,7 +563,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     return currentFile.name === item.data.name;
                 });
                 if(isSameFile) {
-                    alert('Такий файл вже додано.');
+                    alert('File already added.');
                     return false;
                 }
 
@@ -649,7 +649,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     url: app_rest_admin_attachmentfile_deleteattachmentfile,
                     type: 'DELETE',
                     success: function(result) {
-
+                        console.log(result);
                     },
                     error: function(result){
                         console.log(result);
