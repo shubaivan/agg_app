@@ -190,11 +190,13 @@ class AttachmentFileController extends AbstractRestController
      *     description="Json collection object",
      * )
      *
-     * @return Collection
+     * @return []
      * @throws \Exception
      */
     public function deleteAttachmentFileAction(Files $file)
     {
         $this->fileRepo->remove($file);
+
+        return ['status' => 'success'];
     }
 }
