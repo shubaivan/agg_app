@@ -21,7 +21,7 @@ class CategoryKladerFixtures extends AbstractFixtures
                 ',
                 'negative_key_words' => 'dress, shoes, tunika',
                 'sub_key_word' => [
-                    'T-shirt' => 'T-shirt, Kortärmad, Tee, Shortsleeve, short sleeve, short sleeved',
+                    'T-shirts' => 'T-shirt, Kortärmad, Tee, Shortsleeve, short sleeve, short sleeved',
                     'Pikéer' => 'Piké, Rugbytröja, Rugby tröja',
                     'Långärmade t-shirts' => 'Långärmad t-shirt'
                 ]

@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * @ORM\Table(name="files")
  * @ORM\Entity(repositoryClass="App\Repository\FilesRepository")
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
  */
 class Files
 {

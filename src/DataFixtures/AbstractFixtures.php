@@ -373,7 +373,7 @@ abstract class AbstractFixtures extends Fixture implements FixtureGroupInterface
         $category->setCategoryConfigurations($categoryConfigurations);
 
         $this->getManager()->persist($categoryConfigurations);
-        $this->getManager()->flush();
+//        $this->getManager()->flush();
 
         return $category;
     }

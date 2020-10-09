@@ -144,9 +144,4 @@ class AdjacentProduct extends CommonProduct
     {
         return $this->id;
     }
-
-    public function getDataFroSlug()
-    {
-        return $this->name;
-    }
 }

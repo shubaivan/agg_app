@@ -112,15 +112,14 @@ class CategoryRepository extends ServiceEntityRepository
 
     /**
      * @param string $slug
-     * @return mixed
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Category[]|[]
      */
-    public function matchExistBySlug(string $slug)
+    public function matchExistBySlugForMatch(string $slug)
     {
         $dql = '
                 SELECT c
                 FROM App\Entity\Category c
-                WHERE ILIKE(c.slug, :search) = TRUE    
+                WHERE ILIKE(c.slugForMatch, :search) = TRUE    
         ';
 
         $query = $this->getEntityManager()
@@ -129,8 +128,7 @@ class CategoryRepository extends ServiceEntityRepository
 
         $query->setParameter(':search', $slug);
 
-
-        return $query->getOneOrNullResult();
+        return $query->getResult();
     }
 
     /**

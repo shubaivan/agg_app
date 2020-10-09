@@ -4,6 +4,7 @@
 namespace App\EventListener;
 
 use App\Entity\SlugAbstract;
+use App\Entity\SlugForMatch;
 use Cocur\Slugify\SlugifyInterface;
 
 
@@ -21,6 +22,7 @@ abstract class SlugApproach
     public function __construct(SlugifyInterface $cs)
     {
         $cs->addRule('&', 'and');
+        $cs->addRule('->', '_own_');
         $this->cs = $cs;
     }
 
@@ -28,6 +30,12 @@ abstract class SlugApproach
     {
         $dataFroSlug = $abstract->getDataFroSlug();
         $abstract->setSlug($this->generateSlugForString($dataFroSlug));
+    }
+
+    protected function applySlugForMatchToEntity(SlugForMatch $abstract)
+    {
+        $dataFroSlug = $abstract->getDataFroSlugForMatch();
+        $abstract->setSlugForMatch($this->generateSlugForString($dataFroSlug));
     }
 
     protected function generateSlugForString(string $someString)

@@ -170,6 +170,7 @@ doctrine:
                         ILIKE: MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\Ilike
                         SIMILAR_TO: MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\SimilarTo
                         NOT_SIMILAR_TO: MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\NotSimilarTo
+                        REGEXP_REPLACE: App\Doctrine\ORM\Query\AST\Functions\RegexpReplace
 
                         md5:            Oro\ORM\Query\AST\Functions\SimpleFunction
                         group_concat:   Oro\ORM\Query\AST\Functions\String\GroupConcat

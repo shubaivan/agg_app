@@ -6,7 +6,10 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CategoryConfigurationsRepository")
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
+ * @ORM\Cache(
+ *     usage="NONSTRICT_READ_WRITE",
+ *     region="categories_region"
+ * )
  *
  * @ORM\Table(name="category_configurations",
  *     indexes={
@@ -25,7 +28,7 @@ class CategoryConfigurations
 
     /**
      * @var Category
-     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="categories_region")
      * @ORM\OneToOne(targetEntity="Category", inversedBy="categoryConfigurations")
      */
     private $categoryId;

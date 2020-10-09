@@ -186,11 +186,11 @@ class HoverMenuManagmentController extends AbstractRestController
                 $category
                     ->setCategoryConfigurations($categoryConfigurations);
 
-                $matchExistCategory = $this->categoryService
-                    ->matchExistCategory($request->get('category_name'));
-                if ($matchExistCategory) {
-                    throw new \Exception('catefory already exsit');
-                }
+//                $matchExistCategory = $this->categoryService
+//                    ->matchExistCategories($request->get('category_name'));
+//                if ($matchExistCategory) {
+//                    throw new \Exception('catefory already exsit');
+//                }
 
             } else {
                 $categoryConfigurations = $this->categoryConfRepo

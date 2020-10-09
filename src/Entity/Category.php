@@ -18,10 +18,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\CategoryRepository")
  * @ORM\Table(name="category",
  *    uniqueConstraints={
- *        @UniqueConstraint(name="category_name_idx", columns={"category_name"}),
  *        @UniqueConstraint(name="category_slug_idx", columns={"slug"})
  *    },
  *     indexes={
+ *        @ORM\Index(name="category_name_index", columns={"category_name"}),
+ *        @ORM\Index(name="category_slug_for_match_index", columns={"slug_for_match"}),
  *        @ORM\Index(name="position_desc_index", columns={"position"}),
  *        @ORM\Index(name="position_asc_index", columns={"position"})
  * }
@@ -30,7 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="categories_region")
  * @ORM\HasLifecycleCallbacks()
  */
-class Category extends SEOModel implements EntityValidatorException, AttachmentFilesInterface
+class Category extends SEOModel implements EntityValidatorException, AttachmentFilesInterface, SlugForMatch
 {
     protected static $templateTitleId = 'CATEGORY_SEO_META_TITLE';
     protected static $templateDescriptionId = 'CATEGORY_SEO_META_DESCRIPTION';
@@ -61,6 +62,17 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
      * @Annotation\Accessor(getter="getCategoryNameAccessor", setter="setCategoryNameAccessor")
      */
     private $categoryName;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     *
+     * @Annotation\Type("string")
+     * @Annotation\Groups({
+     *     Category::SERIALIZED_GROUP_LIST,
+     *     Category::SERIALIZED_GROUP_RELATIONS_LIST,
+     *     })
+     */
+    protected $slugForMatch;
 
     /**
      * @var Collection|Product[]
@@ -402,9 +414,38 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
         return $this->disableForParsing;
     }
 
-    public function getDataFroSlug()
+    public function getDataFroSlugForMatch()
     {
         return $this->categoryName;
+    }
+
+    public function getDataFroSlug()
+    {
+        $mainCategory = true;
+        $bufferCategory = $this;
+        $uniqPath = '';
+        $uniqPathArray = [];
+        while ($mainCategory) {
+            if ($bufferCategory->getSubCategoryRelations()->count()) {
+                foreach ($bufferCategory->getSubCategoryRelations()->getIterator() as $categoryRelation) {
+                    /** @var $categoryRelation CategoryRelations */
+                    if ($categoryRelation->getMainCategory()) {
+                        $bufferCategory = $categoryRelation->getMainCategory();
+                        $uniqPathArray[] = $bufferCategory->getCategoryName();
+                    } else {
+                        $mainCategory = false;
+                    }
+                }
+            } else {
+                $mainCategory = false;
+            }
+        }
+        if ($uniqPathArray) {
+            $array_reverse = array_reverse($uniqPathArray);
+            $uniqPath = implode('->', $array_reverse) . '->';
+        }
+        $uniqPath .= $this->categoryName;
+        return $uniqPath;
     }
 
     public function getNameForSeoDefaultTemplate()
@@ -469,5 +510,17 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
         }
 
         return $isCheck;
+    }
+
+    public function getSlugForMatch(): ?string
+    {
+        return $this->slugForMatch;
+    }
+
+    public function setSlugForMatch(?string $slugForMatch): self
+    {
+        $this->slugForMatch = $slugForMatch;
+
+        return $this;
     }
 }

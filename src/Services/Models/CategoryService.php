@@ -124,7 +124,7 @@ class CategoryService extends AbstractModel
     {
         $parameterBag = new ParameterBag($paramFetcher->all());
 
-        return  $this->matchCategoryWithSub($parameterBag, true);
+        return $this->matchCategoryWithSub($parameterBag, true);
     }
 
     /**
@@ -159,10 +159,11 @@ class CategoryService extends AbstractModel
      * @return array|mixed[]
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function matchCategoryWithSub(ParameterBag $parameterBag, bool $explain = false) {
-        $depth[] = $parameterBag->get( self::MAIN_SEARCH );
+    public function matchCategoryWithSub(ParameterBag $parameterBag, bool $explain = false)
+    {
+        $depth[] = $parameterBag->get(self::MAIN_SEARCH);
 
-        if ($parameterBag->get( self::SUB_MAIN_SEARCH)) {
+        if ($parameterBag->get(self::SUB_MAIN_SEARCH)) {
             $depth[] = $parameterBag->get(self::SUB_MAIN_SEARCH);
         }
 
@@ -194,7 +195,7 @@ class CategoryService extends AbstractModel
 //        if (!strlen($prepareCategoryDataForGINSearch)) {
 //            return [];
 //        }
-        
+
         $isMatchToMainCategory = $this->getCategoryRepository()
             ->isMatchToMainCategory($product->getCategoryWithShop());
 
@@ -216,9 +217,8 @@ class CategoryService extends AbstractModel
 //        );
 
 
-        
         $mainCategoryIds = [];
-        array_map(function ($v) use (&$mainCategoryIds){
+        array_map(function ($v) use (&$mainCategoryIds) {
             if (isset($v['id'])) {
                 $mainCategoryIds[] = $v['id'];
             }
@@ -262,8 +262,7 @@ class CategoryService extends AbstractModel
      */
     public function addCategoryToProductByIds(array $ids, Product $product)
     {
-        foreach ($ids as $id )
-        {
+        foreach ($ids as $id) {
             $category = $this->getCategoryRepository()->findOneBy(['id' => $id]);
             if ($category) {
                 $product->addCategoryRelation($category);
@@ -309,14 +308,14 @@ class CategoryService extends AbstractModel
             $matchCategoryWithoutSub = $this->matchCategoryWithSub($parameterBag, $explain);
 
             if (!$matchCategoryWithoutSub) {
-                return  $result;
+                return $result;
             }
             $result = array_merge($result, $matchCategoryWithoutSub);
             $parameterBag->set(self::SUB_SUB_MAIN_SEARCH, $resultData);
             $matchCategoryWithSub = $this->matchCategoryWithSub($parameterBag, $explain);
 
             if (!$matchCategoryWithSub) {
-                return  $result;
+                return $result;
             }
             $result = array_merge($result, $matchCategoryWithSub);
         }
@@ -444,10 +443,10 @@ class CategoryService extends AbstractModel
     {
         $arrayModelsCategory = [];
         foreach ($arrayCategories as $category) {
-
+            $categoryModel = null;
             try {
-                $categoryModel = $this->matchExistCategory($category);
-                if (!($categoryModel instanceof Category)) {
+                $categoryModels = $this->matchExistCategories($category);
+                if (is_array($categoryModels) && !count($categoryModels)) {
                     $categoryModel = new Category();
                     $categoryModel
                         ->setCategoryName($category);
@@ -456,47 +455,29 @@ class CategoryService extends AbstractModel
                         ->validateEntity($categoryModel, [Category::SERIALIZED_GROUP_CREATE]);
                 }
             } catch (ValidatorException $e) {
-                $categoryModel = $this->matchExistCategory($category);
+                $categoryModels = $this->matchExistCategories($category);
             }
-            
-            if ($categoryModel instanceof Category) {
-                if ($categoryModel->getSubCategoryRelations()->count()) {
-                    foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
-                        /** @var $categoryRelation CategoryRelations */
-                        if ($categoryRelation->getMainCategory()) {
-                            $product->addCategoryRelation($categoryRelation->getMainCategory());
+
+            if (is_array($categoryModels) && count($categoryModels)) {
+                foreach ($categoryModels as $existCategory) {
+
+                    if ($existCategory instanceof Category) {
+                        if ($existCategory->getSubCategoryRelations()->count()) {
+                            foreach ($existCategory->getSubCategoryRelations()->getIterator() as $categoryRelation) {
+                                /** @var $categoryRelation CategoryRelations */
+                                if ($categoryRelation->getMainCategory()) {
+                                    $product->addCategoryRelation($categoryRelation->getMainCategory());
+                                }
+                            }
                         }
                     }
+
+                    $product->addCategoryRelation($existCategory);
+                    array_push($arrayModelsCategory, $existCategory);
                 }
-//            if ($categoryModel->getSubCategoryRelations()->count()) {
-//                $mainCategoryChallengerIds = [];
-//                foreach ($categoryModel->getSubCategoryRelations()->getIterator() as $categoryRelation) {
-//                    /** @var $categoryRelation CategoryRelations */
-//                    if ($categoryRelation->getMainCategory()) {
-//                        $mainCategoryChallengerIds[$categoryRelation->getMainCategory()->getId()] = $categoryRelation->getMainCategory();
-//                    }
-//                }
-//                if (count($mainCategoryChallengerIds)) {
-//                    $prepareDataForGINSearch = $this->prepareProductDataForMatching(
-//                        $product->getName() . ', ' . $product->getDescription()
-//                    );
-//                    $matchSeparateCategoryById = $this->getCategoryRepository()
-//                        ->matchSeparateCategoryById(
-//                            array_keys($mainCategoryChallengerIds),
-//                            $prepareDataForGINSearch
-//                        );
-//                    if (count($matchSeparateCategoryById)) {
-//                        foreach ($matchSeparateCategoryById as $id) {
-//                            if (isset($id['id']) && isset($mainCategoryChallengerIds[$id['id']])) {
-//                                $product->addCategoryRelation($mainCategoryChallengerIds[$id['id']]);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-                
+            } elseif ($categoryModel instanceof Category) {
                 $product->addCategoryRelation($categoryModel);
-                array_push($arrayModelsCategory, $categoryModel);   
+                array_push($arrayModelsCategory, $categoryModel);
             }
         }
 
@@ -554,15 +535,16 @@ class CategoryService extends AbstractModel
         }
         $matchGlobalNegativeKeyWords = $this->getCategoryRepository()
             ->matchKeyWordsByProperty(
-            $prepareDataForGINSearch,
-            AdminConfiguration::GLOBAL_NEGATIVE_BRAND_KEY_WORDS
-        );
+                $prepareDataForGINSearch,
+                AdminConfiguration::GLOBAL_NEGATIVE_BRAND_KEY_WORDS
+            );
         if ($matchGlobalNegativeKeyWords) {
             throw new GlobalMatchExceptionBrand('match negative key words brand');
         }
 
         return true;
     }
+
     /**
      * @param ParamFetcher $paramFetcher
      * @return Category[]|CategoriesCollection|int
@@ -585,10 +567,10 @@ class CategoryService extends AbstractModel
      * @return mixed
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function matchExistCategory(string $name)
+    public function matchExistCategories(string $name)
     {
         return $this->getCategoryRepository()
-            ->matchExistBySlug($this->generateSlugForString($name));
+            ->matchExistBySlugForMatch($this->generateSlugForString($name));
     }
 
     /**
@@ -627,7 +609,7 @@ class CategoryService extends AbstractModel
         return preg_replace(
             '/-+/',
             '-',
-            preg_replace('/ |\(|\)|\.|\!|\:|"|\'|&/','-', $brand)
+            preg_replace('/ |\(|\)|\.|\!|\:|"|\'|&/', '-', $brand)
         );
     }
 

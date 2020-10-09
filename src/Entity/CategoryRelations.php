@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
  *     uniqueConstraints={@UniqueConstraint(name="uniq_sub_and_main_index", columns={"sub_category_id", "main_category_id"})}
  *     )
  * @UniqueEntity(fields={"subCategory", "mainCategory"})
+ * @ORM\Cache("NONSTRICT_READ_WRITE", region="categories_region")
  */
 class CategoryRelations
 {
@@ -51,6 +52,7 @@ class CategoryRelations
 
     public function setSubCategory(?Category $subCategory): self
     {
+        $subCategory->addSubCategoryRelation($this);
         $this->subCategory = $subCategory;
 
         return $this;
@@ -63,6 +65,7 @@ class CategoryRelations
 
     public function setMainCategory(?Category $mainCategory): self
     {
+        $mainCategory->addMainCategoryRelation($this);
         $this->mainCategory = $mainCategory;
 
         return $this;
