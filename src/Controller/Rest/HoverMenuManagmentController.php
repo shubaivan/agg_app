@@ -18,6 +18,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\CategorySectionRepository;
 use App\Repository\FilesRepository;
 use App\Services\Helpers;
+use App\Services\Models\CategoryService;
 use App\Services\ObjectsHandler;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\DBAL\DBALException;
@@ -76,6 +77,11 @@ class HoverMenuManagmentController extends AbstractRestController
     private $categorySectionRepository;
 
     /**
+     * @var CategoryService
+     */
+    private $categoryService;
+
+    /**
      * HoverMenuManagmentController constructor.
      * @param CategoryConfigurationsRepository $categoryConfRepo
      * @param CategoryRepository $categoryRepo
@@ -85,6 +91,7 @@ class HoverMenuManagmentController extends AbstractRestController
      * @param ObjectsHandler $objectsHandler
      * @param TagAwareQueryResultCacheCategory $tagAwareQueryResultCacheCategory
      * @param CategorySectionRepository $categorySectionRepository
+     * @param CategoryService $categoryService
      */
     public function __construct(
         CategoryConfigurationsRepository $categoryConfRepo,
@@ -95,7 +102,8 @@ class HoverMenuManagmentController extends AbstractRestController
         TagAwareQuerySecondLevelCacheCategory $tagAwareQuerySecondLevelCacheCategory,
         ObjectsHandler $objectsHandler,
         TagAwareQueryResultCacheCategory $tagAwareQueryResultCacheCategory,
-        CategorySectionRepository $categorySectionRepository
+        CategorySectionRepository $categorySectionRepository,
+        CategoryService $categoryService
     )
     {
         parent::__construct($helpers);
@@ -108,6 +116,7 @@ class HoverMenuManagmentController extends AbstractRestController
         $this->objectsHandler = $objectsHandler;
         $this->tagAwareQueryResultCacheCategory = $tagAwareQueryResultCacheCategory;
         $this->categorySectionRepository = $categorySectionRepository;
+        $this->categoryService = $categoryService;
     }
 
     /**
@@ -176,6 +185,13 @@ class HoverMenuManagmentController extends AbstractRestController
                 $categoryConfigurations = new CategoryConfigurations();
                 $category
                     ->setCategoryConfigurations($categoryConfigurations);
+
+                $matchExistCategory = $this->categoryService
+                    ->matchExistCategory($request->get('category_name'));
+                if ($matchExistCategory) {
+                    throw new \Exception('catefory already exsit');
+                }
+
             } else {
                 $categoryConfigurations = $this->categoryConfRepo
                     ->findOneBy(['categoryId' => $request->get('category_id')]);
@@ -187,6 +203,10 @@ class HoverMenuManagmentController extends AbstractRestController
                 if ($categorySection) {
                     $category->setSectionRelation($categorySection);
                 }
+            }
+
+            if ($request->get('category_name')) {
+                $category->setCategoryName($request->get('category_name'));
             }
 
             $pkw = $this->getHelpers()
@@ -209,9 +229,7 @@ class HoverMenuManagmentController extends AbstractRestController
             if ($request->get('category_position')) {
                 $category->setPosition($request->get('category_position'));
             }
-            if ($request->get('category_name')) {
-                $category->setCategoryName($request->get('category_name'));
-            }
+
             $category->setSeoTitle($request->get('category_seo_title'));
             $category->setSeoDescription($request->get('category_seo_description'));
             $category->setSeoText1($request->get('category_seo_text1'));

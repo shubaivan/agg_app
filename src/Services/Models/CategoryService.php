@@ -585,7 +585,7 @@ class CategoryService extends AbstractModel
      * @return mixed
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    private function matchExistCategory(string $name)
+    public function matchExistCategory(string $name)
     {
         return $this->getCategoryRepository()
             ->matchExistBySlug($this->generateSlugForString($name));
