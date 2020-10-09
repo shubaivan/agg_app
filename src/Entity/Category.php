@@ -333,8 +333,7 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
     {
         $categoryName = $this->categoryName;
         if (str_word_count($categoryName) > 1) {
-            $categoryName = preg_replace('/\bsub\b/u', '', $this->categoryName);
-            $categoryName = preg_replace('/\bBaby\b/u', '', $categoryName);
+            $categoryName = preg_replace('/\bsub\b/iu', '', $this->categoryName);
         }
         
         return trim($categoryName);
