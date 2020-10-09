@@ -22,7 +22,7 @@ class CategoryBilbarnstolarFixtures extends AbstractFixtures implements Dependen
                 ',
             ],
             [
-                'name' => 'sub Bilbarnstolar',
+                'name' => 'Bilbarnstolar',
                 'key_word' => '
                     Bilsäten, bilstol, Bilbarnstolar,
                     car seat                     

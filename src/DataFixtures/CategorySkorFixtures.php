@@ -41,7 +41,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     Gummistövlar, Rubber boots, Rain boots, Rain boot, Rubber boot                     
                 ',
                 'sub_key_word' => [
-                    'sub Gummistövlar' => 'Gummistövlar',
+                    'Gummistövlar' => 'Gummistövlar',
                 ]
             ],
             [
@@ -73,7 +73,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     Kick Lo Velcro School Skor                     
                 ',
                 'sub_key_word' => [
-                    'sub Finskor' => 'Finskor, fin sko, fin-sko, festsko, fest sko, fest-sko, festskor, fest skor, fest-skor',
+                    'Finskor' => 'Finskor, fin sko, fin-sko, festsko, fest sko, fest-sko, festskor, fest skor, fest-skor',
                 ],
                 'negative_key_words' => 'midjan'
             ],
@@ -83,7 +83,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     Espadrillos, Espadrillo, Espadriller, Espadrill                     
                 ',
                 'sub_key_word' => [
-                    'sub Espadrillos' => 'Espadrillos'
+                    'Espadrillos' => 'Espadrillos'
                 ]
             ],
             [
@@ -92,7 +92,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     Badskor, Badsko                     
                 ',
                 'sub_key_word' => [
-                    'sub Badskor' => 'Badskor, swimmingshoes',
+                    'Badskor' => 'Badskor, swimmingshoes',
                     'Strandskor' => 'Strandskor, beach shoes',
                 ],
                 'negative_key_words' => 'badskum, badsköldpadda'
@@ -116,7 +116,7 @@ class CategorySkorFixtures extends AbstractFixtures implements DependentFixtureI
                     Träningsskor, Fotbollsskor, Trainers, Tennisskor, Dansskor, golf                   
                 ',
                 'sub_key_word' => [
-                    'sub Träningsskor' => 'Träningsskor, trainers, trainingshoes',
+                    'Träningsskor' => 'Träningsskor, trainers, trainingshoes',
                     'Fotbollsskor' => 'Fotbollsskor, soccershoes, soccer shoes, fotballshoes'
                 ]
             ],
