@@ -466,7 +466,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let form = modal.find("form");
         form.trigger("reset");
-        form.find('textarea').val('');
+        form.find('textarea, input:hidden').val('');
         form.find('.attachment_files_to_categories').remove();
         let sections_select_container = modal.find('.modal-body #sections_select_container');
         if (sections_select_container.length) {
