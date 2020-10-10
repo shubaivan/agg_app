@@ -35,26 +35,7 @@ class JmsEventSubscriber extends SlugApproach implements EventSubscriberInterfac
     public static function getSubscribedEvents()
     {
         return array(
-            array(
-                'event' => 'serializer.pre_deserialize',
-                'class' => Product::class,
-                'method' => 'onPreDeserializeProduct',
-            ),
-            array(
-                'event' => 'serializer.pre_deserialize',
-                'class' => Shop::class,
-                'method' => 'onPreDeserializeShop',
-            ),
-            array(
-                'event' => 'serializer.pre_deserialize',
-                'class' => Category::class,
-                'method' => 'onPreDeserializeCategory',
-            ),
-            array(
-                'event' => 'serializer.pre_deserialize',
-                'class' => Brand::class,
-                'method' => 'onPreDeserializeBrand',
-            ),
+            # Model product
             array(
                 'event' => 'serializer.post_deserialize',
                 'class' => Product::class,
@@ -62,29 +43,50 @@ class JmsEventSubscriber extends SlugApproach implements EventSubscriberInterfac
             ),
             array(
                 'event' => 'serializer.pre_serialize',
+                'class' => Product::class,
+                'method' => 'onPreSerializeProduct',
+            ),
+            array(
+                'event' => 'serializer.pre_deserialize',
+                'class' => Product::class,
+                'method' => 'onPreDeserializeProduct',
+            ),
+
+            # Modle Category
+            array(
+                'event' => 'serializer.pre_serialize',
                 'class' => Category::class,
                 'method' => 'onPreSerializeCategory',
             ),
+            array(
+                'event' => 'serializer.pre_deserialize',
+                'class' => Category::class,
+                'method' => 'onPreDeserializeCategory',
+            ),
+
+            # Model Shop
             array(
                 'event' => 'serializer.pre_serialize',
                 'class' => Shop::class,
                 'method' => 'onPreSerializeShop',
             ),
             array(
+                'event' => 'serializer.pre_deserialize',
+                'class' => Shop::class,
+                'method' => 'onPreDeserializeShop',
+            ),
+
+            # Model Brand
+            array(
+                'event' => 'serializer.pre_deserialize',
+                'class' => Brand::class,
+                'method' => 'onPreDeserializeBrand',
+            ),
+            array(
                 'event' => 'serializer.pre_serialize',
                 'class' => Brand::class,
                 'method' => 'onPreSerializeBrand',
-            ),
-            array(
-                'event' => 'serializer.pre_serialize',
-                'class' => Product::class,
-                'method' => 'onPreSerializeProduct',
-            ),
-            array(
-                'event' => 'serializer.pre_serialize',
-                'class' => AdjacentProduct::class,
-                'method' => 'onPreSerializeAdjacentProduct',
-            ),
+            )
         );
     }
 
@@ -101,12 +103,6 @@ class JmsEventSubscriber extends SlugApproach implements EventSubscriberInterfac
     }
 
     public function onPreSerializeProduct(ObjectEvent $event)
-    {
-        $object = $event->getObject();
-        $this->applySlug($object);
-    }
-
-    public function onPreSerializeAdjacentProduct(ObjectEvent $event)
     {
         $object = $event->getObject();
         $this->applySlug($object);

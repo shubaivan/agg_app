@@ -21,7 +21,7 @@ class CategoryKladerFixtures extends AbstractFixtures
                 ',
                 'negative_key_words' => 'dress, shoes, tunika',
                 'sub_key_word' => [
-                    'T-shirt' => 'T-shirt, Kortärmad, Tee, Shortsleeve, short sleeve, short sleeved',
+                    'T-shirts' => 'T-shirt, Kortärmad, Tee, Shortsleeve, short sleeve, short sleeved',
                     'Pikéer' => 'Piké, Rugbytröja, Rugby tröja',
                     'Långärmade t-shirts' => 'Långärmad t-shirt'
                 ]
@@ -110,7 +110,7 @@ class CategoryKladerFixtures extends AbstractFixtures
                     top, tops
                 ',
                 'sub_key_word' => [
-                    'sub Toppar' => 'Topp, Top, Toppar',
+                    'Toppar' => 'Topp, Top, Toppar',
                     'Linnen' => 'Linne, Linnen, Tanktop, Tank tops'
                 ],
                 'negative_key_words' => '
@@ -174,7 +174,7 @@ class CategoryKladerFixtures extends AbstractFixtures
                     'Regnställ' => 'Regnställ',
                     'Regnhandskar' => 'Regnhandskar',
                     'Regnhattar' => 'Regnhattar, Regnhatt',
-                    'sub Regnoveraller' => 'Regnoverall'
+                    'Regnoveraller' => 'Regnoverall'
                 ],
             ],
             [
@@ -204,7 +204,7 @@ class CategoryKladerFixtures extends AbstractFixtures
                     'Läderjackor' => 'Läderjacka',
                     'MC-jackor' => 'MC-jacka',
                     'Militärjackor' => 'Militärjacka',
-                    'sub Regnjackor' => 'Regnjacka, Regnkappa, Regnrock',
+                    'Regnjackor' => 'Regnjacka, Regnkappa, Regnrock',
                     'Skaljackor' => 'Skaljacka, Softshell jacka',
                     'Skidjackor' => 'Skidjacka',
                     'Trenchcoats' => 'Trenchcoat, Trench coat',
@@ -258,14 +258,14 @@ class CategoryKladerFixtures extends AbstractFixtures
                 ',
                 'sub_key_word' => [
                     'Träningsjackor' => 'Träningsjacka',
-                    'sub Träningsbyxor' => 'Träningsbyxa, Träningsbyxor, Sportpants',
+                    'Träningsbyxor' => 'Träningsbyxa, Träningsbyxor, Sportpants',
                     'Löparbyxor' => 'Löparbyxor, Löparbyxa, Joggingbyxa, Joggingbyxor, Runningpants, Running pants, Jogging pants, Joggingpants',
                     'Träningsshorts' => 'Träningsshorts, Gymshorts, Gym shorts, Exerciseshorts, Exercise shorts',
                     'Träningstoppar' => 'Träningstopp, Gym topp, Gymtopp',
-                    'sub Löparjackor' => 'Löparjacka, Runnin jacket, Jogging jacket',
+                    'Löparjackor' => 'Löparjacka, Runnin jacket, Jogging jacket',
                     'Löparkläder' => 'Löparbyxor, Löparbyxa, Joggingbyxa, Joggingbyxor, Löparjacka, Runnin jacket, Jogging jacket, Running clothes',
                     'Sporttoppar' => 'Sporttopp, Sport topp, Sportstop, Sportsbra, Sports bra',
-                    'sub Flytvästar' => 'Lifevest, Life vest, Lifejacket, Life jacket, Flytväst, Livväst',
+                    'Flytvästar' => 'Lifevest, Life vest, Lifejacket, Life jacket, Flytväst, Livväst',
                     'Byxkjolar' => 'Byxkjol, Pantsuit, Pant suit',
                     'Träningströjor' => 'Sweatwear, Sweat-wear, Sweat wear, Exercise sweater, Exercisesweater',
                     'Tränings T-shirts' => 'Sports T-shirt, Sports Tshirt, Tränings T-shirt, Träningstshirt, Gymtshirt, Gym Tshirt, Gym T-shirt'

@@ -22,7 +22,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                 ',
                 'sub_key_word' => [
                     'Chassin' => 'chassi, chassin',
-                    'sub Byglar' => 'bygel, byglar, bumperbar, bumper bar, säkerhetsbygel, frontbygel',
+                    'Byglar' => 'bygel, byglar, bumperbar, bumper bar, säkerhetsbygel, frontbygel',
                     'Hjul' => 'hjul, terränghjul, promenadhjul, 2ME slang, joggingkitt, hjulpaket, svängbara hjul, framhjul',
                     'Suffletter' => 'sufflett, sufflettpaket',
                     'syb Textilpaket' => 'färgklädsel, textilset, sommarsits, Förlängningsdelar',
@@ -43,7 +43,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     Duovagnar, Duovagn                     
                 ',
                 'sub_key_word' => [
-                    'sub Duovagnar' => 'duovagn'
+                    'Duovagnar' => 'duovagn'
                 ]
             ],
             [
@@ -64,7 +64,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     Kombivagn, universal, demi-season                     
                 ',
                 'sub_key_word' => [
-                    'sub Kombivagnar' => 'kombivagn'
+                    'Kombivagnar' => 'kombivagn'
                 ]
             ],
             [
@@ -73,7 +73,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     Liggvagn         
                 ',
                 'sub_key_word' => [
-                    'sub Liggvagnar' => 'liggvagn'
+                    'Liggvagnar' => 'liggvagn'
                 ]
             ],
             [
@@ -82,7 +82,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     Sittvagn, Sittvagnar                     
                 ',
                 'sub_key_word' => [
-                    'sub Sittvagnar' => 'sittvagn'
+                    'Sittvagnar' => 'sittvagn'
                 ]
             ],
             [
@@ -91,7 +91,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     Skid, Cykelvagn                     
                 ',
                 'sub_key_word' => [
-                    'sub Skid & Cykelvagnar' => 'skidvagn, cykelvagn'
+                    'Skid & Cykelvagnar' => 'skidvagn, cykelvagn'
                 ]
             ],
             [
@@ -100,7 +100,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     Sulkys                     
                 ',
                 'sub_key_word' => [
-                    'sub Sulkys' => 'sulky'
+                    'Sulkys' => 'sulky'
                 ]
             ],
             [
@@ -110,7 +110,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     double stroller, sibling stroller
                 ',
                 'sub_key_word' => [
-                    'sub Syskonvagnar' => 'syskonvagn'
+                    'Syskonvagnar' => 'syskonvagn'
                 ]
             ],
             [
@@ -120,7 +120,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     sports, sport
                 ',
                 'sub_key_word' => [
-                    'sub Multisportvagnar' => 'Multisportvagnar'
+                    'Multisportvagnar' => 'Multisportvagnar'
                 ]
             ],
             [
@@ -129,7 +129,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     Resvagnar, Resvagn
                 ',
                 'sub_key_word' => [
-                    'sub Resvagnar' => 'Resvagnar'
+                    'Resvagnar' => 'Resvagnar'
                 ]
             ],
         ],
@@ -150,7 +150,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     adapter, click
                 ',
                 'sub_key_word' => [
-                    'sub Adapter' => 'Adapter',
+                    'Adapter' => 'Adapter',
                 ]
             ],
             [
@@ -160,7 +160,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     Chassis, wheels, wheel, tire
                 ',
                 'sub_key_word' => [
-                    'sub Chassin' => 'chassi, chassin'
+                    'Chassin' => 'chassi, chassin'
                 ]
             ],
             [
@@ -181,7 +181,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     sit, sedentary
                 ',
                 'sub_key_word' => [
-                    'sub Sittdel' => 'sittdyna, sittinlägg, komfortinlägg, minimizer'
+                    'Sittdel' => 'sittdyna, sittinlägg, komfortinlägg, minimizer'
                 ]
             ],
             [
@@ -191,7 +191,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     hook, hanger
                 ',
                 'sub_key_word' => [
-                    'sub Krokar' => 'barnvagnskrok, krok'
+                    'Krokar' => 'barnvagnskrok, krok'
                 ]
             ],
             [
@@ -201,7 +201,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     portable crib, crib, cot
                 ',
                 'sub_key_word' => [
-                    'sub Liggdelar' => 'Liggdel, liggdelsbas'
+                    'Liggdelar' => 'Liggdel, liggdelsbas'
                 ]
             ],
             [
@@ -211,7 +211,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     beanbag, rattle
                 ',
                 'sub_key_word' => [
-                    'sub Mobiler' => 'mobil, speldosa'
+                    'Mobiler' => 'mobil, speldosa'
                 ]
             ],
             [
@@ -221,7 +221,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     mattress
                 ',
                 'sub_key_word' => [
-                    'sub Madrasskydd' => 'madrasskydd'
+                    'Madrasskydd' => 'madrasskydd'
                 ]
             ],
             [
@@ -231,7 +231,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     cupholder, cup holder, glass-holder
                 ',
                 'sub_key_word' => [
-                    'sub Mugghållare' => 'Kopphållare, Mugghållare'
+                    'Mugghållare' => 'Kopphållare, Mugghållare'
                 ]
             ],
             [
@@ -241,7 +241,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     Wholesuits, winter envelope, envelope, sleeping bag
                 ',
                 'sub_key_word' => [
-                    'sub Åkpåsar' => 'åkpåsar, åkpåse'
+                    'Åkpåsar' => 'åkpåsar, åkpåse'
                 ]
             ],
             [
@@ -251,7 +251,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     standing board, standing-board, stand
                 ',
                 'sub_key_word' => [
-                    'sub Ståbrädor' => 'Ståbrädan, stående, Ståbräda'
+                    'Ståbrädor' => 'Ståbrädan, stående, Ståbräda'
                 ]
             ],
             [
@@ -261,7 +261,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     roof, convertible top, hood, top, cowl, biggin
                 ',
                 'sub_key_word' => [
-                    'sub Suffletter' => 'suffletten, huva, solskydd, tak, visir, mask, hjälmgaller, Sufflett, sufflettpaket',
+                    'Suffletter' => 'suffletten, huva, solskydd, tak, visir, mask, hjälmgaller, Sufflett, sufflettpaket',
                 ]
             ],
             [
@@ -271,7 +271,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     glove, mittens, coupling, clutch, sleeve, socket, muff, union
                 ',
                 'sub_key_word' => [
-                    'sub Handvärmare' => 'Handvärmare, handmuff, handmuffar, barnvagnsvantar'
+                    'Handvärmare' => 'Handvärmare, handmuff, handmuffar, barnvagnsvantar'
                 ]
             ],
             [
@@ -281,7 +281,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     reflector
                 ',
                 'sub_key_word' => [
-                    'sub Reflexer' => 'reflektor, märkbar, reflektion, Reflexer'
+                    'Reflexer' => 'reflektor, märkbar, reflektion, Reflexer'
                 ]
             ],
             [
@@ -292,7 +292,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     parking, stand, stay, camp, quarter
                 ',
                 'sub_key_word' => [
-                    'sub Väderskydd & Myggnät' => 'Väderskydd, regnskydd, raincover, solsufflett, myggnät,
+                    'Väderskydd & Myggnät' => 'Väderskydd, regnskydd, raincover, solsufflett, myggnät,
                     barnvagnsparasoll, solskydd, vagnparasoll, väder kitt, insektsnät, Vindskydd'
                 ]
             ],
@@ -302,7 +302,7 @@ class CategoryBarnvagnarFixtures extends AbstractFixtures implements DependentFi
                     Bygel, Byglar
                 ',
                 'sub_key_word' => [
-                    'sub sub Byglar' => 'bygel, byglar, bumperbar, bumper bar, säkerhetsbygel, frontbygel'
+                    'Byglar' => 'bygel, byglar, bumperbar, bumper bar, säkerhetsbygel, frontbygel'
                 ]
             ],
         ],

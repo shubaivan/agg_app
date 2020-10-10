@@ -49,7 +49,8 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
         $rowData['productModel'] = $rowData['model'];
         $rowData['instock'] = $rowData['inStock'];
 
-        $explodeMerchantProductCategoryPath = explode('>', $rowData['categories']);
+        $explodeMerchantProductCategoryPath = preg_split('/>|:/', $rowData['categories']);
+
         if (count($explodeMerchantProductCategoryPath)) {
             $explodeMerchantProductCategoryPathFilter = array_filter($explodeMerchantProductCategoryPath, function ($v) {
                 return strlen($v);

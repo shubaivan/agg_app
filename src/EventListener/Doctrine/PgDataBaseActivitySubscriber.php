@@ -4,6 +4,7 @@
 namespace App\EventListener\Doctrine;
 
 use App\Entity\SlugAbstract;
+use App\Entity\SlugForMatch;
 use App\EventListener\SlugApproach;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\OnFlushEventArgs;
@@ -72,6 +73,10 @@ class PgDataBaseActivitySubscriber extends SlugApproach implements EventSubscrib
     {
         if ($object instanceof SlugAbstract) {
             $this->applySlugToEntity($object);
+        }
+
+        if ($object instanceof SlugForMatch) {
+            $this->applySlugForMatchToEntity($object);
         }
     }
 }

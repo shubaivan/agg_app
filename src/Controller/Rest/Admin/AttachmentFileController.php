@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations\View;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
+use Twig\Environment;
 
 class AttachmentFileController extends AbstractRestController
 {
@@ -30,19 +31,52 @@ class AttachmentFileController extends AbstractRestController
     private $categoryRepo;
 
     /**
+     * @var Environment
+     */
+    private $twig;
+
+    /**
      * AttachmentFileController constructor.
+     * @param Helpers $helpers
      * @param FilesRepository $fileRepo
      * @param CategoryRepository $categoryRepository
+     * @param Environment $twig
      */
     public function __construct(
         Helpers $helpers,
         FilesRepository $fileRepo,
-        CategoryRepository $categoryRepository
+        CategoryRepository $categoryRepository,
+        Environment $twig
     )
     {
         parent::__construct($helpers);
         $this->fileRepo = $fileRepo;
         $this->categoryRepo = $categoryRepository;
+        $this->twig = $twig;
+    }
+
+    /**
+     * template attachment files.
+     *
+     * @Rest\Get("/admin/api/attachment_files/template", options={"expose": true})
+     *
+     * @param Request $request
+     *
+     * @View(statusCode=Response::HTTP_OK, serializerGroups={Files::GROUP_GET})
+     *
+     * @SWG\Tag(name="Admin")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object",
+     * )
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getAttachmentFilesTemplateAction(Request $request)
+    {
+        return ['template' => $this->twig->render('partial/_attachment_files.html.twig', [])];
     }
 
     /**
@@ -69,34 +103,40 @@ class AttachmentFileController extends AbstractRestController
         /** @var UploadedFile[] $files */
         $files = $request->files->get('files');
 
-        switch ($request->get('entity')) {
-            case Category::class:
-                $repo = $this->categoryRepo;
-                break;
-            default:
-                $repo = false;
+        if ($request->get('id')) {
+            switch ($request->get('entity')) {
+                case Category::class:
+                    $repo = $this->categoryRepo;
+                    break;
+                default:
+                    $repo = false;
+            }
+            if (!$repo) {
+                throw new \Exception('entity was not matched');
+            }
+            /** @var AttachmentFilesInterface $parentEntity */
+            $parentEntity = $repo->findOneBy(['id' => $request->get('id')]);
+            if (!$parentEntity) {
+                throw new \Exception('entity not found');
+            }
         }
-        if (!$repo) {
-            throw new \Exception('entity was not matched');
-        }
-        /** @var AttachmentFilesInterface $parentEntity */
-        $parentEntity = $repo->findOneBy(['id' => $request->get('id')]);
-        if (!$parentEntity) {
-            throw new \Exception('entity not found');
-        }
+
         $response = [];
         foreach ($files as $file) {
             if ('blob' === $file->getClientOriginalName()) {
                 continue;
             }
-            $check = $parentEntity->checkFileExist($file->getClientOriginalName());
-            if ($check) {
-                throw new \Exception('exist file');
-            }
             $entityFile = new Files();
             $entityFile
-                ->setBufferEntity($parentEntity)
                 ->setPath($file);
+            if ($request->get('id')) {
+                $check = $parentEntity->checkFileExist($file->getClientOriginalName());
+                if ($check) {
+                    throw new \Exception('exist file');
+                }
+                $entityFile
+                    ->setBufferEntity($parentEntity);
+            }
 
             if ($request->get('caption')) {
                 $entityFile
