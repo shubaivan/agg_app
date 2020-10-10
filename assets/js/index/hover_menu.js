@@ -466,8 +466,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let form = modal.find("form");
         form.trigger("reset");
-        form.find('textarea, input:hidden').val('');
+        form.find('textarea').val('');
         form.find('.attachment_files_to_categories').remove();
+        form.find('input[type=hidden]').remove();
+
         let sections_select_container = modal.find('.modal-body #sections_select_container');
         if (sections_select_container.length) {
             sections_select_container.remove();
@@ -700,15 +702,19 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (button.hasClass('trigger_new_sub')) {
-            let main_category_id = modal.find('.modal-body #main_category_id');
+            let input_main_category_id = $('<input>').attr({
+                type: 'hidden',
+                id: 'main_category_id',
+                name: 'main_category_id',
+                class: 'categories_exist_id'
+            });
             if (button.data('categoryName')) {
                 modal.find('.modal-title').text('New sub category for ' + button.data('categoryName'));
             } else {
                 modal.find('.modal-title').text('New Category first level');
             }
-
-            main_category_id.text(categoryId);
-            main_category_id.val(categoryId);
+            input_main_category_id.val(categoryId);
+            form.append(input_main_category_id);
             renderSimditor(categoryId, form, modal, button);
             return true;
         }
@@ -723,9 +729,15 @@ document.addEventListener("DOMContentLoaded", function () {
         setDataInForm(modal.find('.modal-body #nkw'),
             '.nkw_' + categoryId);
 
-        let category_id_input = modal.find('.modal-body #category_id');
-        category_id_input.text(categoryId);
-        category_id_input.val(categoryId);
+        let input_category_id = $('<input>').attr({
+            type: 'hidden',
+            id: 'category_id',
+            name: 'category_id',
+            class: 'categories_exist_id'
+        });
+
+        input_category_id.val(categoryId);
+        form.append(input_category_id);
 
         let hotCategory = modal.find('.modal-body #hotCatgory');
         let hc_value = $('.hc_' + categoryId);
@@ -839,7 +851,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         let serialize = $('#editCateory').serialize();
-
+        console.log(serialize);
         const app_rest_hovermenumanagment_edithovermenu = window.Routing
             .generate('app_rest_hovermenumanagment_edithovermenu');
 
