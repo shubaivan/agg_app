@@ -26,6 +26,7 @@ abstract class SEOModel extends SlugAbstract
      *     Category::SERIALIZED_GROUP_RELATIONS_LIST,
      *     SearchProductCollection::GROUP_GET,
      *     Brand::SERIALIZED_GROUP_LIST,
+     *     Brand::SERIALIZED_GROUP_LIST_TH,
      *     Shop::SERIALIZED_GROUP_LIST,
      *     AdjacentProduct::GROUP_GENERATE_ADJACENT,
      *     Product::SERIALIZED_GROUP_LIST
@@ -44,6 +45,7 @@ abstract class SEOModel extends SlugAbstract
      *     Category::SERIALIZED_GROUP_RELATIONS_LIST,
      *     SearchProductCollection::GROUP_GET,
      *     Brand::SERIALIZED_GROUP_LIST,
+     *     Brand::SERIALIZED_GROUP_LIST_TH,
      *     Shop::SERIALIZED_GROUP_LIST,
      *     AdjacentProduct::GROUP_GENERATE_ADJACENT,
      *     Product::SERIALIZED_GROUP_LIST
@@ -190,5 +192,10 @@ abstract class SEOModel extends SlugAbstract
                 $this->getNameForSeoDefaultTemplate(), $template);
         }
         return $column;
+    }
+
+    public static function getSeoRenderColumns(): array
+    {
+        return ['seoTitle', 'seoDescription'];
     }
 }

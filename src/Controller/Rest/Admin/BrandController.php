@@ -4,9 +4,12 @@ namespace App\Controller\Rest\Admin;
 
 use App\Cache\TagAwareQueryResultCacheBrand;
 use App\Cache\TagAwareQueryResultCacheProduct;
+use App\Cache\TagAwareQuerySecondLevelCacheBrand;
+use App\Cache\TagAwareQuerySecondLevelCacheCategory;
 use App\Entity\Brand;
 use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
+use App\Repository\FilesRepository;
 use App\Repository\ProductRepository;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\Configuration;
@@ -41,18 +44,39 @@ class BrandController extends AbstractRestController
     private $tagAwareQueryResultCacheProduct;
 
     /**
+     * @var TagAwareQuerySecondLevelCacheBrand
+     */
+    private $tagAwareQuerySecondLevelCacheBrand;
+
+    /**
+     * @var FilesRepository
+     */
+    private $fileRepo;
+
+    /**
      * BrandController constructor.
      * @param Helpers $helpers
      * @param BrandRepository $brandRepository
      * @param TagAwareQueryResultCacheBrand $tagAwareQueryResultCacheBrand
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
+     * @param FilesRepository $fileRepo
+     * @param TagAwareQuerySecondLevelCacheBrand $tagAwareQuerySecondLevelCacheBrand
      */
-    public function __construct(Helpers $helpers, BrandRepository $brandRepository, TagAwareQueryResultCacheBrand $tagAwareQueryResultCacheBrand, TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct)
+    public function __construct(
+        Helpers $helpers,
+        BrandRepository $brandRepository,
+        TagAwareQueryResultCacheBrand $tagAwareQueryResultCacheBrand,
+        TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
+        FilesRepository $fileRepo,
+        TagAwareQuerySecondLevelCacheBrand $tagAwareQuerySecondLevelCacheBrand
+    )
     {
         parent::__construct($helpers);
         $this->brandRepository = $brandRepository;
         $this->tagAwareQueryResultCacheBrand = $tagAwareQueryResultCacheBrand;
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
+        $this->fileRepo = $fileRepo;
+        $this->tagAwareQuerySecondLevelCacheBrand = $tagAwareQuerySecondLevelCacheBrand;
     }
 
 
@@ -115,45 +139,72 @@ class BrandController extends AbstractRestController
      * )
      *
      * @return \FOS\RestBundle\View\View
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws InvalidArgumentException When $tags is not valid
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Exception
      */
     public function editBrandAction(Request $request)
     {
-        $brand = $this->brandRepository
-            ->findOneBy(['id' => $request->get('brand_id')]);
+        /** @var Registry $registry */
+        $registry = $this->get('doctrine');
+        $objectManager = $registry->getManager();
+        /** @var \Doctrine\DBAL\Connection $connection */
+        $connection = $objectManager->getConnection();
+        $connection->beginTransaction(); // suspend auto-commit
+        try{
+            $brand = $this->brandRepository
+                ->findOneBy(['id' => $request->get('brand_id')]);
 
-        $brand
-            ->setBrandName($request->get('bn'));
+            $brand
+                ->setBrandName($request->get('bn'));
 
-        if ($request->get('topBrand')) {
-            $brand->setTop(true);
-        } else {
-            $brand->setTop(false);
+            if ($request->get('topBrand')) {
+                $brand->setTop(true);
+            } else {
+                $brand->setTop(false);
+            }
+
+            $brand->setSeoTitle($request->get('brand_seo_title'));
+            $brand->setSeoDescription($request->get('brand_seo_description'));
+
+            $fileIds = $request->get('file_ids');
+            if (is_array($fileIds) && count($fileIds)) {
+                $files = $this->fileRepo
+                    ->getByIds($fileIds);
+                foreach ($files as $file) {
+                    $file->setBrand($brand);
+                }
+            }
+            $objectManager->flush();
+            $connection->commit();
+
+            /** @var Registry $resultCacheImpl */
+            $resultCacheImpl = $this->get('doctrine');
+            $objectManager = $resultCacheImpl->getManager();
+            /** @var Configuration $configuration */
+            $configuration = $objectManager->getConfiguration();
+            /** @var DoctrineProvider $resultCacheImpl1 */
+            $resultCacheImpl1 = $configuration->getResultCacheImpl();
+            $resultCacheImpl1->delete(BrandRepository::CACHE_HOT_BRAND_IDS);
+
+            $this->getTagAwareQueryResultCacheBrand()
+                ->getTagAwareAdapter()
+                ->invalidateTags([
+                    BrandRepository::BRAND_FULL_TEXT_SEARCH,
+                ]);
+
+            $this->getTagAwareQueryResultCacheProduct()
+                ->getTagAwareAdapter()
+                ->invalidateTags([
+                    ProductRepository::PRODUCT_FULL_TEXT_SEARCH,
+                ]);
+
+            $this->tagAwareQuerySecondLevelCacheBrand
+                ->deleteAll();
+        } catch (\Exception $e) {
+            $connection->rollBack();
+            throw $e;
         }
-        $this->brandRepository->save($brand);
-        /** @var Registry $resultCacheImpl */
-        $resultCacheImpl = $this->get('doctrine');
-        $objectManager = $resultCacheImpl->getManager();
-        /** @var Configuration $configuration */
-        $configuration = $objectManager->getConfiguration();
-        /** @var DoctrineProvider $resultCacheImpl1 */
-        $resultCacheImpl1 = $configuration->getResultCacheImpl();
-        $resultCacheImpl1->delete(BrandRepository::CACHE_HOT_BRAND_IDS);
-
-        $this->getTagAwareQueryResultCacheBrand()
-            ->getTagAwareAdapter()
-            ->invalidateTags([
-                BrandRepository::BRAND_FULL_TEXT_SEARCH,
-            ]);
-
-        $this->getTagAwareQueryResultCacheProduct()
-            ->getTagAwareAdapter()
-            ->invalidateTags([
-                ProductRepository::PRODUCT_FULL_TEXT_SEARCH,
-            ]);
-
 
         $view = $this->createSuccessResponse(
             ['test' => 1]

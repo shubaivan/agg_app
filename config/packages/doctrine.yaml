@@ -97,6 +97,11 @@ doctrine:
                             cache_driver:
                                 type: service
                                 id: App\Cache\TagAwareQuerySecondLevelCacheCategory
+                        brands_region:
+                            lifetime: 31536000 # One year
+                            cache_driver:
+                                type: service
+                                id: App\Cache\TagAwareQuerySecondLevelCacheBrand
                 metadata_cache_driver:
                     type: pool
                     pool: doctrine.system_cache_pool

@@ -22,18 +22,21 @@ use Symfony\Component\Validator\Constraints as Assert;
  *    }
  * )
  * @UniqueEntity(fields={"brandName"}, groups={Brand::SERIALIZED_GROUP_CREATE})
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="brands_region")
  * @Annotation\AccessorOrder("custom", custom = {
  *     "id",
  *     "brandName"
  * })
  * @ORM\HasLifecycleCallbacks()
  */
-class Brand extends SEOModel implements EntityValidatorException, DataTableInterface
+class Brand extends SEOModel implements EntityValidatorException, DataTableInterface, AttachmentFilesInterface
 {
     const SERIALIZED_GROUP_LIST = 'brand_group_list';
     const SERIALIZED_GROUP_LIST_TH = 'th_brand_group_list';
     const SERIALIZED_GROUP_CREATE = 'brand_group_crete';
+
+    protected static $templateTitleId = 'BRAND_SEO_META_TITLE';
+    protected static $templateDescriptionId = 'BRAND_SEO_META_DESCRIPTION';
 
     use TimestampableEntity;
 
@@ -60,7 +63,7 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
 
     /**
      * @var Product[]|Collection
-     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="brands_region")
      * @ORM\OneToMany(targetEntity="Product", mappedBy="brandRelation",fetch="LAZY")
      */
     private $products;
@@ -72,9 +75,24 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
      */
     private $top = false;
 
+    /**
+     * @var Files
+     *
+     * @ORM\OneToMany(
+     *     targetEntity="App\Entity\Files",
+     *     mappedBy="brand",
+     *     orphanRemoval=true,
+     *     cascade={"persist"}
+     *     )
+     * @Assert\Valid()
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="brands_region")
+     */
+    private $files;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -204,5 +222,54 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
     public function getNameForSeoDefaultTemplate()
     {
         return $this->brandName;
+    }
+
+    /**
+     * @return Collection|Files[]
+     */
+    public function getFiles(): Collection
+    {
+        if (!$this->files) {
+            $this->files = new ArrayCollection();
+        }
+        return $this->files;
+    }
+
+    public function addFile(Files $file): self
+    {
+        if (!$this->files->contains($file)) {
+            $this->files[] = $file;
+            $file->setBrand($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(Files $file): self
+    {
+        if ($this->files->contains($file)) {
+            $this->files->removeElement($file);
+            // set the owning side to null (unless already changed)
+            if ($file->getBrand() === $this) {
+                $file->setBrand(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function checkFileExist($name)
+    {
+        $isCheck = false;
+        $files = $this->getFiles()->getValues();
+        foreach ($files as $file) {
+            /** @var Files $file */
+            $isCheck = ($file->getOriginalName() === $name);
+            if ($isCheck) {
+                break;
+            }
+        }
+
+        return $isCheck;
     }
 }

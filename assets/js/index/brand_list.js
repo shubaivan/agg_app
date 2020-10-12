@@ -23,10 +23,25 @@ global.$ = global.jQuery = $;
 // import 'popper.js';
 require('bootstrap');
 
+import {
+    getBlobFromImageUri,
+    createErrorImgPlaceHolder,
+    delay
+} from './parts/photos_config.js';
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log("brand list!");
     const body = $('body');
+    let exampleModalLong = $('#exampleModalLong');
+
+    const attachment_files = window.Routing
+        .generate('app_rest_admin_attachmentfile_postattachmentfile');
+    const app_rest_admin_attachmentfile_getattachmentfileslist = window.Routing
+        .generate('app_rest_admin_attachmentfile_getattachmentfileslist');
+    const app_rest_admin_attachmentfile_getattachmentfilestemplate = window.Routing
+        .generate('app_rest_admin_attachmentfile_getattachmentfilestemplate');
+
+
     body.on('keydown keyup onblur', '#bn', function () {
         let input = $(this);
         if (input.length) {
@@ -80,6 +95,25 @@ document.addEventListener("DOMContentLoaded", function () {
             })
         }
 
+        if ($.inArray(value.data, seo_columns) !== -1) {
+            common_defs.push({
+                "targets": key,
+                data: value.data,
+                render: function (data, type, row, meta) {
+                    let divTagBuffer = $('<div/>');
+                    let divTagContent = $('<div/>').addClass( value.data + '_' + row.id).addClass('data_model_seo');
+
+                    let parseHTML = $.parseHTML(data);
+                    divTagContent.append(parseHTML);
+                    divTagBuffer.append(divTagContent);
+                    let result = divTagBuffer.html();
+
+                    return type === 'display' && data ?
+                        result : ''
+                }
+            })
+        }
+
         if ($.inArray(value.data, convert_to_html_columns) !== -1) {
             common_defs.push({
                 "targets": key,
@@ -118,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     common_defs.push({
-        "targets": 3,
+        "targets": 5,
         data: 'Action',
         render: function (data, type, row, meta) {
             return '    <!-- Button trigger modal -->\n' +
@@ -171,37 +205,246 @@ document.addEventListener("DOMContentLoaded", function () {
         "columnDefs": common_defs
     });
 
-
-    $('#exampleModalLong').on('hide.bs.modal', function (event) {
+    exampleModalLong.on('hide.bs.modal', function (event) {
         var modal = $(this);
-        let hotCategory = modal.find('.modal-body #topBrand');
-        let bn = modal.find('.modal-body #bn');
-        bn.val('');
-        bn.text('');
-        hotCategory.prop("checked", false);
+
+        let form = modal.find("form");
+        form.trigger("reset");
+        form.find('textarea').val('');
+        form.find('.attachment_files_to_categories').remove();
+        form.find('input[type=hidden]').remove();
+
+        let sections_select_container = modal.find('.modal-body #sections_select_container');
+        if (sections_select_container.length) {
+            sections_select_container.remove();
+        }
+
     });
 
-
-    $('#exampleModalLong').on('show.bs.modal', function (event) {
+    exampleModalLong.on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var modal = $(this);
         let brandId = button.data('brandId');
-        modal.find('.modal-title').text('Edit ' + $('.bn_' + brandId).text() + ' brand');
-        let bn_input = modal.find('.modal-body #bn');
-        let bn_value = $('.bn_' + brandId);
+        let form = modal.find("form");
 
-        $.each(bn_value, function (k, v) {
-            let bn_value_data = $(v).text();
-            if (bn_value_data) {
-                bn_input.text(bn_value_data);
-                bn_input.val(bn_value_data);
-                return false;
+        if (brandId) {
+            $.ajax({
+                type: "POST",
+                url: app_rest_admin_attachmentfile_getattachmentfileslist,
+                data: {
+                    id: brandId, entity: 'App\\Entity\\Brand'
+                },
+                error: (result) => {
+                    console.log(result.responseJSON.status);
+                },
+                success: (data) => {
+                    renderCategoryForm(brandId, form, modal, button);
+                    renderAttachmentFilesBlock(brandId, form, modal, button, data,
+                        function (uppy, data) {
+                            (async function (arr) {
+                                //Promise.all не подходит, т.к. он отвалится если хоть одна фотка не загрузится
+                                for (let item of arr) {
+
+                                    try {
+                                        let blob = await getBlobFromImageUri(item.path);
+                                        await delay(1000);//минимальное время задержки для корректной работы добавления фоток в Dashborad Uppy
+                                        addInitPhotoToUppy(uppy, blob, false, item);
+
+                                    } catch (e) {
+
+                                        let blob = await createErrorImgPlaceHolder();
+                                        await delay(1000);
+                                        addInitPhotoToUppy(uppy, blob, true, item);
+                                        continue;
+                                    } finally {
+                                        uppy.getFiles().forEach(file => {
+                                            uppy.setFileState(file.id, {
+                                                progress: {uploadComplete: true, uploadStarted: true}
+                                            })
+                                        })
+                                    }
+
+                                }
+                            })(data);
+                        });
+                }
+            });
+        }
+    });
+
+    function renderAttachmentFilesBlock(brandId, form, modal, button, attachmentFiles, uppy_callback_function) {
+        $.ajax({
+            type: "GET",
+            url: app_rest_admin_attachmentfile_getattachmentfilestemplate,
+            error: (result) => {
+                if (result.responseJSON.message) {
+                    alert(result.responseJSON.message);
+                }
+            },
+            success: (data) => {
+                console.log(data);
+                let template = data.template;
+                if (template) {
+                    let parseHTML = $.parseHTML(template);
+                    let attachment_files_template = form.find('#attachment_files_template');
+                    attachment_files_template.empty();
+                    attachment_files_template.append(parseHTML);
+                    let uppy = renderUppy(brandId, form, modal, button);
+                    if (attachmentFiles && uppy_callback_function) {
+                        uppy_callback_function(uppy, attachmentFiles);
+                    }
+                }
+            }
+        });
+    }
+
+    function renderUppy(brandId, form, modal, button) {
+        // Import the plugins
+        const Uppy = require('@uppy/core')
+        const XHRUpload = require('@uppy/xhr-upload')
+        const Dashboard = require('@uppy/dashboard')
+        let timeOfLastAttach = new Date();
+        const uppy = Uppy({
+            debug: true,
+            autoProceed: false,
+            restrictions: {
+                maxFileSize: 100097152,//100Mb
+            },
+            onBeforeFileAdded: (currentFile, files) => {
+                //чтоб мог добавить только один файл за раз
+                let currentTime = new Date();
+                if ((currentTime - timeOfLastAttach) < 700) {
+                    return false;
+                }
+                timeOfLastAttach = new Date();
+
+
+                let isSameFile = files && Object.values(files).some(item => {
+                    return currentFile.name === item.data.name;
+                });
+                if (isSameFile) {
+                    alert('File already added.');
+                    return false;
+                }
+
+                return currentFile;
+            },
+            onBeforeUpload: (currentFiles) => {
+
             }
         });
 
-        let brnd_id_input = modal.find('.modal-body #brand_id');
-        brnd_id_input.text(brandId);
-        brnd_id_input.val(brandId);
+        uppy.use(Dashboard, {
+            trigger: '.UppyModalOpenerBtn',
+            inline: true,
+            target: '.DashboardContainer',
+            replaceTargetContent: true,
+            showProgressDetails: true,
+            showRemoveButtonAfterComplete: true,
+            note: 'add Images',
+            height: 470,
+            metaFields: [
+                {id: 'name', name: 'name', placeholder: 'file name'},
+                {id: 'caption', name: 'caption', placeholder: 'describe what the image is about'}
+            ],
+            browserBackButtonClose: true
+        });
+
+        if (brandId) {
+            uppy.setMeta({
+                id: brandId, entity: 'App\\Entity\\Brand'
+            });
+        }
+
+        uppy.use(XHRUpload, {
+            endpoint: attachment_files,
+            formData: true,
+            fieldName: 'files[]',
+            // bundle: true,
+            metaFields: null,
+            getResponseData(responseText, response) {
+                return {
+                    url: responseText
+                }
+            }
+        });
+
+        uppy.on('file-added', (file) => {
+
+        });
+
+        uppy.on('file-editor:complete', (updatedFile) => {
+            // console.log(updatedFile)
+        });
+
+        uppy.on('upload-success', (file, body) => {
+            let files = JSON.parse(body.body.url);
+            $.each(files, function (k, v) {
+                let input = $('<input>').attr({
+                    type: 'hidden',
+                    id: 'file_id_' + v.id,
+                    name: 'file_ids[]',
+                    class: 'attachment_files_to_categories'
+                });
+                input.val(v.id);
+                form.append(input);
+                uppy.setFileMeta(file.id, {m_file_id: v.id})
+            })
+        });
+
+        uppy.on('error', (error) => {
+            console.error(error.stack)
+        });
+
+        uppy.on('file-removed', (file, reason) => {
+            if (reason === 'removed-by-user' && file.meta.m_file_id) {
+                var app_rest_admin_attachmentfile_deleteattachmentfile = Routing.generate('app_rest_admin_attachmentfile_deleteattachmentfile', {'id': file.meta.m_file_id});
+                $.ajax({
+                    url: app_rest_admin_attachmentfile_deleteattachmentfile,
+                    type: 'DELETE',
+                    success: function (result) {
+                        console.log(result);
+                    },
+                    error: function (result) {
+                        console.log(result);
+                    }
+                });
+            }
+        });
+
+        uppy.on('upload-error', (file, error, response) => {
+            uppy.removeFile(file.id);
+            let parse = JSON.parse(response.body.url);
+
+            uppy.info(parse.message, 'error', 5000);
+
+            console.log('error with file:', file.id);
+            console.log('error message:', error);
+        });
+
+        uppy.on('complete', result => {
+            console.log('successful files:', result.successful)
+            console.log('failed files:', result.failed)
+        });
+
+        return uppy;
+    }
+
+    function renderCategoryForm(brandId, form, modal, button) {
+        let bn_value = $('.bn_' + brandId);
+        modal.find('.modal-title').text('Edit ' + bn_value.text() + ' brand');
+        setDataInForm(modal.find('.modal-body #bn'),
+            '.bn_' + brandId);
+
+        let brand_id_input = $('<input>').attr({
+            type: 'hidden',
+            id: 'brand_id',
+            name: 'brand_id',
+            class: 'brand_exist_id'
+        });
+
+        brand_id_input.val(brandId);
+        form.append(brand_id_input);
 
         let topBrand = modal.find('.modal-body #topBrand');
         let tb_value = $('.tb_' + brandId);
@@ -213,8 +456,85 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 return false;
             }
-        })
-    })
+        });
+        renderSimditor(brandId, form, modal, button);
+    }
+
+    function renderSimditor(categoryId, form, modal, button) {
+        $.each(form.find('.data_model_seo textarea'), function (k, v) {
+            Simditor.locale = 'en-US';
+            var editor = new Simditor({
+                textarea: v,
+                upload: false,
+                toolbar: [
+                    'title',
+                    'bold',
+                    'italic',
+                    'underline',
+                    'strikethrough',
+                    'fontScale',
+                    'color',
+                    'ol',
+                    'ul',
+                    'blockquote',
+                    'code',
+                    'table',
+                    'link',
+                    'hr',
+                    'indent',
+                    'outdent',
+                    'alignment'
+                ],
+                codeLanguages: [
+                    {name: 'HTML,XML', value: 'html'}
+                ],
+            });
+            // console.log($(v).attr('id'));
+            let dataInForm = setDataInForm(modal.find('.modal-body #' + $(v).attr('id')),
+                '.' + $(v).attr('id') + '_' + categoryId
+            );
+
+            editor.setValue(dataInForm)
+        });
+    }
+
+    function addInitPhotoToUppy(uppy, blob, isErrorPhoto = false, item) {
+        let configObj = {
+            name: item.originalName, // override in onBeforeFileAdded event
+            type: 'image/jpeg',
+            data: blob,
+            source: isErrorPhoto ? 'canvasPlaceholderError' : '',
+        };
+
+        let file_id = uppy.addFile(configObj);
+        uppy.setFileMeta(file_id, {m_file_id: item.id})
+    }
+
+    /**
+     *
+     * @param formInput
+     * @param classForValue
+     * @returns {string}
+     */
+    function setDataInForm(formInput, classForValue) {
+        let nkw_value = $(classForValue);
+        let nkw_value_data = '';
+        $.each(nkw_value, function (k, v) {
+            if ($(v).hasClass('data_model_seo')) {
+                nkw_value_data = $(v).html();
+            } else {
+                nkw_value_data = $(v).text();
+            }
+
+            if (nkw_value_data) {
+                formInput.text(nkw_value_data);
+                formInput.val(nkw_value_data);
+                return false;
+            }
+        });
+
+        return nkw_value_data;
+    }
 
     $('.btn.btn-primary').on('click', function () {
         if ($('#editBrand input').length) {

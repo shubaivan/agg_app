@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Cache\TagAwareQueryResultCacheCommon;
 use App\Cache\TagAwareQueryResultCacheProduct;
+use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Product;
 use App\Services\Helpers;
@@ -1168,11 +1169,28 @@ class ProductRepository extends ServiceEntityRepository
      */
     private function prepareBrandFacetFilterQuery()
     {
+        $templateId = Brand::getTemplateTitleId();
+        $seoTitle = getenv($templateId);
+
+        $seoDescrTemplId = Brand::getTemplateDescriptionId();
+        $seoDescTempl = getenv($seoDescrTemplId);
+
         $queryFacet = '
             SELECT
                 DISTINCT brand_alias.id,
                 brand_alias.brand_name AS "brandName",
                 brand_alias.created_at AS "createdAt",
+                
+                CASE WHEN brand_alias.seo_title IS NULL OR brand_alias.seo_title=\'\' 
+                    THEN regexp_replace(\''.$seoTitle.'\', \'{{ name }}\', brand_alias.brand_name, \'g\')
+                ELSE brand_alias.seo_title
+                END as seo_title,
+                               
+                CASE WHEN brand_alias.seo_description IS NULL OR brand_alias.seo_description=\'\' 
+                    THEN regexp_replace(\''.$seoDescTempl.'\', \'{{ name }}\', brand_alias.brand_name, \'g\')
+                    ELSE brand_alias.seo_description
+                END as seo_description,
+                
                 brand_alias.slug
             FROM brand brand_alias
             INNER JOIN products products_alias ON products_alias.brand_relation_id = brand_alias.id

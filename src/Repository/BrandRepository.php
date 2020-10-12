@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Cache\TagAwareQueryResultCacheBrand;
 use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
+use App\Entity\Category;
 use App\Entity\Product;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -162,14 +163,29 @@ class BrandRepository extends ServiceEntityRepository
                         SELECT COUNT(DISTINCT brand_alias.id)
                     ';
         } else {
-            $query .= '
+            $templateId = Brand::getTemplateTitleId();
+            $seoTitle = getenv($templateId);
+
+            $seoDescrTemplId = Brand::getTemplateDescriptionId();
+            $seoDescTempl = getenv($seoDescrTemplId);
+
+            $query .= "
                     SELECT                         
                             DISTINCT brand_alias.id,
-                            brand_alias.brand_name AS "brandName",
-                            brand_alias.created_at AS "createdAt"
+                            brand_alias.brand_name AS \"brandName\",
+                            brand_alias.created_at AS \"createdAt\"
                             ,brand_alias.top AS top,
+                            
+                            CASE WHEN brand_alias.seo_title IS NULL OR brand_alias.seo_title='' THEN regexp_replace('$seoTitle', '{{ name }}', brand_alias.brand_name, 'g')
+                                ELSE brand_alias.seo_title
+                            END as seo_title,
+                            
+                            CASE WHEN brand_alias.seo_description IS NULL OR brand_alias.seo_description='' THEN regexp_replace('$seoDescTempl', '{{ name }}', brand_alias.brand_name, 'g')
+                                ELSE brand_alias.seo_description
+                            END as seo_description,
+                            
                             brand_alias.slug
-            ';
+            ";
 
             if ($search) {
                 $query .= '
@@ -408,7 +424,14 @@ class BrandRepository extends ServiceEntityRepository
             ';
         } else {
             $dql = '
-                SELECT b.id, b.brandName, COUNT(DISTINCT p) as quantityProducts, b.top, \'edit\' as Action
+                SELECT 
+                b.id, 
+                b.brandName, 
+                COUNT(DISTINCT p) as quantityProducts,
+                b.top,
+                b.seoTitle,
+                b.seoDescription,
+                \'edit\' as Action
                 FROM App\Entity\Brand b
                 INNER JOIN b.products p
             ';

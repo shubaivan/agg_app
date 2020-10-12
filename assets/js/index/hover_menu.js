@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     data: 'SeoTitle',
                     render: function (data, type, row, meta) {
                         let divTagBuffer = $('<div/>');
-                        let divTagContent = $('<div/>').addClass('seo_title_' + row.id).addClass('category_seo');
+                        let divTagContent = $('<div/>').addClass('seo_title_' + row.id).addClass('data_model_seo');
 
                         let parseHTML = $.parseHTML(data);
                         divTagContent.append(parseHTML);
@@ -315,7 +315,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     data: 'SeoDescription',
                     render: function (data, type, row, meta) {
                         let divTagBuffer = $('<div/>');
-                        let divTagContent = $('<div/>').addClass('seo_description_' + row.id).addClass('category_seo');
+                        let divTagContent = $('<div/>').addClass('seo_description_' + row.id).addClass('data_model_seo');
 
                         let parseHTML = $.parseHTML(data);
                         divTagContent.append(parseHTML);
@@ -332,7 +332,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     data: 'SeoText1',
                     render: function (data, type, row, meta) {
                         let divTagBuffer = $('<div/>');
-                        let divTagContent = $('<div/>').addClass('seo_text1_' + row.id).addClass('category_seo');
+                        let divTagContent = $('<div/>').addClass('seo_text1_' + row.id).addClass('data_model_seo');
 
                         let parseHTML = $.parseHTML(data);
                         divTagContent.append(parseHTML);
@@ -349,7 +349,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     data: 'SeoText2',
                     render: function (data, type, row, meta) {
                         let divTagBuffer = $('<div/>');
-                        let divTagContent = $('<div/>').addClass('seo_text2_' + row.id).addClass('category_seo');
+                        let divTagContent = $('<div/>').addClass('seo_text2_' + row.id).addClass('data_model_seo');
 
                         let parseHTML = $.parseHTML(data);
                         divTagContent.append(parseHTML);
@@ -460,7 +460,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-
     exampleModalLong.on('hide.bs.modal', function (event) {
         var modal = $(this);
 
@@ -487,7 +486,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 type: "POST",
                 url: app_rest_admin_attachmentfile_getattachmentfileslist,
                 data: {
-                    id: categoryId, entity: 'Entity\\Category'
+                    id: categoryId, entity: 'App\\Entity\\Category'
                 },
                 error: (result) => {
                     console.log(result.responseJSON.status);
@@ -611,7 +610,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (categoryId && button.hasClass('trigger_new_sub') === false) {
             uppy.setMeta({
-                id: categoryId, entity: 'Entity\\Category'
+                id: categoryId, entity: 'App\\Entity\\Category'
             });
         }
 
@@ -767,7 +766,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function renderSimditor(categoryId, form, modal, button) {
-        $.each(form.find('.category_seo textarea'), function (k, v) {
+        $.each(form.find('.data_model_seo textarea'), function (k, v) {
             Simditor.locale = 'en-US';
             var editor = new Simditor({
                 textarea: v,
@@ -826,7 +825,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let nkw_value = $(classForValue);
         let nkw_value_data = '';
         $.each(nkw_value, function (k, v) {
-            if ($(v).hasClass('category_seo')) {
+            if ($(v).hasClass('data_model_seo')) {
                 nkw_value_data = $(v).html();
             } else {
                 nkw_value_data = $(v).text();
