@@ -16,8 +16,7 @@ class BlueTomatoService implements IdentityGroup
     private $identityBrand = [];
 
     /**
-     * EllosSEService constructor.
-     * @param array $identityBrand
+     * BlueTomatoService constructor.
      */
     public function __construct()
     {

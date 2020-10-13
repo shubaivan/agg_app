@@ -1,16 +1,49 @@
 <?php
 
-
 namespace App\Services\Models\Shops\Adrecord;
-
 
 use App\Entity\Product;
 use App\Services\Models\Shops\IdentityGroup;
+use App\Services\Models\Shops\Strategies\CutTheRestOfProductNameAfterSymbol;
 
 class SpelexpertenService implements IdentityGroup
 {
+    /**
+     * @var array
+     */
+    private $identityBrand = [];
+
+    /**
+     * SpelexpertenService constructor.
+     */
+    public function __construct()
+    {
+        $this->identityBrand = $this->identityBrand();
+    }
+
+    /**
+     * @param Product $product
+     * @return Product|mixed
+     */
     public function identityGroupColumn(Product $product)
     {
-        $product->setGroupIdentity($product->getSku());
+        if (array_key_exists($product->getBrand(), $this->identityBrand)) {
+            $strategy = $this->identityBrand[$product->getBrand()];
+        } else {
+            $sku = $product->getSku();
+            $product->setGroupIdentity($sku);
+
+            return $product;
+        }
+        $strategy($product);
+    }
+
+    public function identityBrand()
+    {
+        return [
+            "Cards Against Humanity" => new CutTheRestOfProductNameAfterSymbol(':'), "Gen 42" => new CutTheRestOfProductNameAfterSymbol(':'),
+            "Bulls" => new CutTheRestOfProductNameAfterSymbol('-'), "Oakie Doakie" => new CutTheRestOfProductNameAfterSymbol('-'), "Sweets kendamas" => new CutTheRestOfProductNameAfterSymbol('-'),
+
+        ];
     }
 }
