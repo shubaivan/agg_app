@@ -64,6 +64,7 @@ class Shop extends SEOModel
         'stor_and_liten' => 'Stor & Liten',
         'polarn_pyret' => 'Polarn O. Pyret',
         'adlibris' => 'Adlibris',
+        'outdoorexperten' => 'Outdoorexperten'
     ];
 
     private static $shopNamesAdrecordMapping = [
