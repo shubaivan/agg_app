@@ -28,7 +28,7 @@ class CutSomeBlocksByDelimiterFromSku
     {
         $sku = $product->getSku();
         $explodeSku = explode($this->delimiter, $sku);
-        if (count($explodeSku) >= ($this->numberOfBlocks + 1)) {
+        if (count($explodeSku) >= $this->numberOfBlocks) {
             $blocks = array_slice($explodeSku, 0, $this->numberOfBlocks);
             $identity = implode($this->delimiter, $blocks);
             $product->setGroupIdentity($identity);

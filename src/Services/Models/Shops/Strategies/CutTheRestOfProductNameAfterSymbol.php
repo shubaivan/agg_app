@@ -8,14 +8,18 @@ use App\Entity\Product;
 
 class CutTheRestOfProductNameAfterSymbol
 {
+    protected $numberOfBlocks;
+
     protected $delimiter;
 
     /**
      * CutTheRestOfProductNameAfterSymbol constructor.
+     * @param $numberOfBlocks
      * @param $delimiter
      */
-    public function __construct($delimiter)
+    public function __construct($numberOfBlocks, $delimiter)
     {
+        $this->numberOfBlocks = $numberOfBlocks;
         $this->delimiter = $delimiter;
     }
 
@@ -24,10 +28,11 @@ class CutTheRestOfProductNameAfterSymbol
      */
     public function __invoke(Product $product)
     {
-        $sku = $product->getName();
-        $explodeName = explode($this->delimiter, $sku);
-        if (count($explodeName)) {
-            $identity = array_shift($explodeName);
+        $name = $product->getName();
+        $explodeName = explode($this->delimiter, $name);
+        if (count($explodeName) >= $this->numberOfBlocks) {
+            $blocks = array_slice($explodeName, 0, $this->numberOfBlocks);
+            $identity = implode($this->delimiter, $blocks);
             $product->setGroupIdentity($identity);
         }
     }

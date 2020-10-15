@@ -41,9 +41,9 @@ class SpelexpertenService implements IdentityGroup
     public function identityBrand()
     {
         return [
-            "Cards Against Humanity" => new CutTheRestOfProductNameAfterSymbol(':'), "Gen 42" => new CutTheRestOfProductNameAfterSymbol(':'),
-            "Bulls" => new CutTheRestOfProductNameAfterSymbol('-'), "Oakie Doakie" => new CutTheRestOfProductNameAfterSymbol('-'), "Sweets kendamas" => new CutTheRestOfProductNameAfterSymbol('-'),
-
+            "Cards Against Humanity" => new CutTheRestOfProductNameAfterSymbol(1, ':'), "Gen 42" => new CutTheRestOfProductNameAfterSymbol(1, ':'),
+            "Bulls" => new CutTheRestOfProductNameAfterSymbol(1, '-'), "Oakie Doakie" => new CutTheRestOfProductNameAfterSymbol(1, '-'), "Sweets kendamas" => new CutTheRestOfProductNameAfterSymbol(1,'-'),
+            "Gigantoskop" => new CutTheRestOfProductNameAfterSymbol(1,     '(')
         ];
     }
 }

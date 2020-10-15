@@ -43,4 +43,9 @@ abstract class SlugAbstract implements SlugInterface
     {
         $this->slug = $slug;
     }
+
+    public function getDataFroSlug()
+    {
+        return $this->slug;
+    }
 }

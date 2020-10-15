@@ -6,6 +6,8 @@ namespace App\Services\Models\Shops\Adrecord;
 
 use App\Entity\Product;
 use App\Services\Models\Shops\IdentityGroup;
+use App\Services\Models\Shops\Strategies\CutSomeDigitFromEan;
+use App\Services\Models\Shops\Strategies\CutTheRestOfProductNameAfterSymbol;
 
 class StigaSportsService implements IdentityGroup
 {
@@ -14,10 +16,41 @@ class StigaSportsService implements IdentityGroup
      */
     private $match = false;
 
+    /**
+     * @var array
+     */
+    private $identityBrand = [];
+
+    /**
+     * SpelexpertenService constructor.
+     */
+    public function __construct()
+    {
+        $this->identityBrand = $this->identityBrand();
+    }
+
+    /**
+     * @param Product $product
+     * @return Product|mixed
+     */
     public function identityGroupColumn(Product $product)
     {
-        $this->hyphenRule($product);
-        $this->dotRule($product);
+        if (array_key_exists($product->getBrand(), $this->identityBrand)) {
+            $strategy = $this->identityBrand[$product->getBrand()];
+        } else {
+            $this->hyphenRule($product);
+            $this->dotRule($product);
+
+            return $product;
+        }
+        $strategy($product);
+    }
+
+    public function identityBrand()
+    {
+        return [
+            "STIGA" => new CutSomeDigitFromEan(-2)
+        ];
     }
 
     public function hyphenRule(Product $product)

@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *        @ORM\Index(name="position_asc_index", columns={"position"})
  * }
  * )
- * @UniqueEntity(fields={"categoryName"}, groups={Category::SERIALIZED_GROUP_CREATE})
+ * @UniqueEntity(fields={"slug"}, groups={Category::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="categories_region")
  * @ORM\HasLifecycleCallbacks()
  */
