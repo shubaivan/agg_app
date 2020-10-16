@@ -18,7 +18,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\CategoryRepository")
  * @ORM\Table(name="category",
  *    uniqueConstraints={
- *        @UniqueConstraint(name="category_slug_idx", columns={"slug"})
+ *        @UniqueConstraint(
+ *          name="category_slug_idx",
+ *          columns={"slug"},
+ *          options={"where": "(custome_category != 'f')"}
+ *     )
  *    },
  *     indexes={
  *        @ORM\Index(name="category_name_index", columns={"category_name"}),
