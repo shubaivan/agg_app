@@ -53,7 +53,7 @@ class AhlensService implements IdentityGroup
     {
         return [
             "ALFONS ÅBERG" => new CutLastSomeDigitFromSku(-2), "Birkenstock" => new CutLastSomeDigitFromSku(-2), "Blafre" => new CutLastSomeDigitFromSku(-2), "Bloomingville" => new CutLastSomeDigitFromSku(-2), "Bumbo" => new CutLastSomeDigitFromSku(-2), "CTH" => new CutLastSomeDigitFromSku(-2), "Creamie" => new CutLastSomeDigitFromSku(-2), "Design House Stockholm" => new CutLastSomeDigitFromSku(-2), "Design Letters" => new CutLastSomeDigitFromSku(-2), "Diesel" => new CutLastSomeDigitFromSku(-2), "ERNST" => new CutLastSomeDigitFromSku(-2), "Fila" => new CutLastSomeDigitFromSku(-2), "Fiskars" => new CutLastSomeDigitFromSku(-2), "GAP" => new CutLastSomeDigitFromSku(-2), "Gant" => new CutLastSomeDigitFromSku(-2), "Hestra" => new CutLastSomeDigitFromSku(-2), "Hummel" => new CutLastSomeDigitFromSku(-2), "Iris hantverk" => new CutLastSomeDigitFromSku(-2), "LMTD" => new CutLastSomeDigitFromSku(-2), "Le Creuset" => new CutLastSomeDigitFromSku(-2), "Loccitane" => new CutLastSomeDigitFromSku(-2), "M Lindberg" => new CutLastSomeDigitFromSku(-2), "Mads Nørgaard" => new CutLastSomeDigitFromSku(-2), "NYX Professional Makeup" => new CutLastSomeDigitFromSku(-2), "Nicotext" => new CutLastSomeDigitFromSku(-2), "PIPPI"  => new CutLastSomeDigitFromSku(-2),
-            "BABYBJÖRN" => new FullProductName()
+            "BABYBJÖRN" => new FullProductName(), "Name it" => new FullProductName()
         ];
     }
 }

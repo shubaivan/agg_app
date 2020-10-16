@@ -8,6 +8,7 @@ use App\Services\Models\Shops\Strategies\CutLastSomeDigitFromSku;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEan;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEanAndFullName;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndSomeFromEan;
+use App\Services\Models\Shops\Strategies\CutTheRestOfProductNameAfterSymbol;
 use App\Services\Models\Shops\Strategies\FullEan;
 use App\Services\Models\Shops\Strategies\FullProductName;
 
@@ -38,7 +39,7 @@ class JDSportsService implements IdentityGroup
     public function identityBrand()
     {
         return [
-            "ASICS" => new FullEan(), "Champion" => new FullEan(), "Converse" => new FullEan(), "Crocs" => new FullEan(), "Ellesse" => new FullEan(), "Emporio Armani EA7" => new FullEan(), "G-Form" => new FullEan(), "Guess" => new FullEan(), "Hummel" => new FullEan(), "ILLUSIVE LONDON" => new FullEan(), "Joma" => new FullEan(), "Kappa" => new FullEan(), "Kickers" => new FullEan(), "Macron" => new FullEan(), "Mizuno" => new FullEan(), "Nike" => new FullEan(), "Official Team" => new FullEan(), "Speedo" => new FullEan(), "Supply & Demand" => new FullEan(), "Umbro" => new FullEan(),
+            "ASICS" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Champion" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Converse" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Crocs" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Ellesse" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Emporio Armani EA7" => new CutTheRestOfProductNameAfterSymbol(1, ','), "G-Form" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Guess" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Hummel" => new CutTheRestOfProductNameAfterSymbol(1, ','), "ILLUSIVE LONDON" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Joma" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Kappa" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Kickers" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Macron" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Mizuno" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Nike" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Official Team" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Speedo" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Supply & Demand" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Umbro" => new CutTheRestOfProductNameAfterSymbol(1, ','),
             "Adidas" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -1), "Berghaus" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -1),
             "Adidas Originals" => new CutLastSomeDigitFromSku(-2), "Sonneti"  => new CutLastSomeDigitFromSku(-2), "The North Face" => new CutLastSomeDigitFromSku(-2), "Vans" => new CutLastSomeDigitFromSku(-2), "Venum" => new CutLastSomeDigitFromSku(-2),
             "Fila" => new FullProductName(), "Lacoste" => new FullProductName(),
