@@ -13,6 +13,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use JMS\Serializer\Annotation;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validation\Constraints\UniqSlugHoverMenu;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CategoryRepository")
@@ -31,7 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *        @ORM\Index(name="position_asc_index", columns={"position"})
  * }
  * )
- * @UniqueEntity(fields={"slug"}, groups={Category::SERIALIZED_GROUP_CREATE})
+ * @UniqSlugHoverMenu(groups={Category::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="categories_region")
  * @ORM\HasLifecycleCallbacks()
  */
