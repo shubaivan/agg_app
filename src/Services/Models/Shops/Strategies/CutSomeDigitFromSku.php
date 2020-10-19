@@ -4,13 +4,13 @@ namespace App\Services\Models\Shops\Strategies;
 
 use App\Entity\Product;
 
-class CutLastSomeDigitFromSku
+class CutSomeDigitFromSku
 {
 
     protected $cutFromSku;
 
     /**
-     * CutLastSomeDigitFromSku constructor.
+     * CutSomeDigitFromSku constructor.
      * @param $cutFromSku
      */
     public function __construct($cutFromSku)

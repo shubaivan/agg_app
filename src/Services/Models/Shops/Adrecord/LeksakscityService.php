@@ -6,7 +6,7 @@ namespace App\Services\Models\Shops\Adrecord;
 
 use App\Entity\Product;
 use App\Services\Models\Shops\IdentityGroup;
-use App\Services\Models\Shops\Strategies\CutLastSomeDigitFromSkuAndFullName;
+use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndFullName;
 use App\Services\Models\Shops\Strategies\CutSomeBlocksByDelimiterFromSku;
 
 class LeksakscityService implements IdentityGroup
@@ -90,7 +90,7 @@ class LeksakscityService implements IdentityGroup
     public function identityBrand()
     {
         return [
-            "Dino Cars" => new CutLastSomeDigitFromSkuAndFullName(-2),
+            "Dino Cars" => new CutSomeDigitFromSkuAndFullName(-2),
             "Euro Play" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Feilun" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "FurReal" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Gear4Play" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Injusa" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Joueco" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Jovi" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Jurassic World" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Nikko" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Silverlit" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Skrållan & Lillan" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Take Me Home" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Woodi World Toy" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "XQ RC Toys" => new CutSomeBlocksByDelimiterFromSku(2, '-'), "Zuro Robo Alive"  => new CutSomeBlocksByDelimiterFromSku(2, '-')
         ];
     }

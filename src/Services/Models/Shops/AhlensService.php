@@ -3,7 +3,7 @@
 namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
-use App\Services\Models\Shops\Strategies\CutLastSomeDigitFromSku;
+use App\Services\Models\Shops\Strategies\CutSomeDigitFromSku;
 use App\Services\Models\Shops\Strategies\FullProductName;
 
 class AhlensService implements IdentityGroup
@@ -52,8 +52,11 @@ class AhlensService implements IdentityGroup
     public function identityBrand()
     {
         return [
-            "ALFONS ÅBERG" => new CutLastSomeDigitFromSku(-2), "Birkenstock" => new CutLastSomeDigitFromSku(-2), "Blafre" => new CutLastSomeDigitFromSku(-2), "Bloomingville" => new CutLastSomeDigitFromSku(-2), "Bumbo" => new CutLastSomeDigitFromSku(-2), "CTH" => new CutLastSomeDigitFromSku(-2), "Creamie" => new CutLastSomeDigitFromSku(-2), "Design House Stockholm" => new CutLastSomeDigitFromSku(-2), "Design Letters" => new CutLastSomeDigitFromSku(-2), "Diesel" => new CutLastSomeDigitFromSku(-2), "ERNST" => new CutLastSomeDigitFromSku(-2), "Fila" => new CutLastSomeDigitFromSku(-2), "Fiskars" => new CutLastSomeDigitFromSku(-2), "GAP" => new CutLastSomeDigitFromSku(-2), "Gant" => new CutLastSomeDigitFromSku(-2), "Hestra" => new CutLastSomeDigitFromSku(-2), "Hummel" => new CutLastSomeDigitFromSku(-2), "Iris hantverk" => new CutLastSomeDigitFromSku(-2), "LMTD" => new CutLastSomeDigitFromSku(-2), "Le Creuset" => new CutLastSomeDigitFromSku(-2), "Loccitane" => new CutLastSomeDigitFromSku(-2), "M Lindberg" => new CutLastSomeDigitFromSku(-2), "Mads Nørgaard" => new CutLastSomeDigitFromSku(-2), "NYX Professional Makeup" => new CutLastSomeDigitFromSku(-2), "Nicotext" => new CutLastSomeDigitFromSku(-2), "PIPPI"  => new CutLastSomeDigitFromSku(-2),
-            "BABYBJÖRN" => new FullProductName(), "Name it" => new FullProductName()
+            "ALFONS ÅBERG" => new CutSomeDigitFromSku(-2), "Birkenstock" => new CutSomeDigitFromSku(-2), "Blafre" => new CutSomeDigitFromSku(-2), "Bloomingville" => new CutSomeDigitFromSku(-2), "Bumbo" => new CutSomeDigitFromSku(-2), "CTH" => new CutSomeDigitFromSku(-2), "Creamie" => new CutSomeDigitFromSku(-2), "Design House Stockholm" => new CutSomeDigitFromSku(-2), "Design Letters" => new CutSomeDigitFromSku(-2), "Diesel" => new CutSomeDigitFromSku(-2), "ERNST" => new CutSomeDigitFromSku(-2), "Fila" => new CutSomeDigitFromSku(-2), "Fiskars" => new CutSomeDigitFromSku(-2), "GAP" => new CutSomeDigitFromSku(-2), "Gant" => new CutSomeDigitFromSku(-2), "Hestra" => new CutSomeDigitFromSku(-2), "Hummel" => new CutSomeDigitFromSku(-2), "Iris hantverk" => new CutSomeDigitFromSku(-2), "LMTD" => new CutSomeDigitFromSku(-2), "Le Creuset" => new CutSomeDigitFromSku(-2), "Loccitane" => new CutSomeDigitFromSku(-2), "M Lindberg" => new CutSomeDigitFromSku(-2), "Mads Nørgaard" => new CutSomeDigitFromSku(-2), "NYX Professional Makeup" => new CutSomeDigitFromSku(-2), "Nicotext" => new CutSomeDigitFromSku(-2), "PIPPI"  => new CutSomeDigitFromSku(-2),
+            "BABYBJÖRN" => new FullProductName(), "Name it" => new FullProductName(),
+            "Adidas Originals" => new FullProductName(), "Braun" => new FullProductName(), "CarloBaby" => new FullProductName(), "Didriksons" => new FullProductName(), "Done by Deer" => new FullProductName(), "Pick&pack" => new FullProductName(), "Shepherd" => new FullProductName(), "Sorel" => new FullProductName(),
+            "Cink" => new FullProductName(), "Geggamoja" => new FullProductName(),
+            "Klippan" => new FullProductName(), "MICKI" => new FullProductName(), "Peak Performance" => new FullProductName(), "Save the Duck" => new FullProductName(), "Skip Hop" => new FullProductName(), "Summerville organic" => new FullProductName(), "TEDDYKOMPANIET" => new FullProductName()
         ];
     }
 }

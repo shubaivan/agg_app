@@ -3,7 +3,7 @@
 namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
-use App\Services\Models\Shops\Strategies\CutLastSomeDigitFromSkuAndFullName;
+use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndFullName;
 
 class LindexService implements IdentityGroup
 {
@@ -41,7 +41,7 @@ class LindexService implements IdentityGroup
     public function identityBrand()
     {
         return [
-            "Lindex" => new CutLastSomeDigitFromSkuAndFullName(-2)
+            "Lindex" => new CutSomeDigitFromSkuAndFullName(-2)
         ];
     }
 }

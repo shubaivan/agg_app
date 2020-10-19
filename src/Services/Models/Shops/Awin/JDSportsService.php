@@ -4,7 +4,7 @@ namespace App\Services\Models\Shops\Awin;
 
 use App\Entity\Product;
 use App\Services\Models\Shops\IdentityGroup;
-use App\Services\Models\Shops\Strategies\CutLastSomeDigitFromSku;
+use App\Services\Models\Shops\Strategies\CutSomeDigitFromSku;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEan;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEanAndFullName;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndSomeFromEan;
@@ -41,7 +41,7 @@ class JDSportsService implements IdentityGroup
         return [
             "ASICS" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Champion" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Converse" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Crocs" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Ellesse" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Emporio Armani EA7" => new CutTheRestOfProductNameAfterSymbol(1, ','), "G-Form" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Guess" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Hummel" => new CutTheRestOfProductNameAfterSymbol(1, ','), "ILLUSIVE LONDON" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Joma" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Kappa" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Kickers" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Macron" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Mizuno" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Nike" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Official Team" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Speedo" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Supply & Demand" => new CutTheRestOfProductNameAfterSymbol(1, ','), "Umbro" => new CutTheRestOfProductNameAfterSymbol(1, ','),
             "Adidas" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -1), "Berghaus" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -1),
-            "Adidas Originals" => new CutLastSomeDigitFromSku(-2), "Sonneti"  => new CutLastSomeDigitFromSku(-2), "The North Face" => new CutLastSomeDigitFromSku(-2), "Vans" => new CutLastSomeDigitFromSku(-2), "Venum" => new CutLastSomeDigitFromSku(-2),
+            "Adidas Originals" => new CutSomeDigitFromSku(-2), "Sonneti"  => new CutSomeDigitFromSku(-2), "The North Face" => new CutSomeDigitFromSku(-2), "Vans" => new CutSomeDigitFromSku(-2), "Venum" => new CutSomeDigitFromSku(-2),
             "Fila" => new FullProductName(), "Lacoste" => new FullProductName(),
             "Levi's" => new FullProductName(),
             "Lyle & Scott" => new FullProductName(), "New Balance" => new FullProductName(), "Reebok" => new FullProductName(),
