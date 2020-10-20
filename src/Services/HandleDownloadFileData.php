@@ -24,6 +24,7 @@ use App\QueueModel\FileReadyDownloaded;
 use App\QueueModel\ResourceDataRow;
 use App\QueueModel\ResourceProductQueues;
 use App\QueueModel\TradeDoublerDataRow;
+use App\Repository\ProductRepository;
 use App\Services\Models\CategoryService;
 use App\Services\Storage\DigitalOceanStorage;
 use App\Util\RedisHelper;
@@ -165,6 +166,11 @@ class HandleDownloadFileData
     private $kernel;
 
     /**
+     * @var ProductRepository
+     */
+    private $productRepository;
+
+    /**
      * HandleDownloadFileData constructor.
      * @param MessageBusInterface $commandBus
      * @param MessageBusInterface $productsBus
@@ -181,6 +187,7 @@ class HandleDownloadFileData
      * @param ObjectsHandler $objectsHandler
      * @param DigitalOceanStorage $do
      * @param KernelInterface $kernel
+     * @param ProductRepository $productRepository
      */
     public function __construct(
         MessageBusInterface $commandBus,
@@ -197,7 +204,8 @@ class HandleDownloadFileData
         DocumentManager $dm,
         ObjectsHandler $objectsHandler,
         DigitalOceanStorage $do,
-        KernelInterface $kernel
+        KernelInterface $kernel,
+        ProductRepository $productRepository
     )
     {
         $this->kernel = $kernel;
@@ -215,6 +223,7 @@ class HandleDownloadFileData
         $this->categoryService = $categoryService;
         $this->helper = $helpers;
         $this->objectsHandler = $objectsHandler;
+        $this->productRepository = $productRepository;
     }
 
     /**
@@ -325,6 +334,10 @@ class HandleDownloadFileData
             }
 
             $count = $this->getCount($filePath, $redisUniqKey);
+            $this->productRepository
+                ->removeProductsByShop(
+                    Shop::getMapShopKeyByOriginalName($shop)
+                );
 
             if (!$count) {
                 $csv = $this->generateCsvReader($downloadPath, $shop);

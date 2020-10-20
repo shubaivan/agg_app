@@ -213,12 +213,6 @@ document.addEventListener("DOMContentLoaded", function () {
         form.find('textarea').val('');
         form.find('.attachment_files_to_categories').remove();
         form.find('input[type=hidden]').remove();
-
-        let sections_select_container = modal.find('.modal-body #sections_select_container');
-        if (sections_select_container.length) {
-            sections_select_container.remove();
-        }
-
     });
 
     exampleModalLong.on('show.bs.modal', function (event) {
@@ -238,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.log(result.responseJSON.status);
                 },
                 success: (data) => {
-                    renderCategoryForm(brandId, form, modal, button);
+                    renderEditForm(brandId, form, modal, button);
                     renderAttachmentFilesBlock(brandId, form, modal, button, data,
                         function (uppy, data) {
                             (async function (arr) {
@@ -430,7 +424,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return uppy;
     }
 
-    function renderCategoryForm(brandId, form, modal, button) {
+    function renderEditForm(brandId, form, modal, button) {
         let bn_value = $('.bn_' + brandId);
         modal.find('.modal-title').text('Edit ' + bn_value.text() + ' brand');
         setDataInForm(modal.find('.modal-body #bn'),

@@ -50,6 +50,10 @@ framework:
                 default_lifetime: 31536000  # One year
                 adapter: cache.adapter.redis
                 tags: true
+            pdo_shop_second_level_cache_pool:
+                default_lifetime: 31536000  # One year
+                adapter: cache.adapter.redis
+                tags: true
             pdo_category_conf_cache_pool:
                 default_lifetime: 31536000  # One year
                 adapter: cache.adapter.redis

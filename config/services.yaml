@@ -128,6 +128,11 @@ services:
       public: true
       lazy: true
 
+    App\Cache\TagAwareQuerySecondLevelCacheShop:
+      arguments: ['@pdo_shop_second_level_cache_pool']
+      public: true
+      lazy: true
+
     App\Cache\TagAwareQueryResultCacheCategory:
       arguments: ['@pdo_category_cache_pool']
       public: true

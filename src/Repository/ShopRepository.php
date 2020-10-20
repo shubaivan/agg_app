@@ -381,6 +381,30 @@ class ShopRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param ParameterBag $parameterBag
+     * @param bool $count
+     * @return Shop[]|int
+     */
+    public function getShopsByNames(ParameterBag $parameterBag, $count = false)
+    {
+        $names = $parameterBag->get('names');
+        if (is_array($names)) {
+            $qb = $this->createQueryBuilder('s');
+            $qb
+                ->where($qb->expr()->in('s.shopName', $names));
+
+            return $this->getListParameterBag(
+                $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
+                $qb,
+                $parameterBag,
+                $count
+            );
+        }
+
+        return [];
+    }
+
+    /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
      * @return Shop[]|int

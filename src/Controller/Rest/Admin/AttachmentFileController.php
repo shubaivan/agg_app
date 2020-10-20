@@ -7,9 +7,11 @@ use App\Entity\AttachmentFilesInterface;
 use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Files;
+use App\Entity\Shop;
 use App\Repository\BrandRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\FilesRepository;
+use App\Repository\ShopRepository;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Controller\Rest\AbstractRestController;
 use App\Services\Helpers;
@@ -38,6 +40,11 @@ class AttachmentFileController extends AbstractRestController
     private $brandRepo;
 
     /**
+     * @var ShopRepository
+     */
+    private $shopRepository;
+
+    /**
      * @var Environment
      */
     private $twig;
@@ -48,6 +55,7 @@ class AttachmentFileController extends AbstractRestController
      * @param FilesRepository $fileRepo
      * @param CategoryRepository $categoryRepository
      * @param BrandRepository $brandRepository
+     * @param ShopRepository $shopRepository
      * @param Environment $twig
      */
     public function __construct(
@@ -55,6 +63,7 @@ class AttachmentFileController extends AbstractRestController
         FilesRepository $fileRepo,
         CategoryRepository $categoryRepository,
         BrandRepository $brandRepository,
+        ShopRepository $shopRepository,
         Environment $twig
     )
     {
@@ -62,6 +71,7 @@ class AttachmentFileController extends AbstractRestController
         $this->fileRepo = $fileRepo;
         $this->categoryRepo = $categoryRepository;
         $this->brandRepo = $brandRepository;
+        $this->shopRepository = $shopRepository;
         $this->twig = $twig;
     }
 
@@ -216,7 +226,7 @@ class AttachmentFileController extends AbstractRestController
 
     /**
      * @param Request $request
-     * @return BrandRepository|CategoryRepository|bool
+     * @return BrandRepository|CategoryRepository|ShopRepository|bool
      */
     private function getModelRepo(Request $request)
     {
@@ -226,6 +236,9 @@ class AttachmentFileController extends AbstractRestController
                 break;
             case Brand::class:
                 $repo = $this->brandRepo;
+                break;
+            case Shop::class:
+                $repo = $this->shopRepository;
                 break;
             default:
                 $repo = false;
