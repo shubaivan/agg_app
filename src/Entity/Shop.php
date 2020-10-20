@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use JMS\Serializer\Annotation;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ShopRepository")
@@ -19,10 +20,10 @@ use JMS\Serializer\Annotation;
  *    }
  * )
  * @UniqueEntity(fields={"shopName"})
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="entity_that_rarely_changes")
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="shops_region")
  * @ORM\HasLifecycleCallbacks()
  */
-class Shop extends SEOModel
+class Shop extends SEOModel implements AttachmentFilesInterface
 {
     const PREFIX_HASH = 'statistic:';
 
@@ -64,6 +65,7 @@ class Shop extends SEOModel
         'stor_and_liten' => 'Stor & Liten',
         'polarn_pyret' => 'Polarn O. Pyret',
         'adlibris' => 'Adlibris',
+        'outdoorexperten' => 'Outdoorexperten'
     ];
 
     private static $shopNamesAdrecordMapping = [
@@ -132,9 +134,24 @@ class Shop extends SEOModel
      */
     private $products;
 
+    /**
+     * @var Files
+     *
+     * @ORM\OneToMany(
+     *     targetEntity="App\Entity\Files",
+     *     mappedBy="shop",
+     *     orphanRemoval=true,
+     *     cascade={"persist"}
+     *     )
+     * @Assert\Valid()
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="shops_region")
+     */
+    private $files;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -247,5 +264,54 @@ class Shop extends SEOModel
     public function getNameForSeoDefaultTemplate()
     {
         return $this->shopName;
+    }
+
+    public function checkFileExist($name)
+    {
+        $isCheck = false;
+        $files = $this->getFiles()->getValues();
+        foreach ($files as $file) {
+            /** @var Files $file */
+            $isCheck = ($file->getOriginalName() === $name);
+            if ($isCheck) {
+                break;
+            }
+        }
+
+        return $isCheck;
+    }
+
+    /**
+     * @return Collection|Files[]
+     */
+    public function getFiles(): Collection
+    {
+        if (!$this->files) {
+            $this->files = new ArrayCollection();
+        }
+        return $this->files;
+    }
+
+    public function addFile(Files $file): self
+    {
+        if (!$this->files->contains($file)) {
+            $this->files[] = $file;
+            $file->setShop($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(Files $file): self
+    {
+        if ($this->files->contains($file)) {
+            $this->files->removeElement($file);
+            // set the owning side to null (unless already changed)
+            if ($file->getShop() === $this) {
+                $file->setShop(null);
+            }
+        }
+
+        return $this;
     }
 }

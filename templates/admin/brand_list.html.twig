@@ -2,6 +2,11 @@
 
 {% block title %}Profile!{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="{{ asset('simditor-2.3.28/styles/simditor.css') }}" />
+{% endblock %}
+
 {% block body %}
     {{ parent() }}
     {% if th_keys|length %}
@@ -39,23 +44,32 @@
                     <div class="container-fluid">
 
                         <form id="editBrand">
-                            <div class="row">
+                            <div class="form-group">
+                                <label for="bn" class="col-form-label">Brand Name</label>
+                                <input type="text" id="bn" class="form-control" name="bn"/>
+                            </div>
+                            <div class="form-check">
+                                <input name="topBrand" type="checkbox" class="form-check-input" id="topBrand">
+                                <label class="form-check-label" for="topBrand">Top Brand</label>
+                            </div>
+                            <div class="row data_model_seo">
                                 <div class="col-md-6 ml-auto">
                                     <div class="form-group">
-                                        <label for="bn" class="col-form-label">Brand Name:</label>
-                                        <input type="text" name="bn" class="form-control" id="bn">
+                                        <label for="seoTitle" class="col-form-label">Brand Seo title:</label>
+                                        <textarea name="brand_seo_title" class="form-control" id="seoTitle" rows="10"></textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-6 ml-auto">
-                                    <div class="form-group form-check">
-                                        <input name="topBrand" type="checkbox" class="form-check-input" id="topBrand">
-                                        <label class="form-check-label" for="topBrand">Top Brand</label>
+                                    <div class="form-group">
+                                        <label for="seoDescription" class="col-form-label">Brand Seo description:</label>
+                                        <textarea name="brand_seo_description" class="form-control" id="seoDescription" rows="10"></textarea>
                                     </div>
                                 </div>
-
-                                <input type="hidden" id="brand_id" name="brand_id" value="">
                             </div>
 
+                            <div id="attachment_files_template">
+
+                            </div>
                         </form>
 
                     </div>
@@ -89,7 +103,15 @@
         let separate_filter_column = getJSonObject("{{ separate_filter_column ? separate_filter_column|json_encode() : "{}" }}");
         let convert_to_html_columns = getJSonObject("{{ convert_to_html_columns ? convert_to_html_columns|json_encode() : "{}" }}");
 
+        let seo_columns = getJSonObject("{{ seo_columns ? seo_columns|json_encode() : "{}" }}");
+
     </script>
+
+    <script src="{{ asset('simditor-2.3.28/site/assets/scripts/module.js') }}"></script>
+    <script src="{{ asset('simditor-2.3.28/site/assets/scripts/hotkeys.js') }}"></script>
+
+
+    <script src="{{ asset('simditor-2.3.28/lib/simditor.js') }}"></script>
 
 
 {% endblock %}

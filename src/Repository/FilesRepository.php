@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Files;
+use App\Entity\Shop;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 
@@ -30,6 +31,29 @@ class FilesRepository extends ServiceEntityRepository
             ->where($queryBuilder->expr()->in('f.id', $ids))
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @param Shop $shop
+     * @return mixed
+     */
+    public function getByShop(Shop $shop)
+    {
+        $queryBuilder = $this->createQueryBuilder('f');
+        $result = $queryBuilder
+            ->select('f.path')
+            ->where('f.shop = :shop')
+            ->setParameter('shop', $shop)
+            ->getQuery()
+            ->getResult();
+        $prepareResult = [];
+        foreach ($result as $file)
+        {
+            if (isset($file['path'])) {
+                $prepareResult[] = $file['path'];
+            }
+        }
+        return $prepareResult;
     }
 
     /**

@@ -723,6 +723,9 @@ class Product extends SlugAbstract implements EntityValidatorException
         return $this;
     }
 
+    /**
+     * @return Collection
+     */
     public function getHoverMenuCategories()
     {
         return $this->getCategoryRelation()

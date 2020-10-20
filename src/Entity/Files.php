@@ -87,6 +87,20 @@ class Files
     private $category;
 
     /**
+     * @var Brand
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\Brand", inversedBy="files")
+     */
+    private $brand;
+
+    /**
+     * @var Shop
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\Shop", inversedBy="files")
+     */
+    private $shop;
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      * @Annotation\Groups({Files::GROUP_GET, Category::SERIALIZED_GROUP_RELATIONS_LIST})
      */
@@ -238,6 +252,30 @@ class Files
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getBrand(): ?Brand
+    {
+        return $this->brand;
+    }
+
+    public function setBrand(?Brand $brand): self
+    {
+        $this->brand = $brand;
+
+        return $this;
+    }
+
+    public function getShop(): ?Shop
+    {
+        return $this->shop;
+    }
+
+    public function setShop(?Shop $shop): self
+    {
+        $this->shop = $shop;
 
         return $this;
     }

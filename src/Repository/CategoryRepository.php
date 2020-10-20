@@ -1120,6 +1120,32 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param Category $category
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function matchExistSlug(Category $category)
+    {
+        $queryBuilder = $this->createQueryBuilder('c');
+
+        $queryBuilder
+            ->where('c.slug = :slug_p')
+            ->andWhere('c.customeCategory = :hover')
+            ->setParameter('hover', true)
+            ->setParameter('slug_p', $category->getSlug());
+
+        if ($category->getId()) {
+            $queryBuilder
+                ->andWhere('c.id != :id_p')
+                ->setParameter('id_p', $category->getId());
+        }
+
+        return $queryBuilder
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
      * @param $object
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException

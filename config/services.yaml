@@ -51,6 +51,7 @@ parameters:
         'stor_and_liten': '%env(ANDRACTION_DOWNLOAD_URL_Stor_and_Liten)%'
         'polarn_pyret': '%env(ANDRACTION_DOWNLOAD_URL_Pyret)%'
         'adlibris':  '%env(ANDRACTION_DOWNLOAD_URL_Adlibris)%'
+        'outdoorexperten': '%env(ANDRACTION_DOWNLOAD_URL_Outdoorexperten)%'
     adtraction_download_file_path: '%env(ANDRACTION_DOWNLOAD_FILE_PATH)%'
 
     adrecord_download_urls:
@@ -119,6 +120,16 @@ services:
 
     App\Cache\TagAwareQuerySecondLevelCacheCategory:
       arguments: ['@pdo_category_second_level_cache_pool']
+      public: true
+      lazy: true
+
+    App\Cache\TagAwareQuerySecondLevelCacheBrand:
+      arguments: ['@pdo_brand_second_level_cache_pool']
+      public: true
+      lazy: true
+
+    App\Cache\TagAwareQuerySecondLevelCacheShop:
+      arguments: ['@pdo_shop_second_level_cache_pool']
       public: true
       lazy: true
 

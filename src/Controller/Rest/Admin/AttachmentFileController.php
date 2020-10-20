@@ -4,10 +4,14 @@
 namespace App\Controller\Rest\Admin;
 
 use App\Entity\AttachmentFilesInterface;
+use App\Entity\Brand;
+use App\Entity\Category;
 use App\Entity\Files;
+use App\Entity\Shop;
+use App\Repository\BrandRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\FilesRepository;
-use Entity\Category;
+use App\Repository\ShopRepository;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Controller\Rest\AbstractRestController;
 use App\Services\Helpers;
@@ -31,6 +35,16 @@ class AttachmentFileController extends AbstractRestController
     private $categoryRepo;
 
     /**
+     * @var BrandRepository
+     */
+    private $brandRepo;
+
+    /**
+     * @var ShopRepository
+     */
+    private $shopRepository;
+
+    /**
      * @var Environment
      */
     private $twig;
@@ -40,18 +54,24 @@ class AttachmentFileController extends AbstractRestController
      * @param Helpers $helpers
      * @param FilesRepository $fileRepo
      * @param CategoryRepository $categoryRepository
+     * @param BrandRepository $brandRepository
+     * @param ShopRepository $shopRepository
      * @param Environment $twig
      */
     public function __construct(
         Helpers $helpers,
         FilesRepository $fileRepo,
         CategoryRepository $categoryRepository,
+        BrandRepository $brandRepository,
+        ShopRepository $shopRepository,
         Environment $twig
     )
     {
         parent::__construct($helpers);
         $this->fileRepo = $fileRepo;
         $this->categoryRepo = $categoryRepository;
+        $this->brandRepo = $brandRepository;
+        $this->shopRepository = $shopRepository;
         $this->twig = $twig;
     }
 
@@ -104,13 +124,7 @@ class AttachmentFileController extends AbstractRestController
         $files = $request->files->get('files');
 
         if ($request->get('id')) {
-            switch ($request->get('entity')) {
-                case Category::class:
-                    $repo = $this->categoryRepo;
-                    break;
-                default:
-                    $repo = false;
-            }
+            $repo = $this->getModelRepo($request);
             if (!$repo) {
                 throw new \Exception('entity was not matched');
             }
@@ -171,13 +185,7 @@ class AttachmentFileController extends AbstractRestController
      */
     public function getAttachmentFilesListAction(Request $request)
     {
-        switch ($request->get('entity')) {
-            case Category::class:
-                $repo = $this->categoryRepo;
-                break;
-            default:
-                $repo = false;
-        }
+        $repo = $this->getModelRepo($request);
         if (!$repo) {
             throw new \Exception('entity was not matched');
         }
@@ -214,5 +222,27 @@ class AttachmentFileController extends AbstractRestController
         $this->fileRepo->remove($file);
 
         return ['status' => 'success'];
+    }
+
+    /**
+     * @param Request $request
+     * @return BrandRepository|CategoryRepository|ShopRepository|bool
+     */
+    private function getModelRepo(Request $request)
+    {
+        switch ($request->get('entity')) {
+            case Category::class:
+                $repo = $this->categoryRepo;
+                break;
+            case Brand::class:
+                $repo = $this->brandRepo;
+                break;
+            case Shop::class:
+                $repo = $this->shopRepository;
+                break;
+            default:
+                $repo = false;
+        }
+        return $repo;
     }
 }

@@ -192,6 +192,11 @@ class TradeDoublerDataRow extends ResourceProductQueues implements ResourceDataR
                     $prepare[] = $this->getAttributeByName('tradeDoublerId');
                 }
             }
+
+            if ($this->getAttributeByName('TDProductId')
+                && strlen($this->getAttributeByName('TDProductId'))) {
+                $prepare[] = $this->getAttributeByName('TDProductId');
+            }
         }
 
         $implode = implode('_', $prepare);

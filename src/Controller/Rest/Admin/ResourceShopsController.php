@@ -2,11 +2,14 @@
 
 namespace App\Controller\Rest\Admin;
 
+use App\Cache\TagAwareQuerySecondLevelCacheShop;
 use App\Controller\Admin\ResourceShopManagmentController;
 use App\Entity\ManuallyResourceJob;
 use App\Entity\Shop;
 use App\Entity\User;
 use App\QueueModel\ManuallyResourceJobs;
+use App\Repository\BrandRepository;
+use App\Repository\FilesRepository;
 use App\Repository\ManuallyResourceJobRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ShopRepository;
@@ -14,12 +17,17 @@ use App\Services\Admin\ResourceShopManagement;
 use App\Services\ObjectsHandler;
 use App\Util\AmqpHelper;
 use App\Util\RedisHelper;
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\ORM\Configuration;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Controller\Rest\AbstractRestController;
 use App\Services\Helpers;
+use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations\View;
 use Symfony\Component\HttpFoundation\Response;
@@ -79,6 +87,15 @@ class ResourceShopsController extends AbstractRestController
      */
     private $bus;
 
+    /**
+     * @var TagAwareQuerySecondLevelCacheShop
+     */
+    private $tagAwareQuerySecondLevelCacheShop;
+
+    /**
+     * @var FilesRepository
+     */
+    private $fileRepo;
 
     /**
      * ResourceShopsController constructor.
@@ -92,6 +109,8 @@ class ResourceShopsController extends AbstractRestController
      * @param ManuallyResourceJobRepository $manuallyResourceJobRepository
      * @param ObjectsHandler $objectsHandler
      * @param MessageBusInterface $manuallyBus
+     * @param TagAwareQuerySecondLevelCacheShop $tagAwareQuerySecondLevelCacheShop
+     * @param FilesRepository $fileRepo
      */
     public function __construct(
         Helpers $helpers,
@@ -103,7 +122,9 @@ class ResourceShopsController extends AbstractRestController
         ContainerBagInterface $params,
         ManuallyResourceJobRepository $manuallyResourceJobRepository,
         ObjectsHandler $objectsHandler,
-        MessageBusInterface $manuallyBus
+        MessageBusInterface $manuallyBus,
+        TagAwareQuerySecondLevelCacheShop $tagAwareQuerySecondLevelCacheShop,
+        FilesRepository $fileRepo
     )
     {
         parent::__construct($helpers);
@@ -116,7 +137,9 @@ class ResourceShopsController extends AbstractRestController
         $this->manuallyResourceJobRepository = $manuallyResourceJobRepository;
         $this->objectsHandler = $objectsHandler;
         $this->bus = $manuallyBus;
-        
+        $this->tagAwareQuerySecondLevelCacheShop = $tagAwareQuerySecondLevelCacheShop;
+        $this->fileRepo = $fileRepo;
+
         $this->urlsData = [
             $params->get('adrecord_download_file_path') => $this->params->get('adrecord_download_urls'),
             $params->get('adtraction_download_file_path') => $this->params->get('adtraction_download_urls'),
@@ -234,6 +257,64 @@ class ResourceShopsController extends AbstractRestController
     }
 
     /**
+     * edit Shop.
+     *
+     * @Rest\Post("/admin/api/shop/edit", options={"expose": true})
+     *
+     * @param Request $request
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Admin")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object",
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Exception
+     */
+    public function editShopAction(Request $request)
+    {
+        /** @var Registry $registry */
+        $registry = $this->get('doctrine');
+        $objectManager = $registry->getManager();
+        /** @var \Doctrine\DBAL\Connection $connection */
+        $connection = $objectManager->getConnection();
+        $connection->beginTransaction(); // suspend auto-commit
+        try{
+            $shop = $this->shopRepository
+                ->findOneBy(['id' => $request->get('shop_id')]);
+
+            $fileIds = $request->get('file_ids');
+            if (is_array($fileIds) && count($fileIds)) {
+                $files = $this->fileRepo
+                    ->getByIds($fileIds);
+                foreach ($files as $file) {
+                    $file->setShop($shop);
+                }
+            }
+            $objectManager->flush();
+            $connection->commit();
+
+            $this->tagAwareQuerySecondLevelCacheShop
+                ->deleteAll();
+        } catch (\Exception $e) {
+            $connection->rollBack();
+            throw $e;
+        }
+
+        $view = $this->createSuccessResponse(
+            ['test' => 1]
+        );
+
+        return $view;
+    }
+
+    /**
      * get resource shop list.
      *
      * @Rest\Post("/admin/api/resource/shop_list", options={"expose": true})
@@ -266,7 +347,7 @@ class ResourceShopsController extends AbstractRestController
             foreach ($shopList as $shop) {
                 $shopThData = [];
 
-                $shopTh = [$resource, $shop, 0, '', 'reloading'];
+                $shopTh = [$resource, $shop, '', 0, '', 'reloading'];
                 foreach ($shopTh as $key => $tdData) {
                     $shopThData[$th[$key]] = $tdData;
                 }
@@ -297,19 +378,35 @@ class ResourceShopsController extends AbstractRestController
             $quantityResult[$resourceName] = $this->amqpHelper
                 ->getQuantityJobsQueue($queue);
         }
-        $result = array_map(function ($v) use ($quantityResult) {
+        $shopNames = [];
+        $responseResult = [];
+        $result = array_map(function ($v, $k) use ($quantityResult, &$shopNames, &$responseResult) {
             $v[ResourceShopManagmentController::PRODUCTS_QUANTITY] = $this->productRepository
                 ->getCountGroupedProductsByShop($v[ResourceShopManagmentController::SHOP_NAME]);
             if (isset($quantityResult[$v[ResourceShopManagmentController::RESOURCE_NAME]])) {
                 $v['queue'] = $quantityResult[$v[ResourceShopManagmentController::RESOURCE_NAME]];
                 $shopKey = Shop::getMapShopKeyByOriginalName($v[ResourceShopManagmentController::SHOP_NAME]);
+                $shopNames[$shopKey] = $v[ResourceShopManagmentController::SHOP_NAME];
+
                 $manuallyResourceJob = $this->manuallyResourceJobRepository
                     ->findBy(['shopKey' => $shopKey]);
                 $v[ResourceShopManagmentController::MANUALLY_JOBS] = $manuallyResourceJob;
             }
-
+            $responseResult[$v[ResourceShopManagmentController::SHOP_NAME]] = $v;
             return $v;
-        }, $result);
+        }, $result, array_keys($result));
+        $parameterBagShopNames = new ParameterBag();
+        $parameterBagShopNames->set('names', $shopNames);
+        $shops = $this->shopRepository->getShopsByNames($parameterBagShopNames);
+        foreach ($shops as $shopFromDB) {
+            $shopName = $shopFromDB->getShopName();
+            if (isset($responseResult[$shopName])) {
+                $responseResult[$shopName]['shop_from_db']['id'] = $shopFromDB->getId();
+                $responseResult[$shopName][ResourceShopManagmentController::ACTION] .= ',edit';
+                $responseResult[$shopName][ResourceShopManagmentController::FILES] = $this
+                    ->fileRepo->getByShop($shopFromDB);
+            }
+        }
         $view = $this->createSuccessResponse(
             array_merge(
                 [
@@ -317,7 +414,7 @@ class ResourceShopsController extends AbstractRestController
                     "recordsTotal" => $commonCount,
                     "recordsFiltered" => $count
                 ],
-                ['data' => $result]
+                ['data' => array_values($responseResult)]
             )
         );
 

@@ -13,12 +13,17 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use JMS\Serializer\Annotation;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validation\Constraints\UniqSlugHoverMenu;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CategoryRepository")
  * @ORM\Table(name="category",
  *    uniqueConstraints={
- *        @UniqueConstraint(name="category_slug_idx", columns={"slug"})
+ *        @UniqueConstraint(
+ *          name="category_slug_idx",
+ *          columns={"slug"},
+ *          options={"where": "(custome_category != 'f')"}
+ *     )
  *    },
  *     indexes={
  *        @ORM\Index(name="category_name_index", columns={"category_name"}),
@@ -27,7 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *        @ORM\Index(name="position_asc_index", columns={"position"})
  * }
  * )
- * @UniqueEntity(fields={"categoryName"}, groups={Category::SERIALIZED_GROUP_CREATE})
+ * @UniqSlugHoverMenu(groups={Category::SERIALIZED_GROUP_CREATE})
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="categories_region")
  * @ORM\HasLifecycleCallbacks()
  */

@@ -16,7 +16,7 @@ use Doctrine\ODM\MongoDB\Query\Builder;
  * @method array getDataTableAggr ($collection, array $params)
  * @method string|null matchExistProductAllow (string $collection, array $match)
  */
-class AdrecordProductRepository extends ServiceDocumentRepository implements CarefulSavingSku
+class AdrecordProductRepository extends ServiceDocumentRepository implements CarefulSavingSku, DirectlyRemove
 {
     use CommonTrait;
     
@@ -43,38 +43,5 @@ class AdrecordProductRepository extends ServiceDocumentRepository implements Car
     public function getCountDoc()
     {
         return $this->getCount($this->createQueryBuilder());
-    }
-
-    public function createProduct(ResourceProductQueues $productQueues, string $shop)
-    {
-        /**
-         * @var $name
-         * @var $category
-         * @var $SKU
-         * @var $EAN
-         * @var $description
-         * @var $model
-         * @var $brand
-         * @var $price
-         * @var $shippingPrice
-         * @var $currency
-         * @var $productUrl
-         * @var $graphicUrl
-         * @var $inStock
-         * @var $inStockQty
-         * @var $deliveryTime
-         * @var $regularPrice
-         * @var $gender
-         * @var $identityUniqData
-         */
-        extract($productQueues->getRow());
-
-        $adrecordProduct = new AdrecordProduct(
-            $name, $category, $SKU, $EAN, $description,
-            $model, $brand, $price, $shippingPrice, $currency,
-            $productUrl, $graphicUrl, $inStock, $inStockQty, $deliveryTime,
-            $regularPrice, $gender, $shop, $identityUniqData
-        );
-        $this->dm->persist($adrecordProduct);
     }
 }

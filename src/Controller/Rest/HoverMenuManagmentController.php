@@ -239,11 +239,6 @@ class HoverMenuManagmentController extends AbstractRestController
             } else {
                 $category->setHotCategory(false);
             }
-            $this->objectsHandler
-                ->validateEntity(
-                    $category,
-                    [Category::SERIALIZED_GROUP_CREATE]
-                );
 
             $this->categoryRepo->getPersist($category);
             $this->categoryConfRepo->getPersist($categoryConfigurations);
@@ -272,6 +267,11 @@ class HoverMenuManagmentController extends AbstractRestController
                     $file->setCategory($category);
                 }
             }
+            $this->objectsHandler
+                ->validateEntity(
+                    $category,
+                    [Category::SERIALIZED_GROUP_CREATE]
+                );
             $objectManager->flush();
             $connection->commit();
             if ($request->get('disableForParsing')) {

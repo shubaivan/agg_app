@@ -12,6 +12,7 @@ use App\DocumentRepository\AdrecordProductRepository;
 use App\DocumentRepository\AdtractionProductRepository;
 use App\DocumentRepository\AwinProductRepository;
 use App\DocumentRepository\CarefulSavingSku;
+use App\DocumentRepository\DirectlyRemove;
 use App\DocumentRepository\TradeDoublerProductRepository;
 use App\Entity\Product;
 use App\Entity\Shop;
@@ -24,6 +25,7 @@ use App\QueueModel\FileReadyDownloaded;
 use App\QueueModel\ResourceDataRow;
 use App\QueueModel\ResourceProductQueues;
 use App\QueueModel\TradeDoublerDataRow;
+use App\Repository\ProductRepository;
 use App\Services\Models\CategoryService;
 use App\Services\Storage\DigitalOceanStorage;
 use App\Util\RedisHelper;
@@ -165,6 +167,11 @@ class HandleDownloadFileData
     private $kernel;
 
     /**
+     * @var ProductRepository
+     */
+    private $productRepository;
+
+    /**
      * HandleDownloadFileData constructor.
      * @param MessageBusInterface $commandBus
      * @param MessageBusInterface $productsBus
@@ -181,6 +188,7 @@ class HandleDownloadFileData
      * @param ObjectsHandler $objectsHandler
      * @param DigitalOceanStorage $do
      * @param KernelInterface $kernel
+     * @param ProductRepository $productRepository
      */
     public function __construct(
         MessageBusInterface $commandBus,
@@ -197,7 +205,8 @@ class HandleDownloadFileData
         DocumentManager $dm,
         ObjectsHandler $objectsHandler,
         DigitalOceanStorage $do,
-        KernelInterface $kernel
+        KernelInterface $kernel,
+        ProductRepository $productRepository
     )
     {
         $this->kernel = $kernel;
@@ -215,6 +224,7 @@ class HandleDownloadFileData
         $this->categoryService = $categoryService;
         $this->helper = $helpers;
         $this->objectsHandler = $objectsHandler;
+        $this->productRepository = $productRepository;
     }
 
     /**
@@ -325,7 +335,17 @@ class HandleDownloadFileData
             }
 
             $count = $this->getCount($filePath, $redisUniqKey);
-
+            $this->productRepository
+                ->removeProductsByShop(
+                    Shop::getMapShopKeyByOriginalName($shop)
+                );
+            $modelClass = $this->identityModelClass($shop);
+            if ($modelClass) {
+                /** @var $modelClass ResourceProductQueues */
+                /** @var DirectlyRemove $removeGate */
+                $removeGate = $this->dm->getRepository($modelClass::getMongoClass());
+                $removeGate->removeByShop($modelClass::getMongoClass(), $shop);
+            }
             if (!$count) {
                 $csv = $this->generateCsvReader($downloadPath, $shop);
                 $count = (int)$csv->count();
@@ -440,23 +460,7 @@ class HandleDownloadFileData
             ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
                 Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
 
-        switch (true) {
-            case isset($this->awinDownloadUrls[$shop]) :
-                $class = AwinDataRow::class;
-                break;
-            case isset($this->tradedoublerDownloadUrls[$shop]) :
-                $class = TradeDoublerDataRow::class;
-                break;
-            case isset($this->adtractionDownloadUrls[$shop]) :
-                $class = AdtractionDataRow::class;
-                break;
-            case isset($this->adrecordDownloadUrls[$shop]) :
-                $class = AdrecordDataRow::class;
-                break;
-            default:
-                $class = false;
-                break;
-        }
+        $class = $this->identityModelClass($shop);
 
         if (!$class) {
             throw new \Exception('shop was not found in resources map');
@@ -516,7 +520,7 @@ class HandleDownloadFileData
         );
         $dataRow->transform();
 
-        /** @var TradeDoublerProductRepository $savingSku */
+        /** @var CarefulSavingSku $savingSku */
         $savingSku = $this->dm->getRepository($dataRow::getMongoClass());
 
         $saveProductInMongo = $this->saveProductInMongo(
@@ -651,5 +655,31 @@ class HandleDownloadFileData
         $prev_path = substr($path, 0, strrpos($path, '/', -2) + 1 );
         $return = $this->createPath($prev_path);
         return ($return && is_writable($prev_path)) ? mkdir($path) : false;
+    }
+
+    /**
+     * @param string|null $shop
+     * @return bool|string
+     */
+    public function identityModelClass(?string $shop)
+    {
+        switch (true) {
+            case isset($this->awinDownloadUrls[$shop]) :
+                $class = AwinDataRow::class;
+                break;
+            case isset($this->tradedoublerDownloadUrls[$shop]) :
+                $class = TradeDoublerDataRow::class;
+                break;
+            case isset($this->adtractionDownloadUrls[$shop]) :
+                $class = AdtractionDataRow::class;
+                break;
+            case isset($this->adrecordDownloadUrls[$shop]) :
+                $class = AdrecordDataRow::class;
+                break;
+            default:
+                $class = false;
+                break;
+        }
+        return $class;
     }
 }

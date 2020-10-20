@@ -5,7 +5,7 @@ namespace App\Entity\Collection\SearchProducts;
 use App\Entity\Product;
 use App\Entity\SlugAbstract;
 
-abstract class CommonProduct
+abstract class CommonProduct extends SlugAbstract
 {
     const NULL = 'NULL';
 

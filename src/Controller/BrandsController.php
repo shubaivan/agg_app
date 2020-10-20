@@ -71,7 +71,9 @@ class BrandsController extends AbstractController
             'short_preview_columns' => Brand::getShortPreviewText(),
             'separate_filter_column' => Brand::getSeparateFilterColumn(),
             
-            'convert_to_html_columns' => Brand::convertToHtmColumns()
+            'convert_to_html_columns' => Brand::convertToHtmColumns(),
+
+            'seo_columns' => Brand::getSeoRenderColumns(),
         ]);
     }
 }

@@ -3,8 +3,11 @@
 
 namespace App\DocumentRepository;
 
+use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Query\Builder;
 use MongoDB\BSON\Regex;
+use MongoDB\Client;
+use MongoDB\Collection;
 
 trait CommonTrait
 {
@@ -16,6 +19,31 @@ trait CommonTrait
     public function getCount(Builder $builder)
     {
         return $builder->count()->getQuery()->execute();
+    }
+
+    /**
+     * @param string $collection
+     * @param array $match
+     * @return string|null
+     */
+    public function removeByShop(
+        string $collection,
+        string $shop
+    )
+    {
+        /** @var DocumentManager $documentManager */
+        $documentManager = $this->getDocumentManager();
+        /** @var Client $client */
+        $client = $documentManager->getClient();
+        /** @var Collection $collection */
+        $collection = $client->symfony->$collection;
+
+        $cursor = $collection->deleteMany(
+            ['shop' => $shop],
+            ["allowDiskUse" => true]
+        );
+
+        return null;
     }
 
     /**
