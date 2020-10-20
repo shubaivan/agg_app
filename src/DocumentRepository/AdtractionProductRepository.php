@@ -16,7 +16,7 @@ use Doctrine\ODM\MongoDB\Query\Builder;
  * @method array getDataTableAggr ($collection, array $params)
  * @method string|null matchExistProductAllow (string $collection, array $match)
  */
-class AdtractionProductRepository extends ServiceDocumentRepository implements CarefulSavingSku
+class AdtractionProductRepository extends ServiceDocumentRepository implements CarefulSavingSku, DirectlyRemove
 {
     use CommonTrait;
     
@@ -43,41 +43,5 @@ class AdtractionProductRepository extends ServiceDocumentRepository implements C
         return  $this->matchExistProductAllow('AdtractionProduct', [
             'identityUniqData' => $productQueues->getAttributeByName('identityUniqData'),
         ]);
-    }
-    
-    public function createProduct(
-        ResourceProductQueues $productQueues,
-        $shop
-    )
-    {
-        /**
-         * @var $SKU
-         * @var $Name
-         * @var $Description
-         * @var $Category
-         * @var $Price
-         * @var $Shipping
-         * @var $Currency
-         * @var $Instock
-         * @var $ProductUrl
-         * @var $ImageUrl
-         * @var $TrackingUrl
-         * @var $Brand
-         * @var $OriginalPrice
-         * @var $Ean
-         * @var $ManufacturerArticleNumber
-         * @var $Extras
-         * @var $identityUniqData
-         */
-        extract($productQueues->getRow());
-
-        $adrecordProduct = new AdtractionProduct(
-            $SKU, $Name, $Description, $Category, $Price,
-            $Shipping, $Currency, $Instock, $ProductUrl, $ImageUrl,
-            $TrackingUrl, $Brand, $OriginalPrice, $Ean,
-            $ManufacturerArticleNumber, $Extras, $shop, $identityUniqData
-        );
-        
-        $this->dm->persist($adrecordProduct);
     }
 }

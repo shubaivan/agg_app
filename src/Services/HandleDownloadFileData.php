@@ -12,6 +12,7 @@ use App\DocumentRepository\AdrecordProductRepository;
 use App\DocumentRepository\AdtractionProductRepository;
 use App\DocumentRepository\AwinProductRepository;
 use App\DocumentRepository\CarefulSavingSku;
+use App\DocumentRepository\DirectlyRemove;
 use App\DocumentRepository\TradeDoublerProductRepository;
 use App\Entity\Product;
 use App\Entity\Shop;
@@ -338,7 +339,13 @@ class HandleDownloadFileData
                 ->removeProductsByShop(
                     Shop::getMapShopKeyByOriginalName($shop)
                 );
-
+            $modelClass = $this->identityModelClass($shop);
+            if ($modelClass) {
+                /** @var $modelClass ResourceProductQueues */
+                /** @var DirectlyRemove $removeGate */
+                $removeGate = $this->dm->getRepository($modelClass::getMongoClass());
+                $removeGate->removeByShop($modelClass::getMongoClass(), $shop);
+            }
             if (!$count) {
                 $csv = $this->generateCsvReader($downloadPath, $shop);
                 $count = (int)$csv->count();
@@ -453,23 +460,7 @@ class HandleDownloadFileData
             ->hIncrBy(Shop::PREFIX_HASH . date('Ymd'),
                 Shop::PREFIX_HANDLE_DATA_SHOP_SUCCESSFUL . $shop);
 
-        switch (true) {
-            case isset($this->awinDownloadUrls[$shop]) :
-                $class = AwinDataRow::class;
-                break;
-            case isset($this->tradedoublerDownloadUrls[$shop]) :
-                $class = TradeDoublerDataRow::class;
-                break;
-            case isset($this->adtractionDownloadUrls[$shop]) :
-                $class = AdtractionDataRow::class;
-                break;
-            case isset($this->adrecordDownloadUrls[$shop]) :
-                $class = AdrecordDataRow::class;
-                break;
-            default:
-                $class = false;
-                break;
-        }
+        $class = $this->identityModelClass($shop);
 
         if (!$class) {
             throw new \Exception('shop was not found in resources map');
@@ -529,7 +520,7 @@ class HandleDownloadFileData
         );
         $dataRow->transform();
 
-        /** @var TradeDoublerProductRepository $savingSku */
+        /** @var CarefulSavingSku $savingSku */
         $savingSku = $this->dm->getRepository($dataRow::getMongoClass());
 
         $saveProductInMongo = $this->saveProductInMongo(
@@ -664,5 +655,31 @@ class HandleDownloadFileData
         $prev_path = substr($path, 0, strrpos($path, '/', -2) + 1 );
         $return = $this->createPath($prev_path);
         return ($return && is_writable($prev_path)) ? mkdir($path) : false;
+    }
+
+    /**
+     * @param string|null $shop
+     * @return bool|string
+     */
+    public function identityModelClass(?string $shop)
+    {
+        switch (true) {
+            case isset($this->awinDownloadUrls[$shop]) :
+                $class = AwinDataRow::class;
+                break;
+            case isset($this->tradedoublerDownloadUrls[$shop]) :
+                $class = TradeDoublerDataRow::class;
+                break;
+            case isset($this->adtractionDownloadUrls[$shop]) :
+                $class = AdtractionDataRow::class;
+                break;
+            case isset($this->adrecordDownloadUrls[$shop]) :
+                $class = AdrecordDataRow::class;
+                break;
+            default:
+                $class = false;
+                break;
+        }
+        return $class;
     }
 }
