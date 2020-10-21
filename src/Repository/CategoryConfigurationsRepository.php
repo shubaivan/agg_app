@@ -192,6 +192,7 @@ class CategoryConfigurationsRepository extends ServiceEntityRepository
             $query .= '
                     SELECT                         
                         category_alias.id,                       
+                        category_alias.slug,
                         category_alias.hot_category as "HotCategory",
                         category_alias.disable_for_parsing as "DisableForParsing",
                         category_alias.category_name as "CategoryName",
