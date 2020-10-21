@@ -467,6 +467,7 @@ class CategoryService extends AbstractModel
                                 /** @var $categoryRelation CategoryRelations */
                                 if ($categoryRelation->getMainCategory()) {
                                     $product->addCategoryRelation($categoryRelation->getMainCategory());
+                                    $product->addInverseRelationship($categoryRelation->getMainCategory());
                                 }
                             }
                         }

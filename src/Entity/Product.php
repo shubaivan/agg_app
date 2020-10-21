@@ -187,6 +187,41 @@ class Product extends SlugAbstract implements EntityValidatorException
     private $categoryRelation;
 
     /**
+     * @var Collection|Category[]
+     */
+    private $inverseRelationship;
+
+    /**
+     * @return Category[]|Collection
+     */
+    public function getInverseRelationship()
+    {
+        if (!$this->inverseRelationship) {
+            $this->inverseRelationship = new ArrayCollection();
+        }
+
+        return $this->inverseRelationship;
+    }
+
+    public function addInverseRelationship(Category $categoryRelation): self
+    {
+        if (!$this->getInverseRelationship()->contains($categoryRelation)) {
+            $this->getInverseRelationship()->add($categoryRelation);
+        }
+
+        return $this;
+    }
+
+    public function removeInverseRelationship(Category $categoryRelation): self
+    {
+        if ($this->getInverseRelationship()->contains($categoryRelation)) {
+            $this->getInverseRelationship()->removeElement($categoryRelation);
+        }
+
+        return $this;
+    }
+
+    /**
      * @var float
      *
      * @ORM\Column(type="decimal", precision=10, scale=2, nullable=true)
@@ -362,6 +397,7 @@ class Product extends SlugAbstract implements EntityValidatorException
     {
         $this->userIps = new ArrayCollection();
         $this->categoryRelation = new ArrayCollection();
+        $this->inverseRelationship = new ArrayCollection();
         $this->shopRelation = new ArrayCollection();
         $this->userIpProducts = new ArrayCollection();
     }
@@ -466,8 +502,20 @@ class Product extends SlugAbstract implements EntityValidatorException
     public function getCategoryWithShop()
     {
         $result = [];
+        $currentProduct = $this;
         if ($this->category) {
-            $result[] = $this->category;    
+            $filterCategories = $this->getCategoryRelation()->filter(function (Category $category) use ($currentProduct) {
+                return !$currentProduct->getInverseRelationship()->contains($category);
+            });
+            $categoryNames = $filterCategories->map(function (Category $category) use ($currentProduct) {
+                return $category->getCategoryName();
+            });
+            if ($categoryNames->count()) {
+                $arrayCategoryNames = $categoryNames->toArray();
+                $arrayCategoryNames = array_unique($arrayCategoryNames);
+                $implode = implode(' - ', $arrayCategoryNames);
+                $result[] = $implode;
+            }
         }
 
         if ($this->shop) {
