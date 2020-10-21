@@ -360,38 +360,13 @@ class ProductRepository extends ServiceEntityRepository
 
         $query = '
             SELECT 
-                p.id
-                ,p.product_url as "productUrl"
+                p.product_url as "productUrl"
                 ,p.shop 
-                ,p.updated_at as "updatedAt"
                 ,p.price
-                ,p.currency
-                ,p.ean as ean
-                ,p.manufacturer_article_number as "manufacturerArticleNumber"
-                ,p.sku as sku,
-                
-                 CASE';
+                ,p.currency                
+        ';
 
-        if (isset($bindParams[':var_eancurrent'])) {
-            $query .= '
-                    WHEN ean = :var_eancurrent THEN \'ean\'
-                ';
-        }
-
-        if (isset($bindParams[':var_skucurrent'])) {
-            $query .= '
-                    WHEN sku = :var_skucurrent THEN \'sku\'
-                ';
-        }
-
-        if (isset($bindParams[':var_manufacturer_article_numbercurrent'])) {
-            $query .= '
-                    WHEN ean = :var_manufacturer_article_numbercurrent THEN \'manufacturer_article_number\'
-                ';
-        }
-        $query .= '                    
-                    ELSE \'not matched\'
-                 END        
+        $query .= '                         
             FROM products AS p';
 
         $query .= '
@@ -403,6 +378,10 @@ class ProductRepository extends ServiceEntityRepository
             ';
             $bindParams = array_merge([':shop_id' => $shopId], $bindParams);
         }
+
+        $query .= '
+            GROUP BY "productUrl", p.shop, p.price, p.currency
+        ';
 
         $this->getTagAwareQueryResultCacheProduct()->setQueryCacheTags(
             $query,

@@ -9,13 +9,6 @@ use App\Entity\Product;
 class AvailableToModel
 {
     const GROUP_CREATE = 'group_create_available_to_model';
-
-    /**
-     * @var int
-     * @Annotation\Type("int")
-     * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     */
-    private $id;
     
     /**
      * @var string
@@ -41,8 +34,9 @@ class AvailableToModel
 
     /**
      * @var string
-     * @Annotation\Type("string")
+     * @Annotation\Type("DateTime<'Y-m-d H:i:s'>")
      * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Accessor(getter="getUpdatedAtAccessor")
      */
     private $updatedAt;
 
@@ -53,38 +47,15 @@ class AvailableToModel
      */
     private $productUrl;
 
-    /**
-     * @var string
-     * @Annotation\Type("string")
-     * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     */
-    private $sku;
-
-    /**
-     * @var string
-     * @Annotation\Type("string")
-     * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     */
-    private $ean;
-
-    /**
-     * @var string
-     * @Annotation\Type("string")
-     * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     */
-    private $manufacturerArticleNumber;
-
-    /**
-     * @var string
-     * @Annotation\Type("string")
-     * @Annotation\Groups({AvailableToModel::GROUP_CREATE, Product::SERIALIZED_GROUP_LIST})
-     */
-    private $case;
-
     public function getPriceAccessor()
     {
         $price = preg_replace('/\.00/', '', $this->price);
 
         return $price;
+    }
+
+    public function getUpdatedAtAccessor()
+    {
+        return (new \DateTime())->modify('-1 hour');
     }
 }
