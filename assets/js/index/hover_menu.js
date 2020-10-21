@@ -258,7 +258,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         } else {
                             span.append('<i class="fas fa-ban"></i>');
                         }
-                        pTag.append(data).append(span).append(span_dfp);
+                        var spanPath = $('<span />');
+                        spanPath.append('<i class="fas fa-road"></i>').append('<i>' +row.slug + '</i>');
+                        pTag.append(spanPath).append('<br>').append(data).append(span).append(span_dfp);
                         divTag.append(pTag);
                         return type === 'display' ?
                             divTag.html() : ''
