@@ -2,8 +2,6 @@
 
 namespace App\Controller\Rest;
 
-use App\Entity\Collection\ProductByIdCollection;
-use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
 use App\Entity\Collection\Search\SearchProductCollection;
 use App\Exception\ValidatorException;
@@ -284,12 +282,12 @@ class ProductController extends AbstractRestController
      * @throws ValidatorException
      * @throws \Exception
      */
-    public function getProductByIdAction(
+    public function getProductBySlugAction(
         Product $product
     )
     {
         $productByIdCollection = $this->getProductService()
-            ->getProductById($product);
+            ->getProductBySlug($product);
 
         $view = $this->createSuccessResponse(
             $productByIdCollection, [Product::SERIALIZED_GROUP_LIST]

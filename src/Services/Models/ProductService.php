@@ -5,7 +5,7 @@ namespace App\Services\Models;
 use App\Entity\Category;
 use App\Entity\Collection\AvailableToCollection;
 use App\Entity\Collection\AvailableToModel;
-use App\Entity\Collection\ProductByIdCollection;
+use App\Entity\Collection\ProductBySlugCollection;
 use App\Entity\Collection\ProductCollection;
 use App\Entity\Collection\ProductsCollection;
 use App\Entity\Collection\ProductsRawArrayCollection;
@@ -212,13 +212,13 @@ class ProductService extends AbstractModel
 
     /**
      * @param Product $product
-     * @return ProductByIdCollection
+     * @return ProductBySlugCollection
      * @throws DBALException
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws ValidatorException
      */
-    public function getProductById(Product $product)
+    public function getProductBySlug(Product $product)
     {
         $this->recordIpToProduct($product);
 
@@ -480,7 +480,7 @@ class ProductService extends AbstractModel
     /**
      * @param Product $product
      * @param ParameterBag $parameterBag
-     * @return ProductByIdCollection
+     * @return ProductBySlugCollection
      * @throws DBALException
      * @throws ValidatorException
      */
@@ -502,7 +502,7 @@ class ProductService extends AbstractModel
         /** @var GroupProductEntity $currentProductCollectionModel */
         $currentProductCollectionModel = $currentProductCollection->getCollection()->first();
 
-        $productByIdCollection = new ProductByIdCollection(
+        $productByIdCollection = new ProductBySlugCollection(
             $currentProductCollection,
             $this->prepareAvailableToModel(
                 $product,
@@ -525,6 +525,7 @@ class ProductService extends AbstractModel
         $shopId = $product->getShopRelation() ? $product->getShopRelation()->getId() : null;
         $availableTo = $this->getProductRepository()
             ->getAvailableTo($alsoAvailableToArray, $shopId);
+
         /** @var AvailableToCollection $availableToCollection */
         $availableToCollection = $this->getObjectHandler()
             ->handleObject(

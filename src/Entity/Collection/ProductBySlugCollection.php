@@ -6,7 +6,7 @@ use App\Entity\Collection\Search\SearchProductCollection;
 use App\Entity\Product;
 use JMS\Serializer\Annotation;
 
-class ProductByIdCollection
+class ProductBySlugCollection
 {
     /**
      * @var SearchProductCollection
@@ -23,7 +23,7 @@ class ProductByIdCollection
     private $availableTo;
 
     /**
-     * ProductByIdCollection constructor.
+     * ProductBySlugCollection constructor.
      * @param SearchProductCollection $currentProduct
      * @param AvailableToCollection $availableTo
      */
