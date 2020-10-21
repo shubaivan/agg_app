@@ -172,6 +172,9 @@ services:
         $pdo_brand_cache_pool: '@pdo_brand_cache_pool'
         $doctrine_result_cache_pool: '@doctrine.result_cache_pool'
         $doctrine_system_cache_pool: '@doctrine.system_cache_pool'
+        $pdo_category_second_level_cache_pool: '@pdo_category_second_level_cache_pool'
+        $pdo_brand_second_level_cache_pool: '@pdo_brand_second_level_cache_pool'
+        $pdo_shop_second_level_cache_pool: '@pdo_shop_second_level_cache_pool'
         $pdo_category_conf_cache_pool: '@pdo_category_conf_cache_pool'
       lazy: true
 
