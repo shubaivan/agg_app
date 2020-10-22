@@ -52,13 +52,11 @@ class ManagerShopsService
 
 // Awin
 //'nepiece_nordic'
-//'blue_tomato'
-//'ellos_se' 
-//'jd_sports'
 // cubus
 
 //Adtraction
 //adlibris
+//outdoorexperten
 
 // TradeDoubler
 //eskor

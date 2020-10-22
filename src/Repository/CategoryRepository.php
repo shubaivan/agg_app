@@ -1146,6 +1146,69 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param ParameterBag $parameterBag
+     * @param bool $count
+     * @return mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getCategoriesForSelect2(ParameterBag $parameterBag, bool $count = false)
+    {
+        if ($count) {
+            $dql = '
+                SELECT COUNT(c.id) as count    
+            ';
+        } else {
+            $dql = '
+                SELECT 
+                c.id, 
+                c.categoryName as text,
+                c.slug, 
+                c.hotCategory, 
+                c.disableForParsing,
+                IDENTITY(c.sectionRelation) as sectionRelation   
+            ';
+        }
+        $dql .= '
+            FROM App\Entity\Category c
+            WHERE c.customeCategory = :customCategory
+        ';
+
+        if ($parameterBag->get('search')) {
+            $dql .= '
+                AND ILIKE(c.categoryName, :search) = TRUE
+            ';
+        }
+        $page = $parameterBag->get('page');
+        $query = $this->getEntityManager();
+        $createQuery = $query
+            ->createQuery($dql);
+        if ($count) {
+            $createQuery
+                ->enableResultCache(0, 'select2_hm_category_count');
+        } else {
+            $createQuery
+                ->setFirstResult($page <= 1 ? 0 : 25 * $page - 1)
+                ->setMaxResults(25)
+                ->enableResultCache(0, 'select2_hm_category_models');
+        }
+        $createQuery
+            ->useQueryCache(true);
+        $createQuery->setParameter(':customCategory',true);
+        if ($parameterBag->get('search')) {
+            $createQuery->setParameter(':search', '%' . $parameterBag->get('search') . '%');
+        }
+
+        if ($count) {
+            $result = $createQuery->getSingleScalarResult();
+        } else {
+            $result = $createQuery->getResult();
+        }
+
+        return $result;
+    }
+
+    /**
      * @param $object
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException

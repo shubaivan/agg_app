@@ -25,9 +25,11 @@ global.$ = global.jQuery = $;
 // import 'popper.js';
 require('bootstrap');
 
+import 'select2';                       // globally assign select2 fn to $ element
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log("resource shop list!");
+
     const body = $('body');
     let exampleModalLong = $('#exampleModalLong');
 
@@ -35,6 +37,10 @@ document.addEventListener("DOMContentLoaded", function () {
         .generate('app_rest_admin_resourceshops_shopreloading');
     const app_rest_admin_attachmentfile_getattachmentfileslist = window.Routing
         .generate('app_rest_admin_attachmentfile_getattachmentfileslist');
+    const collectionData = window.Routing
+        .generate('app_rest_admin_resourceshops_resourceshoplist');
+    const app_rest_hovermenumanagment_listhovermenuselect2 = window.Routing
+        .generate('app_rest_hovermenumanagment_listhovermenuselect2');
 
     var table;
     body.on('click', '.resource_reloading button.trigger_reloading', function () {
@@ -57,10 +63,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log(result.responseJSON.status);
         },
         success: (data) => {
-            const collectionData = window.Routing
-                .generate('app_rest_admin_resourceshops_resourceshoplist');
-
-
             var common_defs = [];
 
             $.each(for_prepare_defs, function (key, value) {
@@ -211,6 +213,9 @@ document.addEventListener("DOMContentLoaded", function () {
         form.trigger("reset");
         form.find('textarea').val('');
         form.find('.attachment_files_to_categories').remove();
+        form.find('.hover_menu_categories').remove();
+        form.find('.select2-container').remove();
+
         form.find('input[type=hidden]').remove();
     });
 
@@ -265,16 +270,95 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    function customFormatSelection(node) {
+        let level = 0;
+        if (node.slug) {
+            let split = node.slug.split('-own-');
+            if ($.isArray(split)) {
+                level = split.length;
+            }
+        }
+        var commonSpan = $('<span/>').append('Level - ' + level);
+        let pathTag = $('<span style="padding-left:' + (30 * level) + 'px;">' + node.text + '</span>');
+        commonSpan.append(pathTag);
+
+        return commonSpan;
+    }
+
+    function formatState (state) {
+        let hotCategory = state.hotCategory;
+        let disableForParsing = state.disableForParsing;
+        var commonSpan = $('<span/>');
+        var pTag = $('<p/>', {
+            "class": 'cn_' + state.id
+        });
+        var span = $('<span />');
+        var span_dfp = $('<span />');
+
+        if (disableForParsing) {
+            span_dfp.append('<i class="fas fa-bell-slash"></i>');
+        } else {
+            span_dfp.append('<i class="fas fa-bell"></i>');
+        }
+
+        if (hotCategory === true) {
+            span.append('<i class="fa fa-check" aria-hidden="true"></i>');
+        } else {
+            span.append('<i class="fas fa-ban"></i>');
+        }
+        var spanPath = $('<span />');
+        spanPath.append('<i class="fas fa-road"></i>').append('<i>' +state.slug + '</i>');
+        var pPathTag = $('<p/>').append(spanPath);
+        pTag.append(state.text).append(span).append(span_dfp);
+        commonSpan.append(pPathTag).append(pTag);
+
+        return commonSpan;
+    }
+
     function renderEditForm(modelId, form, modal, button) {
-        let brand_id_input = $('<input>').attr({
+        var hover_menu_categories = $('<select>').addClass('hover_menu_categories');
+        let model_id_input = $('<input>').attr({
             type: 'hidden',
             id: 'shop_id',
             name: 'shop_id',
             class: 'shop_exist_id'
         });
 
-        brand_id_input.val(modelId);
-        form.append(brand_id_input);
+        model_id_input.val(modelId);
+        form.prepend(hover_menu_categories);
+        form.append(model_id_input);
+        applySelect2(hover_menu_categories);
+    }
+
+    function applySelect2(select) {
+        select.select2({
+            placeholder: {
+                id: '-1', // the value of the option
+                text: 'Select hover menu categories'
+            },
+            dropdownAutoWidth: true,
+            width: '100%',
+            multiple: true,
+            minimumInputLength: 2,
+            allowClear: true,
+            templateSelection: formatState,
+            templateResult: customFormatSelection,
+            ajax: {
+                type: 'post',
+                url: app_rest_hovermenumanagment_listhovermenuselect2,
+                data: function (params) {
+                    console.log(params);
+                    let query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        type: 'public'
+                    };
+
+                    // Query parameters will be ?search=[term]&type=public
+                    return query;
+                }
+            }
+        });
     }
 
     function reloadingShop(shopName) {
