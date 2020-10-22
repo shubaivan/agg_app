@@ -260,8 +260,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                         var spanPath = $('<span />');
                         spanPath.append('<i class="fas fa-road"></i>').append('<i>' +row.slug + '</i>');
-                        pTag.append(spanPath).append('<br>').append(data).append(span).append(span_dfp);
-                        divTag.append(pTag);
+                        var pPathTag = $('<p/>').append(spanPath);
+                        pTag.append(data).append(span).append(span_dfp);
+                        divTag.append(pPathTag).append(pTag);
                         return type === 'display' ?
                             divTag.html() : ''
                     }
