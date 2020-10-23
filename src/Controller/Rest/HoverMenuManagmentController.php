@@ -29,6 +29,7 @@ use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Controller\Annotations\View;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\DoctrineProvider;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
@@ -380,7 +381,7 @@ class HoverMenuManagmentController extends AbstractRestController
     }
 
     /**
-     * get Products.
+     * get Categories.
      *
      * @Rest\Post("/api/hover_menu/list", options={"expose": true})
      *
@@ -414,6 +415,48 @@ class HoverMenuManagmentController extends AbstractRestController
                         ->getHoverMenuCategoryConf($request->request->all(), true),
                 ],
                 ['data' => $data]
+            )
+        );
+
+        return $view;
+    }
+
+    /**
+     * get Categories.
+     *
+     * @Rest\Post("/api/hover_menu/select2/list", options={"expose": true})
+     *
+     * @param Request $request
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="HoverMenu")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object HoverMenu",
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function listHoverMenuSelect2Action(Request $request)
+    {
+        $parameterBag = new ParameterBag($request->request->all());
+        $data = $this->categoryRepo
+            ->getCategoriesForSelect2($parameterBag);
+
+        $more = $parameterBag->get('page') * 25 < $this->categoryRepo
+                ->getCategoriesForSelect2($parameterBag, true);
+        $view = $this->createSuccessResponse(
+            array_merge(
+                [
+                    "pagination" => [
+                        'more' => $more
+                    ],
+                ],
+                ['results' => $data]
             )
         );
 

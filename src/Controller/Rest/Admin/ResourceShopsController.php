@@ -2,18 +2,22 @@
 
 namespace App\Controller\Rest\Admin;
 
+use App\Cache\TagAwareQueryResultCacheShop;
 use App\Cache\TagAwareQuerySecondLevelCacheShop;
 use App\Controller\Admin\ResourceShopManagmentController;
+use App\Entity\Category;
 use App\Entity\ManuallyResourceJob;
 use App\Entity\Shop;
 use App\Entity\User;
 use App\QueueModel\ManuallyResourceJobs;
 use App\Repository\BrandRepository;
+use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\FilesRepository;
 use App\Repository\ManuallyResourceJobRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ShopRepository;
 use App\Services\Admin\ResourceShopManagement;
+use App\Services\Models\CategoryService;
 use App\Services\ObjectsHandler;
 use App\Util\AmqpHelper;
 use App\Util\RedisHelper;
@@ -98,6 +102,16 @@ class ResourceShopsController extends AbstractRestController
     private $fileRepo;
 
     /**
+     * @var CategoryService
+     */
+    private $categoryService;
+
+    /**
+     * @var TagAwareQueryResultCacheShop
+     */
+    private $tagAwareQueryResultCacheShop;
+
+    /**
      * ResourceShopsController constructor.
      * @param Helpers $helpers
      * @param ShopRepository $shopRepository
@@ -111,6 +125,8 @@ class ResourceShopsController extends AbstractRestController
      * @param MessageBusInterface $manuallyBus
      * @param TagAwareQuerySecondLevelCacheShop $tagAwareQuerySecondLevelCacheShop
      * @param FilesRepository $fileRepo
+     * @param CategoryService $categoryService
+     * @param TagAwareQueryResultCacheShop $tagAwareQueryResultCacheShop
      */
     public function __construct(
         Helpers $helpers,
@@ -124,7 +140,9 @@ class ResourceShopsController extends AbstractRestController
         ObjectsHandler $objectsHandler,
         MessageBusInterface $manuallyBus,
         TagAwareQuerySecondLevelCacheShop $tagAwareQuerySecondLevelCacheShop,
-        FilesRepository $fileRepo
+        FilesRepository $fileRepo,
+        CategoryService $categoryService,
+        TagAwareQueryResultCacheShop $tagAwareQueryResultCacheShop
     )
     {
         parent::__construct($helpers);
@@ -139,6 +157,8 @@ class ResourceShopsController extends AbstractRestController
         $this->bus = $manuallyBus;
         $this->tagAwareQuerySecondLevelCacheShop = $tagAwareQuerySecondLevelCacheShop;
         $this->fileRepo = $fileRepo;
+        $this->categoryService = $categoryService;
+        $this->tagAwareQueryResultCacheShop = $tagAwareQueryResultCacheShop;
 
         $this->urlsData = [
             $params->get('adrecord_download_file_path') => $this->params->get('adrecord_download_urls'),
@@ -288,6 +308,14 @@ class ResourceShopsController extends AbstractRestController
         try{
             $shop = $this->shopRepository
                 ->findOneBy(['id' => $request->get('shop_id')]);
+            if (!$shop) {
+                throw new \Exception('shop was not found');
+            }
+            if ($request->get('category_ids')) {
+                $this->categoryService->createShopCategoryModel(
+                    $shop, $request->get('category_ids')
+                );
+            }
 
             $fileIds = $request->get('file_ids');
             if (is_array($fileIds) && count($fileIds)) {
@@ -299,6 +327,11 @@ class ResourceShopsController extends AbstractRestController
             }
             $objectManager->flush();
             $connection->commit();
+            $this->tagAwareQueryResultCacheShop
+                ->getTagAwareAdapter()
+                ->invalidateTags([
+                    ShopRepository::SHOP_FULL_TEXT_SEARCH
+                ]);
 
             $this->tagAwareQuerySecondLevelCacheShop
                 ->deleteAll();
@@ -387,9 +420,21 @@ class ResourceShopsController extends AbstractRestController
                 $v['queue'] = $quantityResult[$v[ResourceShopManagmentController::RESOURCE_NAME]];
                 $shopKey = Shop::getMapShopKeyByOriginalName($v[ResourceShopManagmentController::SHOP_NAME]);
                 $shopNames[$shopKey] = $v[ResourceShopManagmentController::SHOP_NAME];
-
+                /** @var ManuallyResourceJob[] $manuallyResourceJob */
                 $manuallyResourceJob = $this->manuallyResourceJobRepository
                     ->findBy(['shopKey' => $shopKey]);
+                $manuallyResourceJob = array_map(function ($v) {
+                    /** @var $v ManuallyResourceJob */
+                    return [
+                        'createdAt' => $v->getCreatedAt(),
+                        'createdAtAdmin' => [
+                            'email' => $v->getCreatedAtAdmin()
+                                ? $v->getCreatedAtAdmin()->getEmail()
+                                : null
+                        ],
+                        'enumStatusPresent' => $v->getStoreNamesValue()
+                    ];
+                }, $manuallyResourceJob);
                 $v[ResourceShopManagmentController::MANUALLY_JOBS] = $manuallyResourceJob;
             }
             $responseResult[$v[ResourceShopManagmentController::SHOP_NAME]] = $v;
@@ -401,7 +446,20 @@ class ResourceShopsController extends AbstractRestController
         foreach ($shops as $shopFromDB) {
             $shopName = $shopFromDB->getShopName();
             if (isset($responseResult[$shopName])) {
-                $responseResult[$shopName]['shop_from_db']['id'] = $shopFromDB->getId();
+                $responseResult[$shopName]['shop_from_db']['shop_id'] = $shopFromDB->getId();
+                $responseResult[$shopName]['shop_from_db']['category_models'] = $shopFromDB->getCategoryRelation()
+                    ->map(function (Category $category) {
+                        return [
+                            'id' => $category->getId(),
+                            'text' => $category->getCategoryName(),
+                            'slug' => $category->getSlug(),
+                            'hotCategory' => $category->getHotCategory(),
+                            'disableForParsing' => $category->getDisableForParsing(),
+                            'sectionRelation' => $category->getSectionRelation()
+                                ? $category->getSectionRelation()->getId()
+                                : null
+                        ];
+                    });
                 $responseResult[$shopName][ResourceShopManagmentController::ACTION] .= ',edit';
                 $responseResult[$shopName][ResourceShopManagmentController::FILES] = $this
                     ->fileRepo->getByShop($shopFromDB);

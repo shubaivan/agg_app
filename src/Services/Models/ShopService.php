@@ -6,11 +6,14 @@ use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Collection\BrandsCollection;
+use App\Entity\Collection\Search\SearchProductCollection;
 use App\Entity\Collection\Search\SearchShopsCollection;
+use App\Entity\Collection\Search\SeparateShopModel;
 use App\Entity\Collection\ShopsCollection;
 use App\Entity\Product;
 use App\Entity\Shop;
 use App\Exception\ValidatorException;
+use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ShopRepository;
 use App\Services\ObjectsHandler;
@@ -28,6 +31,11 @@ class ShopService extends AbstractModel
     private $shopRepository;
 
     /**
+     * @var CategoryRepository
+     */
+    private $categoryRepository;
+
+    /**
      * @var ObjectsHandler
      */
     private $objecHandler;
@@ -43,18 +51,21 @@ class ShopService extends AbstractModel
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
      * @param ObjectsHandler $objecHandler
      * @param SlugifyInterface $cs
+     * @param CategoryRepository $categoryRepository
      */
     public function __construct(
         ShopRepository $shopRepository,
         TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
         ObjectsHandler $objecHandler,
-        SlugifyInterface $cs
+        SlugifyInterface $cs,
+        CategoryRepository $categoryRepository
     )
     {
         parent::__construct($cs);
         $this->shopRepository = $shopRepository;
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
         $this->objecHandler = $objecHandler;
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -82,9 +93,9 @@ class ShopService extends AbstractModel
         } catch (ValidatorException $e) {
             $shop = $this->matchExistShop($product->getShop());
         }
-        
+
         if ($shop instanceof Shop) {
-            $product->setShopRelation($shop);   
+            $product->setShopRelation($shop);
         }
 
         return $shop;
@@ -94,6 +105,7 @@ class ShopService extends AbstractModel
      * @param ParamFetcher $paramFetcher
      * @return SearchShopsCollection
      * @throws CacheException
+     * @throws ValidatorException
      */
     public function getShopsByFilter(ParamFetcher $paramFetcher)
     {
@@ -104,8 +116,14 @@ class ShopService extends AbstractModel
         if ($countStrict > 0) {
             $strictCollection = $this->getShopRepository()
                 ->fullTextSearchByParameterBag($parameterBag);
-
-            return (new SearchShopsCollection($strictCollection, $countStrict));
+            return $this->identityModelById($this->objecHandler
+                ->handleObject(
+                    [
+                        'count' => $countStrict,
+                        'collection' => $strictCollection,
+                    ],
+                    SearchShopsCollection::class
+                ));
         }
         $parameterBag->remove('strict');
         $count = $this->getShopRepository()
@@ -113,7 +131,43 @@ class ShopService extends AbstractModel
         $collection = $this->getShopRepository()
             ->fullTextSearchByParameterBag($parameterBag);
 
-        return (new SearchShopsCollection($collection, $count));
+        return $this->identityModelById($this->objecHandler
+            ->handleObject(
+                [
+                    'count' => $count,
+                    'collection' => $collection,
+                ],
+                SearchShopsCollection::class
+            ));
+    }
+
+    /**
+     * @param SearchShopsCollection $shopsCollection
+     * @return SearchShopsCollection
+     */
+    private function identityModelById(SearchShopsCollection $shopsCollection)
+    {
+        $collection = $shopsCollection->getCollection();
+        $mapDTO = $collection->map(function ($shopModel) {
+            /** @var $shopModel SeparateShopModel */
+            $categoryIds = $shopModel->getCategoryModels();
+            /** @var Category[] $categoryModelsByIds */
+            $categoryModelsByIds = $this->categoryRepository
+                ->getCategoryModelsByIds((new ParameterBag(['ids' => $categoryIds])));
+            $categoriesDTO = [];
+            foreach ($categoryModelsByIds as $category) {
+                $categoriesDTO[] = [
+                    'id' => $category->getId(),
+                    'slug' => $category->getSlug(),
+                    'categoryName' => $category->getCategoryName(),
+                ];
+            }
+            $shopModel->setCategoryModels($categoriesDTO);
+            return $shopModel;
+        });
+        $shopsCollection->setCollection($mapDTO);
+
+        return $shopsCollection;
     }
 
     /**
@@ -149,7 +203,7 @@ class ShopService extends AbstractModel
         $params = unserialize(preg_replace('/params=/', '', $pregSplitShopQuery[1]));
         $types = unserialize(preg_replace('/types=/', '', $pregSplitShopQuery[2]));
 
-        $facetFiltersBrand = $this->getShopRepository()
+        $facetFilters = $this->getShopRepository()
             ->facetFilters(
                 (new ParameterBag($paramFetcher->all())),
                 $query,
@@ -163,7 +217,7 @@ class ShopService extends AbstractModel
             $query
         );
 
-        $facetFiltersBrandCount = $this->getShopRepository()
+        $facetFiltersCount = $this->getShopRepository()
             ->facetFilters(
                 (new ParameterBag($paramFetcher->all())),
                 $facetFiltersBrandCountQuery,
@@ -172,7 +226,7 @@ class ShopService extends AbstractModel
                 true
             );
 
-        return new SearchShopsCollection($facetFiltersBrand, $facetFiltersBrandCount);
+        return new SearchShopsCollection($facetFilters, $facetFiltersCount);
     }
 
     /**

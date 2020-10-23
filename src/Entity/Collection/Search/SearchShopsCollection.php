@@ -3,19 +3,24 @@
 namespace App\Entity\Collection\Search;
 
 use App\Entity\Shop;
+use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation;
 
 class SearchShopsCollection
 {
+    const SERIALIZED_GROUP_LIST = 'shop_group_list';
+
     /**
      * @var array
-     * @Annotation\Type("array")
+     * @Annotation\Type("ArrayCollection<App\Entity\Collection\Search\SeparateShopModel>")
+     * @Annotation\Groups({SearchShopsCollection::SERIALIZED_GROUP_LIST})
      */
     private $collection;
 
     /**
      * @var int
      * @Annotation\Type("int")
+     * @Annotation\Groups({SearchShopsCollection::SERIALIZED_GROUP_LIST})
      */
     private $count;
 
@@ -31,9 +36,9 @@ class SearchShopsCollection
     }
 
     /**
-     * @return array
+     * @return array|ArrayCollection
      */
-    public function getCollection(): array
+    public function getCollection()
     {
         return $this->collection;
     }
@@ -44,5 +49,13 @@ class SearchShopsCollection
     public function getCount(): int
     {
         return $this->count;
+    }
+
+    /**
+     * @param array|ArrayCollection $collection
+     */
+    public function setCollection($collection): void
+    {
+        $this->collection = $collection;
     }
 }

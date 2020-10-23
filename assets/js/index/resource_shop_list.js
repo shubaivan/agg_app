@@ -25,9 +25,12 @@ global.$ = global.jQuery = $;
 // import 'popper.js';
 require('bootstrap');
 
+import 'select2';
+import {generateCategoryView} from "./parts/hover_menu_categories";                       // globally assign select2 fn to $ element
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log("resource shop list!");
+
     const body = $('body');
     let exampleModalLong = $('#exampleModalLong');
 
@@ -35,6 +38,10 @@ document.addEventListener("DOMContentLoaded", function () {
         .generate('app_rest_admin_resourceshops_shopreloading');
     const app_rest_admin_attachmentfile_getattachmentfileslist = window.Routing
         .generate('app_rest_admin_attachmentfile_getattachmentfileslist');
+    const collectionData = window.Routing
+        .generate('app_rest_admin_resourceshops_resourceshoplist');
+    const app_rest_hovermenumanagment_listhovermenuselect2 = window.Routing
+        .generate('app_rest_hovermenumanagment_listhovermenuselect2');
 
     var table;
     body.on('click', '.resource_reloading button.trigger_reloading', function () {
@@ -57,13 +64,32 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log(result.responseJSON.status);
         },
         success: (data) => {
-            const collectionData = window.Routing
-                .generate('app_rest_admin_resourceshops_resourceshoplist');
-
-
             var common_defs = [];
 
             $.each(for_prepare_defs, function (key, value) {
+                if (value.data === 'ResourceName') {
+                    common_defs.push({
+                            "targets": key,
+                            data: 'ResourceName',
+                            render: function (data, type, row, meta) {
+                                let divTag = $('<div/>');
+                                let pTag = $('<p/>');
+                                if (row.shop_from_db && row.shop_from_db.shop_id) {
+                                    let pTagPureResult = $('<p/>', {
+                                        "class": 'pure-result-rs_' + row.shop_from_db.shop_id,
+                                        'type': 'hidden',
+                                        'data-pure-result': JSON.stringify(row)
+                                    });
+                                    divTag.append(pTagPureResult);
+                                }
+
+                                divTag.append(pTag.append(data));
+                                return type === 'display' ?
+                                    divTag.html() : ''
+                            }
+                        }
+                    );
+                }
                 if (value.data === 'ManuallyJobs') {
                     common_defs.push({
                             "targets": key,
@@ -126,8 +152,8 @@ document.addEventListener("DOMContentLoaded", function () {
                                         }
                                     );
                                     button.addClass('trigger_' + v.toLowerCase().replace(' ', '_'));
-                                    if (row.shop_from_db && row.shop_from_db.id) {
-                                        button.attr('data-shop-id', row.shop_from_db.id);
+                                    if (row.shop_from_db && row.shop_from_db.shop_id) {
+                                        button.attr('data-shop-id', row.shop_from_db.shop_id);
                                     }
                                     pTag.append(button);
                                     divTag.append(pTag);
@@ -211,6 +237,9 @@ document.addEventListener("DOMContentLoaded", function () {
         form.trigger("reset");
         form.find('textarea').val('');
         form.find('.attachment_files_to_categories').remove();
+        form.find('.hover_menu_categories').remove();
+        form.find('.select2-container').remove();
+
         form.find('input[type=hidden]').remove();
     });
 
@@ -265,16 +294,100 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    function customFormatSelection(node) {
+        let level = 0;
+        if (node.slug) {
+            let split = node.slug.split('-own-');
+            if ($.isArray(split)) {
+                level = split.length;
+            }
+        }
+        var commonSpan = $('<span/>').append('Level - ' + level);
+        let pathTag = $('<span style="padding-left:' + (30 * level) + 'px;">' + node.text + '</span>');
+        commonSpan.append(pathTag);
+
+        return commonSpan;
+    }
+
+    /**
+     *
+     * @param select
+     * @param modelId
+     */
+    function applySelect2(select, modelId = null) {
+        select.select2({
+            placeholder: {
+                id: '-1', // the value of the option
+                text: 'Select hover menu categories'
+            },
+            dropdownAutoWidth: true,
+            width: '100%',
+            multiple: true,
+            minimumInputLength: 2,
+            allowClear: true,
+            templateSelection: generateCategoryView,
+            templateResult: customFormatSelection,
+            ajax: {
+                type: 'post',
+                url: app_rest_hovermenumanagment_listhovermenuselect2,
+                data: function (params) {
+                    console.log(params);
+                    let query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        type: 'public'
+                    };
+
+                    // Query parameters will be ?search=[term]&type=public
+                    return query;
+                }
+            }
+        });
+        if (modelId) {
+            let pure_result = $('.pure-result-rs_' + modelId);
+            if (pure_result && pure_result.length) {
+                let pureResultData = pure_result.data('pureResult');
+
+                if (pureResultData.shop_from_db
+                    && pureResultData.shop_from_db.category_models
+                    && pureResultData.shop_from_db.category_models.length
+                ) {
+                    $.each(pureResultData.shop_from_db.category_models, function (k, data) {
+                        // Set the value, creating a new option if necessary
+                        if (select.find("option[value='" + data.id + "']").length) {
+                            select.val(data.id).trigger('change');
+                        } else {
+                            // Create a DOM Option and pre-select by default
+                            var newOption = new Option(data.text, data.id, true, true);
+
+                            $(newOption).attr('data-slug', data.slug);
+                            $(newOption).attr('data-hot-category', data.hotCategory);
+                            $(newOption).attr('data-disable-for-parsing', data.disableForParsing);
+                            $(newOption).attr('data-section-relation', data.sectionRelation);
+
+                            // Append it to the select
+                            select.append(newOption).trigger('change');
+                        }
+                    })
+                }
+            }
+        }
+    }
+
     function renderEditForm(modelId, form, modal, button) {
-        let brand_id_input = $('<input>').attr({
+        var hover_menu_categories = $('<select>').addClass('hover_menu_categories');
+        hover_menu_categories.attr('name', 'category_ids[]');
+        let model_id_input = $('<input>').attr({
             type: 'hidden',
             id: 'shop_id',
             name: 'shop_id',
             class: 'shop_exist_id'
         });
 
-        brand_id_input.val(modelId);
-        form.append(brand_id_input);
+        model_id_input.val(modelId);
+        form.prepend(hover_menu_categories);
+        form.append(model_id_input);
+        applySelect2(hover_menu_categories, modelId);
     }
 
     function reloadingShop(shopName) {

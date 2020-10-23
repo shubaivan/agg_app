@@ -33,6 +33,7 @@ class ShopRepository extends ServiceEntityRepository
 
     const CACHE_ID_SHOP_LIST = 'cache_id_shop_list';
     const CACHE_ID_AVAILABLE_SHOP_FOR_RULE_LIST = 'cache_id_available_shop_for_rule_list';
+    const SHOP_FULL_TEXT_SEARCH = 'shop_full_text_search';
 
     /**
      * @var Helpers
@@ -200,7 +201,9 @@ class ShopRepository extends ServiceEntityRepository
                             DISTINCT shop_alias.id,
                             shop_alias.shop_name AS "shopName",
                             shop_alias.created_at AS "createdAt",
-                            shop_alias.slug
+                            shop_alias.slug,
+                            array_agg(DISTINCT sc.category_id) FILTER (WHERE sc.category_id IS NOT NULL) as "categoryIds",
+                            array_agg(DISTINCT f.path) FILTER (WHERE f.path IS NOT NULL) as "filePath"
             ';
 
             if ($search) {
@@ -212,6 +215,8 @@ class ShopRepository extends ServiceEntityRepository
 
         $query .= '
                 FROM shop shop_alias 
+                LEFT JOIN shop_category AS sc ON sc.shop_id = shop_alias.id
+                LEFT JOIN files AS f ON f.shop_id = shop_alias.id 
         ';
         if ($search) {
             $query .= '
@@ -258,7 +263,7 @@ class ShopRepository extends ServiceEntityRepository
             $query,
             $params,
             $types,
-            ['shop_full_text_search'],
+            [self::SHOP_FULL_TEXT_SEARCH],
             0, $count ? "shop_search_cont" : "shop_search_collection"
         );
         [$query, $params, $types, $queryCacheProfile] = $this->getTagAwareQueryResultCacheShop()

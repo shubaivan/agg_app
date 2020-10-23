@@ -30,6 +30,7 @@ import {
     createErrorImgPlaceHolder,
     delay
 } from './parts/photos_config.js';
+import {generateCategoryView} from "./parts/hover_menu_categories";
 
 document.addEventListener("DOMContentLoaded", function () {
     var sub_category_ids = {};
@@ -237,34 +238,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     "targets": 0,
                     "data": 'CategoryName',
                     "render": function (data, type, row, meta) {
-                        let hotCategory = row.HotCategory;
-                        let disableForParsing = row.DisableForParsing;
-                        var divTag = $('<div/>');
-                        var pTag = $('<p/>', {
-                            "class": 'cn_' + row.id,
-                            'data-section-id': row.section_relation_id
-                        });
-                        var span = $('<span />').addClass('hc_' + row.id).attr('hc_val', hotCategory);
-                        var span_dfp = $('<span />').addClass('dfp_' + row.id).attr('dfp_val', disableForParsing);
-
-                        if (disableForParsing) {
-                            span_dfp.append('<i class="fas fa-bell-slash"></i>');
-                        } else {
-                            span_dfp.append('<i class="fas fa-bell"></i>');
-                        }
-
-                        if (hotCategory === true) {
-                            span.append('<i class="fa fa-check" aria-hidden="true"></i>');
-                        } else {
-                            span.append('<i class="fas fa-ban"></i>');
-                        }
-                        var spanPath = $('<span />');
-                        spanPath.append('<i class="fas fa-road"></i>').append('<i>' +row.slug + '</i>');
-                        var pPathTag = $('<p/>').append(spanPath);
-                        pTag.append(data).append(span).append(span_dfp);
-                        divTag.append(pPathTag).append(pTag);
+                        let commonSpan = generateCategoryView(row);
                         return type === 'display' ?
-                            divTag.html() : ''
+                            commonSpan.html() : ''
                     }
                 },
 

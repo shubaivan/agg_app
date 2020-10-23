@@ -81,7 +81,7 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
 
     /**
      * @var Collection|Product[]
-     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="categories_region")
      * @ORM\ManyToMany(
      *     targetEntity="Product",
      *      mappedBy="categoryRelation",
@@ -89,6 +89,17 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
      * )
      */
     private $products;
+
+    /**
+     * @var Collection|Shop[]
+     * @ORM\Cache("NONSTRICT_READ_WRITE")
+     * @ORM\ManyToMany(
+     *     targetEntity="Shop",
+     *      mappedBy="categoryRelation",
+     *      fetch="EXTRA_LAZY"
+     * )
+     */
+    private $shop;
 
     /**
      * @ORM\OneToMany(targetEntity="CategoryRelations", mappedBy="subCategory")
@@ -165,6 +176,7 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
         $this->subCategoryRelations = new ArrayCollection();
         $this->mainCategoryRelations = new ArrayCollection();
         $this->files = new ArrayCollection();
+        $this->shop = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -524,6 +536,37 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
     public function setSlugForMatch(?string $slugForMatch): self
     {
         $this->slugForMatch = $slugForMatch;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Shop[]
+     */
+    public function getShop(): Collection
+    {
+        if (!$this->shop) {
+            $this->shop = new ArrayCollection();
+        }
+        return $this->shop;
+    }
+
+    public function addShop(Shop $shop): self
+    {
+        if (!$this->getShop()->contains($shop)) {
+            $this->getShop()->add($shop);
+            $shop->addCategoryRelation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeShop(Shop $shop): self
+    {
+        if ($this->getShop()->contains($shop)) {
+            $this->getShop()->removeElement($shop);
+            $shop->removeCategoryRelation($this);
+        }
 
         return $this;
     }

@@ -148,10 +148,21 @@ class Shop extends SEOModel implements AttachmentFilesInterface
      */
     private $files;
 
+    /**
+     * @var Collection|Category[]
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="shops_region")
+     * @ORM\ManyToMany(targetEntity="Category",
+     *      inversedBy="shop",
+     *      cascade={"persist"},
+     *      fetch="EXTRA_LAZY")
+     */
+    private $categoryRelation;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
         $this->files = new ArrayCollection();
+        $this->categoryRelation = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -310,6 +321,36 @@ class Shop extends SEOModel implements AttachmentFilesInterface
             if ($file->getShop() === $this) {
                 $file->setShop(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Category[]
+     */
+    public function getCategoryRelation(): Collection
+    {
+        if (!$this->categoryRelation) {
+            $this->categoryRelation = new ArrayCollection();
+        }
+
+        return $this->categoryRelation;
+    }
+
+    public function addCategoryRelation(Category $categoryRelation): self
+    {
+        if (!$this->getCategoryRelation()->contains($categoryRelation)) {
+            $this->getCategoryRelation()->add($categoryRelation);
+        }
+
+        return $this;
+    }
+
+    public function removeCategoryRelation(Category $categoryRelation): self
+    {
+        if ($this->getCategoryRelation()->contains($categoryRelation)) {
+            $this->getCategoryRelation()->removeElement($categoryRelation);
         }
 
         return $this;
