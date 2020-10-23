@@ -575,6 +575,21 @@ class CategoryService extends AbstractModel
     }
 
     /**
+     * @param Shop $shop
+     * @param array $ids
+     */
+    public function createShopCategoryModel(Shop $shop, array $ids = [])
+    {
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('ids', $ids);
+        $categoriesModels = $this->categoryRepository
+            ->getCategoryModelsByIds($parameterBag);
+        foreach ($categoriesModels as $categoriesModel) {
+            $shop->addCategoryRelation($categoriesModel);
+        }
+    }
+
+    /**
      * @return ObjectsHandler
      */
     private function getObjecHandler(): ObjectsHandler

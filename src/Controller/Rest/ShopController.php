@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Swagger\Annotations as SWG;
 use App\Validation\Constraints\SearchQueryParam;
 use App\Entity\Collection\ShopsCollection;
+use App\Entity\Collection\Search\SearchShopsCollection;
 
 class ShopController extends AbstractRestController
 {
@@ -55,7 +56,7 @@ class ShopController extends AbstractRestController
      *
      * @param ParamFetcher $paramFetcher
      *
-     * @View(statusCode=Response::HTTP_OK)
+     * @View(statusCode=Response::HTTP_OK, serializerGroups={SearchShopsCollection::SERIALIZED_GROUP_LIST})
      *
      * @SWG\Tag(name="Shop")
      *
@@ -87,7 +88,7 @@ class ShopController extends AbstractRestController
     public function getShopsAction(ParamFetcher $paramFetcher)
     {
         $shopsCollection = $this->getShopService()->getShopsByFilter($paramFetcher);
-        $view = $this->createSuccessResponse($shopsCollection);
+        $view = $this->createSuccessResponse($shopsCollection, [SearchShopsCollection::SERIALIZED_GROUP_LIST]);
         $view
             ->getResponse()
             ->setExpires($this->getHelpers()->getExpiresHttpCache());

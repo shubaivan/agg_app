@@ -25,7 +25,8 @@ global.$ = global.jQuery = $;
 // import 'popper.js';
 require('bootstrap');
 
-import 'select2';                       // globally assign select2 fn to $ element
+import 'select2';
+import {generateCategoryView} from "./parts/hover_menu_categories";                       // globally assign select2 fn to $ element
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log("resource shop list!");
@@ -66,6 +67,29 @@ document.addEventListener("DOMContentLoaded", function () {
             var common_defs = [];
 
             $.each(for_prepare_defs, function (key, value) {
+                if (value.data === 'ResourceName') {
+                    common_defs.push({
+                            "targets": key,
+                            data: 'ResourceName',
+                            render: function (data, type, row, meta) {
+                                let divTag = $('<div/>');
+                                let pTag = $('<p/>');
+                                if (row.shop_from_db && row.shop_from_db.shop_id) {
+                                    let pTagPureResult = $('<p/>', {
+                                        "class": 'pure-result-rs_' + row.shop_from_db.shop_id,
+                                        'type': 'hidden',
+                                        'data-pure-result': JSON.stringify(row)
+                                    });
+                                    divTag.append(pTagPureResult);
+                                }
+
+                                divTag.append(pTag.append(data));
+                                return type === 'display' ?
+                                    divTag.html() : ''
+                            }
+                        }
+                    );
+                }
                 if (value.data === 'ManuallyJobs') {
                     common_defs.push({
                             "targets": key,
@@ -128,8 +152,8 @@ document.addEventListener("DOMContentLoaded", function () {
                                         }
                                     );
                                     button.addClass('trigger_' + v.toLowerCase().replace(' ', '_'));
-                                    if (row.shop_from_db && row.shop_from_db.id) {
-                                        button.attr('data-shop-id', row.shop_from_db.id);
+                                    if (row.shop_from_db && row.shop_from_db.shop_id) {
+                                        button.attr('data-shop-id', row.shop_from_db.shop_id);
                                     }
                                     pTag.append(button);
                                     divTag.append(pTag);
@@ -285,52 +309,12 @@ document.addEventListener("DOMContentLoaded", function () {
         return commonSpan;
     }
 
-    function formatState (state) {
-        let hotCategory = state.hotCategory;
-        let disableForParsing = state.disableForParsing;
-        var commonSpan = $('<span/>');
-        var pTag = $('<p/>', {
-            "class": 'cn_' + state.id
-        });
-        var span = $('<span />');
-        var span_dfp = $('<span />');
-
-        if (disableForParsing) {
-            span_dfp.append('<i class="fas fa-bell-slash"></i>');
-        } else {
-            span_dfp.append('<i class="fas fa-bell"></i>');
-        }
-
-        if (hotCategory === true) {
-            span.append('<i class="fa fa-check" aria-hidden="true"></i>');
-        } else {
-            span.append('<i class="fas fa-ban"></i>');
-        }
-        var spanPath = $('<span />');
-        spanPath.append('<i class="fas fa-road"></i>').append('<i>' +state.slug + '</i>');
-        var pPathTag = $('<p/>').append(spanPath);
-        pTag.append(state.text).append(span).append(span_dfp);
-        commonSpan.append(pPathTag).append(pTag);
-
-        return commonSpan;
-    }
-
-    function renderEditForm(modelId, form, modal, button) {
-        var hover_menu_categories = $('<select>').addClass('hover_menu_categories');
-        let model_id_input = $('<input>').attr({
-            type: 'hidden',
-            id: 'shop_id',
-            name: 'shop_id',
-            class: 'shop_exist_id'
-        });
-
-        model_id_input.val(modelId);
-        form.prepend(hover_menu_categories);
-        form.append(model_id_input);
-        applySelect2(hover_menu_categories);
-    }
-
-    function applySelect2(select) {
+    /**
+     *
+     * @param select
+     * @param modelId
+     */
+    function applySelect2(select, modelId = null) {
         select.select2({
             placeholder: {
                 id: '-1', // the value of the option
@@ -341,7 +325,7 @@ document.addEventListener("DOMContentLoaded", function () {
             multiple: true,
             minimumInputLength: 2,
             allowClear: true,
-            templateSelection: formatState,
+            templateSelection: generateCategoryView,
             templateResult: customFormatSelection,
             ajax: {
                 type: 'post',
@@ -359,6 +343,51 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         });
+        if (modelId) {
+            let pure_result = $('.pure-result-rs_' + modelId);
+            if (pure_result && pure_result.length) {
+                let pureResultData = pure_result.data('pureResult');
+
+                if (pureResultData.shop_from_db
+                    && pureResultData.shop_from_db.category_models
+                    && pureResultData.shop_from_db.category_models.length
+                ) {
+                    $.each(pureResultData.shop_from_db.category_models, function (k, data) {
+                        // Set the value, creating a new option if necessary
+                        if (select.find("option[value='" + data.id + "']").length) {
+                            select.val(data.id).trigger('change');
+                        } else {
+                            // Create a DOM Option and pre-select by default
+                            var newOption = new Option(data.text, data.id, true, true);
+
+                            $(newOption).attr('data-slug', data.slug);
+                            $(newOption).attr('data-hot-category', data.hotCategory);
+                            $(newOption).attr('data-disable-for-parsing', data.disableForParsing);
+                            $(newOption).attr('data-section-relation', data.sectionRelation);
+
+                            // Append it to the select
+                            select.append(newOption).trigger('change');
+                        }
+                    })
+                }
+            }
+        }
+    }
+
+    function renderEditForm(modelId, form, modal, button) {
+        var hover_menu_categories = $('<select>').addClass('hover_menu_categories');
+        hover_menu_categories.attr('name', 'category_ids[]');
+        let model_id_input = $('<input>').attr({
+            type: 'hidden',
+            id: 'shop_id',
+            name: 'shop_id',
+            class: 'shop_exist_id'
+        });
+
+        model_id_input.val(modelId);
+        form.prepend(hover_menu_categories);
+        form.append(model_id_input);
+        applySelect2(hover_menu_categories, modelId);
     }
 
     function reloadingShop(shopName) {

@@ -797,20 +797,34 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function getCategoryByIds(ParamFetcher $paramFetcher, $count = false)
     {
-        $ids = $paramFetcher->get('ids');
+        $parameterBag = new ParameterBag($paramFetcher->all());
+        return $this->getCategoryModelsByIds($parameterBag, $count);
+    }
+
+    /**
+     * @param ParameterBag $parameterBag
+     * @param bool $count
+     * @return array|int|mixed
+     */
+    public function getCategoryModelsByIds(ParameterBag $parameterBag, $count = false)
+    {
+        $ids = $parameterBag->get('ids');
         if (is_array($ids)
             && array_search('0', $ids, true) === false) {
             $ids = array_filter($ids, function ($value, $key) {
                 return boolval($value);
             }, ARRAY_FILTER_USE_BOTH);
+            if (!$ids) {
+                return [];
+            }
             $qb = $this->createQueryBuilder('s');
             $qb
                 ->where($qb->expr()->in('s.id', $ids));
 
-            return $this->getList(
+            return $this->getListParameterBag(
                 $this->getEntityManager()->getConfiguration()->getResultCacheImpl(),
                 $qb,
-                $paramFetcher,
+                $parameterBag,
                 $count
             );
         } else {
