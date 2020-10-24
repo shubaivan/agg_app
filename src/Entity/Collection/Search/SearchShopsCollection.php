@@ -11,7 +11,7 @@ class SearchShopsCollection
     const SERIALIZED_GROUP_LIST = 'shop_group_list';
 
     /**
-     * @var array
+     * @var ArrayCollection
      * @Annotation\Type("ArrayCollection<App\Entity\Collection\Search\SeparateShopModel>")
      * @Annotation\Groups({SearchShopsCollection::SERIALIZED_GROUP_LIST})
      */
@@ -23,17 +23,6 @@ class SearchShopsCollection
      * @Annotation\Groups({SearchShopsCollection::SERIALIZED_GROUP_LIST})
      */
     private $count;
-
-    /**
-     * ShopsCollection constructor.
-     * @param array $collection
-     * @param int $count
-     */
-    public function __construct(array $collection, int $count)
-    {
-        $this->collection = $collection;
-        $this->count = $count;
-    }
 
     /**
      * @return array|ArrayCollection

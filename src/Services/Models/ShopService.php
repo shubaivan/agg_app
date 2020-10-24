@@ -226,7 +226,14 @@ class ShopService extends AbstractModel
                 true
             );
 
-        return new SearchShopsCollection($facetFilters, $facetFiltersCount);
+        return $this->objecHandler
+            ->handleObject(
+                [
+                    'count' => $facetFiltersCount,
+                    'collection' => $facetFilters,
+                ],
+                SearchShopsCollection::class
+            );
     }
 
     /**
