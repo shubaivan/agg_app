@@ -316,9 +316,7 @@ class ResourceShopsController extends AbstractRestController
                     $shop, $request->get('category_ids')
                 );
             } else {
-                $shop->getCategoryRelation()->map(function ($v) use ($shop) {
-                    $shop->removeCategoryRelation($v);
-                });
+                $shop->getCategoryRelation()->clear();
             }
 
             $fileIds = $request->get('file_ids');
