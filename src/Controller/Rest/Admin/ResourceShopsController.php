@@ -315,6 +315,8 @@ class ResourceShopsController extends AbstractRestController
                 $this->categoryService->createShopCategoryModel(
                     $shop, $request->get('category_ids')
                 );
+            } else {
+                $shop->getCategoryRelation()->clear();
             }
 
             $fileIds = $request->get('file_ids');
