@@ -375,6 +375,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function renderEditForm(modelId, form, modal, button) {
+        if (modelId) {
+            let pure_result = $('.pure-result-rs_' + modelId);
+            if (pure_result && pure_result.length) {
+                let pureResultData = pure_result.data('pureResult');
+                if (pureResultData.ResourceName) {
+                    modal.find('.modal-title').text('Edit ' + pureResultData.ResourceName + ' shop');
+                }
+            }
+        }
+
         var hover_menu_categories = $('<select>').addClass('hover_menu_categories');
         hover_menu_categories.attr('name', 'category_ids[]');
         let model_id_input = $('<input>').attr({
