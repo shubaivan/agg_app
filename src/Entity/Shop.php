@@ -45,6 +45,7 @@ class Shop extends SEOModel implements AttachmentFilesInterface
     const PREFIX_HANDLE_DATA_SHOP_FAILED = 'shop:handle:failed:';
 
     const SERIALIZED_GROUP_LIST = 'shop_group_list';
+    const SERIALIZED_GROUP_GET_BY_SLUG = 'shop_group_get_by_slug';
     const ADRECORD = 'Adrecord';
     const ADTRACTION = 'Adtraction';
     const AWIN = 'Awin';
@@ -117,13 +118,13 @@ class Shop extends SEOModel implements AttachmentFilesInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Annotation\Groups({Shop::SERIALIZED_GROUP_LIST, Product::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Shop::SERIALIZED_GROUP_LIST, Product::SERIALIZED_GROUP_LIST, Shop::SERIALIZED_GROUP_GET_BY_SLUG})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Annotation\Groups({Shop::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Shop::SERIALIZED_GROUP_LIST, Shop::SERIALIZED_GROUP_GET_BY_SLUG})
      */
     private $shopName;
 
@@ -145,6 +146,7 @@ class Shop extends SEOModel implements AttachmentFilesInterface
      *     )
      * @Assert\Valid()
      * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="shops_region")
+     * @Annotation\Groups({Shop::SERIALIZED_GROUP_GET_BY_SLUG})
      */
     private $files;
 
@@ -155,6 +157,7 @@ class Shop extends SEOModel implements AttachmentFilesInterface
      *      inversedBy="shop",
      *      cascade={"persist"},
      *      fetch="EXTRA_LAZY")
+     * @Annotation\Groups({Shop::SERIALIZED_GROUP_GET_BY_SLUG})
      */
     private $categoryRelation;
 

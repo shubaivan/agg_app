@@ -120,7 +120,7 @@ class ShopController extends AbstractRestController
         Shop $shop
     )
     {
-        $view = $this->createSuccessResponse($shop, [Shop::SERIALIZED_GROUP_LIST]);
+        $view = $this->createSuccessResponse($shop, [Shop::SERIALIZED_GROUP_GET_BY_SLUG]);
         $view
             ->getResponse()
             ->setExpires($this->getHelpers()->getExpiresHttpCache());
