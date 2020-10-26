@@ -534,6 +534,44 @@ class ProductRepository extends ServiceEntityRepository
         return $all;
     }
 
+    /**
+     * @param int $productId
+     * @param int $categoryId
+     * @return mixed[]
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function removeNativeProductCategories(int $productId, array $categoryIds)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $bindParams[':product_id'] = $productId;
+        $bindParamsType[':product_id'] = \PDO::PARAM_INT;
+
+        $bindParamsIds = array_combine(
+            array_map(function ($k) {
+                return ':var_' . $k;
+            }, array_keys($categoryIds)),
+            array_values($categoryIds)
+        );
+
+        $idsKeys = implode(',', array_keys($bindParamsIds));
+        $commonParams = array_merge($bindParams, $bindParamsIds);
+        $query = "
+            DELETE FROM product_category p
+            WHERE p.product_id = :product_id
+            AND p.category_id IN ($idsKeys)
+        ";
+
+        $statement = $connection->executeQuery(
+            $query,
+            $commonParams,
+            $bindParamsType
+        );
+
+        $all = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $all;
+    }
+
     public function getCountGroupedProductsByShop(string $shopName)
     {
         $connection = $this->getEntityManager()->getConnection();
