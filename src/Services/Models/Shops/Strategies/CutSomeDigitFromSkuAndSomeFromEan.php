@@ -6,6 +6,9 @@ use App\Entity\Product;
 
 class CutSomeDigitFromSkuAndSomeFromEan extends CutSomeDigitFromEan
 {
+    public static $description = 'cut some count of symbol from sku and ean';
+    public static $requiredInputs = ['sku', 'ean'];
+
     protected $cutFromSku;
 
     /**
@@ -22,13 +25,36 @@ class CutSomeDigitFromSkuAndSomeFromEan extends CutSomeDigitFromEan
 
     public function __invoke(Product $product)
     {
-        parent::__invoke($product);
-        $sku = $product->getSku();
-        if (strlen($sku)) {
-            $product->setGroupIdentity(
-                $product->getGroupIdentity() .
-                '_' . mb_substr($sku, 0, $this->cutFromSku)
-            );
+        $coreAnalysis = $this->coreAnalysis([
+            'ean' => $product->getEan(),
+            'sku' => $product->getSku()
+        ]);
+        if ($coreAnalysis) {
+            $product->setGroupIdentity($coreAnalysis);
         }
+    }
+
+    /**
+     * @param array $requiredInputs
+     * @return bool|string
+     * @throws \Exception
+     */
+    function coreAnalysis(array $requiredInputs)
+    {
+        $this->validateRequiredInputs($requiredInputs);
+        /**
+         * @var $ean
+         * @var $sku
+         */
+        extract($requiredInputs);
+        $identity = parent::coreAnalysis([
+            'ean' => $ean
+        ]);
+
+        if (strlen($sku)) {
+            $identity .= '_' . mb_substr($sku, 0, $this->cutFromSku);
+        }
+
+        return $identity;
     }
 }

@@ -3,9 +3,12 @@
 namespace App\Services\Models\Shops\Strategies;
 
 use App\Entity\Product;
+use App\Services\Models\Shops\Strategies\Common\AbstractStrategy;
 
-class CutSomeDigitFromEan
+class CutSomeDigitFromEan extends AbstractStrategy
 {
+    public static $description = 'cut some symbol from ean';
+    public static $requiredInputs = ['ean'];
 
     protected $cutFromEan;
 
@@ -18,11 +21,36 @@ class CutSomeDigitFromEan
         $this->cutFromEan = $cutFromEan;
     }
 
+    /**
+     * @param Product $product
+     * @throws \Exception
+     */
     public function __invoke(Product $product)
     {
-        $ean = $product->getEan();
-        if (strlen($ean)) {
-            $product->setGroupIdentity(mb_substr($ean, 0, $this->cutFromEan));
+        $coreAnalysis = $this->coreAnalysis(['ean' => $product->getEan()]);
+        if ($coreAnalysis) {
+            $product->setGroupIdentity($coreAnalysis);
         }
+    }
+
+    /**
+     * @param array $requiredInputs
+     * @return bool|string
+     * @throws \Exception
+     */
+    function coreAnalysis(array $requiredInputs)
+    {
+        $this->validateRequiredInputs($requiredInputs);
+        /**
+         * @var $ean
+         */
+        extract($requiredInputs);
+        $identity = false;
+
+        if (strlen($ean)) {
+            $identity = mb_substr($ean, 0, $this->cutFromEan);
+        }
+
+        return $identity;
     }
 }

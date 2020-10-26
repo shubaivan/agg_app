@@ -7,7 +7,6 @@ namespace App\Services\Models\Shops\Adrecord;
 use App\Entity\Product;
 use App\Services\Models\Shops\IdentityGroup;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEan;
-use App\Services\Models\Shops\Strategies\CutTheRestOfProductNameAfterSymbol;
 
 class StigaSportsService implements IdentityGroup
 {

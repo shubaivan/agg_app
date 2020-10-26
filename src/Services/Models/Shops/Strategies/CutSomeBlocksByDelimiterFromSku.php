@@ -3,9 +3,13 @@
 namespace App\Services\Models\Shops\Strategies;
 
 use App\Entity\Product;
+use App\Services\Models\Shops\Strategies\Common\AbstractStrategy;
 
-class CutSomeBlocksByDelimiterFromSku
+class CutSomeBlocksByDelimiterFromSku extends AbstractStrategy
 {
+    public static $description = 'cut some block, divided by some delimiter from sku';
+    public static $requiredInputs = ['sku'];
+
     protected $numberOfBlocks;
 
     protected $delimiter;
@@ -23,15 +27,35 @@ class CutSomeBlocksByDelimiterFromSku
 
     /**
      * @param Product $product
+     * @throws \Exception
      */
     public function __invoke(Product $product)
     {
-        $sku = $product->getSku();
+        $coreAnalysis = $this->coreAnalysis(['sku' => $product->getSku()]);
+        if ($coreAnalysis) {
+            $product->setGroupIdentity($coreAnalysis);
+        }
+    }
+
+    /**
+     * @param array $requiredInputs
+     * @return bool|string
+     * @throws \Exception
+     */
+    function coreAnalysis(array $requiredInputs)
+    {
+        $this->validateRequiredInputs($requiredInputs);
+        /**
+         * @var $sku
+         */
+        extract($requiredInputs);
+        $identity = false;
         $explodeSku = explode($this->delimiter, $sku);
         if (count($explodeSku) >= $this->numberOfBlocks) {
             $blocks = array_slice($explodeSku, 0, $this->numberOfBlocks);
             $identity = implode($this->delimiter, $blocks);
-            $product->setGroupIdentity($identity);
         }
+
+        return $identity;
     }
 }

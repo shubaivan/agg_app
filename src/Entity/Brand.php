@@ -89,6 +89,15 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
      */
     private $files;
 
+    /**
+     * @var Strategies
+     * @ORM\ManyToOne(targetEntity="Strategies",
+     *      inversedBy="brands",
+     *      cascade={"persist"}
+     *     )
+     */
+    private $strategy;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -271,5 +280,22 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
         }
 
         return $isCheck;
+    }
+
+    public function getTop(): ?bool
+    {
+        return $this->top;
+    }
+
+    public function getStrategy(): ?Strategies
+    {
+        return $this->strategy;
+    }
+
+    public function setStrategy(?Strategies $strategy): self
+    {
+        $this->strategy = $strategy;
+
+        return $this;
     }
 }

@@ -5,13 +5,13 @@ namespace App\Services\Models\Shops\Awin;
 
 use App\Entity\Product;
 use App\Services\Models\Shops\IdentityGroup;
-use App\Services\Models\Shops\Strategies\CutFirstSomeWordFromProductName;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEan;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndSomeFromEan;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSku;
+use App\Services\Models\Shops\Strategies\CutSomeWordsFromProductNameByDelimiter;
 use App\Services\Models\Shops\Strategies\FullProductName;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndFullName;
-use App\Services\Models\Shops\Strategies\CutLastSomeDigitFromSkuAndEanAndFirstWordFromName;
+use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndEanAndSomeWordFromName;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEanAndFullName;
 
 class EllosSEService implements IdentityGroup
@@ -84,8 +84,8 @@ class EllosSEService implements IdentityGroup
             "Celly" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
             "Champion" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Chi Chi Love" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Civiliants" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
             "Clementoni" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Clicko" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Cold" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Color kids" => new FullProductName(), "Converse" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
-            "Craft" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Creamie" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "DC Shoes" => new FullProductName(), "DUDE Packaging" => new CutFirstSomeWordFromProductName(2), "Danspil" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "DeltaBaby" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
-            "Denver" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "DesignaFriend" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Dickie Toys" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Didriksons" => new CutFirstSomeWordFromProductName(2), "Disney" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
+            "Craft" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Creamie" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "DC Shoes" => new FullProductName(), "DUDE Packaging" => new CutSomeWordsFromProductNameByDelimiter(2), "Danspil" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "DeltaBaby" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
+            "Denver" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "DesignaFriend" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Dickie Toys" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Didriksons" => new CutSomeWordsFromProductNameByDelimiter(2), "Disney" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
             "Done by Deer" => new CutSomeDigitFromEan(-2), "Doomoo" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Duffy" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "ECCO" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "EN FANT" => new FullProductName(), "Egmont Kärnan" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Ellos" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Elodie Details" => new CutSomeDigitFromSkuAndSomeFromEan(-3, -3),
             "Eskimo" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Estelle & Thild" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Evi" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "FIXONI" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Fabbrix" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Fila" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
             "Fireman Sam" => new CutSomeDigitFromEan(-2), "Fisher Price" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Fitbit" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Franklin" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "G-Star" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "GP" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Galt" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
@@ -94,7 +94,7 @@ class EllosSEService implements IdentityGroup
             "Helly Hansen" => new FullProductName(), "Heroes of the city" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Hestra" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
             "How to Kiss a Frog" => new CutSomeDigitFromEan(-2), "Hulabalu" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Hummel" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Hunter" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Hust & Claire" => new FullProductName(),
             "I dig denim" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Intex" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "JCB" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "JaBaDaBaDo" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Jack & jones" => new CutSomeDigitFromSkuAndSomeFromEan(-3, -2), "Jakks pacific" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
-            "Juicy Couture" => new FullProductName(), "KIDS ONLY" => new CutSomeDigitFromSkuAndFullName(-2), "Kaktus" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Kalas" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Kavat" => new FullProductName(), "Kids Concept" => new CutLastSomeDigitFromSkuAndEanAndFirstWordFromName(-2, -2),
+            "Juicy Couture" => new FullProductName(), "KIDS ONLY" => new CutSomeDigitFromSkuAndFullName(-2), "Kaktus" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Kalas" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Kavat" => new FullProductName(), "Kids Concept" => new CutSomeDigitFromSkuAndEanAndSomeWordFromName(-2, -2, 1),
             "Klippex" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Kombi" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "L.O.L Surprise!" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "LMTD" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "La Redoute" => new CutSomeDigitFromSkuAndFullName(-3), "Leaf" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Lego" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
             "Leila's General Store" => new CutSomeDigitFromSkuAndFullName(-1), "Levi's" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Lil" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Atelier" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Lindberg" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
             "Little Tikes" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Lumo Stars" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Lundby" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3), "Lyle & Scott" => new FullProductName(), "MESSI" => new CutSomeDigitFromSkuAndSomeFromEan(-2, -3),
