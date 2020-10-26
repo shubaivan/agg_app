@@ -308,16 +308,21 @@ class ProductService extends AbstractModel
 
     /**
      * @param Product $product
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @return bool
+     * @throws DBALException
      */
     public function removeCustomCategoriesFromProduct(Product $product)
     {
         $collection = $product->getHoverMenuCategories();
-        foreach ($collection as $category) {
-            $product->removeCategoryRelation($category);
+        if (!$collection->count()) {
+            return false;
         }
-        $this->getEm()->flush();
+        $ids = $collection->map(function (Category $c) use ($product) {
+            $product->removeCategoryRelation($c);
+            return $c->getId();
+        });
+        $this->getProductRepository()
+            ->removeNativeProductCategories($product->getId(), $ids->toArray());
     }
 
     /**
