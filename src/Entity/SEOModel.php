@@ -29,7 +29,8 @@ abstract class SEOModel extends SlugAbstract
      *     Brand::SERIALIZED_GROUP_LIST_TH,
      *     Shop::SERIALIZED_GROUP_LIST,
      *     AdjacentProduct::GROUP_GENERATE_ADJACENT,
-     *     Product::SERIALIZED_GROUP_LIST
+     *     Product::SERIALIZED_GROUP_LIST,
+     *     Shop::SERIALIZED_GROUP_GET_BY_SLUG
      *     })
      */
     protected $seoTitle;
@@ -48,7 +49,8 @@ abstract class SEOModel extends SlugAbstract
      *     Brand::SERIALIZED_GROUP_LIST_TH,
      *     Shop::SERIALIZED_GROUP_LIST,
      *     AdjacentProduct::GROUP_GENERATE_ADJACENT,
-     *     Product::SERIALIZED_GROUP_LIST
+     *     Product::SERIALIZED_GROUP_LIST,
+     *     Shop::SERIALIZED_GROUP_GET_BY_SLUG
      *     })
      */
     protected $seoDescription;
@@ -65,7 +67,8 @@ abstract class SEOModel extends SlugAbstract
      *     Brand::SERIALIZED_GROUP_LIST,
      *     Shop::SERIALIZED_GROUP_LIST,
      *     AdjacentProduct::GROUP_GENERATE_ADJACENT,
-     *     Product::SERIALIZED_GROUP_LIST
+     *     Product::SERIALIZED_GROUP_LIST,
+     *     Shop::SERIALIZED_GROUP_GET_BY_SLUG
      *     })
      */
     protected $seoText1;
@@ -82,7 +85,8 @@ abstract class SEOModel extends SlugAbstract
      *     Brand::SERIALIZED_GROUP_LIST,
      *     Shop::SERIALIZED_GROUP_LIST,
      *     AdjacentProduct::GROUP_GENERATE_ADJACENT,
-     *     Product::SERIALIZED_GROUP_LIST
+     *     Product::SERIALIZED_GROUP_LIST,
+     *     Shop::SERIALIZED_GROUP_GET_BY_SLUG
      *     })
      */
     protected $seoText2;

@@ -56,13 +56,17 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST, Product::SERIALIZED_GROUP_LIST, Category::SERIALIZED_GROUP_RELATIONS_LIST})
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST,
+     *     Product::SERIALIZED_GROUP_LIST, Category::SERIALIZED_GROUP_RELATIONS_LIST,
+     *     Shop::SERIALIZED_GROUP_GET_BY_SLUG
+     *     })
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST, Category::SERIALIZED_GROUP_RELATIONS_LIST})
+     * @Annotation\Groups({Category::SERIALIZED_GROUP_LIST,
+     *     Category::SERIALIZED_GROUP_RELATIONS_LIST, Shop::SERIALIZED_GROUP_GET_BY_SLUG})
      * @Assert\NotBlank(groups={Category::SERIALIZED_GROUP_CREATE})
      * @Annotation\Accessor(getter="getCategoryNameAccessor", setter="setCategoryNameAccessor")
      */

@@ -35,7 +35,10 @@ class Files
      * @Assert\File(
      *     maxSize = "100M"
      *     )
-     * @Annotation\Groups({Files::GROUP_GET, Category::SERIALIZED_GROUP_RELATIONS_LIST})
+     * @Annotation\Groups({Files::GROUP_GET,
+     *     Category::SERIALIZED_GROUP_RELATIONS_LIST,
+     *     Shop::SERIALIZED_GROUP_GET_BY_SLUG
+     *     })
      */
     private $path;
 
