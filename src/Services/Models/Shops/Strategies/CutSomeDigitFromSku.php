@@ -9,16 +9,23 @@ class CutSomeDigitFromSku extends AbstractStrategy
 {
     public static $description = 'cut some symbol from sku';
     public static $requiredInputs = ['sku'];
+    public static $requiredArgs = ['cutFromSku', 'offsetSku'];
 
     protected $cutFromSku;
+
+    protected $offsetSku = 0;
 
     /**
      * CutSomeDigitFromSku constructor.
      * @param $cutFromSku
+     * @param int|null $offsetSku
      */
-    public function __construct($cutFromSku)
+    public function __construct($cutFromSku, ?int $offsetSku = 0)
     {
         $this->cutFromSku = $cutFromSku;
+        if ($offsetSku) {
+            $this->offsetSku = $offsetSku;
+        }
     }
 
     /**
@@ -48,7 +55,7 @@ class CutSomeDigitFromSku extends AbstractStrategy
         $identity = false;
 
         if (strlen($sku)) {
-            $identity = mb_substr($sku, 0, $this->cutFromSku);
+            $identity = mb_substr($sku, $this->offsetSku, $this->cutFromSku);
         }
 
         return $identity;

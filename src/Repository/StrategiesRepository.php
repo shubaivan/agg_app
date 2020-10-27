@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Strategies;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * @method Strategies|null find($id, $lockMode = null, $lockVersion = null)
@@ -19,32 +20,66 @@ class StrategiesRepository extends ServiceEntityRepository
         parent::__construct($registry, Strategies::class);
     }
 
-    // /**
-    //  * @return Strategies[] Returns an array of Strategies objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('s')
-            ->andWhere('s.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('s.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Strategies
+    /**
+     * @param ParameterBag $parameterBag
+     * @param bool $count
+     * @return mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getCategoriesForSelect2(
+        ParameterBag $parameterBag, bool $count = false
+    )
     {
-        return $this->createQueryBuilder('s')
-            ->andWhere('s.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        if ($count) {
+            $dql = '
+                SELECT COUNT(s.id) as count    
+            ';
+        } else {
+            $dql = '
+                SELECT 
+                s.id, 
+                s.strategyName as text,
+                s.description,
+                s.slug   
+            ';
+        }
+        $dql .= '
+            FROM App\Entity\Strategies s
+        ';
+
+        if ($parameterBag->get('search')) {
+            $dql .= '
+                WHERE ILIKE(s.strategyName, :search) = TRUE
+            ';
+        }
+        $page = $parameterBag->get('page');
+        $query = $this->getEntityManager();
+        $createQuery = $query
+            ->createQuery($dql);
+        if ($count) {
+            $createQuery
+                ->enableResultCache(0, 'select2_strategies_count');
+        } else {
+            $createQuery
+                ->setFirstResult($page <= 1 ? 0 : 25 * $page - 1)
+                ->setMaxResults(25)
+                ->enableResultCache(0, 'select2_strategies_models');
+        }
+        $createQuery
+            ->useQueryCache(true);
+
+        if ($parameterBag->get('search')) {
+            $createQuery->setParameter(':search', '%' . $parameterBag->get('search') . '%');
+        }
+
+        if ($count) {
+            $result = $createQuery->getSingleScalarResult();
+        } else {
+            $result = $createQuery->getResult();
+        }
+
+        return $result;
     }
-    */
 }

@@ -29,6 +29,10 @@ import {
     delay
 } from './parts/photos_config.js';
 
+import {renderAttachmentFilesBlock, addInitPhotoToUppy} from "./parts/uppy_attachment_files";
+
+import 'select2';
+
 document.addEventListener("DOMContentLoaded", function () {
     console.log("brand list!");
     const body = $('body');
@@ -40,6 +44,10 @@ document.addEventListener("DOMContentLoaded", function () {
         .generate('app_rest_admin_attachmentfile_getattachmentfileslist');
     const app_rest_admin_attachmentfile_getattachmentfilestemplate = window.Routing
         .generate('app_rest_admin_attachmentfile_getattachmentfilestemplate');
+    const app_rest_admin_strategies_getstrategieslist = window.Routing
+        .generate('app_rest_admin_strategies_getstrategieslist');
+    const app_rest_admin_strategies_postapplystrategybyslug = window.Routing
+        .generate('app_rest_admin_strategies_postapplystrategybyslug');
 
 
     body.on('keydown keyup onblur', '#bn', function () {
@@ -211,6 +219,11 @@ document.addEventListener("DOMContentLoaded", function () {
         let form = modal.find("form");
         form.trigger("reset");
         form.find('textarea').val('');
+        form.find('.strategies_select').remove();
+
+        modal.find('.render_play_ground').remove();
+        form.find('.select2-container').remove();
+
         form.find('.attachment_files_to_categories').remove();
         form.find('input[type=hidden]').remove();
     });
@@ -260,175 +273,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
                                 }
                             })(data);
-                        });
+                        }, 'App\\Entity\\Brand');
                 }
             });
         }
     });
 
-    function renderAttachmentFilesBlock(brandId, form, modal, button, attachmentFiles, uppy_callback_function) {
-        $.ajax({
-            type: "GET",
-            url: app_rest_admin_attachmentfile_getattachmentfilestemplate,
-            error: (result) => {
-                if (result.responseJSON.message) {
-                    alert(result.responseJSON.message);
-                }
-            },
-            success: (data) => {
-                console.log(data);
-                let template = data.template;
-                if (template) {
-                    let parseHTML = $.parseHTML(template);
-                    let attachment_files_template = form.find('#attachment_files_template');
-                    attachment_files_template.empty();
-                    attachment_files_template.append(parseHTML);
-                    let uppy = renderUppy(brandId, form, modal, button);
-                    if (attachmentFiles && uppy_callback_function) {
-                        uppy_callback_function(uppy, attachmentFiles);
-                    }
-                }
-            }
-        });
-    }
-
-    function renderUppy(brandId, form, modal, button) {
-        // Import the plugins
-        const Uppy = require('@uppy/core')
-        const XHRUpload = require('@uppy/xhr-upload')
-        const Dashboard = require('@uppy/dashboard')
-        let timeOfLastAttach = new Date();
-        const uppy = Uppy({
-            debug: true,
-            autoProceed: false,
-            restrictions: {
-                maxFileSize: 100097152,//100Mb
-            },
-            onBeforeFileAdded: (currentFile, files) => {
-                //чтоб мог добавить только один файл за раз
-                let currentTime = new Date();
-                if ((currentTime - timeOfLastAttach) < 700) {
-                    return false;
-                }
-                timeOfLastAttach = new Date();
-
-
-                let isSameFile = files && Object.values(files).some(item => {
-                    return currentFile.name === item.data.name;
-                });
-                if (isSameFile) {
-                    alert('File already added.');
-                    return false;
-                }
-
-                return currentFile;
-            },
-            onBeforeUpload: (currentFiles) => {
-
-            }
-        });
-
-        uppy.use(Dashboard, {
-            trigger: '.UppyModalOpenerBtn',
-            inline: true,
-            target: '.DashboardContainer',
-            replaceTargetContent: true,
-            showProgressDetails: true,
-            showRemoveButtonAfterComplete: true,
-            note: 'add Images',
-            height: 470,
-            metaFields: [
-                {id: 'name', name: 'name', placeholder: 'file name'},
-                {id: 'caption', name: 'caption', placeholder: 'describe what the image is about'}
-            ],
-            browserBackButtonClose: true
-        });
-
-        if (brandId) {
-            uppy.setMeta({
-                id: brandId, entity: 'App\\Entity\\Brand'
-            });
-        }
-
-        uppy.use(XHRUpload, {
-            endpoint: attachment_files,
-            formData: true,
-            fieldName: 'files[]',
-            // bundle: true,
-            metaFields: null,
-            getResponseData(responseText, response) {
-                return {
-                    url: responseText
-                }
-            }
-        });
-
-        uppy.on('file-added', (file) => {
-
-        });
-
-        uppy.on('file-editor:complete', (updatedFile) => {
-            // console.log(updatedFile)
-        });
-
-        uppy.on('upload-success', (file, body) => {
-            let files = JSON.parse(body.body.url);
-            $.each(files, function (k, v) {
-                let input = $('<input>').attr({
-                    type: 'hidden',
-                    id: 'file_id_' + v.id,
-                    name: 'file_ids[]',
-                    class: 'attachment_files_to_categories'
-                });
-                input.val(v.id);
-                form.append(input);
-                uppy.setFileMeta(file.id, {m_file_id: v.id})
-            })
-        });
-
-        uppy.on('error', (error) => {
-            console.error(error.stack)
-        });
-
-        uppy.on('file-removed', (file, reason) => {
-            if (reason === 'removed-by-user' && file.meta.m_file_id) {
-                var app_rest_admin_attachmentfile_deleteattachmentfile = Routing.generate('app_rest_admin_attachmentfile_deleteattachmentfile', {'id': file.meta.m_file_id});
-                $.ajax({
-                    url: app_rest_admin_attachmentfile_deleteattachmentfile,
-                    type: 'DELETE',
-                    success: function (result) {
-                        console.log(result);
-                    },
-                    error: function (result) {
-                        console.log(result);
-                    }
-                });
-            }
-        });
-
-        uppy.on('upload-error', (file, error, response) => {
-            uppy.removeFile(file.id);
-            let parse = JSON.parse(response.body.url);
-
-            uppy.info(parse.message, 'error', 5000);
-
-            console.log('error with file:', file.id);
-            console.log('error message:', error);
-        });
-
-        uppy.on('complete', result => {
-            console.log('successful files:', result.successful)
-            console.log('failed files:', result.failed)
-        });
-
-        return uppy;
-    }
-
-    function renderEditForm(brandId, form, modal, button) {
-        let bn_value = $('.bn_' + brandId);
+    function renderEditForm(modelId, form, modal, button) {
+        let bn_value = $('.bn_' + modelId);
         modal.find('.modal-title').text('Edit ' + bn_value.text() + ' brand');
         setDataInForm(modal.find('.modal-body #bn'),
-            '.bn_' + brandId);
+            '.bn_' + modelId);
 
         let brand_id_input = $('<input>').attr({
             type: 'hidden',
@@ -437,11 +292,17 @@ document.addEventListener("DOMContentLoaded", function () {
             class: 'brand_exist_id'
         });
 
-        brand_id_input.val(brandId);
+        brand_id_input.val(modelId);
         form.append(brand_id_input);
 
+
+        var strategies = $('<select>').addClass('strategies_select');
+        strategies.attr('name', 'strategy');
+        form.prepend(strategies);
+        applySelect2(strategies, modelId);
+
         let topBrand = modal.find('.modal-body #topBrand');
-        let tb_value = $('.tb_' + brandId);
+        let tb_value = $('.tb_' + modelId);
         $.each(tb_value, function (k, v) {
             let tp_value_data = $(v).attr('tb_val');
             if (tp_value_data) {
@@ -451,7 +312,201 @@ document.addEventListener("DOMContentLoaded", function () {
                 return false;
             }
         });
-        renderSimditor(brandId, form, modal, button);
+        renderSimditor(modelId, form, modal, button);
+    }
+
+    /**
+     *
+     * @param select
+     * @param modelId
+     */
+    function applySelect2(select, modelId = null) {
+        select.select2({
+            placeholder: {
+                id: '-1', // the value of the option
+                text: 'Select strategy'
+            },
+            dropdownAutoWidth: true,
+            width: '100%',
+            multiple: false,
+            allowClear: true,
+            templateResult: formatOption,
+            ajax: {
+                type: 'post',
+                url: app_rest_admin_strategies_getstrategieslist,
+                data: function (params) {
+                    console.log(params);
+                    let query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        type: 'public'
+                    };
+
+                    // Query parameters will be ?search=[term]&type=public
+                    return query;
+                }
+            }
+        });
+
+        select.on('select2:select', function (e) {
+            var strategyData = e.params.data;
+            renderStrategyPlayGround(strategyData.slug, select);
+        });
+    }
+
+    function formatOption (option) {
+        return  $(
+            '<div><strong>' + option.text + '</strong></div>' +
+            '<div>' + option.description + '</div>'
+        );
+    };
+
+    function renderStrategyPlayGround(slug, select) {
+        const app_rest_admin_strategies_getstrategybyslug = window.Routing
+            .generate('app_rest_admin_strategies_getstrategybyslug', {'slug': slug});
+
+        $.ajax({
+            type: "GET",
+            url: app_rest_admin_strategies_getstrategybyslug,
+            error: (result) => {
+                console.log(result.responseJSON.status);
+            },
+            success: (data) => {
+                $('.render_play_ground').remove();
+                let divTagFormRow = $('<div />').addClass('form-row render_play_ground');
+                renderExecuteButton(data, select, divTagFormRow);
+                renderRequiredInputsPlayGround(data, select, divTagFormRow);
+                renderRequiredArgsPlayGround(data, select, divTagFormRow);
+            }
+        });
+    }
+
+    function renderExecuteButton(strategy, select, divTagFormRow)
+    {
+        var execute = $('<button/>',
+            {
+                type: "button",
+                class: 'btn btn-primary execute_strategy',
+                text: 'Execute Strategy'
+            });
+
+        execute.attr('data-strategy-slug', strategy.slug);
+        execute.on('click', preApplyStrategyCoreAnalysis);
+        divTagFormRow.append(execute);
+    }
+
+    function renderRequiredArgsPlayGround(strategy, select, divTagFormRow) {
+        let editBrandForm = select.closest('#editBrand');
+
+        if ($.isArray(strategy.requiredArgs)) {
+            let lengthRequiredArgs = strategy.requiredArgs.length;
+
+            $.each(strategy.requiredArgs, function (k, render_required_args) {
+                var divTag = $('<div />').addClass('form-group col-md-'+ 12/lengthRequiredArgs);
+                var labelTag = $('<label />').attr('for', render_required_args);
+                labelTag.text(ucfirst(render_required_args));
+
+                let required_arg = $('<input>').attr({
+                    name: render_required_args,
+                    class: 'required_args form-control',
+                    type: 'text'
+                });
+                required_arg.prop('required',true);
+                divTag.append(labelTag).append(required_arg);
+                divTagFormRow.prepend(divTag);
+            });
+            divTagFormRow.insertBefore(editBrandForm);
+        }
+    }
+
+    function renderRequiredInputsPlayGround(strategy, select, divTagFormRow) {
+        let editBrandForm = select.closest('#editBrand');
+
+        if ($.isArray(strategy.requiredInputs)) {
+            let lengthRequiredInputs = strategy.requiredInputs.length;
+
+            $.each(strategy.requiredInputs, function (k, render_required_input) {
+                var divTag = $('<div />').addClass('form-group col-md-'+ 12/lengthRequiredInputs);
+                var labelTag = $('<label />').attr('for', render_required_input);
+                labelTag.text(ucfirst(render_required_input));
+
+                let required_input = $('<input>').attr({
+                    name: render_required_input,
+                    class: 'required_input form-control',
+                    type: 'text'
+                });
+                required_input.prop('required',true);
+                divTag.append(labelTag).append(required_input);
+                divTagFormRow.prepend(divTag);
+            });
+            divTagFormRow.insertBefore(editBrandForm);
+        }
+    }
+
+    function preApplyStrategyCoreAnalysis(e) {
+        let button = $(e.currentTarget);
+
+        // remove valiation blocks
+        $('.render_play_ground .invalid-feedback').remove();
+
+        // remove result executed core analysis blocks
+        $('.core_analysis_result').remove();
+
+        let submitInputs = $('.render_play_ground input');
+        let virtualForm = $('<form />');
+        if (submitInputs.length) {
+            $.each(submitInputs, function (k, v) {
+                let currentInput = $(v);
+                if (!currentInput.val()) {
+                    var divTag = $('<div />').addClass('invalid-feedback');
+                    divTag.text('Please provide a valid ' + currentInput.attr('name'));
+                    divTag.insertAfter(currentInput);
+                } else {
+                    let clone = currentInput.clone();
+                    virtualForm.append(clone);
+                }
+            })
+        }
+        let invalidFeedback = $('.render_play_ground .invalid-feedback');
+        if (invalidFeedback.length) {
+            invalidFeedback.show();
+        } else {
+            let strategy_slug_input = $('<input>').attr({
+                type: 'hidden',
+                name: 'strategy_slug',
+            });
+
+            strategy_slug_input.val(button.attr('data-strategy-slug'));
+            virtualForm.append(strategy_slug_input);
+
+            applyStrategyCoreAnalysis(button, virtualForm);
+        }
+    }
+
+    function applyStrategyCoreAnalysis(button, virtualForm) {
+        let serialize = virtualForm.serialize();
+        $.ajax({
+            type: "POST",
+            url: app_rest_admin_strategies_postapplystrategybyslug,
+            data: serialize,
+            error: (result) => {
+                console.log(result.responseJSON.status);
+            },
+            success: (data) => {
+                var pDiv = $('<div/>', {'class': 'col-4 core_analysis_result'});
+                var pTag = $('<p/>', {'class': 'd-inline'});
+                var span = $('<span />');
+
+                if (data.result) {
+                    span.append('<i class="fa fa-check" aria-hidden="true"></i>');
+                } else {
+                    span.append('<i class="fas fa-ban"></i>');
+                }
+                pTag.append(data.result).append(span);
+                pDiv.append($('<p/>', {'text': 'Result: ', 'class': 'd-inline'})).append(pTag);
+                pDiv.insertAfter(button);
+            }
+        });
     }
 
     function renderSimditor(categoryId, form, modal, button) {
@@ -492,18 +547,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function addInitPhotoToUppy(uppy, blob, isErrorPhoto = false, item) {
-        let configObj = {
-            name: item.originalName, // override in onBeforeFileAdded event
-            type: 'image/jpeg',
-            data: blob,
-            source: isErrorPhoto ? 'canvasPlaceholderError' : '',
-        };
-
-        let file_id = uppy.addFile(configObj);
-        uppy.setFileMeta(file_id, {m_file_id: item.id})
-    }
-
     /**
      *
      * @param formInput
@@ -531,13 +574,25 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     $('.btn.btn-primary').on('click', function () {
-        if ($('#editBrand input').length) {
-            $.each($('#editBrand input'), function (k, v) {
+        let editBrand = $('#editBrand');
+        let inputColumns = editBrand.find('input');
+        if (inputColumns.length) {
+            $.each(inputColumns, function (k, v) {
                 $(v).val($.trim($(v).val()));
             })
         }
 
-        let serialize = $('#editBrand').serialize();
+        let requiredArgs = $('.required_args');
+        if (requiredArgs.length) {
+            $.each(requiredArgs, function (k, v) {
+                let currentInput = $(v).clone();
+                currentInput.attr('name', 'required_args['+currentInput.attr('name')+']');
+                currentInput.attr('type', 'hidden');
+                editBrand.append(currentInput)
+            })
+        }
+
+        let serialize = editBrand.serialize();
 
         const app_rest_admin_brand_editbrand = window.Routing
             .generate('app_rest_admin_brand_editbrand');
@@ -547,6 +602,7 @@ document.addEventListener("DOMContentLoaded", function () {
             url: app_rest_admin_brand_editbrand,
             data: serialize,
             error: (result) => {
+                editBrand.find('.required_args').remove();
                 console.log(result.responseJSON.status);
             },
             success: (data) => {
@@ -555,5 +611,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 table.ajax.reload(null, false);
             }
         });
-    })
+    });
+
+    /**
+     *
+     * @param str
+     * @param force
+     * @returns {string}
+     */
+    function ucfirst(str, force) {
+        str = force ? str.toLowerCase() : str;
+        return str.replace(/(\b)([a-zA-Z])/,
+            function (firstLetter) {
+                return firstLetter.toUpperCase();
+            });
+    }
 });

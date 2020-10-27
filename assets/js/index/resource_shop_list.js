@@ -323,7 +323,6 @@ document.addEventListener("DOMContentLoaded", function () {
             dropdownAutoWidth: true,
             width: '100%',
             multiple: true,
-            minimumInputLength: 2,
             allowClear: true,
             templateSelection: generateCategoryView,
             templateResult: customFormatSelection,

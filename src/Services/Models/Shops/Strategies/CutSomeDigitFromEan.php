@@ -9,16 +9,23 @@ class CutSomeDigitFromEan extends AbstractStrategy
 {
     public static $description = 'cut some symbol from ean';
     public static $requiredInputs = ['ean'];
+    public static $requiredArgs = ['cutFromEan', 'offsetEan'];
 
     protected $cutFromEan;
+
+    protected $offsetEan = 0;
 
     /**
      * CutSomeDigitFromEan constructor.
      * @param $cutFromEan
+     * @param int|null $offsetEan
      */
-    public function __construct($cutFromEan)
+    public function __construct($cutFromEan, ?int $offsetEan = 0)
     {
         $this->cutFromEan = $cutFromEan;
+        if ($offsetEan) {
+            $this->offsetEan = $offsetEan;
+        }
     }
 
     /**
@@ -40,7 +47,7 @@ class CutSomeDigitFromEan extends AbstractStrategy
      */
     function coreAnalysis(array $requiredInputs)
     {
-        $this->validateRequiredInputs($requiredInputs);
+        $this->validateRequiredInputs($requiredInputs, self::$requiredInputs);
         /**
          * @var $ean
          */
@@ -48,7 +55,7 @@ class CutSomeDigitFromEan extends AbstractStrategy
         $identity = false;
 
         if (strlen($ean)) {
-            $identity = mb_substr($ean, 0, $this->cutFromEan);
+            $identity = mb_substr($ean, $this->offsetEan, $this->cutFromEan);
         }
 
         return $identity;

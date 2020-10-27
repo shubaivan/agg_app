@@ -24,7 +24,8 @@ abstract class SlugAbstract implements SlugInterface
      *     Shop::SERIALIZED_GROUP_LIST,
      *     AdjacentProduct::GROUP_GENERATE_ADJACENT,
      *     Product::SERIALIZED_GROUP_LIST,
-     *     Shop::SERIALIZED_GROUP_GET_BY_SLUG
+     *     Shop::SERIALIZED_GROUP_GET_BY_SLUG,
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
      *     })
      */
     protected $slug;

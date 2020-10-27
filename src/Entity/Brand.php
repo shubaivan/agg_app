@@ -90,13 +90,13 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
     private $files;
 
     /**
-     * @var Strategies
-     * @ORM\ManyToOne(targetEntity="Strategies",
-     *      inversedBy="brands",
+     * @var BrandStrategy
+     * @ORM\OneToOne(targetEntity="BrandStrategy",
+     *      mappedBy="brand",
      *      cascade={"persist"}
      *     )
      */
-    private $strategy;
+    private $brandStrategies;
 
     public function __construct()
     {
@@ -287,14 +287,20 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
         return $this->top;
     }
 
-    public function getStrategy(): ?Strategies
+    public function getBrandStrategies(): ?BrandStrategy
     {
-        return $this->strategy;
+        return $this->brandStrategies;
     }
 
-    public function setStrategy(?Strategies $strategy): self
+    public function setBrandStrategies(?BrandStrategy $brandStrategies): self
     {
-        $this->strategy = $strategy;
+        $this->brandStrategies = $brandStrategies;
+
+        // set (or unset) the owning side of the relation if necessary
+        $newBrand = null === $brandStrategies ? null : $this;
+        if ($brandStrategies->getBrand() !== $newBrand) {
+            $brandStrategies->setBrand($newBrand);
+        }
 
         return $this;
     }

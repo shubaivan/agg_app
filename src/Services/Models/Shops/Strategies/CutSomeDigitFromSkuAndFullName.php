@@ -8,14 +8,16 @@ class CutSomeDigitFromSkuAndFullName extends CutSomeDigitFromSku
 {
     public static $description = 'cut some count of symbol from sku and plus full name';
     public static $requiredInputs = ['sku', 'name'];
+    public static $requiredArgs = ['cutFromSku', 'offsetSku'];
 
     /**
      * CutSomeDigitFromSkuAndFullName constructor.
      * @param int $cutFromSku
+     * @param int|null $offsetSku
      */
-    public function __construct(int $cutFromSku)
+    public function __construct(int $cutFromSku, ?int $offsetSku = 0)
     {
-        parent::__construct($cutFromSku);
+        parent::__construct($cutFromSku, $offsetSku);
     }
 
     public function __invoke(Product $product)

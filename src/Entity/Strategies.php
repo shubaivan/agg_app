@@ -24,44 +24,69 @@ class Strategies extends SlugAbstract
 {
     use TimestampableEntity;
 
+    const SERIALIZED_GROUP_GET_BY_SLUG = 'get_by_slug';
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Annotation\Groups({
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
+     * })
      */
     private $id;
 
     /**
      * @ORM\Column(type="string")
+     * @Annotation\Groups({
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
+     * })
      */
     private $strategyName;
 
     /**
      * @ORM\Column(type="string")
+     * @Annotation\Groups({
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
+     * })
      */
     private $strategyNameSpace;
 
     /**
      * @ORM\Column(type="text")
+     * @Annotation\Groups({
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
+     * })
      */
     private $description;
 
     /**
      * @ORM\Column(type="jsonb", nullable=true)
      * @Annotation\Type("array")
+     * @Annotation\Groups({
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
+     * })
      */
     private $requiredInputs = [];
 
     /**
-     * @var Collection|Brand[]
-     * @ORM\OneToMany(targetEntity="Brand", mappedBy="strategy", fetch="LAZY")
+     * @ORM\Column(type="jsonb", nullable=true)
+     * @Annotation\Type("array")
+     * @Annotation\Groups({
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
+     * })
      */
-    private $brands;
+    private $requiredArgs = [];
 
-    public function __construct()
-    {
-        $this->brands = new ArrayCollection();
-    }
+
+    /**
+     * @var BrandStrategy
+     * @ORM\OneToOne(targetEntity="BrandStrategy",
+     *      mappedBy="strategy",
+     *      cascade={"persist"}
+     *     )
+     */
+    private $brandStrategies;
 
     public function getDataFroSlug()
     {
@@ -121,36 +146,31 @@ class Strategies extends SlugAbstract
         return $this;
     }
 
-    /**
-     * @return Collection|Brand[]
-     */
-    public function getBrands(): Collection
+    public function getRequiredArgs()
     {
-        if (!$this->brands) {
-            $this->brands = new ArrayCollection();
-        }
-
-        return $this->brands;
+        return $this->requiredArgs;
     }
 
-    public function addBrand(Brand $brand): self
+    public function setRequiredArgs($requiredArgs): self
     {
-        if (!$this->getBrands()->contains($brand)) {
-            $this->getBrands()->add($brand);
-            $brand->setStrategy($this);
-        }
+        $this->requiredArgs = $requiredArgs;
 
         return $this;
     }
 
-    public function removeBrand(Brand $brand): self
+    public function getBrandStrategies(): ?BrandStrategy
     {
-        if ($this->getBrands()->contains($brand)) {
-            $this->getBrands()->removeElement($brand);
-            // set the owning side to null (unless already changed)
-            if ($brand->getStrategy() === $this) {
-                $brand->setStrategy(null);
-            }
+        return $this->brandStrategies;
+    }
+
+    public function setBrandStrategies(?BrandStrategy $brandStrategies): self
+    {
+        $this->brandStrategies = $brandStrategies;
+
+        // set (or unset) the owning side of the relation if necessary
+        $newStrategy = null === $brandStrategies ? null : $this;
+        if ($brandStrategies->getStrategy() !== $newStrategy) {
+            $brandStrategies->setStrategy($newStrategy);
         }
 
         return $this;

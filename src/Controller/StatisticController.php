@@ -99,29 +99,6 @@ EOF;
      */
     public function bufferTestAction()
     {
-        $dir = $this->kernel->getProjectDir() . '/src/Services/Models/Shops/Strategies';
-        $array_diff = array_diff(scandir($dir), array('..', '.'));
-        foreach ($array_diff as $item) {
-            $preg_replace = preg_replace("/\..+/", "", $item);
-            if (!is_dir($dir.'/'.$preg_replace)) {
-                $argument = 'App\Services\Models\Shops\Strategies\\' . $preg_replace;
-                $r = new \ReflectionClass($argument);
-                $requireProperties = $r->newInstanceWithoutConstructor()::requireProperty();
-                $value = [];
-                foreach ($requireProperties as $property) {
-                    $value[$property] = $r->getProperty($property)->getValue();
-                }
-                $value['strategyNameSpace'] = $argument;
-                $value['strategyName'] = $preg_replace;
-
-                $handleObject = $this->handler->handleObject(
-                    $value,
-                    Strategies::class
-                );
-                $this->em->persist($handleObject);
-            }
-        }
-        $this->em->flush();
         $allStatistics = $this->statisticsService->getAllStatistics();
         return $this->render('statistics/statistics.html.twig', [
             'prepareDataTh' => $allStatistics['prepareDataTh'],

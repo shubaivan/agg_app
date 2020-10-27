@@ -8,18 +8,40 @@ class CutSomeDigitFromSkuAndSomeFromEan extends CutSomeDigitFromEan
 {
     public static $description = 'cut some count of symbol from sku and ean';
     public static $requiredInputs = ['sku', 'ean'];
+    public static $requiredArgs = [
+        'cutFromEan', 'cutFromSku',
+        'offsetEan', 'offsetSku',
+    ];
 
     protected $cutFromSku;
+
+    protected $offsetSku = 0;
+
+    /**
+     * @param array $requiredArgs
+     */
+    public static function setRequiredArgs(array $requiredArgs): void
+    {
+        self::$requiredArgs = $requiredArgs;
+    }
 
     /**
      * CutSomeDigitFromSkuAndSomeFromEan constructor.
      * @param $cutFromEan
      * @param $cutFromSku
+     * @param int|null $offsetSku
+     * @param int|null $offsetEan
      */
-    public function __construct($cutFromEan, $cutFromSku)
+    public function __construct(
+        $cutFromEan, $cutFromSku,
+        ?int $offsetSku = 0, ?int $offsetEan = 0
+    )
     {
-        parent::__construct($cutFromEan);
+        parent::__construct($cutFromEan, $offsetEan);
         $this->cutFromSku = $cutFromSku;
+        if ($offsetSku) {
+            $this->offsetSku = $offsetSku;
+        }
     }
 
 
@@ -41,7 +63,7 @@ class CutSomeDigitFromSkuAndSomeFromEan extends CutSomeDigitFromEan
      */
     function coreAnalysis(array $requiredInputs)
     {
-        $this->validateRequiredInputs($requiredInputs);
+        $this->validateRequiredInputs($requiredInputs, self::$requiredInputs);
         /**
          * @var $ean
          * @var $sku
@@ -52,7 +74,7 @@ class CutSomeDigitFromSkuAndSomeFromEan extends CutSomeDigitFromEan
         ]);
 
         if (strlen($sku)) {
-            $identity .= '_' . mb_substr($sku, 0, $this->cutFromSku);
+            $identity .= '_' . mb_substr($sku, $this->offsetSku, $this->cutFromSku);
         }
 
         return $identity;

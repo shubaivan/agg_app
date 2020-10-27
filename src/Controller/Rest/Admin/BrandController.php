@@ -175,6 +175,13 @@ class BrandController extends AbstractRestController
                     $file->setBrand($brand);
                 }
             }
+
+            if ($request->get('required_args')
+                && $request->get('strategy')
+            ) {
+
+            }
+
             $objectManager->flush();
             $connection->commit();
 

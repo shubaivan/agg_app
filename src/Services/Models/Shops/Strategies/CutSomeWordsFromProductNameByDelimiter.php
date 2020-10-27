@@ -9,21 +9,28 @@ class CutSomeWordsFromProductNameByDelimiter extends AbstractStrategy
 {
     public static $description = 'cut some word, divided by delimiter, from name';
     public static $requiredInputs = ['name'];
+    public static $requiredArgs = ['cutWord', 'pattern', 'offsetName'];
 
     private $cutWord;
 
     private $pattern = '\s+\\\\,.\/';
 
+    protected $offsetName = 0;
+
     /**
      * CutSomeWordsFromProductNameByDelimiter constructor.
      * @param $cutWord
      * @param string|null $pattern
+     * @param int|null $offsetName
      */
-    public function __construct($cutWord, ?string $pattern = null)
+    public function __construct($cutWord, ?string $pattern = null, ?int $offsetName = 0)
     {
         $this->cutWord = $cutWord;
         if ($pattern) {
             $this->pattern = $pattern;
+        }
+        if ($offsetName) {
+            $this->offsetName = $offsetName;
         }
     }
 
@@ -60,7 +67,7 @@ class CutSomeWordsFromProductNameByDelimiter extends AbstractStrategy
             if (count($name)) {
                 $array_slice = array_slice(
                     $name,
-                    0,
+                    $this->offsetName,
                     $this->cutWord
                 );
                 $identity = mb_strtolower(implode('_', $array_slice));
