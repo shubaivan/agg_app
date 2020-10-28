@@ -12,4 +12,6 @@ interface IdentityGroup
      * @return mixed
      */
     public function identityGroupColumn(Product $product);
+
+    public function identityBrand();
 }

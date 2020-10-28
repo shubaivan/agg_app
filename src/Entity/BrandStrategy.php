@@ -48,7 +48,7 @@ class BrandStrategy implements EntityValidatorException
     private $brand;
 
     /**
-     * @ORM\OneToOne(targetEntity="Strategies", inversedBy="brandStrategies", fetch="LAZY")
+     * @ORM\ManyToOne(targetEntity="Strategies", inversedBy="brandStrategies", fetch="LAZY")
      * @Assert\NotBlank()
      * @Annotation\Groups({
      *     Brand::SERIALIZED_GROUP_BY_SLUG,

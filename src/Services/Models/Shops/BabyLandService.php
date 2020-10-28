@@ -4,9 +4,13 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class BabyLandService extends AbstractShop implements IdentityGroup
+class BabyLandService extends AbstractShop
 {
     /**
+     * @param Product $product
+     * @return bool|mixed|void
+     * @throws \ReflectionException
+     *
      * name: "Color Kids Mössa & Vantar (Candy pink) (48)"
      * sku: "207126"
      * sku: "207127"
@@ -21,13 +25,14 @@ class BabyLandService extends AbstractShop implements IdentityGroup
      *
      * ean: 6438429169260, sku: 256904
      * ean: 6438429169178, sku: 256900
-     *
-     *
-     * @param Product $product
-     * @return mixed|void
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $sku = $product->getSku();
         $groupIdentity = [];
         if (strlen($sku)) {

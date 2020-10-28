@@ -505,7 +505,7 @@ class ProductRepository extends ServiceEntityRepository
 
     /**
      * @param string $shopName
-     * @return mixed[]
+     * @return bool
      * @throws \Doctrine\DBAL\DBALException
      */
     public function removeProductsByShop(string $shopName)
@@ -523,15 +523,13 @@ class ProductRepository extends ServiceEntityRepository
         $bindParams[':shop_name'] = $shopName;
         $bindParamsType[':shop_name'] = \PDO::PARAM_STR;
 
-        $statement = $connection->executeQuery(
+        $connection->executeQuery(
             $query,
             $bindParams,
             $bindParamsType
         );
 
-        $all = $statement->fetchAll(\PDO::FETCH_ASSOC);
-
-        return $all;
+        return true;
     }
 
     /**

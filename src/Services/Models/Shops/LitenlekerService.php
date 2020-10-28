@@ -8,27 +8,20 @@ use App\Services\Models\Shops\Strategies\CutSomeWordsFromProductNameByDelimiter;
 use App\Services\Models\Shops\Strategies\CutSomeBlocksByDelimiterFromSku;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEan;
 
-class LitenlekerService implements IdentityGroup
+class LitenlekerService extends AbstractShop
 {
     /**
-     * @var array
-     */
-    private $identityBrand = [];
-
-    /**
-     * SpelexpertenService constructor.
-     */
-    public function __construct()
-    {
-        $this->identityBrand = $this->identityBrand();
-    }
-
-    /**
      * @param Product $product
-     * @return Product|mixed
+     * @return Product|bool|mixed|void
+     * @throws \ReflectionException
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         if (array_key_exists($product->getBrand(), $this->identityBrand)) {
             $strategy = $this->identityBrand[$product->getBrand()];
         } else {

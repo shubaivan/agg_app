@@ -4,6 +4,8 @@
 namespace App\Services\Models\Shops\Strategies\Common;
 
 
+use App\Entity\Product;
+
 abstract class AbstractStrategy
 {
     public static $description = '';
@@ -16,6 +18,8 @@ abstract class AbstractStrategy
     }
 
     abstract function coreAnalysis(array $requiredInputs);
+
+    abstract function __invoke(Product $product);
 
     /**
      * @param array $data

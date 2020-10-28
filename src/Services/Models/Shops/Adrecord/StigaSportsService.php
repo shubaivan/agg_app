@@ -5,10 +5,11 @@ namespace App\Services\Models\Shops\Adrecord;
 
 
 use App\Entity\Product;
+use App\Services\Models\Shops\AbstractShop;
 use App\Services\Models\Shops\IdentityGroup;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEan;
 
-class StigaSportsService implements IdentityGroup
+class StigaSportsService extends AbstractShop
 {
     /**
      * @var bool
@@ -16,24 +17,17 @@ class StigaSportsService implements IdentityGroup
     private $match = false;
 
     /**
-     * @var array
-     */
-    private $identityBrand = [];
-
-    /**
-     * SpelexpertenService constructor.
-     */
-    public function __construct()
-    {
-        $this->identityBrand = $this->identityBrand();
-    }
-
-    /**
      * @param Product $product
-     * @return Product|mixed
+     * @return Product|bool|mixed|void
+     * @throws \ReflectionException
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         if (array_key_exists($product->getBrand(), $this->identityBrand)) {
             $strategy = $this->identityBrand[$product->getBrand()];
         } else {

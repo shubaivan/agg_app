@@ -14,6 +14,7 @@ use App\Repository\FilesRepository;
 use App\Repository\ProductRepository;
 use App\Repository\StrategiesRepository;
 use App\Services\Models\Shops\Strategies\Common\AbstractStrategy;
+use App\Services\Models\StrategyService;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\NonUniqueResultException;
@@ -38,17 +39,24 @@ class StrategiesController extends AbstractRestController
     private $strategiesRepository;
 
     /**
+     * @var StrategyService
+     */
+    private $strategyService;
+
+    /**
      * StrategiesController constructor.
      * @param Helpers $helpers
      * @param StrategiesRepository $strategiesRepository
+     * @param StrategyService $strategyService
      */
     public function __construct(
         Helpers $helpers,
-        StrategiesRepository $strategiesRepository
+        StrategiesRepository $strategiesRepository,
+        StrategyService $strategyService
     )
     {
         parent::__construct($helpers);
-
+        $this->strategyService = $strategyService;
         $this->strategiesRepository = $strategiesRepository;
     }
 
@@ -145,22 +153,10 @@ class StrategiesController extends AbstractRestController
             ->findOneBy(['slug' => $slug]);
         $coreAnalysis = false;
         if ($strategy) {
-            $strategyNameSpace = $strategy->getStrategyNameSpace();
-            $requiredArgs = $strategy->getRequiredArgs();
-            $requiredArgsData = [];
-            foreach ($requiredArgs as $arg) {
-                $requiredArgsData[$arg] = $request->get($arg);
-            }
-            $reflector = new \ReflectionClass($strategyNameSpace);
-            /** @var AbstractStrategy $instance */
-            $instance = $reflector->newInstanceArgs($requiredArgsData);
-
-            $requiredInputs = $strategy->getRequiredInputs();
-            $requiredInputsData = [];
-            foreach ($requiredInputs as $input) {
-                $requiredInputsData[$input] = $request->get($input);
-            }
-            $coreAnalysis = $instance->coreAnalysis($requiredInputsData);
+            $coreAnalysis = $this->strategyService
+                ->applyCoreAnalysis(
+                    $strategy, (new ParameterBag($request->request->all()))
+                );
         }
 
         return ['result' => $coreAnalysis];

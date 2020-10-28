@@ -4,6 +4,7 @@
 namespace App\Services\Models\Shops\Awin;
 
 use App\Entity\Product;
+use App\Services\Models\Shops\AbstractShop;
 use App\Services\Models\Shops\IdentityGroup;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEan;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndSomeFromEan;
@@ -14,26 +15,27 @@ use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndFullName;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndEanAndSomeWordFromName;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEanAndFullName;
 
-class EllosSEService implements IdentityGroup
+class EllosService extends AbstractShop
 {
-    private $identityBrand = [];
-
     /**
-     * EllosSEService constructor.
-     * @param array $identityBrand
+     * @param Product $product
+     * @return bool|mixed|void
+     * @throws \ReflectionException
+     * @throws \Exception
      */
-    public function __construct()
-    {
-        $this->identityBrand = $this->identityBrand();
-    }
-
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         if (array_key_exists($product->getBrand(), $this->identityBrand)) {
             $strategy = $this->identityBrand[$product->getBrand()];
         } else {
             $strategy = new CutSomeDigitFromSkuAndSomeFromEan(-2, -2);
         }
+
         $strategy($product);
     }
 

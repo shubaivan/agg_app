@@ -2,6 +2,7 @@
 
 namespace App\Services\Models;
 
+use App\Entity\Product;
 use App\Entity\Shop;
 use App\Services\Models\Shops\Adrecord\BabyBjornService;
 use App\Services\Models\Shops\Adrecord\CardooniaService;
@@ -20,7 +21,7 @@ use App\Services\Models\Shops\Adrecord\StrumpgalenService;
 use App\Services\Models\Shops\Adrecord\TwarService;
 use App\Services\Models\Shops\AhlensService;
 use App\Services\Models\Shops\Awin\BlueTomatoService;
-use App\Services\Models\Shops\Awin\EllosSEService;
+use App\Services\Models\Shops\Awin\EllosService;
 use App\Services\Models\Shops\Awin\JDSportsService;
 use App\Services\Models\Shops\BabyLandService;
 use App\Services\Models\Shops\BabyShopService;
@@ -43,6 +44,7 @@ use App\Services\Models\Shops\SneakersPointService;
 use App\Services\Models\Shops\StorAndLitenService;
 use App\Services\Models\Shops\TradeDoubler\BonprixService;
 use App\Services\Models\Shops\TradeDoubler\SportamoreService;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 class ManagerShopsService
 {
@@ -254,7 +256,7 @@ class ManagerShopsService
     private $jd_sports;
 
     /**
-     * @var EllosSEService
+     * @var EllosService
      */
     private $ellos_se;
 
@@ -262,6 +264,11 @@ class ManagerShopsService
      * @var BlueTomatoService
      */
     private $blue_tomato;
+
+    /**
+     * @var StrategyService
+     */
+    protected $strategyService;
 
     /**
      * ManagerShopsService constructor.
@@ -302,10 +309,11 @@ class ManagerShopsService
      * @param SportamoreService $sportamore
      * @param BonprixService $bonprix
      * @param JDSportsService $jd_sports
-     * @param EllosSEService $ellos_se
+     * @param EllosService $ellos_se
      * @param BlueTomatoService $blue_tomato
+     * @param StrategyService $strategyService
      */
-    public function __construct(PyretService $polarn_pyret, BabyShopService $babyshop, JollyRoomService $jollyroom, ReimaService $reima, LekmerService $lekmer, BabyLandService $babyland, BabyVService $babyV, ElodiService $elodi, LindexService $lindex, LitenlekermerService $litenlekermer, CykloteketService $cykloteket, AhlensService $ahlens, BabyBjornService $baby_bjorn, CardooniaService $cardoonia, EbbeKids $ebbeKids, FrankDandy $frankDandy, Jultroja $jultroja, GusTextil $gus_rextil, LeksakscityService $leksakscity, NallerietService $nalleriet, NamnbandService $namnband, ShirtstoreService $shirtstore, SpelexpertenService $spelexperten, SportshopenService $sportshopen, StigaSportsService $stigaSports, StrumpgalenService $strumpgalen, TwarService $twar, NikeService $nike, LitenlekerService $litenleker, COSService $cos, BjornBorgService $bjorn_borg, LekiaService $lekia, SneakersPointService $sneakersPoint, StorAndLitenService $stor_and_liten, SportamoreService $sportamore, BonprixService $bonprix, JDSportsService $jd_sports, EllosSEService $ellos_se, BlueTomatoService $blue_tomato)
+    public function __construct(PyretService $polarn_pyret, BabyShopService $babyshop, JollyRoomService $jollyroom, ReimaService $reima, LekmerService $lekmer, BabyLandService $babyland, BabyVService $babyV, ElodiService $elodi, LindexService $lindex, LitenlekermerService $litenlekermer, CykloteketService $cykloteket, AhlensService $ahlens, BabyBjornService $baby_bjorn, CardooniaService $cardoonia, EbbeKids $ebbeKids, FrankDandy $frankDandy, Jultroja $jultroja, GusTextil $gus_rextil, LeksakscityService $leksakscity, NallerietService $nalleriet, NamnbandService $namnband, ShirtstoreService $shirtstore, SpelexpertenService $spelexperten, SportshopenService $sportshopen, StigaSportsService $stigaSports, StrumpgalenService $strumpgalen, TwarService $twar, NikeService $nike, LitenlekerService $litenleker, COSService $cos, BjornBorgService $bjorn_borg, LekiaService $lekia, SneakersPointService $sneakersPoint, StorAndLitenService $stor_and_liten, SportamoreService $sportamore, BonprixService $bonprix, JDSportsService $jd_sports, EllosService $ellos_se, BlueTomatoService $blue_tomato, StrategyService $strategyService)
     {
         $this->polarn_pyret = $polarn_pyret;
         $this->babyshop = $babyshop;
@@ -348,13 +356,35 @@ class ManagerShopsService
         $this->blue_tomato = $blue_tomato;
     }
 
+    /**
+     * @param $name
+     * @param $arguments
+     * @return bool
+     * @throws \ReflectionException
+     */
     public function __call($name, $arguments)
     {
         $prepareProperty = Shop::getMapShopKeyByOriginalName($name);
-
+        /** @var Product $product */
+        $product = array_shift($arguments);
         if (property_exists($this, $prepareProperty)) {
-            $this->getProprtyObject($prepareProperty)
-                ->identityGroupColumn(array_shift($arguments));
+            $this->getPropertyObject($prepareProperty)
+                ->identityGroupColumn($product);
+        } else {
+            $brand = $product->getBrandRelation();
+            if ($brand && $brand->getBrandStrategies() && $brand->getBrandStrategies()->getStrategy()) {
+                $strategy = $this->strategyService
+                    ->prepareStrategyInstanceWithArgs(
+                        $brand->getBrandStrategies()->getStrategy(),
+                        (new ParameterBag(array_merge(
+                            $brand->getBrandStrategies()->getRequiredArgs()
+                        )))
+                    );
+                $strategy($product);
+                if ($product->getGroupIdentity()) {
+                    return true;
+                }
+            }
         }
     }
 
@@ -362,7 +392,7 @@ class ManagerShopsService
      * @param string $property
      * @return IdentityGroup
      */
-    private function getProprtyObject(string $property)
+    private function getPropertyObject(string $property)
     {
         return $this->$property;
     }

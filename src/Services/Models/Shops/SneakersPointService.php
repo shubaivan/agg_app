@@ -6,11 +6,12 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class SneakersPointService implements IdentityGroup
+class SneakersPointService extends AbstractShop
 {
     /**
      * @param Product $product
-     * @return mixed|void
+     * @return bool|mixed|void
+     * @throws \ReflectionException
      *
      * 258908101101
      * 258908101102
@@ -22,6 +23,11 @@ class SneakersPointService implements IdentityGroup
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $identity = [];
         $sku = $product->getSku();
         if (strlen($sku)) {

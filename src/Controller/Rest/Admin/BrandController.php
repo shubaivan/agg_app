@@ -240,7 +240,7 @@ class BrandController extends AbstractRestController
                         }
                     }
                     $brandStrategy = $this->brandStrategyRepository
-                        ->findOneBy(['strategy' => $strategy, 'brand' => $brand]);
+                        ->findOneBy(['brand' => $brand]);
                     if (!$brandStrategy) {
                         $brandStrategy = new BrandStrategy();
                         $brandStrategy

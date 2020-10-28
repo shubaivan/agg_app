@@ -84,7 +84,7 @@ class Strategies extends SlugAbstract
 
     /**
      * @var BrandStrategy
-     * @ORM\OneToOne(targetEntity="BrandStrategy",
+     * @ORM\OneToMany(targetEntity="BrandStrategy",
      *      mappedBy="strategy",
      *      cascade={"persist"}
      *     )

@@ -3,6 +3,7 @@
 namespace App\Services\Models\Shops\Awin;
 
 use App\Entity\Product;
+use App\Services\Models\Shops\AbstractShop;
 use App\Services\Models\Shops\IdentityGroup;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSku;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEan;
@@ -11,20 +12,21 @@ use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndSomeFromEan;
 use App\Services\Models\Shops\Strategies\CutSomeWordsFromProductNameByDelimiter;
 use App\Services\Models\Shops\Strategies\FullProductName;
 
-class JDSportsService implements IdentityGroup
+class JDSportsService extends AbstractShop
 {
-    private $identityBrand = [];
-
     /**
-     * JDSportsService constructor.
+     * @param Product $product
+     * @return bool|mixed|void
+     * @throws \ReflectionException
+     * @throws \Exception
      */
-    public function __construct()
-    {
-        $this->identityBrand = $this->identityBrand();
-    }
-
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         if (array_key_exists($product->getBrand(), $this->identityBrand)) {
             $strategy = $this->identityBrand[$product->getBrand()];
         } else {

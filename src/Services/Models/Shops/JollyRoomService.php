@@ -6,18 +6,24 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class JollyRoomService extends AbstractShop implements IdentityGroup
+class JollyRoomService extends AbstractShop
 {
     /**
+     * @param Product $product
+     * @return bool|mixed|void
+     * @throws \ReflectionException
+     *
      * name: "Paw Patrol Baddräkt, Lila, 6 År"
      * https://www.jollyroom.se/sport/sportskor/traningsskor/adidas-adizero-club-jr-tennisskor
      * https://www.jollyroom.se/sport/sportskor/traningsskor/adidas-adizero-club-jr-tennisskor
-     *
-     * @param Product $product
-     * @return mixed|void
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $name = $product->getName();
         $explodeName = explode(',', $name);
         if (count($explodeName) > 1) {

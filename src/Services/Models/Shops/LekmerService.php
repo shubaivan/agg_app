@@ -6,16 +6,23 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class LekmerService implements IdentityGroup
+class LekmerService extends AbstractShop
 {
 
     /**
-     * productUrl: "https://lekmer.se/penguin-vinteroverall-gra/p/36019?country_override=SE&dfw_tracker=42152-174894"
-     *
      * @param Product $product
+     * @return bool|mixed|void
+     * @throws \ReflectionException
+     *
+     * productUrl: "https://lekmer.se/penguin-vinteroverall-gra/p/36019?country_override=SE&dfw_tracker=42152-174894"
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $productUrl = $product->getProductUrl();
 
         if (preg_match(

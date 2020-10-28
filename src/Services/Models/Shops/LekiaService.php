@@ -6,17 +6,23 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class LekiaService implements IdentityGroup
+class LekiaService extends AbstractShop
 {
     /**
      * @param Product $product
-     * @return mixed|void
-     * 
+     * @return bool|mixed|void
+     * @throws \ReflectionException
+     *
      * alga_38010693
      * alga_38010694
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $sku = $product->getSku();
 
         $preg_split = preg_split('/-/', $sku);

@@ -5,12 +5,23 @@ namespace App\Services\Models\Shops\Adrecord;
 
 
 use App\Entity\Product;
+use App\Services\Models\Shops\AbstractShop;
 use App\Services\Models\Shops\IdentityGroup;
 
-class NamnbandService implements IdentityGroup
+class NamnbandService extends AbstractShop
 {
+    /**
+     * @param Product $product
+     * @return bool|mixed|void
+     * @throws \ReflectionException
+     */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $sku = $product->getSku();
         if ($sku && $product->getProductUrl()) {
             $firstEl = mb_substr($sku, 0, 2);

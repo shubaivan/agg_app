@@ -4,36 +4,34 @@
 namespace App\Services\Models\Shops\Awin;
 
 use App\Entity\Product;
+use App\Services\Models\Shops\AbstractShop;
 use App\Services\Models\Shops\IdentityGroup;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromEan;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSku;
 use App\Services\Models\Shops\Strategies\CutSomeWordsFromProductNameByDelimiter;
 use App\Services\Models\Shops\Strategies\FullProductName;
 
-class BlueTomatoService implements IdentityGroup
+class BlueTomatoService extends AbstractShop
 {
-    private $identityBrand = [];
-
-    /**
-     * BlueTomatoService constructor.
-     */
-    public function __construct()
-    {
-        $this->identityBrand = $this->identityBrand();
-    }
-
     /**
      * @param Product $product
-     * @return mixed|void
+     * @return bool|mixed|void
+     * @throws \ReflectionException
      * @throws \Exception
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         if (array_key_exists($product->getBrand(), $this->identityBrand)) {
             $strategy = $this->identityBrand[$product->getBrand()];
         } else {
             $strategy = new CutSomeDigitFromEan(-3);
         }
+
         $strategy($product);
     }
 

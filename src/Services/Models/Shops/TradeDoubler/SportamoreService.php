@@ -5,13 +5,15 @@ namespace App\Services\Models\Shops\TradeDoubler;
 
 
 use App\Entity\Product;
+use App\Services\Models\Shops\AbstractShop;
 use App\Services\Models\Shops\IdentityGroup;
 
-class SportamoreService implements IdentityGroup
+class SportamoreService extends AbstractShop
 {
     /**
      * @param Product $product
-     * @return mixed|void
+     * @return bool|mixed|void
+     * @throws \ReflectionException
      *
      * 03203
      * 03203
@@ -39,6 +41,11 @@ class SportamoreService implements IdentityGroup
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $sku = $product->getSku();
         if ($sku) {
             $product->setGroupIdentity($sku);   
