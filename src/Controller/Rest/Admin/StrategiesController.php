@@ -95,7 +95,7 @@ class StrategiesController extends AbstractRestController
     }
 
     /**
-     * get Strategy bu slug.
+     * get Strategy by slug.
      *
      * @Rest\Get("/admin/api/strategy/{slug}", options={"expose": true})
      *

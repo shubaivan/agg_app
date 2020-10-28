@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  */
 class StrategiesRepository extends ServiceEntityRepository
 {
+    const SELECT_2_STRATEGIES_MODELS = 'select2_strategies_models';
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Strategies::class);
@@ -39,10 +41,11 @@ class StrategiesRepository extends ServiceEntityRepository
         } else {
             $dql = '
                 SELECT 
-                s.id, 
+                s.id as core_id, 
                 s.strategyName as text,
                 s.description,
-                s.slug   
+                s.slug as id,
+                s.slug slug  
             ';
         }
         $dql .= '
@@ -58,16 +61,14 @@ class StrategiesRepository extends ServiceEntityRepository
         $query = $this->getEntityManager();
         $createQuery = $query
             ->createQuery($dql);
-        if ($count) {
-            $createQuery
-                ->enableResultCache(0, 'select2_strategies_count');
-        } else {
+        if (!$count) {
             $createQuery
                 ->setFirstResult($page <= 1 ? 0 : 25 * $page - 1)
-                ->setMaxResults(25)
-                ->enableResultCache(0, 'select2_strategies_models');
+                ->setMaxResults(25);
         }
+
         $createQuery
+            ->enableResultCache(0, self::SELECT_2_STRATEGIES_MODELS)
             ->useQueryCache(true);
 
         if ($parameterBag->get('search')) {

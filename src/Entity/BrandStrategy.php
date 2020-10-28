@@ -2,20 +2,24 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Exception\EntityValidatorException;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation;
-use Doctrine\ORM\Mapping\UniqueConstraint;
+use Symfony\Component\Validator\Constraints as Assert;
+use App\Validation\Constraints\BrandStrategyRequiredArgs;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\BrandStrategyRepository")
  * @ORM\Table(name="brand_strategy")
+ * @BrandStrategyRequiredArgs()
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="brands_region")
  */
-class BrandStrategy
+class BrandStrategy implements EntityValidatorException
 {
     use TimestampableEntity;
+
+    const SERIALIZED_GROUP_BY_RELATION = 'brand_strategy_by_relation';
 
     /**
      * @ORM\Id()
@@ -31,18 +35,25 @@ class BrandStrategy
      * @ORM\Column(type="jsonb", nullable=true)
      * @Annotation\Type("array")
      * @Annotation\Groups({
-     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG,
+     *     Brand::SERIALIZED_GROUP_BY_SLUG
      * })
      */
     private $requiredArgs = [];
 
     /**
      * @ORM\OneToOne(targetEntity="Brand", inversedBy="brandStrategies", fetch="LAZY")
+     * @Assert\NotBlank()
      */
     private $brand;
 
     /**
      * @ORM\OneToOne(targetEntity="Strategies", inversedBy="brandStrategies", fetch="LAZY")
+     * @Assert\NotBlank()
+     * @Annotation\Groups({
+     *     Brand::SERIALIZED_GROUP_BY_SLUG,
+     *     BrandStrategy::SERIALIZED_GROUP_BY_RELATION
+     * })
      */
     private $strategy;
 
@@ -85,5 +96,10 @@ class BrandStrategy
         $this->strategy = $strategy;
 
         return $this;
+    }
+
+    public function getIdentity()
+    {
+        return $this->getId();
     }
 }

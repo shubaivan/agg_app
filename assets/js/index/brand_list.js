@@ -142,8 +142,17 @@ document.addEventListener("DOMContentLoaded", function () {
         "targets": 1,
         "data": 'brandName',
         "render": function (data, type, row, meta) {
-            let topBrand = row.top;
             var divTag = $('<div/>');
+            if (row.id) {
+                let pTagPureResult = $('<p/>', {
+                    "class": 'pure-result-brand_' + row.id,
+                    'type': 'hidden',
+                    'data-pure-result': JSON.stringify(row)
+                });
+                divTag.append(pTagPureResult);
+            }
+            let topBrand = row.top;
+
             var pTag = $('<p/>', {"class": 'bn_' + row.id});
             var span = $('<span />').addClass('tb_' + row.id).attr('tb_val', topBrand);
 
@@ -280,10 +289,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function renderEditForm(modelId, form, modal, button) {
-        let bn_value = $('.bn_' + modelId);
-        modal.find('.modal-title').text('Edit ' + bn_value.text() + ' brand');
-        setDataInForm(modal.find('.modal-body #bn'),
-            '.bn_' + modelId);
+        let pure_result = $('.pure-result-brand_' + modelId);
+        if (pure_result && pure_result.length) {
+            let pureResultData = pure_result.data('pureResult');
+
+            modal.find('.modal-title').text('Edit ' + pureResultData.brandName + ' brand');
+            let brandNameInput = modal.find('.modal-body #bn');
+            brandNameInput.val(pureResultData.brandName);
+            brandNameInput.text(pureResultData.brandName);
+        } else {
+            setDataInForm(modal.find('.modal-body #bn'),
+                '.bn_' + modelId);
+        }
 
         let brand_id_input = $('<input>').attr({
             type: 'hidden',
@@ -335,7 +352,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 type: 'post',
                 url: app_rest_admin_strategies_getstrategieslist,
                 data: function (params) {
-                    console.log(params);
+
                     let query = {
                         search: params.term,
                         page: params.page || 1,
@@ -347,10 +364,48 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         });
+        let pure_result = $('.pure-result-brand_' + modelId);
 
-        select.on('select2:select', function (e) {
-            var strategyData = e.params.data;
-            renderStrategyPlayGround(strategyData.slug, select);
+        if (pure_result && pure_result.length) {
+            select.on('change', function (e) {
+                let currentOption = e.currentTarget.selectedOptions;
+                renderStrategyPlayGround($(currentOption).attr('value'), select, pureResultData.slug);
+            });
+
+            let pureResultData = pure_result.data('pureResult');
+            renderExistStrategyInPlayGround(pureResultData.slug, select);
+        }
+    }
+
+    function renderExistStrategyInPlayGround(modelSlug, select)
+    {
+        const app_rest_admin_brand_getbrandbyslug = window.Routing
+            .generate('app_rest_admin_brand_getbrandbyslug', {'slug': modelSlug});
+
+        $.ajax({
+            type: "GET",
+            url: app_rest_admin_brand_getbrandbyslug,
+            error: (result) => {
+                console.log(result.responseJSON.status);
+            },
+            success: (data) => {
+                if (data.brandStrategies && data.brandStrategies.strategy) {
+                    let strategy = data.brandStrategies.strategy;
+
+                    // Set the value, creating a new option if necessary
+                    if (select.find("option[value='" + strategy.slug + "']").length) {
+                        select.val(data.slug).trigger('change');
+                    } else {
+                        // Create a DOM Option and pre-select by default
+                        var newOption = new Option(strategy.strategyName, strategy.slug, true, true);
+
+                        $(newOption).attr('data-description', strategy.description);
+
+                        // Append it to the select
+                        select.append(newOption).trigger('change');
+                    }
+                }
+            }
         });
     }
 
@@ -361,22 +416,48 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     };
 
-    function renderStrategyPlayGround(slug, select) {
-        const app_rest_admin_strategies_getstrategybyslug = window.Routing
-            .generate('app_rest_admin_strategies_getstrategybyslug', {'slug': slug});
+    function renderStrategyPlayGround(strategySlug, select, modelSlug) {
+        const app_rest_admin_brandstrategy_getbrandstrategy = window.Routing
+            .generate('app_rest_admin_brandstrategy_getbrandstrategy');
 
         $.ajax({
-            type: "GET",
-            url: app_rest_admin_strategies_getstrategybyslug,
+            type: "POST",
+            url: app_rest_admin_brandstrategy_getbrandstrategy,
+            data: {
+                brand_slug: modelSlug,
+                strategy_slug: strategySlug
+            },
             error: (result) => {
                 console.log(result.responseJSON.status);
             },
             success: (data) => {
-                $('.render_play_ground').remove();
-                let divTagFormRow = $('<div />').addClass('form-row render_play_ground');
-                renderExecuteButton(data, select, divTagFormRow);
-                renderRequiredInputsPlayGround(data, select, divTagFormRow);
-                renderRequiredArgsPlayGround(data, select, divTagFormRow);
+                if (Object.keys(data).length) {
+                    let strategy = data.strategy;
+                    $('.render_play_ground').remove();
+                    let divTagFormRow = $('<div />').addClass('form-row render_play_ground');
+                    renderExecuteButton(strategy, select, divTagFormRow);
+                    renderRequiredInputsPlayGround(strategy, select, divTagFormRow);
+                    renderRequiredArgsPlayGround(strategy, select, divTagFormRow, data.requiredArgs);
+                } else {
+                    const app_rest_admin_strategies_getstrategybyslug = window.Routing
+                        .generate('app_rest_admin_strategies_getstrategybyslug',
+                            {'slug': strategySlug});
+
+                    $.ajax({
+                        type: "GET",
+                        url: app_rest_admin_strategies_getstrategybyslug,
+                        error: (result) => {
+                            console.log(result.responseJSON.status);
+                        },
+                        success: (data) => {
+                            $('.render_play_ground').remove();
+                            let divTagFormRow = $('<div />').addClass('form-row render_play_ground');
+                            renderExecuteButton(data, select, divTagFormRow);
+                            renderRequiredInputsPlayGround(data, select, divTagFormRow);
+                            renderRequiredArgsPlayGround(data, select, divTagFormRow);
+                        }
+                    });
+                }
             }
         });
     }
@@ -395,7 +476,7 @@ document.addEventListener("DOMContentLoaded", function () {
         divTagFormRow.append(execute);
     }
 
-    function renderRequiredArgsPlayGround(strategy, select, divTagFormRow) {
+    function renderRequiredArgsPlayGround(strategy, select, divTagFormRow, existArgs = []) {
         let editBrandForm = select.closest('#editBrand');
 
         if ($.isArray(strategy.requiredArgs)) {
@@ -411,6 +492,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     class: 'required_args form-control',
                     type: 'text'
                 });
+
+                if (existArgs && existArgs.hasOwnProperty(render_required_args)) {
+                    required_arg.val(existArgs[render_required_args]);
+                    required_arg.text(existArgs[render_required_args]);
+                }
+
                 required_arg.prop('required',true);
                 divTag.append(labelTag).append(required_arg);
                 divTagFormRow.prepend(divTag);
@@ -509,7 +596,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function renderSimditor(categoryId, form, modal, button) {
+    function renderSimditor(modelId, form, modal, button) {
         $.each(form.find('.data_model_seo textarea'), function (k, v) {
             Simditor.locale = 'en-US';
             var editor = new Simditor({
@@ -540,7 +627,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             // console.log($(v).attr('id'));
             let dataInForm = setDataInForm(modal.find('.modal-body #' + $(v).attr('id')),
-                '.' + $(v).attr('id') + '_' + categoryId
+                '.' + $(v).attr('id') + '_' + modelId
             );
 
             editor.setValue(dataInForm)
@@ -606,7 +693,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log(result.responseJSON.status);
             },
             success: (data) => {
-                console.log(data);
                 $('#exampleModalLong').modal('toggle');
                 table.ajax.reload(null, false);
             }

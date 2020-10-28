@@ -39,7 +39,8 @@ class Strategies extends SlugAbstract
     /**
      * @ORM\Column(type="string")
      * @Annotation\Groups({
-     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG,
+     *     Brand::SERIALIZED_GROUP_BY_SLUG
      * })
      */
     private $strategyName;
@@ -55,7 +56,8 @@ class Strategies extends SlugAbstract
     /**
      * @ORM\Column(type="text")
      * @Annotation\Groups({
-     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG,
+     *     Brand::SERIALIZED_GROUP_BY_SLUG
      * })
      */
     private $description;
@@ -64,7 +66,8 @@ class Strategies extends SlugAbstract
      * @ORM\Column(type="jsonb", nullable=true)
      * @Annotation\Type("array")
      * @Annotation\Groups({
-     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG
+     *     Strategies::SERIALIZED_GROUP_GET_BY_SLUG,
+     *     BrandStrategy::SERIALIZED_GROUP_BY_RELATION
      * })
      */
     private $requiredInputs = [];

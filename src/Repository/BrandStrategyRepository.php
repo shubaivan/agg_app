@@ -19,6 +19,14 @@ class BrandStrategyRepository extends ServiceEntityRepository
         parent::__construct($registry, BrandStrategy::class);
     }
 
+    /**
+     * @param BrandStrategy $brandStrategy
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function persist(BrandStrategy $brandStrategy) {
+        $this->getEntityManager()->persist($brandStrategy);
+    }
+
     // /**
     //  * @return BrandStrategy[] Returns an array of BrandStrategy objects
     //  */
