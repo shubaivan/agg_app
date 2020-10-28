@@ -6,16 +6,23 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class BabyVService extends AbstractShop implements IdentityGroup
+class BabyVService extends AbstractShop
 {
     /**
+     * @param Product $product
+     * @return bool|mixed|void
+     * @throws \ReflectionException
+     *
      * productUrl: "https://www.babyv.se/sv/articles/1.37.18/babybjorn-babybjorn-balance-bliss-mesh-antracitgra"
      * productUrl: "https://www.babyv.se/sv/articles/1.37.9/babybjorn-babybjorn-balance-soft-jersey-morkgragra"
-     * @param Product $product
-     * @return mixed|void
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $productUrl = $product->getProductUrl();
 
         if (preg_match(

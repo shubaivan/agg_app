@@ -7,10 +7,15 @@ use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Cache\TagAwareQuerySecondLevelCacheBrand;
 use App\Cache\TagAwareQuerySecondLevelCacheCategory;
 use App\Entity\Brand;
+use App\Entity\BrandStrategy;
+use App\Entity\Strategies;
+use App\Repository\BrandStrategyRepository;
 use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\FilesRepository;
 use App\Repository\ProductRepository;
+use App\Repository\StrategiesRepository;
+use App\Services\ObjectsHandler;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\NonUniqueResultException;
@@ -54,6 +59,21 @@ class BrandController extends AbstractRestController
     private $fileRepo;
 
     /**
+     * @var StrategiesRepository
+     */
+    private $strategyRepository;
+
+    /**
+     * @var BrandStrategyRepository
+     */
+    private $brandStrategyRepository;
+
+    /**
+     * @var ObjectsHandler
+     */
+    private $objectsHandler;
+
+    /**
      * BrandController constructor.
      * @param Helpers $helpers
      * @param BrandRepository $brandRepository
@@ -61,6 +81,9 @@ class BrandController extends AbstractRestController
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
      * @param FilesRepository $fileRepo
      * @param TagAwareQuerySecondLevelCacheBrand $tagAwareQuerySecondLevelCacheBrand
+     * @param StrategiesRepository $strategiesRepository
+     * @param BrandStrategyRepository $brandStrategyRepository
+     * @param ObjectsHandler $objectsHandler
      */
     public function __construct(
         Helpers $helpers,
@@ -68,7 +91,10 @@ class BrandController extends AbstractRestController
         TagAwareQueryResultCacheBrand $tagAwareQueryResultCacheBrand,
         TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
         FilesRepository $fileRepo,
-        TagAwareQuerySecondLevelCacheBrand $tagAwareQuerySecondLevelCacheBrand
+        TagAwareQuerySecondLevelCacheBrand $tagAwareQuerySecondLevelCacheBrand,
+        StrategiesRepository $strategiesRepository,
+        BrandStrategyRepository $brandStrategyRepository,
+        ObjectsHandler $objectsHandler
     )
     {
         parent::__construct($helpers);
@@ -77,8 +103,33 @@ class BrandController extends AbstractRestController
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
         $this->fileRepo = $fileRepo;
         $this->tagAwareQuerySecondLevelCacheBrand = $tagAwareQuerySecondLevelCacheBrand;
+        $this->strategyRepository = $strategiesRepository;
+        $this->brandStrategyRepository = $brandStrategyRepository;
+        $this->objectsHandler = $objectsHandler;
     }
 
+    /**
+     * get Brand bu slug.
+     *
+     * @Rest\Get("/admin/api/brand/{slug}", options={"expose": true})
+     *
+     * @param Request $request
+     *
+     * @View(statusCode=Response::HTTP_OK, serializerGroups={Brand::SERIALIZED_GROUP_BY_SLUG})
+     *
+     * @SWG\Tag(name="Admin")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object",
+     * )
+     *
+     * @return Brand
+     */
+    public function getBrandBySlugAction(Brand $brand)
+    {
+        return $brand;
+    }
 
     /**
      * get Brands.
@@ -111,7 +162,7 @@ class BrandController extends AbstractRestController
                     "draw" => $request->request->get('draw'),
                     "recordsTotal" => $this->brandRepository
                         ->getDataTablesData($request->request->all(), true, true),
-                    "recordsFiltered"=> $this->brandRepository
+                    "recordsFiltered" => $this->brandRepository
                         ->getDataTablesData($request->request->all(), true)
                 ],
                 ['data' => $dataTable]
@@ -151,7 +202,7 @@ class BrandController extends AbstractRestController
         /** @var \Doctrine\DBAL\Connection $connection */
         $connection = $objectManager->getConnection();
         $connection->beginTransaction(); // suspend auto-commit
-        try{
+        try {
             $brand = $this->brandRepository
                 ->findOneBy(['id' => $request->get('brand_id')]);
 
@@ -175,17 +226,49 @@ class BrandController extends AbstractRestController
                     $file->setBrand($brand);
                 }
             }
+
+            if ($request->get('strategy')) {
+                $strategy = $this->strategyRepository
+                    ->findOneBy(['slug' => $request->get('strategy')]);
+                if ($strategy) {
+                    if (!$strategy->getRequiredArgs()) {
+                        $requiredArgs = [];
+                    } else {
+                        $requiredArgs = $request->get('required_args');
+                        if (!$requiredArgs) {
+                            throw new \Exception('required_args is required');
+                        }
+                    }
+                    $brandStrategy = $this->brandStrategyRepository
+                        ->findOneBy(['brand' => $brand]);
+                    if (!$brandStrategy) {
+                        $brandStrategy = new BrandStrategy();
+                        $brandStrategy
+                            ->setBrand($brand);
+                        $this->brandStrategyRepository
+                            ->persist($brandStrategy);
+                    }
+
+                    $brandStrategy
+                        ->setStrategy($strategy)
+                        ->setRequiredArgs($requiredArgs);
+                    $this->objectsHandler
+                        ->validateEntity($brandStrategy);
+                }
+            }
+
             $objectManager->flush();
             $connection->commit();
 
-            /** @var Registry $resultCacheImpl */
-            $resultCacheImpl = $this->get('doctrine');
-            $objectManager = $resultCacheImpl->getManager();
+            /** @var Registry $registry */
+            $registry = $this->get('doctrine');
+            $objectManager = $registry->getManager();
             /** @var Configuration $configuration */
             $configuration = $objectManager->getConfiguration();
-            /** @var DoctrineProvider $resultCacheImpl1 */
-            $resultCacheImpl1 = $configuration->getResultCacheImpl();
-            $resultCacheImpl1->delete(BrandRepository::CACHE_HOT_BRAND_IDS);
+            /** @var DoctrineProvider $resultCacheImpl */
+            $resultCacheImpl = $configuration->getResultCacheImpl();
+            $resultCacheImpl->delete(BrandRepository::CACHE_HOT_BRAND_IDS);
+            $resultCacheImpl->delete(StrategiesRepository::SELECT_2_STRATEGIES_MODELS);
 
             $this->getTagAwareQueryResultCacheBrand()
                 ->getTagAwareAdapter()

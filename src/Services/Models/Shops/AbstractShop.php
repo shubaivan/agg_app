@@ -4,11 +4,39 @@
 namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
+use App\Services\Models\StrategyService;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
-abstract class AbstractShop
+abstract class AbstractShop implements IdentityGroup
 {
     const SIZE_TWO_CHARACTER = '\b([A-Z]{2})\b';
     const SIZE_ONE_CHARACTER = '\b([A-Z]{1})\b';
+
+    /**
+     * @var StrategyService
+     */
+    protected $strategyService;
+
+    /**
+     * @var array
+     */
+    protected $identityBrand = [];
+
+    /**
+     * AbstractShop constructor.
+     * @param StrategyService $strategyService
+     */
+    public function __construct(StrategyService $strategyService)
+    {
+        $this->strategyService = $strategyService;
+        $this->identityBrand = $this->identityBrand();
+    }
+
+    public function identityBrand()
+    {
+        return [];
+    }
+
 
     protected function analysisColorValue(string $color, Product $product)
     {
@@ -47,5 +75,30 @@ abstract class AbstractShop
                 $product->setSeparateExtra(Product::SIZE, $value);
             }
         }
+    }
+
+    /**
+     * @param Product $product
+     * @return bool|mixed
+     * @throws \ReflectionException
+     */
+    public function identityGroupColumn(Product $product)
+    {
+        $brand = $product->getBrandRelation();
+        if ($brand && $brand->getBrandStrategies() && $brand->getBrandStrategies()->getStrategy()) {
+            $strategy = $this->strategyService
+                ->prepareStrategyInstanceWithArgs(
+                    $brand->getBrandStrategies()->getStrategy(),
+                    (new ParameterBag(array_merge(
+                        $brand->getBrandStrategies()->getRequiredArgs()
+                    )))
+                );
+            $strategy($product);
+            if ($product->getGroupIdentity()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -5,12 +5,18 @@ namespace App\Controller;
 use App\Cache\CacheManager;
 use App\Entity\Product;
 use App\Entity\Shop;
+use App\Entity\Strategies;
+use App\Kernel;
 use App\Services\HandleDownloadFileData;
+use App\Services\Models\Shops\Strategies\CutSomeWordsFromProductNameByDelimiter;
 use App\Services\ObjectsHandler;
 use App\Services\StatisticsService;
 use App\Util\RedisHelper;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class StatisticController extends AbstractController
@@ -36,23 +42,39 @@ class StatisticController extends AbstractController
     private $statisticsService;
 
     /**
+     * @var Kernel
+     */
+    private $kernel;
+
+    /**
+     * @var EntityManager
+     */
+    private $em;
+
+    /**
      * FileDownloadController constructor.
      * @param ObjectsHandler $handler
      * @param CacheManager $cacheManager
      * @param RedisHelper $redisHelper
      * @param StatisticsService $statisticsService
+     * @param KernelInterface $kernel
+     * @param EntityManagerInterface $em
      */
     public function __construct(
         ObjectsHandler $handler,
         CacheManager $cacheManager,
         RedisHelper $redisHelper,
-        StatisticsService $statisticsService
+        StatisticsService $statisticsService,
+        KernelInterface $kernel,
+        EntityManagerInterface $em
     )
     {
         $this->handler = $handler;
         $this->cacheManager = $cacheManager;
         $this->redisHelper = $redisHelper;
         $this->statisticsService = $statisticsService;
+        $this->kernel = $kernel;
+        $this->em = $em;
     }
 
 

@@ -93,7 +93,7 @@ class ManuallyResourceJobHandler implements MessageHandlerInterface
 
             $removeProductsByShop = $this->em->getRepository(Product::class)
                 ->removeProductsByShop(
-                    Shop::getMapShopKeyByOriginalName($manuallyResourceJob->getShopKey())
+                    Shop::getRealShopNameByKey($manuallyResourceJob->getShopKey())
                 );
 
             $modelClass = $this->handleDownloadFileData->identityModelClass($manuallyResourceJob->getShopKey());

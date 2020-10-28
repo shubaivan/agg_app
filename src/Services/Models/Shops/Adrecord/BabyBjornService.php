@@ -5,13 +5,15 @@ namespace App\Services\Models\Shops\Adrecord;
 
 
 use App\Entity\Product;
+use App\Services\Models\Shops\AbstractShop;
 use App\Services\Models\Shops\IdentityGroup;
 
-class BabyBjornService implements IdentityGroup
+class BabyBjornService extends AbstractShop
 {
     /**
      * @param Product $product
-     * @return mixed|void
+     * @return bool|mixed|void
+     * @throws \ReflectionException
      *
      * sku
      * BS_005083
@@ -67,6 +69,10 @@ class BabyBjornService implements IdentityGroup
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
         $identity = [];
         $sku = $product->getSku();
         if (strlen($sku)) {

@@ -5,11 +5,16 @@ namespace App\Services\Models\Shops\Adrecord;
 
 
 use App\Entity\Product;
+use App\Services\Models\Shops\AbstractShop;
 use App\Services\Models\Shops\IdentityGroup;
 
-class FrankDandy implements IdentityGroup
+class FrankDandy extends AbstractShop
 {
     /**
+     * @param Product $product
+     * @return bool|mixed|void
+     * @throws \ReflectionException
+     *
      * 1/se-p6001-v7942-s31741
      * 1/se-p5993-v7931-s31717
      * 1/se-p5992-v7930-s31715
@@ -22,12 +27,14 @@ class FrankDandy implements IdentityGroup
      *
      * 1/se-p2372-v3925-s13125
      * 1/se-p2371-v3924-s13123
-     *
-     * @param Product $product
-     * @return mixed|void
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $sku = $product->getSku();
         $explodeSku = explode('-', $sku);
         if ($explodeSku) {

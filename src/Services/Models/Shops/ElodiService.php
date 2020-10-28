@@ -6,14 +6,20 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class ElodiService implements IdentityGroup
+class ElodiService extends AbstractShop
 {
     /**
      * @param Product $product
-     * @return mixed|void
+     * @return bool|mixed|void
+     * @throws \ReflectionException
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $name = $product->getName();
         $explodeName = explode(' - ', $name);
         if (count($explodeName) > 1) {

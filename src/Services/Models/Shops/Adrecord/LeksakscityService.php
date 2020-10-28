@@ -5,27 +5,18 @@ namespace App\Services\Models\Shops\Adrecord;
 
 
 use App\Entity\Product;
+use App\Services\Models\Shops\AbstractShop;
 use App\Services\Models\Shops\IdentityGroup;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSkuAndFullName;
 use App\Services\Models\Shops\Strategies\CutSomeBlocksByDelimiterFromSku;
+use App\Services\Models\StrategyService;
 
-class LeksakscityService implements IdentityGroup
+class LeksakscityService extends AbstractShop
 {
     /**
-     * @var array
-     */
-    private $identityBrand = [];
-
-    /**
-     * LeksakscityService constructor.
-     */
-    public function __construct()
-    {
-        $this->identityBrand = $this->identityBrand();
-    }
-
-    /**
      * @param Product $product
+     * @return Product|bool|mixed|void
+     * @throws \ReflectionException
      *
      * https://click.adrecord.com/?p=877&c=37741&url=https%3A%2F%2Fwww.leksakscity.se%2Fset-med-paerlor-i-olika-faerger-och-moenster-foer-att-goera-egna-smycken-samt-paerlor-och-paerlplattor%2F3131-melissa-doug-diy-parlkit-hjarta-45-delar-0000772194952.html
      * https://click.adrecord.com/?p=877&c=37741&url=https%3A%2F%2Fwww.leksakscity.se%2Fset-med-paerlor-i-olika-faerger-och-moenster-foer-att-goera-egna-smycken-samt-paerlor-och-paerlplattor%2F3130-melissa-doug-sparkling-flowers-parlkit-45-delar-0000772194945.html
@@ -51,11 +42,14 @@ class LeksakscityService implements IdentityGroup
      * https://click.adrecord.com/?p=877&c=37741&url=https%3A%2F%2Fwww.leksakscity.se%2Friddjur%2F1491-mekanisk-riddjur-bock-berga-sitthojd-54-cm-6950587835509.html
      * https://click.adrecord.com/?p=877&c=37741&url=https%3A%2F%2Fwww.leksakscity.se%2Friddjur%2F1494-mekaniskt-leksaksdjur-lejonet-simba-sitthojd-54-cm-6999593000730.html
      * https://click.adrecord.com/?p=877&c=37741&url=https%3A%2F%2Fwww.leksakscity.se%2Friddjur%2F1493-mekaniskt-leksaksdjur-kamelen-oki-sitthojd-54-cm-6950587835516.html
-     *
-     * @return Product|mixed
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         if (array_key_exists($product->getBrand(), $this->identityBrand)) {
             $strategy = $this->identityBrand[$product->getBrand()];
         } else {

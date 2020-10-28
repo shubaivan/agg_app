@@ -4,13 +4,20 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class LitenlekermerService implements IdentityGroup
+class LitenlekermerService extends AbstractShop
 {
     /**
      * @param Product $product
+     * @return bool|mixed|void
+     * @throws \ReflectionException
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $explode = explode('-', $product->getSku());
         if (count($explode) > 2) {
             $firstPartIdentity = array_shift($explode);

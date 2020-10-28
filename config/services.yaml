@@ -211,9 +211,6 @@ services:
     App\Services\Models\ManagerShopsService:
       lazy: true
 
-    App\Services\Models\Shops\Awin\EllosSEService:
-      lazy: true
-
     serializer.normalizer.flatten_exception:
       class: App\Symfony\Component\Serializer\Normalizer\FlattenExceptionNormalizer
       tags:

@@ -431,6 +431,7 @@ class BrandRepository extends ServiceEntityRepository
                 b.top,
                 b.seoTitle,
                 b.seoDescription,
+                b.slug,
                 \'edit\' as Action
                 FROM App\Entity\Brand b
                 INNER JOIN b.products p

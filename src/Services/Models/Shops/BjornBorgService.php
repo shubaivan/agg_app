@@ -6,20 +6,25 @@ namespace App\Services\Models\Shops;
 
 use App\Entity\Product;
 
-class BjornBorgService implements IdentityGroup
+class BjornBorgService extends AbstractShop
 {
     /**
      * @param Product $product
-     * @return mixed|void
+     * @return bool|mixed|void
+     * @throws \ReflectionException
      *
      * 2011-1117_70011-134-
      * 2011-1117_70011-158-
      * 2011-1117_70011-146-
      * 2011-1117_70011-170
-     *
      */
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         $sku = $product->getSku();
         $trim = trim($sku, '-');
         $preg_split = preg_split('/-|_/', $trim);

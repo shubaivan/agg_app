@@ -6,23 +6,20 @@ use App\Entity\Product;
 use App\Services\Models\Shops\Strategies\CutSomeDigitFromSku;
 use App\Services\Models\Shops\Strategies\FullProductName;
 
-class AhlensService implements IdentityGroup
+class AhlensService extends AbstractShop
 {
     /**
-     * @var array
+     * @param Product $product
+     * @return Product|bool|mixed|void
+     * @throws \ReflectionException
      */
-    private $identityBrand = [];
-
-    /**
-     * AhlensService constructor.
-     */
-    public function __construct()
-    {
-        $this->identityBrand = $this->identityBrand();
-    }
-
     public function identityGroupColumn(Product $product)
     {
+        $parentResult = parent::identityGroupColumn($product);
+        if ($parentResult) {
+            return;
+        }
+
         if (array_key_exists($product->getBrand(), $this->identityBrand)) {
             $strategy = $this->identityBrand[$product->getBrand()];
         } else {

@@ -32,6 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Brand extends SEOModel implements EntityValidatorException, DataTableInterface, AttachmentFilesInterface
 {
     const SERIALIZED_GROUP_LIST = 'brand_group_list';
+    const SERIALIZED_GROUP_BY_SLUG = 'brand_group_by_slug';
     const SERIALIZED_GROUP_LIST_TH = 'th_brand_group_list';
     const SERIALIZED_GROUP_CREATE = 'brand_group_crete';
 
@@ -50,13 +51,18 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST,
-     *      Product::SERIALIZED_GROUP_LIST, Brand::SERIALIZED_GROUP_LIST_TH})
+     *      Product::SERIALIZED_GROUP_LIST, Brand::SERIALIZED_GROUP_LIST_TH,
+     *      Brand::SERIALIZED_GROUP_BY_SLUG
+     *     })
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST, Brand::SERIALIZED_GROUP_LIST_TH})
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST,
+     *      Brand::SERIALIZED_GROUP_LIST_TH,
+     *     Brand::SERIALIZED_GROUP_BY_SLUG
+     *     })
      * @Assert\NotBlank(groups={Brand::SERIALIZED_GROUP_CREATE})
      */
     private $brandName;
@@ -71,7 +77,9 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
     /**
      * @var boolean
      * @ORM\Column(type="boolean", nullable=true, options={"default": "0"})
-     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST})
+     * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST,
+     *     Brand::SERIALIZED_GROUP_BY_SLUG
+     *     })
      */
     private $top = false;
 
@@ -88,6 +96,19 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
      * @ORM\Cache("NONSTRICT_READ_WRITE", region="brands_region")
      */
     private $files;
+
+    /**
+     * @var BrandStrategy
+     * @ORM\OneToOne(targetEntity="BrandStrategy",
+     *      mappedBy="brand",
+     *      cascade={"persist"}
+     *     )
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="brands_region")
+     * @Annotation\Groups({
+     *     Brand::SERIALIZED_GROUP_BY_SLUG
+     *     })
+     */
+    private $brandStrategies;
 
     public function __construct()
     {
@@ -271,5 +292,28 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
         }
 
         return $isCheck;
+    }
+
+    public function getTop(): ?bool
+    {
+        return $this->top;
+    }
+
+    public function getBrandStrategies(): ?BrandStrategy
+    {
+        return $this->brandStrategies;
+    }
+
+    public function setBrandStrategies(?BrandStrategy $brandStrategies): self
+    {
+        $this->brandStrategies = $brandStrategies;
+
+        // set (or unset) the owning side of the relation if necessary
+        $newBrand = null === $brandStrategies ? null : $this;
+        if ($brandStrategies->getBrand() !== $newBrand) {
+            $brandStrategies->setBrand($newBrand);
+        }
+
+        return $this;
     }
 }
