@@ -51,7 +51,7 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      * @Annotation\Groups({Brand::SERIALIZED_GROUP_LIST,
-     *      Product::SERIALIZED_GROUP_LIST, Brand::SERIALIZED_GROUP_LIST_TH,
+     *      Product::SERIALIZED_GROUP_LIST,
      *      Brand::SERIALIZED_GROUP_BY_SLUG
      *     })
      */
@@ -110,10 +110,21 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
      */
     private $brandStrategies;
 
+    /**
+     * @var BrandShop
+     * @ORM\OneToMany(targetEntity="BrandShop",
+     *      mappedBy="brand",
+     *      cascade={"persist"}
+     *     )
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="brands_region")
+     */
+    private $brandShopRelation;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
         $this->files = new ArrayCollection();
+        $this->brandShopRelation = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -312,6 +323,41 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
         $newBrand = null === $brandStrategies ? null : $this;
         if ($brandStrategies->getBrand() !== $newBrand) {
             $brandStrategies->setBrand($newBrand);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|BrandShop[]
+     */
+    public function getBrandShopRelation(): Collection
+    {
+        if (!$this->brandShopRelation) {
+            $this->brandShopRelation = new ArrayCollection();
+        }
+
+        return $this->brandShopRelation;
+    }
+
+    public function addBrandShopRelation(BrandShop $brandShopRelation): self
+    {
+        if (!$this->getBrandShopRelation()->contains($brandShopRelation)) {
+            $this->getBrandShopRelation()->add($brandShopRelation);
+            $brandShopRelation->setBrand($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBrandShopRelation(BrandShop $brandShopRelation): self
+    {
+        if ($this->getBrandShopRelation()->contains($brandShopRelation)) {
+            $this->getBrandShopRelation()->removeElement($brandShopRelation);
+            // set the owning side to null (unless already changed)
+            if ($brandShopRelation->getBrand() === $this) {
+                $brandShopRelation->setBrand(null);
+            }
         }
 
         return $this;

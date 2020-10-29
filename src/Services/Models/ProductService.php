@@ -24,6 +24,7 @@ use App\Repository\ProductRepository;
 use App\Repository\UserIpProductRepository;
 use App\Services\ObjectsHandler;
 use App\Util\RedisHelper;
+use Cocur\Slugify\SlugifyInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Cache\CacheException;
@@ -82,6 +83,11 @@ class ProductService extends AbstractModel
     private $redisHelper;
 
     /**
+     * @var BrandService
+     */
+    private $brandService;
+
+    /**
      * ProductService constructor.
      * @param LoggerInterface $logger
      * @param ObjectsHandler $objectHandler
@@ -89,6 +95,8 @@ class ProductService extends AbstractModel
      * @param RequestStack $requestStack
      * @param ManagerShopsService $managerShopsService
      * @param RedisHelper $redisHelper
+     * @param BrandService $brandService
+     * @param SlugifyInterface $cs
      */
     public function __construct(
         LoggerInterface $logger,
@@ -96,15 +104,19 @@ class ProductService extends AbstractModel
         EntityManagerInterface $em,
         RequestStack $requestStack,
         ManagerShopsService $managerShopsService,
-        RedisHelper $redisHelper
+        RedisHelper $redisHelper,
+        BrandService $brandService,
+        SlugifyInterface $cs
     )
     {
+        parent::__construct($cs);
         $this->logger = $logger;
         $this->objectHandler = $objectHandler;
         $this->em = $em;
         $this->requestStack = $requestStack;
         $this->managerShopsService = $managerShopsService;
         $this->redisHelper = $redisHelper;
+        $this->brandService = $brandService;
     }
 
     /**
@@ -169,6 +181,9 @@ class ProductService extends AbstractModel
                 [Product::SERIALIZED_GROUP_CREATE],
                 'json'
             );
+
+        $this->getBrandService()->createBrandFromProduct($handleObject);
+
         $this->setGroupIdentity($handleObject);
 
         $this->getObjectHandler()
@@ -644,5 +659,13 @@ class ProductService extends AbstractModel
     private function getRedisHelper(): RedisHelper
     {
         return $this->redisHelper;
+    }
+
+    /**
+     * @return BrandService
+     */
+    protected function getBrandService(): BrandService
+    {
+        return $this->brandService;
     }
 }

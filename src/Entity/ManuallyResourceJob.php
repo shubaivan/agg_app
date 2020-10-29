@@ -15,15 +15,15 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *
  * @ORM\Table(name="manually_resource_job",
  *    uniqueConstraints={
- *        @UniqueConstraint(name="redis_uniq_key_uniq_idx",
- *            columns={"redis_uniq_key"})
+ *        @UniqueConstraint(name="redis_uniq_key_shop_uniq_idx",
+ *            columns={"redis_uniq_key", "shop_key"})
  *    },
  *     indexes={
  *     @ORM\Index(name="shop_key_idx", columns={"shop_key"}),
  *     @ORM\Index(name="status_key_idx", columns={"status"})
  * }
  *     )
- * @UniqueEntity(fields={"redisUniqKey"})
+ * @UniqueEntity(fields={"redisUniqKey", "shopKey"})
  * @ORM\HasLifecycleCallbacks()
  */
 class ManuallyResourceJob implements EntityValidatorException

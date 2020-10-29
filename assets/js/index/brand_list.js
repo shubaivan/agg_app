@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     common_defs.push({
-        "targets": 1,
+        "targets": 0,
         "data": 'brandName',
         "render": function (data, type, row, meta) {
             var divTag = $('<div/>');
@@ -149,7 +149,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     'type': 'hidden',
                     'data-pure-result': JSON.stringify(row)
                 });
-                divTag.append(pTagPureResult);
+                var pTagShops = $('<p/>')
+                    .append('Shops: ')
+                    .append('<i>'+row.shop_names+'</i>');
+                divTag.append(pTagPureResult).append(pTagShops);
             }
             let topBrand = row.top;
 
@@ -169,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     common_defs.push({
-        "targets": 5,
+        "targets": 4,
         data: 'Action',
         render: function (data, type, row, meta) {
             return '    <!-- Button trigger modal -->\n' +
@@ -182,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var table = $('#empTable').DataTable({
         initComplete: function () {
 
-            this.api().columns(1).every(function () {
+            this.api().columns(0).every(function () {
                 var column = this;
 
                 var divTag = $('<div />').addClass('form-group col-md-4');

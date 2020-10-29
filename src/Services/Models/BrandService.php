@@ -23,9 +23,9 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 class BrandService extends AbstractModel
 {
     /**
-     * @var EntityManager
+     * @var BrandRepository
      */
-    private $em;
+    private $brandRepository;
 
     /**
      * @var TagAwareQueryResultCacheProduct
@@ -39,20 +39,20 @@ class BrandService extends AbstractModel
 
     /**
      * BrandService constructor.
-     * @param EntityManagerInterface $em
+     * @param BrandRepository $brandRepository
      * @param TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct
      * @param ObjectsHandler $objecHandler
      * @param SlugifyInterface $cs
      */
     public function __construct(
-        EntityManagerInterface $em,
+        BrandRepository $brandRepository,
         TagAwareQueryResultCacheProduct $tagAwareQueryResultCacheProduct,
         ObjectsHandler $objecHandler,
         SlugifyInterface $cs
     )
     {
         parent::__construct($cs);
-        $this->em = $em;
+        $this->brandRepository = $brandRepository;
         $this->tagAwareQueryResultCacheProduct = $tagAwareQueryResultCacheProduct;
         $this->objecHandler = $objecHandler;
     }
@@ -60,8 +60,8 @@ class BrandService extends AbstractModel
     /**
      * @param Product $product
      * @return Brand|bool|mixed
-     * @throws \App\Exception\ValidatorException
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function createBrandFromProduct(Product $product)
     {
@@ -78,6 +78,9 @@ class BrandService extends AbstractModel
                     ->setBrandName($product->getBrand());
                 $this->getObjecHandler()
                     ->validateEntity($brand, [Brand::SERIALIZED_GROUP_CREATE]);
+
+                $this->getBrandRepository()
+                    ->getPersist($brand);
             }            
         } catch (ValidatorException $e) {
             $brand = $this->matchExistBrand($product->getBrand());
@@ -211,22 +214,6 @@ class BrandService extends AbstractModel
     }
 
     /**
-     * @return EntityManager
-     */
-    protected function getEm(): EntityManager
-    {
-        return $this->em;
-    }
-
-    /**
-     * @return BrandRepository|ObjectRepository|EntityRepository
-     */
-    private function getBrandRepository()
-    {
-        return $this->getEm()->getRepository(Brand::class);
-    }
-
-    /**
      * @return TagAwareQueryResultCacheProduct
      */
     private function getTagAwareQueryResultCacheProduct(): TagAwareQueryResultCacheProduct
@@ -240,5 +227,13 @@ class BrandService extends AbstractModel
     private function getObjecHandler(): ObjectsHandler
     {
         return $this->objecHandler;
+    }
+
+    /**
+     * @return BrandRepository
+     */
+    public function getBrandRepository(): BrandRepository
+    {
+        return $this->brandRepository;
     }
 }
