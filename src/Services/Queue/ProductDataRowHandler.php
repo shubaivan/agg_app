@@ -160,7 +160,7 @@ class ProductDataRowHandler
             $this->getCategoryService()->matchGlobalNegativeBrandWords($product);
             $this->getAdminShopRulesService()->executeShopRule($product);
 
-            $this->getBrandService()->createBrandFromProduct($product);
+//            $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);
             $this->getShopService()->createShopFromProduct($product);
             $this->getEm()->persist($product);
