@@ -337,7 +337,7 @@ class HandleDownloadFileData
             $count = $this->getCount($filePath, $redisUniqKey);
             $this->productRepository
                 ->removeProductsByShop(
-                    Shop::getMapShopKeyByOriginalName($shop)
+                    Shop::getRealShopNameByKey($shop)
                 );
             $modelClass = $this->identityModelClass($shop);
             if ($modelClass) {
