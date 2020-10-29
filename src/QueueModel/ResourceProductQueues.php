@@ -172,7 +172,9 @@ abstract class ResourceProductQueues implements MatchSameProducts, ResourceDataR
         if (count($this->categories)) {
             $this->row['category'] = implode(' - ', array_unique($this->categories));
         }
-
+        if (!$this->getBrand() && $this->getShop()) {
+            $this->row['brand'] = $this->getShop();
+        }
         $this->row['identityUniqData'] = $this->generateIdentityUniqData();
     }
     
