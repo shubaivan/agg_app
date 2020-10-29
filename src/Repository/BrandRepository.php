@@ -420,7 +420,7 @@ class BrandRepository extends ServiceEntityRepository
 
         if ($count) {
             $dql = '
-                SELECT COUNT(b)
+                SELECT COUNT(DISTINCT b)
                 FROM App\Entity\Brand b
                 INNER JOIN b.products p
             ';
