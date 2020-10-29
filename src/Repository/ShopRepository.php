@@ -440,6 +440,15 @@ class ShopRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param Shop $shop
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function getPersist(Shop $shop)
+    {
+        $this->getEntityManager()->persist($shop);
+    }
+
+    /**
      * @return Helpers
      */
     private function getHelpers(): Helpers

@@ -7,6 +7,7 @@ use App\Cache\TagAwareQueryResultCacheProduct;
 use App\Entity\Brand;
 use App\Entity\Category;
 use App\Entity\Product;
+use App\Entity\Shop;
 use App\Services\Helpers;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Cache\Cache as ResultCacheDriver;
@@ -421,6 +422,7 @@ class BrandRepository extends ServiceEntityRepository
             $dql = '
                 SELECT COUNT(b)
                 FROM App\Entity\Brand b
+                INNER JOIN b.products p
             ';
         } else {
             $dql = '
@@ -432,9 +434,12 @@ class BrandRepository extends ServiceEntityRepository
                 b.seoTitle,
                 b.seoDescription,
                 b.slug,
+                GROUP_CONCAT(DISTINCT sh.shopName SEPARATOR \'|\') as shop_names,
                 \'edit\' as Action
                 FROM App\Entity\Brand b
                 INNER JOIN b.products p
+                LEFT JOIN b.brandShopRelation sr
+                LEFT JOIN sr.shop sh
             ';
         }
         $bindParams = [];
@@ -507,8 +512,17 @@ class BrandRepository extends ServiceEntityRepository
      */
     public function save($object)
     {
-        $this->getEntityManager()->persist($object);
+        $this->getPersist($object);
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param Brand $shop
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function getPersist(Brand $shop)
+    {
+        $this->getEntityManager()->persist($shop);
     }
     
     /**

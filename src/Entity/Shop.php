@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Exception\EntityValidatorException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -23,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE", region="shops_region")
  * @ORM\HasLifecycleCallbacks()
  */
-class Shop extends SEOModel implements AttachmentFilesInterface
+class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidatorException
 {
     const PREFIX_HASH = 'statistic:';
 
@@ -161,11 +162,22 @@ class Shop extends SEOModel implements AttachmentFilesInterface
      */
     private $categoryRelation;
 
+    /**
+     * @var BrandShop
+     * @ORM\OneToMany(targetEntity="BrandShop",
+     *      mappedBy="shop",
+     *      cascade={"persist"}
+     *     )
+     * @ORM\Cache("NONSTRICT_READ_WRITE", region="brands_region")
+     */
+    private $brandShopRelation;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
         $this->files = new ArrayCollection();
         $this->categoryRelation = new ArrayCollection();
+        $this->brandShopRelation = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -357,5 +369,44 @@ class Shop extends SEOModel implements AttachmentFilesInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection|BrandShop[]
+     */
+    public function getBrandShopRelation(): Collection
+    {
+        if (!$this->brandShopRelation) {
+            $this->brandShopRelation = new ArrayCollection();
+        }
+        return $this->brandShopRelation;
+    }
+
+    public function addBrandShopRelation(BrandShop $brandShopRelation): self
+    {
+        if (!$this->getBrandShopRelation()->contains($brandShopRelation)) {
+            $this->getBrandShopRelation()->add($brandShopRelation);
+            $brandShopRelation->setShop($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBrandShopRelation(BrandShop $brandShopRelation): self
+    {
+        if ($this->getBrandShopRelation()->contains($brandShopRelation)) {
+            $this->getBrandShopRelation()->removeElement($brandShopRelation);
+            // set the owning side to null (unless already changed)
+            if ($brandShopRelation->getShop() === $this) {
+                $brandShopRelation->setShop(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getIdentity()
+    {
+        return $this->getId(). '=' . $this->getShopName();
     }
 }

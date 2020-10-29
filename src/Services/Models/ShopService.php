@@ -72,6 +72,7 @@ class ShopService extends AbstractModel
      * @param Product $product
      * @return Shop|mixed
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function createShopFromProduct(Product $product)
     {
@@ -86,10 +87,13 @@ class ShopService extends AbstractModel
                 $shop = new Shop();
                 $shop
                     ->setShopName($product->getShop());
-            }
 
-            $this->getObjecHandler()
-                ->validateEntity($shop);
+                $this->getObjecHandler()
+                    ->validateEntity($shop);
+
+                $this->shopRepository
+                    ->getPersist($shop);
+            }
         } catch (ValidatorException $e) {
             $shop = $this->matchExistShop($product->getShop());
         }

@@ -21,6 +21,7 @@ use App\QueueModel\VacuumJob;
 use App\Services\HandleDownloadFileData;
 use App\Services\Models\AdminShopRulesService;
 use App\Services\Models\BrandService;
+use App\Services\Models\BrandShopService;
 use App\Services\Models\CategoryService;
 use App\Services\Models\ProductService;
 use App\Services\Models\ShopService;
@@ -96,6 +97,10 @@ class ProductDataRowHandler
      */
     private $dm;
 
+    /**
+     * @var BrandShopService
+     */
+    private $brandShopService;
 
     /**
      * AdtractionDataRowHandler constructor.
@@ -109,6 +114,7 @@ class ProductDataRowHandler
      * @param RedisHelper $redisHelper
      * @param AdminShopRulesService $adminShopRulesService
      * @param DocumentManager $dm
+     * @param BrandShopService $brandShopService
      */
     public function __construct(
         MessageBusInterface $vacuumBus,
@@ -122,7 +128,8 @@ class ProductDataRowHandler
         CacheManager $cacheManager,
         string $forceAnalysis,
         AdminShopRulesService $adminShopRulesService,
-        DocumentManager $dm
+        DocumentManager $dm,
+        BrandShopService $brandShopService
     )
     {
         $this->cacheManager = $cacheManager;
@@ -137,6 +144,7 @@ class ProductDataRowHandler
         $this->forceAnalysis = $forceAnalysis;
         $this->adminShopRulesService = $adminShopRulesService;
         $this->dm = $dm;
+        $this->brandShopService = $brandShopService;
     }
 
     /**
@@ -163,6 +171,8 @@ class ProductDataRowHandler
 //            $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);
             $this->getShopService()->createShopFromProduct($product);
+            $this->getBrandShopService()->createBrandShopRelation($product);
+
             $this->getEm()->persist($product);
             $this->getEm()->flush();
 
@@ -265,7 +275,10 @@ class ProductDataRowHandler
             $this->getCacheManager()->clearAllPoolsCache();
             /** @var ManuallyResourceJob $oneBy */
             $oneBy = $this->em->getRepository(ManuallyResourceJob::class)
-                ->findOneBy(['redisUniqKey' => $dataRow->getRedisUniqKey()]);
+                ->findOneBy([
+                    'redisUniqKey' => $dataRow->getRedisUniqKey(),
+                    'shopKey' => Shop::getMapShopKeyByOriginalName($dataRow->getShop())
+                ]);
             echo 'last_product';
             echo $oneBy ? $oneBy->getRedisUniqKey() . $oneBy->getId() : 'no';
             if ($oneBy) {
@@ -377,5 +390,13 @@ class ProductDataRowHandler
     private function getAdminShopRulesService(): AdminShopRulesService
     {
         return $this->adminShopRulesService;
+    }
+
+    /**
+     * @return BrandShopService
+     */
+    private function getBrandShopService(): BrandShopService
+    {
+        return $this->brandShopService;
     }
 }
