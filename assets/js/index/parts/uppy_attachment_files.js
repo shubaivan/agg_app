@@ -35,6 +35,22 @@ export function renderAttachmentFilesBlock(
     });
 }
 
+export function setMetadataToRequest(modelId, uppy, entity, button) {
+    if (modelId) {
+        if (entity === 'App\\Entity\\Category') {
+            if (button.hasClass('trigger_new_sub') === false) {
+                uppy.setMeta({
+                    id: modelId, entity: entity
+                });
+            }
+        } else {
+            uppy.setMeta({
+                id: modelId, entity: entity
+            });
+        }
+    }
+}
+
 export function renderUppy(modelId, form, modal, button, entity) {
     const attachment_files = window.Routing
         .generate('app_rest_admin_attachmentfile_postattachmentfile');
@@ -90,11 +106,7 @@ export function renderUppy(modelId, form, modal, button, entity) {
         browserBackButtonClose: true
     });
 
-    if (modelId) {
-        uppy.setMeta({
-            id: modelId, entity: entity
-        });
-    }
+    setMetadataToRequest(modelId, uppy, entity, button);
 
     uppy.use(XHRUpload, {
         endpoint: attachment_files,
