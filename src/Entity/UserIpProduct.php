@@ -24,6 +24,7 @@ class UserIpProduct
      * @var Product
      * @ORM\Cache("NONSTRICT_READ_WRITE")
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="userIpProducts", cascade={"persist"})
+     * @ORM\JoinColumn(onDelete="CASCADE")
      */
     private $products;
 
