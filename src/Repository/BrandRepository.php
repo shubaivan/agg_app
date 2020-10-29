@@ -196,7 +196,8 @@ class BrandRepository extends ServiceEntityRepository
         }
 
         $query .= '
-                FROM brand brand_alias 
+                FROM brand brand_alias
+                INNER JOIN products AS pr ON pr.brand_relation_id = brand_alias.id   
         ';
         if ($search) {
             $query .= '
