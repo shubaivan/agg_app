@@ -3,6 +3,7 @@
 
 namespace App\DocumentRepository;
 
+use App\Document\AdrecordProduct;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Query\Builder;
 use MongoDB\BSON\Regex;
@@ -23,8 +24,9 @@ trait CommonTrait
 
     /**
      * @param string $collection
-     * @param array $match
-     * @return string|null
+     * @param string $shop
+     * @return \MongoDB\DeleteResult
+     * @throws \Doctrine\ODM\MongoDB\MongoDBException
      */
     public function removeByShop(
         string $collection,
@@ -33,17 +35,13 @@ trait CommonTrait
     {
         /** @var DocumentManager $documentManager */
         $documentManager = $this->getDocumentManager();
-        /** @var Client $client */
-        $client = $documentManager->getClient();
         /** @var Collection $collection */
-        $collection = $client->symfony->$collection;
-
-        $cursor = $collection->deleteMany(
-            ['shop' => $shop],
-            ["allowDiskUse" => true]
+        $collection = $documentManager->getDocumentCollection(
+            $collection
         );
+        $deleteResult = $collection->deleteMany(['shop' => $shop]);
 
-        return null;
+        return $deleteResult;
     }
 
     /**

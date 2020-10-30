@@ -515,13 +515,13 @@ class ProductRepository extends ServiceEntityRepository
         $bindParams = [];
         $bindParamsType = [];
         $query = '
-            DELETE FROM products p
-            WHERE p.shop_relation_id = 
-            (SELECT s.id FROM shop as s
-            WHERE s.shop_name = :shop_name)
+            SELECT remove_products_by_batch(:shop_name, :quantity);
         ';
         $bindParams[':shop_name'] = $shopName;
         $bindParamsType[':shop_name'] = \PDO::PARAM_STR;
+
+        $bindParams[':quantity'] = 10000;
+        $bindParamsType[':quantity'] = \PDO::PARAM_INT;
 
         $connection->executeQuery(
             $query,
