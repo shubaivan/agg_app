@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var table = $('#empTable').DataTable({
         initComplete: function () {
-
+            initiateShopsSelect();
             this.api().columns(0).every(function () {
                 var column = this;
 
@@ -715,4 +715,49 @@ document.addEventListener("DOMContentLoaded", function () {
                 return firstLetter.toUpperCase();
             });
     }
+
+    function initiateShopsSelect() {
+        var shops_select = $('<select>').addClass('shops_select');
+        shops_select.attr('name', 'shops');
+        shops_select.insertBefore($('#empTable'));
+        applySelect2ToShopsSelect(shops_select);
+    }
+
+    function applySelect2ToShopsSelect(select) {
+        const app_rest_admin_resourceshops_resourceshops = window.Routing
+            .generate('app_rest_admin_resourceshops_resourceshops');
+        select.select2({
+            placeholder: {
+                id: '-1', // the value of the option
+                text: 'Select strategy'
+            },
+            dropdownAutoWidth: true,
+            width: '100%',
+            multiple: false,
+            allowClear: true,
+            templateResult: formatShopOption,
+            ajax: {
+                type: 'post',
+                url: app_rest_admin_resourceshops_resourceshops,
+                data: function (params) {
+
+                    let query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        type: 'public'
+                    };
+
+                    // Query parameters will be ?search=[term]&type=public
+                    return query;
+                }
+            }
+        });
+    }
+
+    function formatShopOption (option) {
+        return  $(
+            '<div><strong>' + option.text + '</strong></div>' +
+            '<div>' + option.resource_relation + '</div>'
+        );
+    };
 });

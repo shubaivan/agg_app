@@ -103,6 +103,65 @@ class ShopRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param ParameterBag $parameterBag
+     * @param bool $count
+     * @return mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getShopsForSelect2(
+        ParameterBag $parameterBag,
+        bool $count = false
+    ) {
+        if ($count) {
+            $dql = '
+                SELECT COUNT(c.id) as count    
+            ';
+        } else {
+            $dql = '
+                SELECT 
+                c.id, 
+                c.shopName as text,
+                c.slug   
+            ';
+        }
+        $dql .= '
+            FROM App\Entity\Shop c
+        ';
+
+        if ($parameterBag->get('search')) {
+            $dql .= '
+                WHERE ILIKE(c.shopName, :search) = TRUE
+            ';
+        }
+        $page = $parameterBag->get('page');
+        $query = $this->getEntityManager();
+        $createQuery = $query
+            ->createQuery($dql);
+        if (!$count) {
+            $createQuery
+                ->setFirstResult($page <= 1 ? 0 : 25 * $page - 1)
+                ->setMaxResults(25);
+        }
+
+        $createQuery
+            ->enableResultCache(0, 'select2_shops_models')
+            ->useQueryCache(true);
+
+        if ($parameterBag->get('search')) {
+            $createQuery->setParameter(':search', '%' . $parameterBag->get('search') . '%');
+        }
+
+        if ($count) {
+            $result = $createQuery->getSingleScalarResult();
+        } else {
+            $result = $createQuery->getResult();
+        }
+
+        return $result;
+    }
+
+    /**
      * @param ParamFetcher $paramFetcher
      * @param bool $count
      * @return Shop[]|int

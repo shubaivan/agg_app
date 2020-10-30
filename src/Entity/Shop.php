@@ -52,7 +52,7 @@ class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidator
     const AWIN = 'Awin';
     const TRADE_DOUBLER = 'TradeDoubler';
 
-    private static $shopNamesAdtractionMapping = [
+    public static $shopNamesAdtractionMapping = [
         'babyland' => 'Babyland',
         'babyV' => 'BabyV',
         'elodi' => 'Elodi',
@@ -70,7 +70,7 @@ class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidator
         'outdoorexperten' => 'Outdoorexperten'
     ];
 
-    private static $shopNamesAdrecordMapping = [
+    public static $shopNamesAdrecordMapping = [
         'baby_bjorn' => 'Baby Björn',
         'cardoonia' => 'Cardoonia',
         'ebbeKids' => 'EbbeKids',
@@ -87,7 +87,7 @@ class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidator
         'twar' => 'Twar',
     ];
 
-    private static $shopNamesAwinMapping = [
+    public static $shopNamesAwinMapping = [
         'vegaoo' => 'Vegaoo',
         'nike' => 'Nike',
         'nordic_nest' => 'Nordic Nest',
@@ -98,7 +98,7 @@ class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidator
         'cubus' => 'Cubus',
     ];
 
-    private static $shopNamesTradeDoublerMapping = [
+    public static $shopNamesTradeDoublerMapping = [
         'sportamore' => 'Sportamore',
         'bonprix' => 'Bonprix',
         'cdon_barn_and_baby' => 'CDON Barn and Baby',
