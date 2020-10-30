@@ -15,6 +15,7 @@ use Doctrine\ODM\MongoDB\Query\Builder;
  * @method int getCount(Builder $builder)
  * @method array getDataTableAggr ($collection, array $params)
  * @method string|null matchExistProductAllow (string $collection, array $match)
+ * @method string|null removeByShop(string $collection,string $shop)
  */
 class AdtractionProductRepository extends ServiceDocumentRepository implements CarefulSavingSku, DirectlyRemove
 {

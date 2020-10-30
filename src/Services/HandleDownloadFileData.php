@@ -344,7 +344,7 @@ class HandleDownloadFileData
                 /** @var $modelClass ResourceProductQueues */
                 /** @var DirectlyRemove $removeGate */
                 $removeGate = $this->dm->getRepository($modelClass::getMongoClass());
-                $removeGate->removeByShop($modelClass::getMongoClass(), $shop);
+                $removeGate->removeByShop($modelClass::getMongoClass(), Shop::getRealShopNameByKey($shop));
             }
             if (!$count) {
                 $csv = $this->generateCsvReader($downloadPath, $shop);
