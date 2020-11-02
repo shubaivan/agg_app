@@ -1197,15 +1197,13 @@ class CategoryRepository extends ServiceEntityRepository
         $query = $this->getEntityManager();
         $createQuery = $query
             ->createQuery($dql);
-        if ($count) {
-            $createQuery
-                ->enableResultCache(0, 'select2_hm_category_count');
-        } else {
+        if (!$count) {
             $createQuery
                 ->setFirstResult($page <= 1 ? 0 : 25 * $page - 1)
-                ->setMaxResults(25)
-                ->enableResultCache(0, 'select2_hm_category_models');
+                ->setMaxResults(25);
         }
+        $createQuery
+            ->enableResultCache(0, 'select2_hm_category_models');
         $createQuery
             ->useQueryCache(true);
         $createQuery->setParameter(':customCategory',true);

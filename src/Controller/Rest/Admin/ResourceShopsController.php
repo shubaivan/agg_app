@@ -169,6 +169,67 @@ class ResourceShopsController extends AbstractRestController
     }
 
     /**
+     * get Shop set.
+     *
+     * @Rest\Post("/admin/api/resource/shops", options={"expose": true})
+     *
+     * @param Request $request
+     *
+     * @View(statusCode=Response::HTTP_OK)
+     *
+     * @SWG\Tag(name="Admin")
+     *
+     * @SWG\Response(
+     *     response=200,
+     *     description="Json collection object",
+     * )
+     *
+     * @return \FOS\RestBundle\View\View
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
+    public function resourceShopsAction(Request $request)
+    {
+        $parameterBag = new ParameterBag($request->request->all());
+        $data = $this->shopRepository
+            ->getShopsForSelect2($parameterBag);
+        $mapData = array_map(function ($v) {
+            switch (true) {
+                case isset(Shop::$shopNamesTradeDoublerMapping[Shop::getMapShopKeyByOriginalName($v['text'])]):
+                    $v['resource_relation'] = Shop::TRADE_DOUBLER;
+                    break;
+                case isset(Shop::$shopNamesAwinMapping[Shop::getMapShopKeyByOriginalName($v['text'])]):
+                    $v['resource_relation'] = Shop::AWIN;
+                    break;
+                case isset(Shop::$shopNamesAdtractionMapping[Shop::getMapShopKeyByOriginalName($v['text'])]):
+                    $v['resource_relation'] = Shop::ADTRACTION;
+                    break;
+                case isset(Shop::$shopNamesAdrecordMapping[Shop::getMapShopKeyByOriginalName($v['text'])]):
+                    $v['resource_relation'] = Shop::ADRECORD;
+                    break;
+                default:
+                    break;
+            }
+
+            return $v;
+        }, $data);
+        $more = $parameterBag->get('page') * 25 < $this->shopRepository
+                ->getShopsForSelect2($parameterBag, true);
+        $view = $this->createSuccessResponse(
+            array_merge(
+                [
+                    "pagination" => [
+                        'more' => $more
+                    ],
+                ],
+                ['results' => $mapData]
+            )
+        );
+
+        return $view;
+    }
+
+    /**
      * get Shop list.
      *
      * @Rest\Post("/admin/api/resource/resource_list", options={"expose": true})
