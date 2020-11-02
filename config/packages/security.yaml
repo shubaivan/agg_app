@@ -36,6 +36,7 @@ security:
 
     access_control:
         - { path: ^/admin/resource, roles: [ROLE_ADMIN] }
+        - { path: ^/admin/api/resource/shops, roles: [ROLE_USER, ROLE_ADMIN, ROLE_SUPER_ADMIN] }
         - { path: ^/admin/api/resource, roles: [ROLE_ADMIN] }
         - { path: ^/index, roles: [ROLE_USER, ROLE_ADMIN, ROLE_SUPER_ADMIN] }
         - { path: ^/admin, roles: [ROLE_USER, ROLE_ADMIN, ROLE_SUPER_ADMIN] }
