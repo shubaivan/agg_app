@@ -18,6 +18,7 @@ use App\Repository\ProductRepository;
 use App\Repository\ShopRepository;
 use App\Services\ObjectsHandler;
 use Cocur\Slugify\SlugifyInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Cache\CacheException;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -146,6 +147,20 @@ class ShopService extends AbstractModel
     }
 
     /**
+     * @param Shop $shop
+     * @return Shop
+     */
+    public function getShopBySlug(Shop $shop)
+    {
+        $categories = $shop->getCategoryRelation();
+        $shop->setPrepareCategoryRelation(
+            $this->prepareGroupedCategories($categories)
+        );
+
+        return $shop;
+    }
+
+    /**
      * @param SearchShopsCollection $shopsCollection
      * @return SearchShopsCollection
      */
@@ -158,20 +173,37 @@ class ShopService extends AbstractModel
             /** @var Category[] $categoryModelsByIds */
             $categoryModelsByIds = $this->categoryRepository
                 ->getCategoryModelsByIds((new ParameterBag(['ids' => $categoryIds])));
-            $categoriesDTO = [];
-            foreach ($categoryModelsByIds as $category) {
-                $categoriesDTO[] = [
-                    'id' => $category->getId(),
-                    'slug' => $category->getSlug(),
-                    'categoryName' => $category->getCategoryName(),
-                ];
-            }
+            $categoriesDTO = $this->prepareGroupedCategories($categoryModelsByIds);
             $shopModel->setCategoryModels($categoriesDTO);
             return $shopModel;
         });
         $shopsCollection->setCollection($mapDTO);
 
         return $shopsCollection;
+    }
+
+    /**
+     * @param array|ArrayCollection $categories
+     * @return array
+     */
+    private function prepareGroupedCategories($categories): array
+    {
+        $categoriesDTO = [];
+        $main = 'main';
+        foreach ($categories as $category) {
+            $preparePathArray = $category->preparePathArray(true, $category, []);
+            if (count($preparePathArray)) {
+                $reverse = array_reverse($preparePathArray);
+                $main = array_shift($reverse);
+            }
+            $categoriesDTO[$main][] = [
+                'id' => $category->getId(),
+                'slug' => $category->getSlug(),
+                'categoryName' => $category->getCategoryName(),
+            ];
+        }
+
+        return $categoriesDTO;
     }
 
     /**

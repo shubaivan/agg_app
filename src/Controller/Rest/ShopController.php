@@ -120,6 +120,7 @@ class ShopController extends AbstractRestController
         Shop $shop
     )
     {
+        $this->shopService->getShopBySlug($shop);
         $view = $this->createSuccessResponse($shop, [Shop::SERIALIZED_GROUP_GET_BY_SLUG]);
         $view
             ->getResponse()
