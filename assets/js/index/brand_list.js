@@ -767,7 +767,7 @@ document.addEventListener("DOMContentLoaded", function () {
             '<div><strong>' + option.text + '</strong></div>' +
             '<div>' + option.resource_relation + '</div>'
         );
-    };
+    }
 
     function applyOnChangeToResourceShopSelect(shops_select) {
         shops_select.on('change', function (e) {

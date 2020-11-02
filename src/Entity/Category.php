@@ -445,6 +445,25 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
         $bufferCategory = $this;
         $uniqPath = '';
         $uniqPathArray = [];
+        $uniqPathArray = $this->preparePathArray(
+            $mainCategory, $bufferCategory, $uniqPathArray
+        );
+        if ($uniqPathArray) {
+            $array_reverse = array_reverse($uniqPathArray);
+            $uniqPath = implode('->', $array_reverse) . '->';
+        }
+        $uniqPath .= $this->categoryName;
+        return $uniqPath;
+    }
+
+    /**
+     * @param bool $mainCategory
+     * @param Category $bufferCategory
+     * @param array $uniqPathArray
+     * @return array
+     */
+    public function preparePathArray(bool $mainCategory, Category $bufferCategory, array $uniqPathArray): array
+    {
         while ($mainCategory) {
             if ($bufferCategory->getSubCategoryRelations()->count()) {
                 foreach ($bufferCategory->getSubCategoryRelations()->getIterator() as $categoryRelation) {
@@ -460,12 +479,7 @@ class Category extends SEOModel implements EntityValidatorException, AttachmentF
                 $mainCategory = false;
             }
         }
-        if ($uniqPathArray) {
-            $array_reverse = array_reverse($uniqPathArray);
-            $uniqPath = implode('->', $array_reverse) . '->';
-        }
-        $uniqPath .= $this->categoryName;
-        return $uniqPath;
+        return $uniqPathArray;
     }
 
     public function getNameForSeoDefaultTemplate()

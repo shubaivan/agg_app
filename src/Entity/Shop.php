@@ -158,7 +158,6 @@ class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidator
      *      inversedBy="shop",
      *      cascade={"persist"},
      *      fetch="EXTRA_LAZY")
-     * @Annotation\Groups({Shop::SERIALIZED_GROUP_GET_BY_SLUG})
      */
     private $categoryRelation;
 
@@ -171,6 +170,11 @@ class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidator
      * @ORM\Cache("NONSTRICT_READ_WRITE", region="brands_region")
      */
     private $brandShopRelation;
+
+    /**
+     * @var array
+     */
+    private $prepareCategoryRelation;
 
     public function __construct()
     {
@@ -408,5 +412,25 @@ class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidator
     public function getIdentity()
     {
         return $this->getId(). '=' . $this->getShopName();
+    }
+
+    /**
+     * @return array
+     * @Annotation\VirtualProperty()
+     * @Annotation\SerializedName("categoryRelation")
+     * @Annotation\Type("array")
+     * @Annotation\Groups({Shop::SERIALIZED_GROUP_GET_BY_SLUG})
+     */
+    public function getQCategoryRelationsValue()
+    {
+        return $this->prepareCategoryRelation;
+    }
+
+    /**
+     * @param array $prepareCategoryRelation
+     */
+    public function setPrepareCategoryRelation(array $prepareCategoryRelation): void
+    {
+        $this->prepareCategoryRelation = $prepareCategoryRelation;
     }
 }
