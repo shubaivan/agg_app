@@ -24,7 +24,10 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
  *          name="brand_shop_uniq_slugs",
  *          columns={"brand_slug", "shop_slug"}
  *     ),
- *    }
+ *    },
+ *     indexes={
+ *        @ORM\Index(name="shop_slug_index", columns={"shop_slug"})
+ * }
  * )
  * @ORM\HasLifecycleCallbacks()
  * @UniqueEntity(fields={"brand", "shop"})

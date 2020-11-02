@@ -36,6 +36,8 @@ import 'select2';
 document.addEventListener("DOMContentLoaded", function () {
     console.log("brand list!");
     const body = $('body');
+    let table;
+    let resource_shop_slug;
     let exampleModalLong = $('#exampleModalLong');
 
     const attachment_files = window.Routing
@@ -182,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    var table = $('#empTable').DataTable({
+    table = $('#empTable').DataTable({
         initComplete: function () {
             initiateShopsSelect();
             this.api().columns(0).every(function () {
@@ -220,6 +222,11 @@ document.addEventListener("DOMContentLoaded", function () {
         'serverMethod': 'post',
         'ajax': {
             'url': collectionData,
+            "data": function ( d ) {
+                if (resource_shop_slug) {
+                    d.resource_shop_slug = resource_shop_slug;
+                }
+            }
         },
         columns: th_keys,
         "columnDefs": common_defs
@@ -721,6 +728,7 @@ document.addEventListener("DOMContentLoaded", function () {
         shops_select.attr('name', 'shops');
         shops_select.insertBefore($('#empTable'));
         applySelect2ToShopsSelect(shops_select);
+        applyOnChangeToResourceShopSelect(shops_select);
     }
 
     function applySelect2ToShopsSelect(select) {
@@ -729,10 +737,10 @@ document.addEventListener("DOMContentLoaded", function () {
         select.select2({
             placeholder: {
                 id: '-1', // the value of the option
-                text: 'Select strategy'
+                text: 'Select resource shop'
             },
             dropdownAutoWidth: true,
-            width: '100%',
+            width: '20%',
             multiple: false,
             allowClear: true,
             templateResult: formatShopOption,
@@ -760,4 +768,13 @@ document.addEventListener("DOMContentLoaded", function () {
             '<div>' + option.resource_relation + '</div>'
         );
     };
+
+    function applyOnChangeToResourceShopSelect(shops_select) {
+        shops_select.on('change', function (e) {
+            if (table) {
+                resource_shop_slug = $(e.currentTarget.selectedOptions).attr('value');
+                table.draw();
+            }
+        })
+    }
 });

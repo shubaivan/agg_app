@@ -411,7 +411,9 @@ class BrandRepository extends ServiceEntityRepository
     )
     {
         $parameterBag = $this->handleDataTablesRequest($params);
-        
+        if (isset($params['resource_shop_slug'])) {
+            $parameterBag->set('resource_shop_slug', $params['resource_shop_slug']);
+        }
         $limit = $parameterBag->get('limit');
         $offset = $parameterBag->get('offset');
         $sortBy = $parameterBag->get('sort_by');
@@ -443,6 +445,12 @@ class BrandRepository extends ServiceEntityRepository
                 LEFT JOIN sr.shop sh
             ';
         }
+
+        if ($parameterBag->get('resource_shop_slug') && !$total) {
+            $dql .= '
+                INNER JOIN b.brandShopRelation bsr
+            ';
+        }
         $bindParams = [];
         $condition = ' WHERE ';
         $conditions = [];
@@ -451,6 +459,14 @@ class BrandRepository extends ServiceEntityRepository
                             ILIKE(b.brandName, :var_search) = TRUE
                         ';
             $bindParams['var_search'] = '%'.$parameterBag->get('search').'%';
+
+        }
+
+        if ($parameterBag->get('resource_shop_slug') && !$total) {
+            $conditions[] = '
+                bsr.shopSlug = :resource_shop_slug
+            ';
+            $bindParams['resource_shop_slug'] = $parameterBag->get('resource_shop_slug');
 
         }
 

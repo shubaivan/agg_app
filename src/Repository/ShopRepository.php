@@ -120,9 +120,9 @@ class ShopRepository extends ServiceEntityRepository
         } else {
             $dql = '
                 SELECT 
-                c.id, 
+                c.id as db_id, 
                 c.shopName as text,
-                c.slug   
+                c.slug as id  
             ';
         }
         $dql .= '
