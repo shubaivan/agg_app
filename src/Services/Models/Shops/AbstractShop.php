@@ -3,6 +3,7 @@
 
 namespace App\Services\Models\Shops;
 
+use App\Entity\BrandStrategy;
 use App\Entity\Product;
 use App\Services\Models\StrategyService;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -85,17 +86,25 @@ abstract class AbstractShop implements IdentityGroup
     public function identityGroupColumn(Product $product)
     {
         $brand = $product->getBrandRelation();
-        if ($brand && $brand->getBrandStrategies() && $brand->getBrandStrategies()->getStrategy()) {
-            $strategy = $this->strategyService
-                ->prepareStrategyInstanceWithArgs(
-                    $brand->getBrandStrategies()->getStrategy(),
-                    (new ParameterBag(array_merge(
-                        $brand->getBrandStrategies()->getRequiredArgs()
-                    )))
-                );
-            $strategy($product);
-            if ($product->getGroupIdentity()) {
-                return true;
+        if ($brand && $brand->getBrandStrategies()->count()) {
+            $collectionStrategy = $brand->getBrandStrategies()
+                ->filter(function ($v) use ($product) {
+                    /** @var $v BrandStrategy */
+                    return $v->getShop()->getSlug() === $product->getShopRelation()->getSlug();
+                });
+            if ($collectionStrategy->count()) {
+                /** @var BrandStrategy $brandStrategyDb */
+                $brandStrategyDb = $collectionStrategy->first();
+                $strategy = $this->strategyService
+                    ->prepareStrategyInstanceWithArgs(
+                        $brandStrategyDb->getStrategy(),
+                        (new ParameterBag($brandStrategyDb->getRequiredArgs()))
+                    );
+                $strategy($product);
+
+                if ($product->getGroupIdentity()) {
+                    return true;
+                }
             }
         }
 
