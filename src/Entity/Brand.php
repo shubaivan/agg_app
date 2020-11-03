@@ -125,6 +125,7 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
         $this->products = new ArrayCollection();
         $this->files = new ArrayCollection();
         $this->brandShopRelation = new ArrayCollection();
+        $this->brandStrategies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -310,24 +311,6 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
         return $this->top;
     }
 
-    public function getBrandStrategies(): ?BrandStrategy
-    {
-        return $this->brandStrategies;
-    }
-
-    public function setBrandStrategies(?BrandStrategy $brandStrategies): self
-    {
-        $this->brandStrategies = $brandStrategies;
-
-        // set (or unset) the owning side of the relation if necessary
-        $newBrand = null === $brandStrategies ? null : $this;
-        if ($brandStrategies->getBrand() !== $newBrand) {
-            $brandStrategies->setBrand($newBrand);
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection|BrandShop[]
      */
@@ -357,6 +340,41 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
             // set the owning side to null (unless already changed)
             if ($brandShopRelation->getBrand() === $this) {
                 $brandShopRelation->setBrand(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|BrandStrategy[]
+     */
+    public function getBrandStrategies(): Collection
+    {
+        if (!$this->brandStrategies) {
+            $this->brandStrategies = new ArrayCollection();
+        }
+
+        return $this->brandStrategies;
+    }
+
+    public function addBrandStrategy(BrandStrategy $brandStrategy): self
+    {
+        if (!$this->brandStrategies->contains($brandStrategy)) {
+            $this->brandStrategies[] = $brandStrategy;
+            $brandStrategy->setBrand($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBrandStrategy(BrandStrategy $brandStrategy): self
+    {
+        if ($this->brandStrategies->contains($brandStrategy)) {
+            $this->brandStrategies->removeElement($brandStrategy);
+            // set the owning side to null (unless already changed)
+            if ($brandStrategy->getBrand() === $this) {
+                $brandStrategy->setBrand(null);
             }
         }
 
