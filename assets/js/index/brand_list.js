@@ -405,7 +405,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (brandSlug) {
             brand_slug = brandSlug;
         }
-        applySelect2ToShopsSelect(select);
+        applySelect2ToShopsSelect(select, {width: '100%'});
     }
 
     /**
@@ -805,24 +805,24 @@ document.addEventListener("DOMContentLoaded", function () {
         var shops_select = $('<select>').addClass('shops_select');
         shops_select.attr('name', 'shops');
         shops_select.insertBefore($('#empTable'));
-        applySelect2ToShopsSelect(shops_select);
+        applySelect2ToShopsSelect(shops_select, {width: '20%'});
         applyOnChangeToResourceShopSelect(shops_select);
     }
 
     /**
      *
      * @param select
+     * @param width
      */
-    function applySelect2ToShopsSelect(select,) {
+    function applySelect2ToShopsSelect(select, width = {}) {
         const app_rest_admin_resourceshops_resourceshops = window.Routing
             .generate('app_rest_admin_resourceshops_resourceshops');
-        select.select2({
+        let options = $.extend(width, {
             placeholder: {
                 id: '-1', // the value of the option
                 text: 'Select resource shop'
             },
             dropdownAutoWidth: true,
-            width: '20%',
             multiple: false,
             allowClear: true,
             templateResult: formatShopOption,
@@ -845,6 +845,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         });
+        select.select2(options);
     }
 
     function formatShopOption (option) {
