@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const body = $('body');
     let table;
     let resource_shop_slug;
+    let data_tables_resource_shop_slug;
     let brand_slug;
     let exampleModalLong = $('#exampleModalLong');
 
@@ -224,8 +225,8 @@ document.addEventListener("DOMContentLoaded", function () {
         'ajax': {
             'url': collectionData,
             "data": function ( d ) {
-                if (resource_shop_slug) {
-                    d.resource_shop_slug = resource_shop_slug;
+                if (data_tables_resource_shop_slug) {
+                    d.resource_shop_slug = data_tables_resource_shop_slug;
                 }
             }
         },
@@ -241,8 +242,15 @@ document.addEventListener("DOMContentLoaded", function () {
         form.find('textarea').val('');
 
         form.find('.strategies_select').remove();
+        let strategySelect2Container = form.find('.strategy_select2_container');
+        if (strategySelect2Container) {
+            strategySelect2Container.remove();
+        }
+
         modal.find('.render_play_ground').remove();
         form.find('.select2-container').remove();
+
+        form.find('.brand_shops_select').remove();
 
         form.find('.attachment_files_to_categories').remove();
         form.find('input[type=hidden]').remove();
@@ -331,26 +339,10 @@ document.addEventListener("DOMContentLoaded", function () {
         brand_id_input.val(modelId);
         form.append(brand_id_input);
 
-        var shops_select = $('<select>').addClass('shops_select');
+        var shops_select = $('<select>').addClass('brand_shops_select');
         shops_select.attr('name', 'shops');
         form.prepend(shops_select);
         applySelect2ToBrandShops(shops_select, pureResultData.slug);
-
-        if (splitShops.length === 1) {
-
-            // Set the value, creating a new option if necessary
-            if (shops_select.find("option[value='" + splitShopsSlugs[0] + "']").length) {
-                shops_select.val(splitShopsSlugs[0]).trigger('change');
-            } else {
-                // Create a DOM Option and pre-select by default
-                var newOption = new Option(splitShopsSlugs[0], splitShopsSlugs[0], true, true);
-
-                // $(newOption).attr('data-description', strategy.description);
-
-                // Append it to the select
-                shops_select.append(newOption).trigger('change');
-            }
-        }
 
         shops_select.on('change', function (e) {
             resource_shop_slug = $(e.currentTarget.selectedOptions).attr('value');
@@ -373,6 +365,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 applySelect2(strategies, modelId, resource_shop_slug);
             }
         });
+
+        if (splitShops.length === 1) {
+
+            // Set the value, creating a new option if necessary
+            if (shops_select.find("option[value='" + splitShopsSlugs[0] + "']").length) {
+                shops_select.val(splitShopsSlugs[0]).trigger('change');
+            } else {
+                // Create a DOM Option and pre-select by default
+                var newOption = new Option(splitShopsSlugs[0], splitShopsSlugs[0], true, true);
+
+                // $(newOption).attr('data-description', strategy.description);
+
+                // Append it to the select
+                shops_select.append(newOption).trigger('change');
+            }
+        }
 
         let topBrand = modal.find('.modal-body #topBrand');
         let tb_value = $('.tb_' + modelId);
@@ -849,7 +857,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function applyOnChangeToResourceShopSelect(shops_select) {
         shops_select.on('change', function (e) {
             if (table) {
-                resource_shop_slug = $(e.currentTarget.selectedOptions).attr('value');
+                data_tables_resource_shop_slug = $(e.currentTarget.selectedOptions).attr('value');
                 table.draw();
             }
         })
