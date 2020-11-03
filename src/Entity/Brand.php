@@ -99,7 +99,7 @@ class Brand extends SEOModel implements EntityValidatorException, DataTableInter
 
     /**
      * @var BrandStrategy
-     * @ORM\OneToOne(targetEntity="BrandStrategy",
+     * @ORM\OneToMany(targetEntity="BrandStrategy",
      *      mappedBy="brand",
      *      cascade={"persist"}
      *     )

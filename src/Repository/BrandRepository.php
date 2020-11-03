@@ -438,6 +438,7 @@ class BrandRepository extends ServiceEntityRepository
                 b.seoDescription,
                 b.slug,
                 GROUP_CONCAT(DISTINCT sh.shopName SEPARATOR \'|\') as shop_names,
+                GROUP_CONCAT(DISTINCT sh.slug SEPARATOR \'|\') as shop_slugs,
                 \'edit\' as Action
                 FROM App\Entity\Brand b
                 INNER JOIN b.products p

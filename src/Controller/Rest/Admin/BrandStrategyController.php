@@ -14,6 +14,7 @@ use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\FilesRepository;
 use App\Repository\ProductRepository;
+use App\Repository\ShopRepository;
 use App\Repository\StrategiesRepository;
 use App\Services\Models\Shops\Strategies\Common\AbstractStrategy;
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -50,21 +51,30 @@ class BrandStrategyController extends AbstractRestController
     private $strategiesRepository;
 
     /**
+     * @var ShopRepository
+     */
+    private $shopRepository;
+
+    /**
      * BrandStrategyController constructor.
      * @param BrandStrategyRepository $brandStrategyRepository
      * @param BrandRepository $brandRepository
      * @param StrategiesRepository $strategiesRepository
+     * @param ShopRepository $shopRepository
      */
     public function __construct(
         Helpers $helpers,
         BrandStrategyRepository $brandStrategyRepository,
         BrandRepository $brandRepository,
-        StrategiesRepository $strategiesRepository)
+        StrategiesRepository $strategiesRepository,
+        ShopRepository $shopRepository
+    )
     {
         parent::__construct($helpers);
         $this->brandStrategyRepository = $brandStrategyRepository;
         $this->brandRepository = $brandRepository;
         $this->strategiesRepository = $strategiesRepository;
+        $this->shopRepository = $shopRepository;
     }
 
 
@@ -87,27 +97,31 @@ class BrandStrategyController extends AbstractRestController
      *     description="Json collection object",
      * )
      *
-     * @return BrandStrategy
+     * @return BrandStrategy|array
      * @throws \Exception
      */
     public function getBrandStrategyAction(Request $request)
     {
         $brandSlug = $request->get('brand_slug');
         $strategySlug = $request->get('strategy_slug');
-        if (!$brandSlug || !$strategySlug) {
+        $resourceShopSlug = $request->get('resource_shop_slug');
+
+        if (!$brandSlug || !$strategySlug || !$resourceShopSlug) {
             throw new \Exception('required data was not found');
         }
         $brand = $this->brandRepository
             ->findOneBy(['slug' => $brandSlug]);
         $strategy = $this->strategiesRepository
             ->findOneBy(['slug' => $strategySlug]);
+        $shop = $this->shopRepository
+            ->findOneBy(['slug' => $resourceShopSlug]);
 
-        if (!$brand || !$strategy) {
+        if (!$brand || !$strategy || !$shop) {
             throw new \Exception('model by slug was not found');
         }
 
         $brandStrategy = $this->brandStrategyRepository
-            ->findOneBy(['brand' => $brand, 'strategy' => $strategy]);
+            ->findOneBy(['brand' => $brand, 'strategy' => $strategy, 'shop' => $shop]);
 
         return $brandStrategy ?? [];
     }

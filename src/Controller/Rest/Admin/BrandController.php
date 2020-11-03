@@ -8,12 +8,14 @@ use App\Cache\TagAwareQuerySecondLevelCacheBrand;
 use App\Cache\TagAwareQuerySecondLevelCacheCategory;
 use App\Entity\Brand;
 use App\Entity\BrandStrategy;
+use App\Entity\Shop;
 use App\Entity\Strategies;
 use App\Repository\BrandStrategyRepository;
 use App\Repository\CategoryConfigurationsRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\FilesRepository;
 use App\Repository\ProductRepository;
+use App\Repository\ShopRepository;
 use App\Repository\StrategiesRepository;
 use App\Services\ObjectsHandler;
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -25,6 +27,7 @@ use App\Controller\Rest\AbstractRestController;
 use App\Repository\BrandRepository;
 use App\Services\Helpers;
 use Psr\Cache\InvalidArgumentException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations\View;
@@ -64,6 +67,11 @@ class BrandController extends AbstractRestController
     private $strategyRepository;
 
     /**
+     * @var ShopRepository
+     */
+    private $shopRepository;
+
+    /**
      * @var BrandStrategyRepository
      */
     private $brandStrategyRepository;
@@ -84,6 +92,7 @@ class BrandController extends AbstractRestController
      * @param StrategiesRepository $strategiesRepository
      * @param BrandStrategyRepository $brandStrategyRepository
      * @param ObjectsHandler $objectsHandler
+     * @param ShopRepository $shopRepository
      */
     public function __construct(
         Helpers $helpers,
@@ -94,7 +103,8 @@ class BrandController extends AbstractRestController
         TagAwareQuerySecondLevelCacheBrand $tagAwareQuerySecondLevelCacheBrand,
         StrategiesRepository $strategiesRepository,
         BrandStrategyRepository $brandStrategyRepository,
-        ObjectsHandler $objectsHandler
+        ObjectsHandler $objectsHandler,
+        ShopRepository $shopRepository
     )
     {
         parent::__construct($helpers);
@@ -106,14 +116,15 @@ class BrandController extends AbstractRestController
         $this->strategyRepository = $strategiesRepository;
         $this->brandStrategyRepository = $brandStrategyRepository;
         $this->objectsHandler = $objectsHandler;
+        $this->shopRepository = $shopRepository;
     }
 
     /**
-     * get Brand bu slug.
+     * get BrandStrategy by slugs.
      *
-     * @Rest\Get("/admin/api/brand/{slug}", options={"expose": true})
+     * @Rest\Get("/admin/api/brand/{slug}/{resource_shop_slug}", options={"expose": true})
      *
-     * @param Request $request
+     * @param Brand $brand, Shop $shop
      *
      * @View(statusCode=Response::HTTP_OK, serializerGroups={Brand::SERIALIZED_GROUP_BY_SLUG})
      *
@@ -124,11 +135,18 @@ class BrandController extends AbstractRestController
      *     description="Json collection object",
      * )
      *
-     * @return Brand
+     * @return BrandStrategy|array
+     *
+     * @ParamConverter("shop", options={"mapping": {"resource_shop_slug": "slug"}})
+     *
      */
-    public function getBrandBySlugAction(Brand $brand)
+    public function getBrandStrategyBySlugsAction(Brand $brand, Shop $shop)
     {
-        return $brand;
+        $brandStrategy = $this->brandStrategyRepository->findOneBy([
+            'brand' => $brand,
+            'shop' => $shop
+        ]);
+        return $brandStrategy ?? [];
     }
 
     /**
@@ -227,10 +245,12 @@ class BrandController extends AbstractRestController
                 }
             }
 
-            if ($request->get('strategy')) {
+            if ($request->get('strategy') && $request->get('shops')) {
                 $strategy = $this->strategyRepository
                     ->findOneBy(['slug' => $request->get('strategy')]);
-                if ($strategy) {
+                $shop = $this->shopRepository
+                    ->findOneBy(['slug' => $request->get('shops')]);
+                if ($strategy && $shop) {
                     if (!$strategy->getRequiredArgs()) {
                         $requiredArgs = [];
                     } else {
@@ -240,10 +260,11 @@ class BrandController extends AbstractRestController
                         }
                     }
                     $brandStrategy = $this->brandStrategyRepository
-                        ->findOneBy(['brand' => $brand]);
+                        ->findOneBy(['brand' => $brand, 'shop' => $shop]);
                     if (!$brandStrategy) {
                         $brandStrategy = new BrandStrategy();
                         $brandStrategy
+                            ->setShop($shop)
                             ->setBrand($brand);
                         $this->brandStrategyRepository
                             ->persist($brandStrategy);
