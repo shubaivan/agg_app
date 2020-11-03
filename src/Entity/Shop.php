@@ -172,6 +172,15 @@ class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidator
     private $brandShopRelation;
 
     /**
+     * @var BrandStrategy
+     * @ORM\OneToMany(targetEntity="BrandStrategy",
+     *      mappedBy="shop",
+     *      cascade={"persist"}
+     *     )
+     */
+    private $brandStrategies;
+
+    /**
      * @var array
      */
     private $prepareCategoryRelation;
@@ -182,6 +191,7 @@ class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidator
         $this->files = new ArrayCollection();
         $this->categoryRelation = new ArrayCollection();
         $this->brandShopRelation = new ArrayCollection();
+        $this->brandStrategies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -432,5 +442,36 @@ class Shop extends SEOModel implements AttachmentFilesInterface, EntityValidator
     public function setPrepareCategoryRelation(array $prepareCategoryRelation): void
     {
         $this->prepareCategoryRelation = $prepareCategoryRelation;
+    }
+
+    /**
+     * @return Collection|BrandStrategy[]
+     */
+    public function getBrandStrategies(): Collection
+    {
+        return $this->brandStrategies;
+    }
+
+    public function addBrandStrategy(BrandStrategy $brandStrategy): self
+    {
+        if (!$this->brandStrategies->contains($brandStrategy)) {
+            $this->brandStrategies[] = $brandStrategy;
+            $brandStrategy->setShop($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBrandStrategy(BrandStrategy $brandStrategy): self
+    {
+        if ($this->brandStrategies->contains($brandStrategy)) {
+            $this->brandStrategies->removeElement($brandStrategy);
+            // set the owning side to null (unless already changed)
+            if ($brandStrategy->getShop() === $this) {
+                $brandStrategy->setShop(null);
+            }
+        }
+
+        return $this;
     }
 }

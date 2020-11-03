@@ -128,16 +128,46 @@ class ShopRepository extends ServiceEntityRepository
         $dql .= '
             FROM App\Entity\Shop c
         ';
-
-        if ($parameterBag->get('search')) {
+        if ($parameterBag->get('brand_slug')) {
             $dql .= '
-                WHERE ILIKE(c.shopName, :search) = TRUE
+                INNER JOIN c.brandShopRelation bsr
             ';
         }
+
+        $bindParams = [];
+        $condition = ' WHERE ';
+        $conditions = [];
+
+        if ($parameterBag->get('search')) {
+            $conditions[] = '
+                ILIKE(c.shopName, :search) = TRUE
+            ';
+            $bindParams['search'] = '%' . $parameterBag->get('search'). '%';
+        }
+
+        if ($parameterBag->get('brand_slug')) {
+            $conditions[] = '
+                bsr.brandSlug = :brand_slug
+            ';
+            $bindParams['brand_slug'] = $parameterBag->get('brand_slug');
+        }
+
+        if (count($conditions)) {
+            $conditions = array_unique($conditions);
+            $dql .= $condition . implode(' AND ', $conditions);
+        }
+
         $page = $parameterBag->get('page');
         $query = $this->getEntityManager();
         $createQuery = $query
             ->createQuery($dql);
+
+        if ($bindParams) {
+            $bindParams = array_unique($bindParams);
+            $createQuery
+                ->setParameters($bindParams);
+        }
+
         if (!$count) {
             $createQuery
                 ->setFirstResult($page <= 1 ? 0 : 25 * $page - 1)
@@ -147,10 +177,6 @@ class ShopRepository extends ServiceEntityRepository
         $createQuery
             ->enableResultCache(0, 'select2_shops_models')
             ->useQueryCache(true);
-
-        if ($parameterBag->get('search')) {
-            $createQuery->setParameter(':search', '%' . $parameterBag->get('search') . '%');
-        }
 
         if ($count) {
             $result = $createQuery->getSingleScalarResult();

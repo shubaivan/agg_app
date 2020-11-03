@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const body = $('body');
     let table;
     let resource_shop_slug;
+    let brand_slug;
     let exampleModalLong = $('#exampleModalLong');
 
     const attachment_files = window.Routing
@@ -238,8 +239,8 @@ document.addEventListener("DOMContentLoaded", function () {
         let form = modal.find("form");
         form.trigger("reset");
         form.find('textarea').val('');
-        form.find('.strategies_select').remove();
 
+        form.find('.strategies_select').remove();
         modal.find('.render_play_ground').remove();
         form.find('.select2-container').remove();
 
@@ -300,8 +301,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function renderEditForm(modelId, form, modal, button) {
         let pure_result = $('.pure-result-brand_' + modelId);
+        let splitShops;
+        let splitShopsSlugs;
+        let pureResultData;
         if (pure_result && pure_result.length) {
-            let pureResultData = pure_result.data('pureResult');
+            pureResultData = pure_result.data('pureResult');
+            let shopNames = pureResultData.shop_names;
+            splitShops = shopNames.split('|');
+
+            let shopSlugs = pureResultData.shop_slugs;
+            splitShopsSlugs = shopSlugs.split('|');
 
             modal.find('.modal-title').text('Edit ' + pureResultData.brandName + ' brand');
             let brandNameInput = modal.find('.modal-body #bn');
@@ -322,11 +331,48 @@ document.addEventListener("DOMContentLoaded", function () {
         brand_id_input.val(modelId);
         form.append(brand_id_input);
 
+        var shops_select = $('<select>').addClass('shops_select');
+        shops_select.attr('name', 'shops');
+        form.prepend(shops_select);
+        applySelect2ToBrandShops(shops_select, pureResultData.slug);
 
-        var strategies = $('<select>').addClass('strategies_select');
-        strategies.attr('name', 'strategy');
-        form.prepend(strategies);
-        applySelect2(strategies, modelId);
+        if (splitShops.length === 1) {
+
+            // Set the value, creating a new option if necessary
+            if (shops_select.find("option[value='" + splitShopsSlugs[0] + "']").length) {
+                shops_select.val(splitShopsSlugs[0]).trigger('change');
+            } else {
+                // Create a DOM Option and pre-select by default
+                var newOption = new Option(splitShopsSlugs[0], splitShopsSlugs[0], true, true);
+
+                // $(newOption).attr('data-description', strategy.description);
+
+                // Append it to the select
+                shops_select.append(newOption).trigger('change');
+            }
+        }
+
+        shops_select.on('change', function (e) {
+            resource_shop_slug = $(e.currentTarget.selectedOptions).attr('value');
+
+            modal.find('.render_play_ground').remove();
+
+            let findStrategiesSelect = form.find('.strategies_select');
+            if (findStrategiesSelect) {
+                findStrategiesSelect.remove();
+            }
+            let strategySelect2Container = form.find('.strategy_select2_container');
+            if (strategySelect2Container) {
+                strategySelect2Container.remove();
+            }
+
+            if (resource_shop_slug) {
+                var strategies = $('<select>').addClass('strategies_select');
+                strategies.attr('name', 'strategy');
+                form.prepend(strategies);
+                applySelect2(strategies, modelId, resource_shop_slug);
+            }
+        });
 
         let topBrand = modal.find('.modal-body #topBrand');
         let tb_value = $('.tb_' + modelId);
@@ -345,10 +391,24 @@ document.addEventListener("DOMContentLoaded", function () {
     /**
      *
      * @param select
-     * @param modelId
+     * @param brandSlug
      */
-    function applySelect2(select, modelId = null) {
+    function applySelect2ToBrandShops(select, brandSlug = null) {
+        if (brandSlug) {
+            brand_slug = brandSlug;
+        }
+        applySelect2ToShopsSelect(select);
+    }
+
+    /**
+     *
+     * @param select
+     * @param modelId
+     * @param resource_shop_slug
+     */
+    function applySelect2(select, modelId = null, resource_shop_slug = null) {
         select.select2({
+            theme: 'default strategy_select2_container',
             placeholder: {
                 id: '-1', // the value of the option
                 text: 'Select strategy'
@@ -379,32 +439,40 @@ document.addEventListener("DOMContentLoaded", function () {
         if (pure_result && pure_result.length) {
             select.on('change', function (e) {
                 let currentOption = e.currentTarget.selectedOptions;
-                renderStrategyPlayGround($(currentOption).attr('value'), select, pureResultData.slug);
+                renderStrategyPlayGround(
+                    $(currentOption).attr('value'),
+                    select,
+                    pureResultData.slug,
+                    resource_shop_slug
+                );
             });
 
             let pureResultData = pure_result.data('pureResult');
-            renderExistStrategyInPlayGround(pureResultData.slug, select);
+            renderExistStrategyInPlayGround(pureResultData.slug, select, resource_shop_slug);
         }
     }
 
-    function renderExistStrategyInPlayGround(modelSlug, select)
+    function renderExistStrategyInPlayGround(modelSlug, select, resource_shop_slug)
     {
-        const app_rest_admin_brand_getbrandbyslug = window.Routing
-            .generate('app_rest_admin_brand_getbrandbyslug', {'slug': modelSlug});
+        const app_rest_admin_brand_getbrandstrategybyslugs = window.Routing
+            .generate('app_rest_admin_brand_getbrandstrategybyslugs', {
+                'slug': modelSlug,
+                'resource_shop_slug': resource_shop_slug
+            });
 
         $.ajax({
             type: "GET",
-            url: app_rest_admin_brand_getbrandbyslug,
+            url: app_rest_admin_brand_getbrandstrategybyslugs,
             error: (result) => {
                 console.log(result.responseJSON.status);
             },
             success: (data) => {
-                if (data.brandStrategies && data.brandStrategies.strategy) {
-                    let strategy = data.brandStrategies.strategy;
+                if (data && data.strategy) {
+                    let strategy = data.strategy;
 
                     // Set the value, creating a new option if necessary
                     if (select.find("option[value='" + strategy.slug + "']").length) {
-                        select.val(data.slug).trigger('change');
+                        select.val(strategy.slug).trigger('change');
                     } else {
                         // Create a DOM Option and pre-select by default
                         var newOption = new Option(strategy.strategyName, strategy.slug, true, true);
@@ -426,7 +494,7 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     };
 
-    function renderStrategyPlayGround(strategySlug, select, modelSlug) {
+    function renderStrategyPlayGround(strategySlug, select, modelSlug, resource_shop_slug) {
         const app_rest_admin_brandstrategy_getbrandstrategy = window.Routing
             .generate('app_rest_admin_brandstrategy_getbrandstrategy');
 
@@ -435,7 +503,8 @@ document.addEventListener("DOMContentLoaded", function () {
             url: app_rest_admin_brandstrategy_getbrandstrategy,
             data: {
                 brand_slug: modelSlug,
-                strategy_slug: strategySlug
+                strategy_slug: strategySlug,
+                resource_shop_slug: resource_shop_slug
             },
             error: (result) => {
                 console.log(result.responseJSON.status);
@@ -703,6 +772,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log(result.responseJSON.status);
             },
             success: (data) => {
+                brand_slug = null;
                 $('#exampleModalLong').modal('toggle');
                 table.ajax.reload(null, false);
             }
@@ -731,7 +801,11 @@ document.addEventListener("DOMContentLoaded", function () {
         applyOnChangeToResourceShopSelect(shops_select);
     }
 
-    function applySelect2ToShopsSelect(select) {
+    /**
+     *
+     * @param select
+     */
+    function applySelect2ToShopsSelect(select,) {
         const app_rest_admin_resourceshops_resourceshops = window.Routing
             .generate('app_rest_admin_resourceshops_resourceshops');
         select.select2({
@@ -748,12 +822,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 type: 'post',
                 url: app_rest_admin_resourceshops_resourceshops,
                 data: function (params) {
-
                     let query = {
                         search: params.term,
                         page: params.page || 1,
                         type: 'public'
                     };
+
+                    if (brand_slug) {
+                        query.brand_slug = brand_slug;
+                    }
 
                     // Query parameters will be ?search=[term]&type=public
                     return query;
