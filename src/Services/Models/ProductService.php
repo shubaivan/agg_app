@@ -88,6 +88,11 @@ class ProductService extends AbstractModel
     private $brandService;
 
     /**
+     * @var ShopService
+     */
+    private $shopService;
+
+    /**
      * ProductService constructor.
      * @param LoggerInterface $logger
      * @param ObjectsHandler $objectHandler
@@ -97,6 +102,7 @@ class ProductService extends AbstractModel
      * @param RedisHelper $redisHelper
      * @param BrandService $brandService
      * @param SlugifyInterface $cs
+     * @param ShopService $shopService
      */
     public function __construct(
         LoggerInterface $logger,
@@ -106,7 +112,8 @@ class ProductService extends AbstractModel
         ManagerShopsService $managerShopsService,
         RedisHelper $redisHelper,
         BrandService $brandService,
-        SlugifyInterface $cs
+        SlugifyInterface $cs,
+        ShopService $shopService
     )
     {
         parent::__construct($cs);
@@ -117,6 +124,7 @@ class ProductService extends AbstractModel
         $this->managerShopsService = $managerShopsService;
         $this->redisHelper = $redisHelper;
         $this->brandService = $brandService;
+        $this->shopService = $shopService;
     }
 
     /**
@@ -183,6 +191,7 @@ class ProductService extends AbstractModel
             );
 
         $this->getBrandService()->createBrandFromProduct($handleObject);
+        $this->getShopService()->createShopFromProduct($handleObject);
 
         $this->setGroupIdentity($handleObject);
 
@@ -667,5 +676,13 @@ class ProductService extends AbstractModel
     protected function getBrandService(): BrandService
     {
         return $this->brandService;
+    }
+
+    /**
+     * @return ShopService
+     */
+    protected function getShopService(): ShopService
+    {
+        return $this->shopService;
     }
 }
