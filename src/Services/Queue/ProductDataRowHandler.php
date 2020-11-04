@@ -170,7 +170,7 @@ class ProductDataRowHandler
 
 //            $this->getBrandService()->createBrandFromProduct($product);
             $this->getCategoryService()->createCategoriesFromProduct($product);
-            $this->getShopService()->createShopFromProduct($product);
+//            $this->getShopService()->createShopFromProduct($product);
             $this->getBrandShopService()->createBrandShopRelation($product);
 
             $this->getEm()->persist($product);
