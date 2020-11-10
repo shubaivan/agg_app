@@ -38,7 +38,7 @@ class CutSomeDigitFromSkuAndFullName extends CutSomeDigitFromSku
      */
     function coreAnalysis(array $requiredInputs)
     {
-        $this->validateRequiredInputs($requiredInputs);
+        $this->validateRequiredInputs($requiredInputs, self::$requiredInputs);
         /**
          * @var $sku
          * @var $name

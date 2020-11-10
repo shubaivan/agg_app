@@ -57,7 +57,7 @@ class CutSomeDigitFromSkuAndEanAndSomeWordFromName extends CutSomeDigitFromSkuAn
      */
     function coreAnalysis(array $requiredInputs)
     {
-        $this->validateRequiredInputs($requiredInputs);
+        $this->validateRequiredInputs($requiredInputs, self::$requiredInputs);
 
         /**
          * @var $ean
